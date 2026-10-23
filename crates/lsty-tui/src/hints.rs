@@ -15,6 +15,7 @@ use crate::text::Span;
 pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
     match mode {
         Mode::Normal => &[
+            Action::ClearSearch,
             Action::ToggleComplete,
             Action::CycleState,
             Action::Stop,
@@ -85,8 +86,8 @@ pub(crate) fn warnings(hints: &BTreeMap<String, Vec<String>>) -> Vec<Warning> {
 }
 
 /// The hints of `mode`, in order: the first key of each action and its
-/// label, with `accept` as the label of a picker's choice. An action
-/// without a key has no hint.
+/// label, with `accept` as the label of a picker's choice and of the
+/// Enter of the text line. An action without a key has no hint.
 pub(crate) fn hints<'a>(
     mode: Mode,
     configured: &BTreeMap<String, Vec<String>>,
@@ -115,7 +116,10 @@ pub(crate) fn hints<'a>(
 }
 
 fn label(mode: Mode, action: Action, accept: &'static str) -> &'static str {
-    if mode == Mode::Picker && action == Action::Accept {
+    if matches!(
+        (mode, action),
+        (Mode::Picker, Action::Accept) | (Mode::Command, Action::Execute)
+    ) {
         accept
     } else {
         action.hint()

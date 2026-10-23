@@ -33,4 +33,4 @@ M +q
 │  5   N +p                                                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- COMMAND  /p  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  /p  <CR> keep  <Tab> next  <Esc> cancel

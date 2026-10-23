@@ -95,7 +95,7 @@ const NORMAL: &[Entry] = moving![
     (Action::Redo, &["<C-r>"]),
     (Action::Repeat, &["."]),
     (Action::Search, &["/"]),
-    (Action::ClearSearch, &["<C-l>", "<Esc>", "<C-c>"]),
+    (Action::ClearSearch, &["<Esc>", "<C-l>", "<C-c>"]),
     (Action::ClearFilters, &["gc"]),
     (Action::CycleSort, &["s"]),
     (Action::ToggleSidebar, &["gs"]),

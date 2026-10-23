@@ -24,7 +24,7 @@ Buy milk +home t:2026-10-05
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  /inv due:  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  /inv due:  <CR> keep  <Tab> next  <Esc> cancel
 -- error --
 ┌ [1]─/inv  /due: ─────────────────────────────────────────────────────────────────────────────────┐
 │  2   (B) Send Invoice +work.acme @email                                                  2d late │
@@ -37,4 +37,4 @@ Buy milk +home t:2026-10-05
 │                                                                                                  │
 │                                                                                                  │
 filter: "due:<" has no date after the operator
- COMMAND  /inv due:<  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  /inv due:<  <CR> keep  <Tab> next  <Esc> cancel

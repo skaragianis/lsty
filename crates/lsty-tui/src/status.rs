@@ -44,16 +44,24 @@ impl Model {
             || self.output.as_ref().is_some_and(|o| o.help.is_none())
         {
             &[Action::Search]
-        } else {
+        } else if self.search_in_effect() {
             &[]
+        } else {
+            &[Action::ClearSearch]
         };
-        let accept = if self.choosing.is_some() {
+        let keys = &self.deps.keys;
+        let table = self.key_mode();
+        let accept = if table == Mode::Command {
+            if self.searching() {
+                "keep"
+            } else {
+                Action::Execute.hint()
+            }
+        } else if self.choosing.is_some() {
             "save"
         } else {
             "open"
         };
-        let keys = &self.deps.keys;
-        let table = self.key_mode();
         let mut used = width(&line);
         let taken = self.version_room(used, w);
         let room = w - taken;

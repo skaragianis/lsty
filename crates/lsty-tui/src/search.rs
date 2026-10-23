@@ -66,19 +66,37 @@ impl Model {
     /// and that has not changed since, its selection from before, then
     /// rebuilds the list. With nothing to undo it does nothing.
     pub(crate) fn clear_search(&mut self) {
-        let mut changed = !self.search.is_empty();
+        let changed = self.search_in_effect();
         self.search.clear();
         for (panel, taken) in self.panels.iter_mut().zip(&mut self.taken) {
             if let Some((before, _)) =
                 taken.take().filter(|(_, after)| panel.active == *after)
             {
-                changed |= panel.active != before;
                 panel.active = before;
             }
         }
         if changed {
             self.refresh();
         }
+    }
+
+    /// Whether `clear_search` would change anything: text is kept, or a
+    /// panel still holds what the last search put there in place of
+    /// something else.
+    pub(crate) fn search_in_effect(&self) -> bool {
+        !self.search.is_empty()
+            || self.panels.iter().zip(&self.taken).any(|(panel, taken)| {
+                taken.as_ref().is_some_and(|(before, after)| {
+                    panel.active == *after && before != after
+                })
+            })
+    }
+
+    /// Whether the text line is open on the search.
+    pub(crate) fn searching(&self) -> bool {
+        self.line
+            .as_ref()
+            .is_some_and(|l| matches!(l.kind, LineKind::Search(_)))
     }
 
     /// Closes the text line, whichever it is.
@@ -193,10 +211,7 @@ impl Model {
     /// text line is open, and narrows the list to the new text when it
     /// is the search.
     pub(crate) fn prompt_keys(&mut self, fed: Fed) -> Vec<Cmd> {
-        let searching = self
-            .line
-            .as_ref()
-            .is_some_and(|l| matches!(l.kind, LineKind::Search(_)));
+        let searching = self.searching();
         let action = self.prompt_action_of(fed.outcome);
         let completing = matches!(
             action,

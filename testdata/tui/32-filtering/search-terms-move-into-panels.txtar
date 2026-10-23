@@ -30,7 +30,7 @@ Buy milk +home t:2026-10-05
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- COMMAND  /+work|+home -@email -+gone "call client"  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  /+work|+home -@email -+gone "call client"  <CR> keep  <Tab> next  <Esc> cancel
 -- kept --
 ┌[3]─Projects─┐┌ [1]─+work|+home  -@email  /-+gone  /"call client" ───────────────────────┐┌[2]─Detail───────────────────────────┐
 │|+home    2/2││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
@@ -51,4 +51,4 @@ Buy milk +home t:2026-10-05
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
+ NORMAL  todo.txt  manual  <Esc> clear search  x done  t state  T stop  o new  a append  dd delete  u undo  / search        9.9.9

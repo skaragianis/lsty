@@ -5,7 +5,7 @@ use lsty_core::keys::Mode;
 use crate::{
     hints::{defaults, warnings},
     msg::Msg,
-    test_util::{alone, deps, press, screen, started, workdir},
+    test_util::{alone, deps, keys, press, screen, started, workdir},
 };
 
 type Hints = BTreeMap<String, Vec<String>>;
@@ -110,5 +110,30 @@ fn the_version_needs_the_whole_left_part_and_a_gap() {
         let lines = screen(&model, width, 6);
         let row = lines.last().map_or("", String::as_str);
         assert_eq!(row.ends_with("9.9.9"), shown, "{width}: {row}");
+    }
+}
+
+#[test]
+fn clear_search_shows_while_a_search_is_in_effect() {
+    let clear = "<Esc> clear search";
+    let rows = [
+        ("none", "gg", 80, "manual  x done"),
+        ("kept text", "/A<CR>", 80, "<Esc> clear search  x done"),
+        ("moved names only", "/+work<CR>", 80, clear),
+        ("cleared", "/+work A<CR><Esc>", 80, "manual  x done"),
+        // Only the first hint fits beside the version.
+        ("narrow", "/A<CR>", 56, "manual  <Esc> clear search   "),
+        ("search prompt", "/A", 80, "/A  <CR> keep  <Tab> next"),
+        (": line", ":", 80, ":  <CR> run  <Tab> next"),
+    ];
+    for (name, typed, width, has) in rows {
+        let dir = workdir("A +work\nB +home\n");
+        let mut model = started(deps(dir.path(), alone()));
+        model.update(Msg::Resize(width, 6));
+        keys(&mut model, typed);
+        let lines = screen(&model, width, 6);
+        let row = lines.last().map_or("", String::as_str);
+        assert!(row.contains(has), "{name}: {row}");
+        assert_eq!(row.contains(clear), has.contains(clear), "{name}: {row}");
     }
 }
