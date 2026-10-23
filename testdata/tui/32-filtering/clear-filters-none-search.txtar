@@ -18,4 +18,4 @@ B +b
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  no filters to clear  x done  t state  T stop  o new  a append      9.9.9
+ NORMAL  todo.txt  manual  no filters to clear  <Esc> clear search  x done  t state  T stop   9.9.9

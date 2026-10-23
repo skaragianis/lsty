@@ -82,4 +82,4 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..
 │ ─────────── ││                                                                                   │
 │>Today       ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  alpha  x done  t state  T stop  o new  a append  dd delete  u undo         9.9.9
+ NORMAL  todo.txt  alpha  <Esc> clear search  x done  t state  T stop  o new  a append        9.9.9

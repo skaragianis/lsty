@@ -21,7 +21,7 @@ B foo
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A foo; 3 done: B foo  x done  t state  T stop  o new       9.9.9
+ NORMAL  todo.txt  manual  1 done: A foo; 3 done: B foo  <Esc> clear search  x done  t state  9.9.9
 -- a-file --
 x 2026-09-29 A foo
 H bar

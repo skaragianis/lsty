@@ -27,7 +27,7 @@ D t:2099-01-01 +home
 │                                                                                                  │
 │                                                                                                  │
 +work  +work.acme
- COMMAND  /-+work  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  /-+work  <CR> keep  <Tab> next  <Esc> cancel
 -- next --
 ┌ [1]─-+work.acme ─────────────────────────────────────────────────────────────────────────────────┐
 │  1   A +home @phone                                                                              │
@@ -37,7 +37,7 @@ D t:2099-01-01 +home
 │                                                                                                  │
 │                                                                                                  │
 +work  +work.acme
- COMMAND  /-+work.acme  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  /-+work.acme  <CR> keep  <Tab> next  <Esc> cancel
 -- state --
 ┌ [1]─/is:done|is:later ───────────────────────────────────────────────────────────────────────────┐
 │  4   D t:2099-01-01 +home                                                                        │
@@ -47,4 +47,4 @@ D t:2099-01-01 +home
 │                                                                                                  │
 │                                                                                                  │
 is:later
- COMMAND  /is:done|is:later  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  /is:done|is:later  <CR> keep  <Tab> next  <Esc> cancel

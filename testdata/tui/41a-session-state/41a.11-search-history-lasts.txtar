@@ -35,4 +35,4 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  /inv  <CR> run  <Tab> next  <Esc> cancel
+ COMMAND  /inv  <CR> keep  <Tab> next  <Esc> cancel

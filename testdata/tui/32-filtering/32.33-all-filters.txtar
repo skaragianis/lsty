@@ -47,7 +47,7 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help      9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  <Esc> clear search  x done  t state  T stop  o new  a append  dd delete  u undo    9.9.9
 -- combined_fg --
 emmmmmmmmmmmmeeEEEEEEhhhhhEEhhhhhEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ttttt....mmmeE.tt...AAA.ttttttttttttppppptcccccc..................................TTTTT.Ee.ttttttttttttppppptcccccc............e
@@ -78,4 +78,4 @@ e.ttttt.......eE................................................................
 e.ttttttt.....eE..........................................................................Ee.....................................e
 e.tttttttttt..eE..........................................................................Ee.....................................e
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy..k.yyyyyy..k.yyyy......mmmmm.
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..kkkkk.yyyyyyyyyyyy..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..k.yyyy....mmmmm.
