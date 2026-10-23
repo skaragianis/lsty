@@ -120,11 +120,11 @@ fn parse_term(text: &str) -> Result<Term, Error> {
         return Err(invalid(text, "negates nothing", &TERM_FORMS));
     }
     let (parts, _) = split_outside(body, b'|');
-    let last = parts.len() - 1;
+    let edge = parts.first() == Some(&"") || parts.last() == Some(&"");
     let alts: Result<Vec<Alt>, Error> = parts
         .into_iter()
         .enumerate()
-        .map(|(i, part)| parse_alt(part, text, (i, last)))
+        .map(|(i, part)| parse_alt(part, text, i > 0, edge))
         .collect();
     Ok(Term {
         negated,
@@ -132,22 +132,23 @@ fn parse_term(text: &str) -> Result<Term, Error> {
     })
 }
 
-/// Parses alternative `at` of the term `text`, whose last is `last`.
+/// Parses an alternative of the term `text`, a `later` one or the
+/// first; `edge` when the term starts or ends with a bar.
 fn parse_alt(
     part: &str,
     text: &str,
-    (at, last): (usize, usize),
+    later: bool,
+    edge: bool,
 ) -> Result<Alt, Error> {
     if part.is_empty() {
         let problem = "has an empty alternative";
-        let edge = at == 0 || at == last;
         let hint = if edge { BAR_HINT } else { "" };
         return Err(invalid(text, problem, &TERM_FORMS).with_hint(hint));
     }
     if part.starts_with('"') {
         return parse_phrase(part, text);
     }
-    if at > 0 && part.starts_with('-') {
+    if later && part.starts_with('-') {
         let problem = "negates inside an alternative";
         return Err(invalid(text, problem, &TERM_FORMS));
     }

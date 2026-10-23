@@ -95,6 +95,8 @@ fn a_bar_at_the_edge_of_a_term_hints_at_the_spaces() {
         ("a| b", "a|", hint),
         ("-|a", "-|a", hint),
         ("+a|\"b\"|", "+a|\"b\"|", hint),
+        ("a||b|", "a||b|", hint),
+        ("\"|a\"||b", "\"|a\"||b", None),
         ("a||b", "a||b", None),
         ("a|b||c", "a|b||c", None),
     ];
