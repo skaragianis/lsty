@@ -25,6 +25,14 @@ pub(crate) const DELETE_DEP: &str = " — delete its dep: to go on";
 /// The states in the order a message names them.
 const ORDER: [State; 3] = [State::Todo, State::Doing, State::Done];
 
+/// The message of `e`, followed by its hint when it has one.
+pub(crate) fn hinted(e: &errs::Error) -> String {
+    e.hint().map_or_else(
+        || e.message().to_owned(),
+        |hint| format!("{} — {hint}", e.message()),
+    )
+}
+
 /// What the status line says when the lock is held by someone else.
 pub(crate) fn busy(name: &str) -> String {
     format!(

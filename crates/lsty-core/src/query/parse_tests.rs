@@ -87,6 +87,28 @@ fn text_after_a_closed_phrase_is_named() {
 }
 
 #[test]
+fn a_bar_at_the_edge_of_a_term_hints_at_the_spaces() {
+    let hint = Some("write a|b, without spaces around the bar");
+    let rows = [
+        ("a | b", "|", hint),
+        ("a |b", "|b", hint),
+        ("a| b", "a|", hint),
+        ("-|a", "-|a", hint),
+        ("+a|\"b\"|", "+a|\"b\"|", hint),
+        ("a||b", "a||b", None),
+        ("a|b||c", "a|b||c", None),
+    ];
+    for (input, term, want) in rows {
+        let err = Query::parse(input).expect_err(input);
+        let message = format!("filter: {term:?} has an empty alternative");
+        assert_eq!(err.message(), message, "{input}");
+        assert_eq!(err.hint(), want, "{input}");
+    }
+    let err = Query::parse_args(&["a", "|", "b"]).expect_err("bar");
+    assert_eq!(err.hint(), hint);
+}
+
+#[test]
 fn arguments_are_one_term_each() {
     let rows: &[ArgRow<'_>] = &[
         (&["two words", "+work"], "two words +work", true),
