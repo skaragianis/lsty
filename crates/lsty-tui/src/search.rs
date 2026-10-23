@@ -20,6 +20,10 @@ use crate::{
     text::width_of,
 };
 
+/// A panel's selection from before a kept search moved names into it,
+/// with what the search put there.
+pub(crate) type Taken = Option<(Vec<Term>, Vec<Term>)>;
+
 /// What a search does to the view.
 #[derive(Default)]
 pub(crate) struct Split {
@@ -58,11 +62,21 @@ impl Model {
         self.session.prefill(!self.search.is_empty());
     }
 
-    /// Drops the kept search and rebuilds the list. With none kept it
-    /// does nothing.
+    /// Drops the kept search and gives each panel the last search moved,
+    /// and that has not changed since, its selection from before, then
+    /// rebuilds the list. With nothing to undo it does nothing.
     pub(crate) fn clear_search(&mut self) {
-        if !self.search.is_empty() {
-            self.search.clear();
+        let mut changed = !self.search.is_empty();
+        self.search.clear();
+        for (panel, taken) in self.panels.iter_mut().zip(&mut self.taken) {
+            if let Some((before, _)) =
+                taken.take().filter(|(_, after)| panel.active == *after)
+            {
+                changed |= panel.active != before;
+                panel.active = before;
+            }
+        }
+        if changed {
             self.refresh();
         }
     }
@@ -162,10 +176,12 @@ impl Model {
         };
         self.remember_search(&typed);
         let moved = std::mem::take(&mut split.moved);
-        for (panel, moved) in self.panels.iter_mut().zip(moved) {
-            if let Some(moved) = moved {
-                panel.active = moved;
-            }
+        for ((panel, moved), taken) in
+            self.panels.iter_mut().zip(moved).zip(&mut self.taken)
+        {
+            *taken = moved.map(|moved| {
+                (std::mem::replace(&mut panel.active, moved.clone()), moved)
+            });
         }
         self.search = split.text();
         self.close_input();

@@ -141,6 +141,7 @@ impl Model {
     /// the selected filter; the search and the switches stay.
     pub(crate) fn clear_filters(&mut self) {
         let was = self.panels.iter().any(|p| !p.active.is_empty());
+        self.taken = Default::default();
         for panel in &mut self.panels {
             panel.active.clear();
         }

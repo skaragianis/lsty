@@ -188,10 +188,7 @@ fn the_search_is_smartcase_text_and_a_plus_word_a_project() {
 
 #[test]
 fn enter_puts_the_projects_of_the_search_in_place_of_the_selection() {
-    let (_dir, mut model) = workdir_model(LIST, alone());
-    model.panels[PROJECTS].active = vec![Term::and("home")];
-    model.panels[CONTEXTS].active = vec![Term::and("phone")];
-    model.refresh();
+    let (_dir, mut model) = home_and_phone();
     assert_eq!(nrs(&model), [] as [u32; 0]);
     keys(&mut model, "/+work");
     assert_eq!(nrs(&model), [1]);
@@ -260,19 +257,83 @@ fn enter_on_a_search_that_does_not_parse_does_nothing() {
 }
 
 #[test]
-fn a_recalled_search_moves_its_names_again_and_clearing_keeps_them() {
+fn a_recalled_search_moves_its_names_again() {
     let (_dir, mut model) = workdir_model(LIST, alone());
     keys(&mut model, "/+work bug<CR>");
     assert_eq!(model.search, "bug");
     keys(&mut model, "<C-l>");
     assert_eq!(model.search, "");
-    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
-    model.panels[PROJECTS].active.clear();
+    assert_eq!(model.panels[PROJECTS].active, []);
     keys(&mut model, "/<Up>");
     keys(&mut model, "<CR>");
     assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
     assert_eq!(model.search, "bug");
     assert_eq!(nrs(&model), [4]);
+}
+
+/// A list where the projects hold `+home` and the contexts `@phone`.
+fn home_and_phone() -> (tempfile::TempDir, Model) {
+    let (dir, mut model) = workdir_model(LIST, alone());
+    model.panels[PROJECTS].active = vec![Term::and("home")];
+    model.panels[CONTEXTS].active = vec![Term::and("phone")];
+    model.refresh();
+    (dir, model)
+}
+
+#[test]
+fn clearing_the_search_takes_back_what_its_enter_moved() {
+    let (_dir, mut model) = home_and_phone();
+    let before = nrs(&model);
+    keys(&mut model, "/+work milk<CR>");
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
+    assert_eq!(model.search, "milk");
+    keys(&mut model, "<Esc>");
+    assert_eq!(model.search, "");
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("home")]);
+    assert_eq!(model.panels[CONTEXTS].active, [Term::and("phone")]);
+    assert_eq!(nrs(&model), before);
+}
+
+#[test]
+fn clearing_takes_back_moved_names_with_no_text_left() {
+    let (_dir, mut model) = home_and_phone();
+    keys(&mut model, "/+work<CR>");
+    assert_eq!(model.search, "");
+    keys(&mut model, "<Esc>");
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("home")]);
+    model.panels[PROJECTS].active.clear();
+    keys(&mut model, "<Esc>");
+    assert_eq!(model.panels[PROJECTS].active, []);
+}
+
+#[test]
+fn a_panel_changed_after_the_search_keeps_its_change() {
+    let (_dir, mut model) = home_and_phone();
+    keys(&mut model, "/+work milk<CR><C-w>3<Space>");
+    let by_hand = model.panels[PROJECTS].active.clone();
+    assert_ne!(by_hand, [Term::and("work")]);
+    keys(&mut model, "<C-l>");
+    assert_eq!(model.search, "");
+    assert_eq!(model.panels[PROJECTS].active, by_hand);
+}
+
+#[test]
+fn clearing_after_gc_takes_nothing_back() {
+    let (_dir, mut model) = home_and_phone();
+    keys(&mut model, "/+work milk<CR>gc");
+    model.panels[PROJECTS].active = vec![Term::and("work")];
+    keys(&mut model, "<Esc>");
+    assert_eq!(model.search, "");
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
+    assert_eq!(model.panels[CONTEXTS].active, []);
+}
+
+#[test]
+fn only_the_last_search_is_taken_back() {
+    let (_dir, mut model) = home_and_phone();
+    keys(&mut model, "/+work<CR>/@email<CR><Esc>");
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
+    assert_eq!(model.panels[CONTEXTS].active, [Term::and("phone")]);
 }
 
 #[test]

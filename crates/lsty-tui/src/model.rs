@@ -37,6 +37,7 @@ use crate::{
     prompt::Kind as PromptKind,
     reldate::Today,
     rows::{self, Context, Inline, Row, Shows},
+    search::Taken,
     session::Session,
     sticky::Sticky,
     store::Store,
@@ -104,6 +105,8 @@ pub(crate) struct Model {
     pub(crate) catalog: Vec<filters::Entry>,
     /// The search that was kept.
     pub(crate) search: String,
+    /// What the last kept search did to the projects and the contexts.
+    pub(crate) taken: [Taken; 2],
     /// The text line of the status line while it is open.
     pub(crate) line: Option<Line>,
     /// What a command of the `:` line showed, over the list.
@@ -171,6 +174,7 @@ impl Model {
             panels: Self::new_panels(),
             catalog,
             search: String::new(),
+            taken: Default::default(),
             line: None,
             output: None,
             opening: None,
