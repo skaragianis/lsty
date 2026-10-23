@@ -121,6 +121,18 @@ fn clear_search_shows_while_a_search_is_in_effect() {
         ("kept text", "/A<CR>", 80, "<Esc> clear search  x done"),
         ("moved names only", "/+work<CR>", 80, clear),
         ("cleared", "/+work A<CR><Esc>", 80, "manual  x done"),
+        (
+            "by hand",
+            "/+work<CR><C-w>3<Space><Esc>",
+            80,
+            "manual  x done",
+        ),
+        (
+            "already selected",
+            "/+work<CR>/+work<CR>",
+            80,
+            "manual  x done",
+        ),
         // Only the first hint fits beside the version.
         ("narrow", "/A<CR>", 56, "manual  <Esc> clear search   "),
         ("search prompt", "/A", 80, "/A  <CR> keep  <Tab> next"),
