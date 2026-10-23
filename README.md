@@ -21,7 +21,7 @@ lsty is a vim-inspired [todo.txt](http://todotxt.org/) TUI written in Rust,
 and a [todo.sh](https://github.com/todotxt/todo.txt-cli)-inspired CLI with
 extensions for safe concurrent use by humans, scripts, and LLM agents.
 
-## Some Possible Uses
+## Some Use Cases
 
 - Personal todo list that includes recurring tasks
 - Human in the loop with agents posting decisions for approval
@@ -34,13 +34,15 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 
 - Watch agents work lists in "real-time"
 - Vim-inspired TUI with configurable key bindings and themes. Normal, insert,
-  visual and command-line modes
+  visual and command-line modes. `u` for undo and `<c-r>` for redo
 - Plain-text todo.txt files, with priorities, projects, contexts, dependencies,
   dates, and links
 - Filters on text, projects, contexts, tags, priorities and dates, combined
   with and (a space), or (`|`) and not (`-`)
-- Auto-completion of project and context names. Cycle priorities and completion
-- A CLI for listing, adding, editing, and completing tasks
+- Auto-completion of commands, filters, projects and contexts
+- Nesting of projects and contexts with `.` or `/`
+- Cycle priorities and completion
+- A CLI for listing, adding, editing, waiting on, and completing tasks
 - JSON output for scripts and agents
 - Task ownership, claiming, and dependencies for coordinating work
 - Concurrent access by lsty processes, with locking, atomic writes, and file
@@ -175,9 +177,9 @@ through `TODO_FILE` or `TODO_DIR`.
 
 ### Filters
 
-`--filter`, the terms of `lsty ls` and saved `[filters]` (listed in the TUI's
-Filters panel) all use one language. Terms are separated by spaces and all
-must match.
+`--filter`, the terms of `lsty ls`, saved `[filters]` (listed in the TUI's
+Filters panel) and the TUI's `/` search all use one language. Terms are
+separated by spaces and all must match.
 
 | Term                                  | Matches                                             |
 | ------------------------------------- | --------------------------------------------------- |
