@@ -33,8 +33,8 @@ const INTRO: [&[&str]; 9] = [
         "  no task, but blocked_count, later_count or claimed_count above 0: the",
         "    queue is not done: tasks await a prerequisite, start date or another worker.",
         "`wait IDS…` returns when one of the tasks changes, or at once if one is done",
-        "(exit 5 after --timeout, default 1h). It watches only those ids: to add one,",
-        "end it and wait on all again. Check them with `lsty show` before acting.",
+        "(exit 5 after --timeout, default 1h, 0: no limit). It watches only those ids:",
+        "to add one, end it and wait on all. Check them with `lsty show` before acting.",
     ],
     &[
         "# Files",
@@ -59,8 +59,8 @@ const INTRO: [&[&str]; 9] = [
     ],
     &[
         "# Dates",
-        "Write new dates as relative input (+3d, fri); on another day it may resolve",
-        "differently: retry with the result's ISO date or, if lost, read the task first.",
+        "Dates may be relative (+3d, fri), counted from today. To retry a command,",
+        "reuse the ISO date its result gave, or `lsty show` the task if that was lost.",
     ],
     &[
         "# Claims",
