@@ -26,12 +26,12 @@ Set CursorBlink false
 
 # Prepare the list, environment, and cleanup without recording the shell.
 Hide
-Type@1ms `set -eu; demo=$(mktemp -d); trap 'tmux -L lsty-demo kill-server 2>/dev/null || :; rm -rf "$demo"' EXIT; cp assets/demo.todo.txt "$demo/todo.txt"; export HOME="$demo" XDG_CONFIG_HOME="$demo/config" XDG_STATE_HOME="$demo/state" PATH="$PWD/target/release:$PATH" TZ=UTC LSTY_NOW=2026-10-07T1000Z TERM=xterm-256color COLORTERM=truecolor TODO_FILE="$demo/todo.txt"; unset TODO_DIR DONE_FILE LSTY_FILE LSTY_OWNER LSTY_CONFIG LSTY_NONINTERACTIVE NO_COLOR TMUX; clear`
+Type@1ms `set -eu; demo=$(mktemp -d); trap 'tmux -L lsty-demo kill-server 2>/dev/null || :; rm -rf "$demo"' EXIT; cp assets/demo.todo.txt "$demo/todo.txt"; export SHELL="$(command -v bash)" HOME="$demo" XDG_CONFIG_HOME="$demo/config" XDG_STATE_HOME="$demo/state" PATH="$PWD/target/release:$PATH" TZ=UTC LSTY_NOW=2026-10-07T1000Z TERM=xterm-256color COLORTERM=truecolor TODO_FILE="$demo/todo.txt" TODOTXT_CFG_FILE=/dev/null; unset DONE_FILE LSTY_OWNER LSTY_CONFIG LSTY_TODAY LSTY_NONINTERACTIVE NO_COLOR TMUX TODOTXT_AUTO_ARCHIVE TODOTXT_DATE_ON_ADD TODOTXT_PLAIN TODOTXT_PRESERVE_LINE_NUMBERS; clear`
 Enter
 Sleep 500ms
 
 # The agent starts typing a few seconds in; its pauses track the tape.
-Type@1ms `assets/demo-agent.sh & tmux -L lsty-demo -f assets/demo.tmux.conf new-session -s demo -x 100 -y 36 lsty \; select-pane -T "human: lsty" \; split-window -v -l 5 'PS1="$ " exec bash --norc --noprofile' \; select-pane -T "agent: lsty CLI" \; select-pane -t 0`
+Type@1ms `assets/demo-agent.sh & tmux -u -L lsty-demo -f assets/demo.tmux.conf new-session -s demo -x 100 -y 36 lsty \; select-pane -T "human: lsty" \; split-window -v -l 5 'PS1="$ " exec bash --norc --noprofile' \; select-pane -T "agent: lsty CLI" \; select-pane -t 0`
 Enter
 Wait+Screen /NORMAL/
 Show
