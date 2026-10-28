@@ -2,7 +2,7 @@ name: ci
 
 on:
   push:
-    branches: [main, staging]
+    branches: [main]
   pull_request:
   workflow_call:
 
@@ -47,6 +47,26 @@ jobs:
           tool: cargo-machete
       - run: cargo machete
 
+  publish-dry-run:
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install the pinned toolchain
+        run: rustup toolchain install
+      - run: cargo publish --dry-run --workspace --locked
+
   package:
     if: github.event_name == 'pull_request'
     uses: ./.github/workflows/package.yml
+
+  checks:
+    if: always()
+    needs: [test, deps, publish-dry-run, package]
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      # Only package is ever skipped, and only off pull requests.
+      - name: Fail unless every check succeeded or was skipped
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
