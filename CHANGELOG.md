@@ -4,6 +4,24 @@ Changes a user of lsty can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.6.0 (2026-10-28)
+
+### Added
+
+- **tui:** Search with the filter language of `--filter`
+- **tui:** Auto-complete names and states in the search
+- **tui:** Auto-complete filter terms on the command line as the search does
+- **core:** Hint at the spaces when a term starts or ends with a bar
+- **tui:** Take back what the last search moved when it is cleared
+- **tui:** Hint how to clear a search and what enter does to it
+- **tui:** Say what enter does in the due and tag prompts
+
+### Fixed
+
+- **tui:** Auto-complete states only after is: and nothing inside a phrase
+- **tui:** Auto-complete file paths in filter terms
+- **core:** Hint whenever a term starts or ends with a bar
+
 ## 0.5.0 (2026-10-21)
 
 ### Added
@@ -131,7 +149,6 @@ Changes a user of lsty can see, newest first.
 - **tui:** Cope with the file changing under a draft that gives an id
 - **cli:** Draw control characters in printed text as pictures
 - **tui:** Open the key help at the section of where it was opened
-- **demo:** Wait for the list row of the review, not the agent's typing
 - **help:** Say project or context where help and readme said name
 - **help:** Say box, select and blank lines where help and readme used other words
 - **help:** Head the key help group of the boxes Boxes
