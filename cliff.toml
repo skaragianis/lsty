@@ -38,6 +38,8 @@ filter_unconventional = true
 # Only what a user sees: tests, refactors, docs, builds and chores are left out.
 filter_commits = true
 commit_parsers = [
+    # How the demo is recorded is no change a user sees.
+    { message = "^[a-z]+\\(demo\\)", skip = true },
     { field = "breaking", pattern = "true", group = "<!-- 0 -->Breaking" },
     { message = "^feat", group = "<!-- 1 -->Added" },
     { message = "^fix", group = "<!-- 2 -->Fixed" },
