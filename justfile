@@ -209,14 +209,15 @@ demo-tools:
     sudo install -D -m 0644 "$dir/charm.asc" /etc/apt/keyrings/charm.asc
     echo 'deb [signed-by=/etc/apt/keyrings/charm.asc] https://repo.charm.sh/apt/ * *' | sudo tee /etc/apt/sources.list.d/charm.list >/dev/null
     sudo apt-get update
-    sudo apt-get install --yes vhs ffmpeg chromium fonts-dejavu-core
+    sudo apt-get install --yes vhs ffmpeg chromium
     command -v tmux >/dev/null || sudo apt-get install --yes tmux
     if ! command -v ttyd >/dev/null; then
         curl -fsSL -o "$dir/ttyd" "https://github.com/tsl0922/ttyd/releases/download/1.7.7/$ttyd_asset"
         echo "$ttyd_sha256  $dir/ttyd" | sha256sum -c -
         sudo install -D -m 0755 "$dir/ttyd" /usr/local/bin/ttyd
     fi
-    echo "Installed current VHS, FFmpeg, Chromium, and DejaVu fonts, and ttyd 1.7.7 and tmux if missing."
+    echo "Installed current VHS, FFmpeg and Chromium, and ttyd 1.7.7 and tmux if missing."
+    fc-list -q "Ioskeley Mono Term" || echo "The demo also needs the Ioskeley Mono Term font; install it by hand." >&2
     echo "Run recordings as your normal user, not with sudo."
 
 todo_sh_version := "2.13.0"

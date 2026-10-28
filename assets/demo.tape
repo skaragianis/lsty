@@ -2,7 +2,7 @@
 # lsty runs in the upper tmux pane; demo-agent.sh types an agent's commands
 # into the lower one. Only a temporary copy of demo.todo.txt is changed.
 # Personal configuration and session state are isolated, and all writers use
-# the same defaults.
+# the same defaults. The font, Ioskeley Mono Term, must be installed.
 
 Require ./target/release/lsty
 Require bash
@@ -14,7 +14,7 @@ Output assets/demo.gif
 # Output assets/demo.mp4
 
 Set Shell bash
-Set FontFamily "DejaVu Sans Mono"
+Set FontFamily "Ioskeley Mono Term"
 Set FontSize 14
 Set Columns 100
 Set Rows 36
