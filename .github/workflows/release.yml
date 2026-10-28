@@ -30,106 +30,12 @@ jobs:
   ci:
     uses: ./.github/workflows/ci.yml
 
-  licenses:
-    timeout-minutes: 10
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - name: Install the pinned toolchain
-        run: rustup toolchain install
-      - uses: taiki-e/install-action@f7e5d7c961414b23f5b25b2da9294395d08513ad # v2.87.26
-        with:
-          tool: cargo-about@0.9.2
-      - name: Collect the licenses of the code in the executable
-        run: |
-          mkdir notices
-          cargo about generate --locked --fail -m crates/lsty/Cargo.toml \
-            -c release/about.toml release/about.hbs \
-            -o notices/THIRD-PARTY-LICENSES
-          cp "$(rustc --print sysroot)/share/doc/rust/COPYRIGHT-library.html" \
-            notices/THIRD-PARTY-LICENSES-std.html
-      - uses: actions/upload-artifact@v7
-        with:
-          name: third-party-licenses
-          path: notices/
-          if-no-files-found: error
-
-  build:
-    needs: [version, ci, licenses]
-    timeout-minutes: 20
-    strategy:
-      fail-fast: true
-      matrix:
-        include:
-          - target: x86_64-unknown-linux-musl
-            os: ubuntu-latest
-          - target: aarch64-unknown-linux-musl
-            os: ubuntu-latest
-            linker: rust-lld
-            # The executable is static, so qemu-user needs no sysroot.
-            prepare: |
-              sudo apt-get update
-              sudo apt-get install -y qemu-user
-            launch: qemu-aarch64
-          - target: x86_64-apple-darwin
-            os: macos-latest
-            # A no-op where the image already has Rosetta.
-            prepare: softwareupdate --install-rosetta --agree-to-license
-          - target: aarch64-apple-darwin
-            os: macos-latest
-    runs-on: ${{ matrix.os }}
-    env:
-      CARGO_TARGET_AARCH64_UNKNOWN_LINUX_MUSL_LINKER: ${{ matrix.linker }}
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
-        with:
-          name: third-party-licenses
-          path: notices
-      - name: Install the pinned toolchain and the target
-        run: |
-          rustup toolchain install
-          rustup target add ${{ matrix.target }}
-      - run: cargo build --release --locked -p lsty --target ${{ matrix.target }}
-      - name: Package
-        run: |
-          name="lsty-$GITHUB_REF_NAME-${{ matrix.target }}"
-          mkdir -p "dist/$name"
-          cp "target/${{ matrix.target }}/release/lsty" LICENSE notices/* \
-            "dist/$name/"
-          case "${{ matrix.target }}" in
-            *-musl)
-              {
-                echo
-                echo "=============================================================================="
-                echo "musl libc (MIT), linked into this executable"
-                echo
-                echo "------------------------------------------------------------------------------"
-                echo
-                cat release/musl-COPYRIGHT
-              } >> "dist/$name/THIRD-PARTY-LICENSES"
-              ;;
-          esac
-          tar -czf "dist/$name.tar.gz" -C dist "$name"
-          cd dist && shasum -a 256 "$name.tar.gz" > "$name.tar.gz.sha256"
-      - name: Run the executable from its archive
-        run: |
-          ${{ matrix.prepare }}
-          tar -xzf dist/*.tar.gz -C "$RUNNER_TEMP"
-          out="$(${{ matrix.launch }} "$RUNNER_TEMP"/lsty-*/lsty --version)"
-          echo "$out"
-          case "$out" in
-            *"${GITHUB_REF_NAME#v}"*) ;;
-            *) echo "unexpected version: $out" >&2; exit 1 ;;
-          esac
-      - uses: actions/upload-artifact@v7
-        with:
-          name: lsty-${{ matrix.target }}
-          path: dist/*.tar.gz*
-          if-no-files-found: error
+  package:
+    needs: [version, ci]
+    uses: ./.github/workflows/package.yml
 
   publish:
-    needs: build
+    needs: package
     timeout-minutes: 5
     runs-on: ubuntu-latest
     permissions:

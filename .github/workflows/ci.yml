@@ -46,3 +46,7 @@ jobs:
         with:
           tool: cargo-machete
       - run: cargo machete
+
+  package:
+    if: github.event_name == 'pull_request'
+    uses: ./.github/workflows/package.yml
