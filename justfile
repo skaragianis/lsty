@@ -138,7 +138,7 @@ changelog:
     fi
     git cliff --unreleased --tag "$tag" --prepend CHANGELOG.md
 
-# Tag the version in Cargo.toml as vVERSION and push main and the tag together, which starts the release build
+# Tag origin/main as vVERSION (the version in Cargo.toml) and push only the tag, which starts the release build
 release:
     #!/usr/bin/env sh
     set -eu
@@ -148,10 +148,9 @@ release:
     id="$(cargo pkgid --locked -p lsty)"
     version="${id##*[#@]}"
     tag="v$version"
-    test "$(git symbolic-ref --short -q HEAD)" = main || fail "not on main"
     test -z "$(git status --porcelain)" || fail "the working tree has changes"
     git fetch --quiet origin main
-    git merge-base --is-ancestor origin/main HEAD || fail "main is behind origin/main"
+    test "$(git rev-parse HEAD)" = "$(git rev-parse FETCH_HEAD)" || fail "HEAD is not origin/main"
     ! git rev-parse -q --verify "refs/tags/$tag" >/dev/null || fail "$tag exists already"
     remote="$(git ls-remote --tags origin "refs/tags/$tag")" || fail "can't read the tags on origin"
     test -z "$remote" || fail "$tag exists on origin"
@@ -160,7 +159,7 @@ release:
     test -z "$latest" || test "$(printf '%s\n%s\n' "$latest" "$tag" | sed 's/-/~/' | sort -V | tail -n 1 | sed 's/~/-/')" = "$tag" \
         || fail "$tag is not newer than $latest"
     git tag -a "$tag" -m "lsty $version"
-    if ! git push --atomic origin main "$tag"; then
+    if ! git push origin "$tag"; then
         theirs="$(git ls-remote --tags origin "refs/tags/$tag")" \
             || fail "push failed and origin can't be read; $tag kept"
         test -n "$theirs" || { git tag -d "$tag" >/dev/null; fail "push failed; $tag removed again"; }
