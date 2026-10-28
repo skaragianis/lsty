@@ -126,17 +126,17 @@ licenses:
     cargo about generate --locked --fail -m crates/lsty/Cargo.toml \
         -c release/about.toml release/about.hbs -o target/THIRD-PARTY-LICENSES
 
-# Write CHANGELOG.md from the commits since the first release; those after the last tag go under the version in Cargo.toml, or under Unreleased while that version is tagged already
+# Add the commits since the last tag to the top of CHANGELOG.md, under the version in Cargo.toml; released sections are left as they are
 changelog:
     #!/usr/bin/env sh
     set -eu
     id="$(cargo pkgid --locked -p lsty)"
     tag="v${id##*[#@]}"
-    if git rev-parse -q --verify "refs/tags/$tag" >/dev/null; then
-        git cliff v0.1.0.. -o CHANGELOG.md
-    else
-        git cliff v0.1.0.. --tag "$tag" -o CHANGELOG.md
+    if grep -q "^## ${tag#v} (" CHANGELOG.md; then
+        echo "CHANGELOG.md has ${tag#v} already: bump the version, or remove that section to write it again" >&2
+        exit 1
     fi
+    git cliff --unreleased --tag "$tag" --prepend CHANGELOG.md
 
 # Tag the version in Cargo.toml as vVERSION and push main and the tag together, which starts the release build
 release:
