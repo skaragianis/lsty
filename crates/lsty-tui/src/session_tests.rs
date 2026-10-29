@@ -111,14 +111,18 @@ fn unreadable(good: &[u8], wrong: [&[u8]; 2]) -> [(Vec<u8>, &'static str); 4] {
     ]
 }
 
-/// Puts `data` at `name` in the state folder, runs `act` and checks
-/// that the file is as it was and why it was not written is shown once.
+/// Puts `data` at `name` in the state folder, checks that the screen
+/// opens with no history, runs `act` and checks that the file is as it
+/// was and why it was not written is shown once.
 fn kept_after(name: &str, data: &[u8], why: &str, act: fn(&mut Model)) {
     let dir = workdir(LIST);
     let path = state_of(dir.path()).join(name);
     fs::create_dir_all(state_of(dir.path())).unwrap_or_default();
     fs::write(&path, data).unwrap_or_default();
     let mut model = model_in(dir.path(), Config::default());
+    keys(&mut model, ":<Up>");
+    assert_eq!(text_of(&model), "", "{why}");
+    keys(&mut model, "<Esc>");
     act(&mut model);
     assert_eq!(fs::read(&path).ok().as_deref(), Some(data), "{why}");
     let want =
