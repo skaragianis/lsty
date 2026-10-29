@@ -5,7 +5,7 @@ use std::{
     path::Path,
 };
 
-use lsty_core::{config::Config, list::SortField};
+use lsty_core::{config::Config, errs::lossy_path, list::SortField};
 use ratatui::layout::Position;
 
 use crate::{
@@ -94,21 +94,104 @@ fn a_history_read_is_normalised_when_it_is_written_again() {
     assert!(text.contains("\"l51\""));
 }
 
-#[test]
-fn a_history_with_a_syntax_error_is_empty_and_replaced() {
+const OTHER: &[u8] =
+    b"[\"/other/todo.txt\"]\n  projects = [\"x\"]\n  contexts = []\n";
+
+const WRONG: &str = "an entry has the wrong type";
+
+/// Files that cannot be read as `good` (a history or folds file), each
+/// with what `good` holds, and the reason shown for each; `wrong` are
+/// two such files with an entry of the wrong type.
+fn unreadable(good: &[u8], wrong: [&[u8]; 2]) -> [(Vec<u8>, &'static str); 4] {
+    [
+        ([b"# \xff\n", good].concat(), "not UTF-8"),
+        ([good, b"x = ["].concat(), "not valid TOML"),
+        (wrong[0].to_vec(), WRONG),
+        (wrong[1].to_vec(), WRONG),
+    ]
+}
+
+/// Puts `data` at `name` in the state folder, runs `act` and checks
+/// that the file is as it was and why it was not written is shown once.
+fn kept_after(name: &str, data: &[u8], why: &str, act: fn(&mut Model)) {
     let dir = workdir(LIST);
+    let path = state_of(dir.path()).join(name);
     fs::create_dir_all(state_of(dir.path())).unwrap_or_default();
-    fs::write(state_of(dir.path()).join("history.toml"), "command = [")
+    fs::write(&path, data).unwrap_or_default();
+    let mut model = model_in(dir.path(), Config::default());
+    act(&mut model);
+    assert_eq!(fs::read(&path).ok().as_deref(), Some(data), "{why}");
+    let want =
+        format!("can't save session state: {}: {why}", lossy_path(&path));
+    assert_eq!(model.message.take(), Some(want));
+    act(&mut model);
+    assert_eq!(model.message, None, "{why}");
+    assert_eq!(fs::read(&path).ok().as_deref(), Some(data), "{why}");
+}
+
+fn search(model: &mut Model) {
+    keys(model, "/work<CR>");
+}
+
+#[test]
+fn a_history_file_that_cannot_be_read_is_kept_and_why_shown_once() {
+    let wrong: [&[u8]; 2] = [
+        b"command = [1]\nsearch = []\n",
+        b"command = []\nsearch = \"x\"\n",
+    ];
+    for (data, why) in unreadable(b"command = [\"sort due\"]\n", wrong) {
+        kept_after("history.toml", &data, why, search);
+    }
+}
+
+#[test]
+fn a_folds_file_that_cannot_be_read_is_kept_and_why_shown_once() {
+    let wrong = [
+        &[b"t = 1\n", OTHER].concat()[..],
+        &[OTHER, b"\n[t]\n  projects = [1]\n"].concat()[..],
+    ];
+    for (data, why) in unreadable(OTHER, wrong) {
+        kept_after("folds.toml", &data, why, fold_work);
+    }
+}
+
+#[test]
+fn a_folder_in_place_of_a_state_file_is_left_and_why_shown() {
+    for (name, act) in [
+        ("history.toml", search as fn(&mut Model)),
+        ("folds.toml", fold_work),
+    ] {
+        let dir = workdir(LIST);
+        let path = state_of(dir.path()).join(name);
+        fs::create_dir_all(&path).unwrap_or_default();
+        let mut model = model_in(dir.path(), Config::default());
+        act(&mut model);
+        assert!(path.is_dir(), "{name}");
+        let shown = model.message.unwrap_or_default();
+        let want = format!("{}: is a directory", lossy_path(&path));
+        assert!(shown.ends_with(&want), "{shown}");
+    }
+}
+
+#[test]
+fn a_folds_file_without_read_permission_is_kept() {
+    let dir = workdir(LIST);
+    let path = state_of(dir.path()).join("folds.toml");
+    fs::create_dir_all(state_of(dir.path())).unwrap_or_default();
+    fs::write(&path, OTHER).unwrap_or_default();
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o000))
         .unwrap_or_default();
-    let mut model = model_in(dir.path(), alone());
-    keys(&mut model, ":<Up>");
-    assert_eq!(text_of(&model), "");
-    keys(&mut model, "<Esc>");
-    run_line(&mut model, "sort manual");
-    assert_eq!(
-        history_file(dir.path()),
-        "command = [\"sort manual\"]\nsearch = []\n"
-    );
+    if fs::read(&path).is_ok() {
+        return; // root reads it anyway
+    }
+    let mut model = model_in(dir.path(), Config::default());
+    fold_work(&mut model);
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o600))
+        .unwrap_or_default();
+    assert_eq!(fs::read(&path).ok().as_deref(), Some(OTHER));
+    let shown = model.message.unwrap_or_default();
+    let want = format!("{}: permission denied", lossy_path(&path));
+    assert!(shown.ends_with(&want), "{shown}");
 }
 
 #[test]
@@ -249,7 +332,7 @@ fn quoted_lines_and_keys_read_back_as_written() {
         search: vec![line],
     };
     assert_eq!(store.save_history(&saved), Ok(()));
-    assert_eq!(store.history(), saved);
+    assert_eq!(store.history(), Ok(saved));
     let text = history_file(dir.path());
     assert!(text.contains("\\u007f\\u001b \\b"), "{text}");
     let folds = Folds {
