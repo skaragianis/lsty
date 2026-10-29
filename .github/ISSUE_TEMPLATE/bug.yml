@@ -7,7 +7,7 @@ body:
     attributes:
       label: lsty version
       description: The output of `lsty --version`.
-      placeholder: lsty 0.6.0
+      placeholder: lsty 0.6.1
     validations:
       required: true
   - type: input

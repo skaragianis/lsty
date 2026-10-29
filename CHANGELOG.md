@@ -1,8 +1,16 @@
 # Changelog
 
-Changes a user of lsty can see, newest first.
+Changes that a user of lsty can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
+
+## 0.6.1 (2026-10-29)
+
+Pull requests are now welcome, see [CONTRIBUTING.md](https://github.com/skaragianis/lsty/blob/main/CONTRIBUTING.md).
+
+### Fixed
+
+- **tui:** Never rewrite a session state file that could not be read
 
 ## 0.6.0 (2026-10-28)
 

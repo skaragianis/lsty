@@ -637,7 +637,7 @@ dependencies = [
 
 [[package]]
 name = "lsty"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "jiff",
  "libtest-mimic",
@@ -652,7 +652,7 @@ dependencies = [
 
 [[package]]
 name = "lsty-cli"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "jiff",
  "lsty-core",
@@ -662,7 +662,7 @@ dependencies = [
 
 [[package]]
 name = "lsty-core"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "getrandom",
  "jiff",
@@ -676,7 +676,7 @@ dependencies = [
 
 [[package]]
 name = "lsty-scripttest"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "libtest-mimic",
  "regex",
@@ -688,7 +688,7 @@ dependencies = [
 
 [[package]]
 name = "lsty-tui"
-version = "0.6.0"
+version = "0.6.1"
 dependencies = [
  "jiff",
  "lsty-cli",

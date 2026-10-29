@@ -4,7 +4,7 @@
 header = """
 # Changelog
 
-Changes a user of lsty can see, newest first.
+Changes that a user of lsty can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 """
