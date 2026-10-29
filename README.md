@@ -332,8 +332,8 @@ Frontier LLMs have no issue using it without specific skills.
 
 ## Contributing
 
-Bug reports and feature requests are welcome. Pull requests are not while this
-remains an experiment in local agentic development. See
+Bug reports, feature requests, and pull requests are welcome. Please open an
+issue before a large change. See
 [Contributing](https://github.com/skaragianis/lsty/blob/main/CONTRIBUTING.md).
 
 ## License
