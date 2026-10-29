@@ -15,7 +15,7 @@ use std::{
     ffi::OsString,
     fs, io,
     path::{Path, PathBuf},
-    process::{Command, ExitCode},
+    process::{Child, Command, ExitCode},
 };
 
 use libtest_mimic::{Arguments, Trial};
@@ -38,7 +38,6 @@ const ADD_FLAG: &str = "--add-helper";
 const READER_FLAG: &str = "--reader-helper";
 const SHARED_FLAG: &str = "--shared-helper";
 const MOVES: usize = 200;
-const MAX_MOVES: usize = 20_000;
 const PROCESSES: usize = 8;
 const ROUNDS: usize = 25;
 
@@ -286,24 +285,30 @@ fn moves_and_reader() -> Result<(), String> {
         .arg(&dir)
         .spawn()
         .map_err(|e| e.to_string())?;
-    let moved = move_back_and_forth(&dir);
+    let moved = move_back_and_forth(&dir, &mut reader);
     fs::write(dir.join("stop"), "").map_err(|e| e.to_string())?;
     let status = reader.wait().map_err(|e| e.to_string())?;
     moved.map_err(|e| e.to_string())?;
+    if !dir.join("seen").exists() {
+        return Err(format!(
+            "the reader ({status}) never saw k in the done file"
+        ));
+    }
     if status.success() {
         return Ok(());
     }
     Err(format!("reader: {status}"))
 }
 
-fn move_back_and_forth(dir: &Path) -> errs::Result<()> {
+fn move_back_and_forth(dir: &Path, reader: &mut Child) -> errs::Result<()> {
     let targets = parse_refs("id:k")?;
     let opts = DoOpts {
         archive: Toggle::On,
         ..DoOpts::default()
     };
     // The reader says when it is running and when it has seen the task
-    // in the done file; the moves go on until then, at least MOVES times.
+    // in the done file; the moves go on until then, at least MOVES times,
+    // and stop once the reader has gone.
     for _ in 0..10_000 {
         if dir.join("ready").exists() {
             break;
@@ -311,10 +316,11 @@ fn move_back_and_forth(dir: &Path) -> errs::Result<()> {
         std::thread::sleep(std::time::Duration::from_millis(1));
     }
     with_env(&found(dir), |env| {
-        for round in 0..MAX_MOVES {
+        for round in 1.. {
             finish(env, &targets, opts)?;
             restore(env, &targets, ClaimOpts::default())?;
-            if round + 1 >= MOVES && dir.join("seen").exists() {
+            let gone = !matches!(reader.try_wait(), Ok(None));
+            if gone || round >= MOVES && dir.join("seen").exists() {
                 break;
             }
         }
