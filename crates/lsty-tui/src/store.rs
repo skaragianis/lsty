@@ -55,12 +55,10 @@ impl Store {
         Self { dir }
     }
 
-    /// The saved history; empty when the file is missing, cannot be read
-    /// or does not parse.
-    pub(crate) fn history(&self) -> Saved {
-        self.read(HISTORY_FILE)
-            .and_then(|text| parse_history(&text))
-            .unwrap_or_default()
+    /// The saved history; empty when the file is missing, an error
+    /// naming the file when it cannot be read or does not parse.
+    pub(crate) fn history(&self) -> Result<Saved, String> {
+        self.read(HISTORY_FILE, parse_history)
     }
 
     /// Writes both histories.
@@ -73,25 +71,26 @@ impl Store {
         self.write(HISTORY_FILE, text.as_bytes())
     }
 
-    fn all_folds(&self) -> BTreeMap<String, Folds> {
-        self.read(FOLDS_FILE)
-            .and_then(|text| parse_folds(&text))
-            .unwrap_or_default()
+    fn all_folds(&self) -> Result<BTreeMap<String, Folds>, String> {
+        self.read(FOLDS_FILE, parse_folds)
     }
 
-    /// The folded names saved for the todo file `todo`.
+    /// The folded names saved for the todo file `todo`; none when the
+    /// file cannot be read.
     pub(crate) fn folds(&self, todo: &str) -> Folds {
-        self.all_folds().remove(todo).unwrap_or_default()
+        let mut all = self.all_folds().unwrap_or_default();
+        all.remove(todo).unwrap_or_default()
     }
 
     /// Saves the folded names of `todo`, and leaves those of the other
-    /// todo files as they are. No folded names remove the entry.
+    /// todo files as they are, and writes nothing when the file cannot
+    /// be read. No folded names remove the entry.
     pub(crate) fn save_folds(
         &self,
         todo: &str,
         folds: Folds,
     ) -> Result<(), String> {
-        let mut all = self.all_folds();
+        let mut all = self.all_folds()?;
         if folds.is_empty() {
             all.remove(todo);
         } else {
@@ -100,9 +99,29 @@ impl Store {
         self.write(FOLDS_FILE, folds_text(&all).as_bytes())
     }
 
-    fn read(&self, name: &str) -> Option<String> {
-        let data = fs::read(self.dir.as_ref()?.join(name)).ok()?;
-        String::from_utf8(data).ok()
+    /// The file `name` read by `parse`; the default when there is no
+    /// folder or no file.
+    fn read<T: Default>(
+        &self,
+        name: &str,
+        parse: fn(&DeTable<'_>) -> Option<T>,
+    ) -> Result<T, String> {
+        let Some(dir) = &self.dir else {
+            return Ok(T::default());
+        };
+        let path = dir.join(name);
+        let data = match fs::read(&path) {
+            Ok(data) => data,
+            Err(e) if e.kind() == io::ErrorKind::NotFound => Vec::new(),
+            Err(e) => return Err(reason(&path, &e)),
+        };
+        let shown = lossy_path(&path);
+        let text = String::from_utf8(data)
+            .map_err(|_| format!("{shown}: not UTF-8"))?;
+        let table = DeTable::parse(&text)
+            .map_err(|_| format!("{shown}: not valid TOML"))?;
+        parse(table.get_ref())
+            .ok_or_else(|| format!("{shown}: an entry has the wrong type"))
     }
 
     fn write(&self, name: &str, data: &[u8]) -> Result<(), String> {
@@ -186,18 +205,16 @@ fn list_at(table: &DeTable<'_>, key: &str) -> Option<Vec<String>> {
     })
 }
 
-fn parse_history(text: &str) -> Option<Saved> {
-    let table = DeTable::parse(text).ok()?;
+fn parse_history(table: &DeTable<'_>) -> Option<Saved> {
     Some(Saved {
-        command: list_at(table.get_ref(), "command")?,
-        search: list_at(table.get_ref(), "search")?,
+        command: list_at(table, "command")?,
+        search: list_at(table, "search")?,
     })
 }
 
-fn parse_folds(text: &str) -> Option<BTreeMap<String, Folds>> {
-    let table = DeTable::parse(text).ok()?;
+fn parse_folds(table: &DeTable<'_>) -> Option<BTreeMap<String, Folds>> {
     let mut all = BTreeMap::new();
-    for (key, value) in table.get_ref() {
+    for (key, value) in table {
         let DeValue::Table(one) = value.get_ref() else {
             return None;
         };

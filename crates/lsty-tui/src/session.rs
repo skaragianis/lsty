@@ -51,13 +51,18 @@ pub(crate) struct Session {
     prefilled: bool,
     /// A failed save was already shown.
     failed: bool,
+    /// Why the history file could not be read, which keeps it unwritten.
+    unread: Option<String>,
 }
 
 impl Session {
     /// The session over `store`, with the saved histories read.
     pub(crate) fn new(store: Store) -> Self {
         let mut history = Saved::default();
-        let saved = store.history();
+        let (saved, unread) = match store.history() {
+            Ok(saved) => (saved, None),
+            Err(why) => (Saved::default(), Some(why)),
+        };
         for line in &saved.command {
             keep(&mut history.command, line);
         }
@@ -67,6 +72,7 @@ impl Session {
         Self {
             store,
             history,
+            unread,
             ..Self::default()
         }
     }
@@ -149,7 +155,11 @@ impl Model {
             return;
         }
         keep(pick(&mut self.session.history), line);
-        let result = self.session.store.save_history(&self.session.history);
+        let session = &self.session;
+        let result = session
+            .unread
+            .clone()
+            .map_or_else(|| session.store.save_history(&session.history), Err);
         self.persisted(result);
     }
 
