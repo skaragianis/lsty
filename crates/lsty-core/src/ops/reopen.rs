@@ -12,7 +12,7 @@ use super::{
 use crate::{
     errs::Result,
     list::{State, TaskId},
-    todotxt::{Line, Parts, Priority, build},
+    todotxt::{Line, Parts, Priority, build, is_wontdo},
 };
 
 /// Un-completes each done target of the todo file. There is no blocked
@@ -50,7 +50,7 @@ fn reopen_task(
     let (open, back) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;
     tx.set(id, open.raw(), Path::Action);
     tx.say([handle.as_bytes(), b" reopened", &back].concat());
-    if line.tags().rec.is_some() {
+    if line.tags().rec.is_some() && !line.has_wontdo() {
         tx.say(format!(
             "{handle} has rec:; its next occurrence stays in the list"
         ));
@@ -63,7 +63,8 @@ fn reopen_task(
 ///
 /// # Errors
 ///
-/// `wrong_state` when nothing would be left of the line.
+/// `wrong_state` when nothing would be left of the line, and when removing
+/// `wontdo:true` would turn a word into a stamp.
 pub(super) fn unfinished(
     tx: &Tx,
     actor: &Actor,
@@ -71,7 +72,7 @@ pub(super) fn unfinished(
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<(Line, Vec<u8>)> {
-    let open = reopened(tx, id, line);
+    let open = reopened(tx, id, line)?;
     if hollowed(line, &open) {
         return Err(emptied(tx, id));
     }
@@ -94,20 +95,23 @@ fn back_to(actor: &Actor, line: &Line, opts: ClaimOpts) -> Vec<u8> {
     }
 }
 
-/// `line` without its mark and completion date, with its priority back
-/// and its `pri:` and `ended:` tags gone (all kept when removing them
-/// would change a stamp).
-fn reopened(tx: &Tx, id: TaskId, line: &Line) -> Line {
+/// `line` without its mark, completion date and `wontdo:true`, with its
+/// priority back and its `pri:` and `ended:` tags gone, and the `owner:` of a
+/// decision on a task never started, which only says who decided (those kept
+/// when removing them would change a stamp).
+fn reopened(tx: &Tx, id: TaskId, line: &Line) -> Result<Line> {
     let open = Line::parse(build(&Parts {
         priority: restored_priority(line),
         created: line.created(),
         description: line.description(),
         ..Parts::default()
     }));
-    match tx.remove_where(id, &open, |t| is_pri_tag(t) || t.is_tag(b"ended")) {
-        Ok((bare, _)) => bare,
-        Err(_) => open,
-    }
+    let (open, _) = tx.remove_where(id, &open, is_wontdo)?;
+    let decided = line.has_wontdo() && !line.tags().underway;
+    let cut = tx.remove_where(id, &open, |t| {
+        is_pri_tag(t) || t.is_tag(b"ended") || (decided && t.is_tag(b"owner"))
+    });
+    Ok(cut.map_or(open, |(bare, _)| bare))
 }
 
 /// The `(X)` field, or else the first valid `pri:`.

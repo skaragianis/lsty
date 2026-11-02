@@ -29,7 +29,7 @@ pub struct StartOpts {
     pub ignore_blocked: bool,
 }
 
-/// The flags of `do`.
+/// The flags of `do` and `wontdo`.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct DoOpts {
     /// The claim flags.
@@ -38,6 +38,9 @@ pub struct DoOpts {
     pub ignore_blocked: bool,
     /// `--archive` or `--no-archive`.
     pub archive: Toggle,
+    /// Finish the task as won't do: with the tag, without a blocked check
+    /// and without a next occurrence.
+    pub wontdo: bool,
 }
 
 const BLOCKED_HINT: &str =

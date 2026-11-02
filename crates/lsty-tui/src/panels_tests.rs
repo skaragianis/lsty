@@ -159,6 +159,7 @@ fn the_filters_panel_lists_saved_filters_after_the_built_in_ones() {
             "Doing",
             "Waiting",
             "No project",
+            "Won't do",
             "Urgent",
             "Agents"
         ]

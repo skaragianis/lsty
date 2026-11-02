@@ -177,6 +177,20 @@ fn an_undo_writes_the_file_the_lines_return_to_first() {
 }
 
 #[test]
+fn an_undo_takes_a_wont_do_back() {
+    let dir = folder("A rec:1w\nB\n", None);
+    let opts = DoOpts {
+        wontdo: true,
+        ..DoOpts::default()
+    };
+    let mut done = finish(&dir.env(), &target("1"), opts).expect("wontdo");
+    assert_eq!(dir.todo(), "x 2026-09-29 A rec:1w wontdo:true\nB\n");
+    let rec = done.take_undo().expect("record");
+    undo_it(&dir.env(), &rec).expect("undo");
+    assert_eq!(dir.todo(), "A rec:1w\nB\n");
+}
+
+#[test]
 fn a_redo_does_the_action_again() {
     let dir = folder("A\nB\n", None);
     let pair = PriPair {

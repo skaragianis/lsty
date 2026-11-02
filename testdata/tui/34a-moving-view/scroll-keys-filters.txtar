@@ -150,7 +150,6 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
@@ -159,6 +158,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- scroll-to-the-end-bg --
@@ -200,7 +200,6 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [ ] Later   ││                                                               │
 │ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
@@ -209,6 +208,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
+│ No project  ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- scroll-back-bg --
@@ -450,7 +450,6 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
@@ -459,6 +458,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- top-bg --
@@ -478,8 +478,8 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 ................................................................................
 ................................................................................
-................................................................................
 .uuuuuuuuuuuuu..................................................................
+................................................................................
 ................................................................................
 ................................................................................
 ................................................................................

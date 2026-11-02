@@ -27,7 +27,7 @@ pub use filelink::FileLink;
 pub(crate) use filelink::clean;
 pub(crate) use id::ID_ALPHABET;
 pub use id::Id;
-pub(crate) use line::Eol;
+pub(crate) use line::{Eol, is_wontdo};
 pub use line::{Kind, Line, Priority, TokenView};
 pub use name::{SEPARATORS, name_levels, name_parent};
 pub(crate) use name::{name_has_prefix, trim_name};

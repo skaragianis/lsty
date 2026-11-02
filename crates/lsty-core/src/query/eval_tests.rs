@@ -387,10 +387,46 @@ fn states_match_their_own_task() {
     }
 }
 
+/// The todo and done file, and whether `is:wontdo` and `is:done` match.
+type WontdoRow =
+    (&'static [&'static str], &'static [&'static str], bool, bool);
+const WONTDO: &[WontdoRow] = &[
+    (&["x 2026-09-28 A wontdo:true"], &[], true, true),
+    (&["x 2026-09-28 A"], &[], false, true),
+    (&["x 2026-09-28 A wontdo:false"], &[], false, true),
+    (&["x 2026-09-28 A `wontdo:true`"], &[], false, true),
+    (&["A wontdo:true"], &[], false, false),
+    (&[], &["x 2026-09-28 A wontdo:true"], true, true),
+    (&[], &["A wontdo:true"], true, true),
+    (&[], &["A"], false, true),
+];
+
+#[test]
+fn is_wontdo_is_the_done_state_with_the_tag() {
+    let clock = clock();
+    let ctx = Context::from_clock(&clock);
+    for &(todo, done, wontdo, finished) in WONTDO {
+        let snap = snapshot(todo, done);
+        let task = snap.tasks().first().expect("task");
+        let at = format!("{todo:?} {done:?}");
+        assert_eq!(
+            parse("is:wontdo").matches(&snap, task, &ctx),
+            wontdo,
+            "{at}"
+        );
+        assert_eq!(
+            parse("is:done").matches(&snap, task, &ctx),
+            finished,
+            "{at}"
+        );
+    }
+}
+
 const OVERRIDES: &[(&str, &[Category])] = &[
     ("is:later +work", &[Category::Later]),
     ("-is:later", &[]),
     ("pri:A|is:done", &[Category::Done]),
+    ("is:wontdo", &[Category::Done]),
     (
         "is:archived is:blocked",
         &[Category::Archived, Category::Blocked],

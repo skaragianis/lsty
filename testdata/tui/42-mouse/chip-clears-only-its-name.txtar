@@ -31,7 +31,6 @@ E +home +work
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
-│             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
@@ -44,6 +43,7 @@ E +home +work
 │ Doing       ││                                                                                   │
 │ Waiting     ││                                                                                   │
 │ No project  ││                                                                                   │
+│ Won't do    ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
 -- frame --
@@ -62,7 +62,6 @@ E +home +work
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
-│             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
@@ -75,5 +74,6 @@ E +home +work
 │ Doing       ││                                                                                   │
 │ Waiting     ││                                                                                   │
 │ No project  ││                                                                                   │
+│ Won't do    ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9

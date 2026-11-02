@@ -19,9 +19,10 @@ const OPERATORS: [(&str, Op); 5] = [
 /// An `is:` form, its test and the category it belongs to.
 type StateForm = (&'static str, StateTest, Option<Category>);
 
-const STATES: [StateForm; 9] = [
+const STATES: [StateForm; 10] = [
     ("is:open", StateTest::Open, None),
     ("is:done", StateTest::Done, Some(Category::Done)),
+    ("is:wontdo", StateTest::Wontdo, Some(Category::Done)),
     ("is:doing", StateTest::Doing, None),
     ("is:blocked", StateTest::Blocked, Some(Category::Blocked)),
     ("is:later", StateTest::Later, Some(Category::Later)),

@@ -28,6 +28,9 @@ const ROWS: &[(&str, &str, bool)] = &[
     ("Waiting", "X dep:nope", false),
     ("No project", "X", true),
     ("No project", "X +p", false),
+    ("Won't do", "x 2026-09-29 X wontdo:true", true),
+    ("Won't do", "x 2026-09-29 X", false),
+    ("Won't do", "X wontdo:true", false),
 ];
 
 /// The narrowing filter called `name`.

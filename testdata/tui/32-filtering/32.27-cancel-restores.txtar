@@ -34,7 +34,6 @@ x 2026-09-01 Old task +work
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
@@ -47,6 +46,7 @@ x 2026-09-01 Old task +work
 │ Doing       ││                                                                          ││                                     │
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  COMMAND  /invoice  <CR> keep  <Tab> next  <Esc> cancel
 -- restored --
@@ -65,7 +65,6 @@ x 2026-09-01 Old task +work
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
@@ -78,5 +77,6 @@ x 2026-09-01 Old task +work
 │ Doing       ││                                                                          ││                                     │
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  <Esc> clear search  x done  t state  T stop  o new  a append  dd delete  u undo    9.9.9

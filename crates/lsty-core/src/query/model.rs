@@ -118,6 +118,7 @@ pub(super) struct Word {
 pub(super) enum StateTest {
     Open,
     Done,
+    Wontdo,
     Doing,
     Blocked,
     Later,

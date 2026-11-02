@@ -30,7 +30,6 @@ start_filter = "Nope"
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
@@ -43,5 +42,6 @@ start_filter = "Nope"
 │ Doing       ││                                                                          ││                                     │
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  config.toml: start_filter: no filter "Nope"  x done  t state  T stop  o new        9.9.9

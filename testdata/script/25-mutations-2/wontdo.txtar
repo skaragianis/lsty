@@ -1,0 +1,119 @@
+env TODO_FILE=$WORK/todo.txt
+
+# The dependents go free, the state stays done and is:wontdo finds it.
+exec lsty wontdo id:a --human --json --no-config
+stdout '"action":"wontdo"'
+stdout '"state":"done"'
+stdout '"done":true,"wontdo":true'
+stdout '"messages":\["a won''t do: Prerequisite"\]'
+exec lsty ls is:wontdo --human --no-config
+stdout 'Prerequisite'
+! stdout 'Plain'
+exec lsty show 2 --json --no-config
+stdout '"blocked":false'
+stdout '"done":false,"wontdo":false'
+
+# The tag on an open line means nothing.
+exec lsty show 3 --json --no-config
+stdout '"done":false,"wontdo":false'
+exec lsty next --json --no-config
+! stdout 'Prerequisite'
+
+# A retry is safe; the route of a plain done task runs as written.
+exec lsty wontdo id:a --human --no-config
+stdout '^a is already won''t do$'
+exec lsty wontdo 4 --human --no-config
+stdout '^4 is already done; use lsty reopen 4 first$'
+exec lsty reopen 4 --human --no-config
+stdout '^4 reopened$'
+
+# It has the options of do but for --ignore-blocked.
+exit 2 lsty wontdo 2 --ignore-blocked --human --no-config
+exit 3 lsty wontdo 2 --expect nothing --human --no-config
+stderr 'nothing'
+exec lsty wontdo 2 --expect Blocked --archive --human --no-config
+stdout '^2 won''t do: Blocked$'
+stdout '^archived to done.txt as done:1$'
+exec lsty ls is:wontdo --human --no-config
+! stdout 'Blocked'
+exec lsty ls is:wontdo is:archived --human --no-config
+stdout 'Blocked'
+exec lsty wontdo done:1 --human --no-config
+stdout '^done:1 is already won''t do$'
+exec lsty restore done:1 --human --no-config
+stdout '^done:1 restored as 5$'
+exec lsty show 5 --json --no-config
+stdout '"raw":"2026-09-01 Blocked dep:a id:b"'
+
+# --no-archive beats the setting.
+env LSTY_CONFIG=$WORK/config.toml
+exec lsty wontdo 3 --no-archive --human
+stdout '^3 won''t do: Tagged$'
+! stdout 'archived'
+
+# Help tells the agent the same.
+exec lsty help wontdo --no-config
+stdout 'agents only when told to'
+stdout 'Agent reference: id:'
+stdout 'Retry: no-op'
+stdout 'Checks: claim guard$'
+stdout '--takeover'
+
+# By number an agent gets the usual route to an id.
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 2 lsty wontdo 5 --no-config
+stderr 'agents name tasks by id'
+stderr 'lsty id 5 --expect'
+exit 2 lsty wontdo done:1 --no-config
+stderr 'agents name tasks by id'
+stderr 'lsty restore done:1 --expect'
+cmp todo.txt before
+
+# Another actor's claim needs --takeover.
+env LSTY_OWNER=agent2
+exec lsty start id:b --no-config
+env LSTY_OWNER=agent1
+cp todo.txt before
+exit 3 lsty wontdo id:b --json --no-config
+stdout '"code":"claimed"'
+cmp todo.txt before
+exec lsty wontdo id:b --takeover --no-config
+stdout '^b won''t do: Blocked$'
+
+# A retry by id is a no-op; the decision can be taken back.
+exec lsty wontdo id:b --no-config
+stdout '^b is already won''t do$'
+exec lsty reopen id:b --no-config
+stdout '^b reopened'
+
+# A task never started needs no start first, and can be deleted.
+exec lsty add Fresh --id=fresh --human --no-config
+exec lsty wontdo id:fresh --no-config
+stdout '^fresh won''t do: Fresh$'
+exec lsty del id:fresh --no-config
+stdout 'fresh'
+
+# Adding and removing the tag.
+exec lsty add 'New wontdo:true' --no-config
+exec lsty addm 'Newer wontdo:true' --no-config
+exec lsty ls New --raw --no-config
+stdout 'New wontdo:true'
+stdout 'Newer wontdo:true'
+exec lsty tag id:b wontdo:true --no-config
+stdout '^b tagged wontdo:true$'
+exec lsty untag id:b wontdo:true --no-config
+stdout '^b untagged wontdo:true$'
+
+# In backticks it is only text.
+exec lsty add 'Say `wontdo:true`' --no-config
+exec lsty ls is:wontdo --no-config
+! stdout 'Say'
+
+-- config.toml --
+auto_archive = true
+-- todo.txt --
+Prerequisite id:a
+2026-09-01 Blocked dep:a id:b
+Tagged wontdo:true
+x 2026-09-28 Plain done

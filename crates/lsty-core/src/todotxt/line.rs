@@ -108,6 +108,11 @@ pub struct TokenView<'a> {
     pub quoted: bool,
 }
 
+/// Whether the word is the tag `wontdo:true`.
+pub(crate) fn is_wontdo(tok: &TokenView<'_>) -> bool {
+    tok.is_tag(b"wontdo") && tok.value == b"true"
+}
+
 impl<'a> TokenView<'a> {
     /// Whether the word is a tag with `key`.
     pub fn is_tag(&self, key: &[u8]) -> bool {
@@ -226,6 +231,12 @@ impl Line {
         let Some(t) = id else { return self.raw.len() };
         let head = self.raw.get(..t.start).unwrap_or_default();
         head.trim_ascii_end().len()
+    }
+
+    /// Whether the line carries the tag `wontdo:true`, which means won't
+    /// do on a task in the done state.
+    pub fn has_wontdo(&self) -> bool {
+        self.tokens().any(|t| is_wontdo(&t))
     }
 
     /// The `i`-th token of the description.

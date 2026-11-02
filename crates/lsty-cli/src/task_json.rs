@@ -49,6 +49,7 @@ impl TaskJson<'_> {
         obj.string("source", task.source().as_str());
         obj.bytes("raw", line.raw());
         obj.bool("done", !task.is_open());
+        obj.bool("wontdo", self.snap.is_wontdo(task));
         obj.opt_string("priority", priority.as_deref());
         obj.opt_string("created", line.created());
         obj.opt_string("completed", line.completed());

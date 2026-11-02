@@ -18,7 +18,6 @@ frame empty
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
@@ -31,5 +30,6 @@ frame empty
 │ Doing       ││                                                                          ││                                     │
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

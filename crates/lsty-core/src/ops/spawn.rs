@@ -15,14 +15,14 @@ use crate::{
     dates::Date,
     errs::{Code, Error, Field, Result, Source},
     list::TaskId,
-    todotxt::{Line, Parts, Rec, RecUnit, TokenView, build},
+    todotxt::{Line, Parts, Rec, RecUnit, TokenView, build, is_wontdo},
 };
 
 /// A fresh open copy of `line`: today's creation date when the
 /// configuration asks for one, the priority (restored from `pri:` for a
-/// done line), and every token but `id:`, `started:` and `owner:` as it
-/// was. Dates are left alone. `None` when removing a token would turn a
-/// word into a stamp.
+/// done line, which also leaves its `wontdo:true` behind), and every token
+/// but `id:`, `started:` and `owner:` as it was. Dates are left alone.
+/// `None` when removing a token would turn a word into a stamp.
 pub(crate) fn spawn(env: &Env<'_>, line: &Line) -> Option<Line> {
     let today = env.clock.today().to_string();
     let mut out = Line::parse(build(&Parts {
@@ -36,7 +36,7 @@ pub(crate) fn spawn(env: &Env<'_>, line: &Line) -> Option<Line> {
         ..Parts::default()
     }));
     if line.is_done() {
-        out = cut_where(&out, is_pri_tag)?.0;
+        out = cut_where(&out, |t| is_pri_tag(t) || is_wontdo(t))?.0;
     }
     cut_where(&out, is_structure_tag).map(|(line, _)| line)
 }
@@ -55,13 +55,14 @@ pub(super) struct Pending {
 /// Makes the next occurrence of the task `id`, which `do` is completing,
 /// and stages it: directly below the task, or at the end of the todo file
 /// for a task of the done file. A task without a valid `rec:` says why
-/// it makes none.
+/// it makes none, and so does one that `done` shows finished as won't do,
+/// which ends the series.
 pub(super) fn spawn_next(
     tx: &mut Tx,
     env: &Env<'_>,
     id: TaskId,
-    pending: &mut Vec<Pending>,
-    taken: &mut Taken,
+    done: &Line,
+    (pending, taken): (&mut Vec<Pending>, &mut Taken),
 ) -> Result<()> {
     let task = tx.task(id).ok_or_else(gone)?;
     let line = tx.snapshot().line(task);
@@ -74,6 +75,11 @@ pub(super) fn spawn_next(
         }
         return Ok(());
     };
+    if done.has_wontdo() {
+        let handle = tx.handle(id);
+        tx.say(format!("{handle} has rec:; the series ended"));
+        return Ok(());
+    }
     let (source, after) = (task.source(), task.nr().index() + 1);
     let origin = tx.snapshot().ref_of(task);
     let copy = spawn(env, line).ok_or_else(|| tx.stamp_word_refusal(id))?;
