@@ -28,7 +28,7 @@ Done task
 │ │    <C-w>h , <C-w><Left>  Focus the box to the left   │ │
 │ │    <C-w>j , <C-w><Down>  Focus the box below         │ │
 │ │    <C-w>k , <C-w><Up>  Focus the box above           │ │
-│ └ 169-181 of 366 ──────────────────────────────────────┘ │
+│ └ 169-181 of 367 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close      9.9.9

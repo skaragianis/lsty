@@ -231,8 +231,8 @@ impl Tx {
         Ok(started)
     }
 
-    /// Refuses an agent's change to a claim. For the human, gives the
-    /// task when the edit starts it.
+    /// Refuses an agent's change to a claim. For the human, gives the task
+    /// when the edit starts it.
     fn claim_row(&self, actor: &Actor, row: &Row) -> Result<Option<TaskId>> {
         let (Some(id), Some(cur)) = (row.task, row.edited_line()) else {
             return Ok(None);

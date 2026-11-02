@@ -22,6 +22,7 @@ use crate::{
 };
 
 const MARKER_DONE: &str = "✓";
+const MARKER_WONTDO: &str = "✗";
 const MARKER_BLOCKED: &str = "⧗";
 /// The marker of a task an agent claimed, and the sign of the doing filter.
 pub(crate) const MARKER_DOING: &str = "▶";
@@ -217,7 +218,7 @@ impl Row {
             nr: task.nr(),
             source: task.source(),
             base,
-            marker: marker(task, base),
+            marker: marker(snap, task, base),
             priority: priority_span(task, line, base),
             date,
             id_cell,
@@ -235,7 +236,7 @@ impl Row {
         let row = Self::new(snap, task, ctx);
         Self {
             base,
-            marker: marker(task, base),
+            marker: marker(snap, task, base),
             priority: priority_span(task, snap.line(task), base),
             date: Cell {
                 text: WORD.to_owned(),
@@ -264,8 +265,14 @@ pub(crate) fn base_slot(task: &Task) -> Option<Slot> {
     }
 }
 
-pub(crate) fn marker(task: &Task, base: Option<Slot>) -> Span<'static> {
-    if task.state() == State::Done {
+pub(crate) fn marker(
+    snap: &Snapshot,
+    task: &Task,
+    base: Option<Slot>,
+) -> Span<'static> {
+    if snap.is_wontdo(task) {
+        Span::new(MARKER_WONTDO, base)
+    } else if task.state() == State::Done {
         Span::new(MARKER_DONE, base)
     } else if task.blocked() {
         Span::new(MARKER_BLOCKED, Some(Slot::Blocked))

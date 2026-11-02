@@ -251,6 +251,20 @@ pub(crate) const MATRIX: &[Row] = &[
         changes: false,
     },
     Row {
+        command: "wontdo",
+        agent_ref: "id:",
+        retry: retry(RetryKind::NoOp),
+        checks: &["claim guard"],
+        files: TODO_AND_DONE,
+        effects: &[
+            "writes wontdo:true, and ended: on a task that was started",
+            "ends a recurring series",
+            "--archive moves the line to the done file",
+        ],
+        renumbers: false,
+        changes: false,
+    },
+    Row {
         command: "reopen",
         agent_ref: "id:",
         retry: retry(RetryKind::NoOp),

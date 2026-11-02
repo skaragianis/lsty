@@ -102,6 +102,7 @@ const CASES: &[Row] = &[
             &["do", "3", "--no-archive"],
         ],
     ),
+    ("wontdo", &[&["wontdo", "1", "--archive"]]),
     ("reopen", &[&["reopen", "1"]]),
     (
         "dep, undep",
@@ -139,7 +140,7 @@ const DONE_FIRST: &str = "x 2026-09-28 Gone id:dd\n\
 fn content_of(command: &str) -> &'static str {
     match command {
         "reopen" | "archive" | "report" => DONE_FIRST,
-        "do" => RECURRING_FIRST,
+        "do" | "wontdo" => RECURRING_FIRST,
         _ => FIXTURE,
     }
 }
@@ -184,6 +185,7 @@ fn the_matrix_has_a_row_for_each_command() {
             "del REF",
             "del REF TERM",
             "do",
+            "wontdo",
             "reopen",
             "dep, undep",
             "start",

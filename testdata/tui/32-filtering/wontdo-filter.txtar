@@ -1,0 +1,144 @@
+size 130 30
+start
+keys <C-w>5 x
+tick 50ms
+frame done_off
+keys 10 j x <CR>
+frame filter_shows_only_wontdo
+keys <C-w> h 7 k x
+tick 50ms
+frame archive_on
+keys 7 j x <CR>
+frame filter_off_again
+-- todo.txt --
+Open task
+Tagged but open wontdo:true
+x 2026-09-28 Plain done
+x 2026-09-28 Decided against wontdo:true
+-- done.txt --
+x 2026-09-01 Old plain
+x 2026-09-01 Old decided wontdo:true
+-- done_off --
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│             ││  1   Open task                                                           ││ Open task                           │
+│             ││  1   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
+│             ││                                                                          ││ state  todo                         │
+│             ││                                                                          ││ nr     1                            │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+├[4]─Contexts─┤│                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││                                     │
+│ [ ] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
+│ Today       ││                                                                          ││                                     │
+│ Overdue     ││                                                                          ││                                     │
+│ Upcoming    ││                                                                          ││                                     │
+│ Doing       ││                                                                          ││                                     │
+│ Waiting     ││                                                                          ││                                     │
+│ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                                                9.9.9
+-- filter_shows_only_wontdo --
+┌[3]─Projects─┐┌ [1]─Won't do ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│             ││  4 ✗ Decided against wontdo:true                                  1d ago ││ Decided against wontdo:true         │
+│             ││                                                                          ││ ─────────────────────────────────── │
+│             ││                                                                          ││ state      done                     │
+│             ││                                                                          ││ nr         4                        │
+│             ││                                                                          ││ completed  2026-09-28               │
+│             ││                                                                          ││ wontdo     true                     │
+│             ││                                                                          ││                                     │
+├[4]─Contexts─┤│                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││                                     │
+│ [ ] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
+│ Today       ││                                                                          ││                                     │
+│ Overdue     ││                                                                          ││                                     │
+│ Upcoming    ││                                                                          ││                                     │
+│ Doing       ││                                                                          ││                                     │
+│ Waiting     ││                                                                          ││                                     │
+│ No project  ││                                                                          ││                                     │
+│>Won't do    ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
+-- archive_on --
+┌[3]─Projects─┐┌ [1]─Won't do ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│             ││  4 ✗ Decided against wontdo:true                                 1d ago  ││ Decided against wontdo:true         │
+│             ││    ✗ Old decided wontdo:true                                     28d ago ││ ─────────────────────────────────── │
+│             ││                                                                          ││ state      done                     │
+│             ││                                                                          ││ nr         4                        │
+│             ││                                                                          ││ completed  2026-09-28               │
+│             ││                                                                          ││ wontdo     true                     │
+│             ││                                                                          ││                                     │
+├[4]─Contexts─┤│                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││                                     │
+│ [ ] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [x] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
+│ Today       ││                                                                          ││                                     │
+│ Overdue     ││                                                                          ││                                     │
+│ Upcoming    ││                                                                          ││                                     │
+│ Doing       ││                                                                          ││                                     │
+│ Waiting     ││                                                                          ││                                     │
+│ No project  ││                                                                          ││                                     │
+│>Won't do    ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                                                9.9.9
+-- filter_off_again --
+┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│             ││  1   Open task                                                           ││ Tagged but open wontdo:true         │
+│             ││  2   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
+│             ││                                                                          ││ state   todo                        │
+│             ││                                                                          ││ nr      2                           │
+│             ││                                                                          ││ wontdo  true                        │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+├[4]─Contexts─┤│                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││                                     │
+│ [ ] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [x] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
+│ Today       ││                                                                          ││                                     │
+│ Overdue     ││                                                                          ││                                     │
+│ Upcoming    ││                                                                          ││                                     │
+│ Doing       ││                                                                          ││                                     │
+│ Waiting     ││                                                                          ││                                     │
+│ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
+└─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

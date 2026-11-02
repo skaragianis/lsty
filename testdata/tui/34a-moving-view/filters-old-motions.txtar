@@ -1,6 +1,6 @@
 size 80 24
 start
-keys <C-w>5 G k
+keys <C-w>5 G kk
 frame bottom-then-up
 bg bottom-then-up-bg
 keys kkkkk
@@ -58,7 +58,6 @@ a02 +p02 @c02
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
@@ -67,6 +66,7 @@ a02 +p02 @c02
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- bottom-then-up-bg --
@@ -89,8 +89,8 @@ a02 +p02 @c02
 ................................................................................
 ................................................................................
 ................................................................................
-................................................................................
 .uuuuuuuuuuuuu..................................................................
+................................................................................
 ................................................................................
 ................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
@@ -108,7 +108,6 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
@@ -117,6 +116,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- five-up-bg --
@@ -133,8 +133,8 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 ................................................................................
 ................................................................................
 ................................................................................
-................................................................................
 .uuuuuuuuuuuuu..................................................................
+................................................................................
 ................................................................................
 ................................................................................
 ................................................................................
@@ -158,7 +158,6 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
@@ -167,6 +166,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- half-page-up-bg --
@@ -308,7 +308,6 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
@@ -317,6 +316,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- four-down-bg --
@@ -358,7 +358,6 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
@@ -367,6 +366,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- bottom-bg --
@@ -558,7 +558,6 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │             ││                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
-│ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
@@ -567,6 +566,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ Doing       ││                                                               │
 │ Waiting     ││                                                               │
 │ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold          9.9.9
 -- wheel-then-down-bg --

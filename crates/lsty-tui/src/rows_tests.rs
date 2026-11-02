@@ -100,13 +100,15 @@ fn the_marker_tells_a_human_claim_from_an_agent_claim() {
         Agent started:2026-09-29T0700Z owner:agent1\n\
         x 2026-09-29 Done started:2026-09-29T0700Z owner:agent1\n\
         Open id:a\n\
-        Blocked dep:a\n";
+        Blocked dep:a\n\
+        x 2026-09-29 Decided wontdo:true\n\
+        Tagged wontdo:true\n";
     let snap = snapshot(todo, "", "2026-09-29T0900Z");
     let got: Vec<_> = snap
         .tasks()
         .iter()
         .map(|task| {
-            let span = marker(task, base_slot(task));
+            let span = marker(&snap, task, base_slot(task));
             (span.text.to_string(), span.slot)
         })
         .collect();
@@ -117,6 +119,8 @@ fn the_marker_tells_a_human_claim_from_an_agent_claim() {
         ("✓", Some(Slot::Done)),
         (" ", None),
         ("⧗", Some(Slot::Blocked)),
+        ("✗", Some(Slot::Done)),
+        (" ", None),
     ]
     .map(|(text, slot)| (text.to_owned(), slot));
     assert_eq!(got, want);

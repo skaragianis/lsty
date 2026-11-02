@@ -29,7 +29,6 @@ F started:2026-09-29T0900Z
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -42,6 +41,7 @@ F started:2026-09-29T0900Z
 │ Doing       ││                                                                                                                 │
 │ Waiting     ││                                                                                                                 │
 │ No project  ││                                                                                                                 │
+│ Won't do    ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold  l unfold  <Tab> next                                  9.9.9
 -- frame-bg --

@@ -213,7 +213,7 @@ const UNGUARDED: bool = false;
 pub(crate) const COMMAND: &str = "command";
 
 /// Every command, in the order `lsty help` lists them.
-pub(crate) static COMMANDS: [Command; 40] = [
+pub(crate) static COMMANDS: [Command; 41] = [
     Command {
         name: "add",
         aliases: &["a"],
@@ -276,6 +276,15 @@ pub(crate) static COMMANDS: [Command; 40] = [
         about: "Marks tasks as done; recurring ones spawn the next.",
         opts: DO,
         handler: Handler::Write(crate::lifecycle::finish),
+    },
+    Command {
+        name: "wontdo",
+        aliases: &[],
+        writes: WRITE,
+        synopsis: "wontdo REFS…",
+        about: "Marks tasks as decided against; agents only when told to.",
+        opts: &[Opt::Expect, Opt::Takeover, Opt::Archive, Opt::NoArchive],
+        handler: Handler::Write(crate::lifecycle::wontdo),
     },
     Command {
         name: "pri",

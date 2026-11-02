@@ -385,6 +385,11 @@ impl Snapshot {
             .unwrap_or_else(|| blank())
     }
 
+    /// Whether `task` is won't do: in the done state, with `wontdo:true`.
+    pub fn is_wontdo(&self, task: &Task) -> bool {
+        task.state == State::Done && self.line(task).has_wontdo()
+    }
+
     /// The reference to `task` that errors carry: its place, and its `id:`
     /// when it has one.
     pub fn ref_of(&self, task: &Task) -> Ref {

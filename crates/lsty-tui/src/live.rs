@@ -441,7 +441,7 @@ impl Model {
                 None => return rows.next().map(Row::place),
             }
         } else {
-            if !matches!(record.action.as_str(), "del" | "do")
+            if !matches!(record.action.as_str(), "del" | "do" | "wontdo")
                 || !acted.contains(&cursor?)
             {
                 return None;

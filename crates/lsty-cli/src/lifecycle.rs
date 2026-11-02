@@ -1,5 +1,5 @@
 //! The commands that move a task through its life: `start`, `stop`,
-//! `do`, `reopen`, `restore`, `archive` and `deduplicate`.
+//! `do`, `wontdo`, `reopen`, `restore`, `archive` and `deduplicate`.
 
 use lsty_core::{
     errs::Result,
@@ -33,6 +33,18 @@ pub(crate) fn finish(call: &Call<'_>) -> Result<Written> {
         claim: claim(call),
         ignore_blocked: call.has(Opt::IgnoreBlocked),
         archive: call.toggle(Opt::Archive, Opt::NoArchive),
+        wontdo: false,
+    };
+    on_refs(call, &call.parsed.args, |env, t| ops::finish(env, t, opts))
+}
+
+/// `lsty wontdo`: finishes tasks as decided against.
+pub(crate) fn wontdo(call: &Call<'_>) -> Result<Written> {
+    let opts = DoOpts {
+        claim: claim(call),
+        archive: call.toggle(Opt::Archive, Opt::NoArchive),
+        wontdo: true,
+        ..DoOpts::default()
     };
     on_refs(call, &call.parsed.args, |env, t| ops::finish(env, t, opts))
 }

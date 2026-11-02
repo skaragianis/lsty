@@ -129,6 +129,7 @@ fn state_holds(state: StateTest, subject: &Subject<'_>) -> bool {
     match state {
         StateTest::Open => task.state() != State::Done,
         StateTest::Done => task.state() == State::Done,
+        StateTest::Wontdo => subject.snap.is_wontdo(task),
         StateTest::Doing => task.state() == State::Doing,
         StateTest::Blocked => task.blocked(),
         StateTest::Later => task.later(),

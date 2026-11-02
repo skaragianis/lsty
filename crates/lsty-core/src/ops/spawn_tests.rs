@@ -395,7 +395,7 @@ fn done_file_line_spawns_at_the_end_of_the_todo_file() {
 
 const COPY: &str = "x 2026-09-28 2026-09-20 Fix +w id:a \
                     started:2026-09-29T0800Z ended:2026-09-29T0900Z \
-                    owner:agent1 due:2026-10-01 pri:B";
+                    owner:agent1 due:2026-10-01 pri:B wontdo:true";
 
 #[test]
 fn copy_of_a_done_line() {

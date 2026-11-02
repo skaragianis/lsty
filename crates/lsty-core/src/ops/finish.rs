@@ -1,4 +1,4 @@
-//! `do`: complete tasks.
+//! `do` and `wontdo`: complete tasks.
 
 use std::sync::Arc;
 
@@ -28,10 +28,10 @@ use crate::{
 ///
 /// # Errors
 ///
-/// `claimed` for an agent on another actor's claim without `takeover`,
-/// `wrong_state` for an agent that has not started the task, `blocked`
-/// for a task that waits for another unless `ignore_blocked`, and
-/// whatever the rules refuse.
+/// `claimed` for an agent on another actor's claim without `takeover`.
+/// Unless `wontdo`: `wrong_state` for an agent that has not started the
+/// task, and `blocked` for a task that waits for another unless
+/// `ignore_blocked`. And whatever the rules refuse.
 pub fn finish(
     env: &Env<'_>,
     targets: &[Target],
@@ -39,11 +39,12 @@ pub fn finish(
 ) -> Result<Outcome> {
     let targets: Vec<Target> =
         targets.iter().cloned().map(Target::archived).collect();
+    let action = if opts.wontdo { "wontdo" } else { "do" };
     // The done file is locked for writing: completing can move the task
     // there once archiving is applied.
-    run(env, "do", true, |tx| {
+    run(env, action, true, |tx| {
         let archive = opts.archive.resolve(env.config.auto_archive)
-            && !spawns_from_done(tx, &targets);
+            && !spawns_from_done(tx, &targets, opts.wontdo);
         let guard = Guard {
             actor: &env.actor,
             mode: ClaimMode::Ends,
@@ -78,30 +79,59 @@ fn finish_task(
     let line = tx.snapshot().line(task).clone();
     // The mark, not the state: an open line of the done file is completed.
     if line.is_done() {
-        tx.say(format!("{handle} is already done"));
+        let message = already_done(tx, id, source, &line, opts.wontdo);
+        tx.say(message);
         return Ok(());
     }
-    refuse_unstarted(tx, &env.actor, id, task)?;
-    if !opts.ignore_blocked {
-        refuse_blocked(tx, id, task)?;
+    if !opts.wontdo {
+        refuse_unstarted(tx, &env.actor, id, task)?;
+        if !opts.ignore_blocked {
+            refuse_blocked(tx, id, task)?;
+        }
     }
-    let done = completion(tx, env, id, &line)?;
-    tx.say([handle.as_bytes(), b" done: ", &line.text()].concat());
+    let done = completion(tx, env, id, &line, opts.wontdo)?;
+    let said: &[u8] = if opts.wontdo {
+        b" won't do: "
+    } else {
+        b" done: "
+    };
+    tx.say([handle.as_bytes(), said, &line.text()].concat());
     if archive && source == Source::Todo {
         archive_done(tx, id, done.shared())?;
     } else {
         tx.set(id, done.raw(), Path::Action);
     }
-    spawn_next(tx, env, id, pending, taken)?;
+    spawn_next(tx, env, id, &done, (pending, taken))?;
     if opts.ignore_blocked {
         say_was_blocked(tx, id);
     }
     Ok(())
 }
 
+/// What a command says about a task that is already done. `wontdo` names
+/// the way to change the decision, as the task was given.
+fn already_done(
+    tx: &Tx,
+    id: TaskId,
+    source: Source,
+    line: &Line,
+    wontdo: bool,
+) -> String {
+    let handle = tx.handle(id);
+    if !wontdo {
+        return format!("{handle} is already done");
+    }
+    if line.has_wontdo() {
+        return format!("{handle} is already won't do");
+    }
+    let route = source.pick("reopen", "restore");
+    let given = tx.given(id);
+    format!("{handle} is already done; use lsty {route} {given} first")
+}
+
 /// Whether a target is an open line of the done file that spawns. The
 /// run then completes todo tasks in place.
-fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
+fn spawns_from_done(tx: &Tx, targets: &[Target], wontdo: bool) -> bool {
     targets.iter().any(|target| {
         let Ok(Some(task)) = find(tx.snapshot(), target) else {
             return false;
@@ -110,6 +140,8 @@ fn spawns_from_done(tx: &Tx, targets: &[Target]) -> bool {
         task.source() == Source::Done
             && !line.is_done()
             && line.tags().rec.is_some()
+            && !wontdo
+            && !line.has_wontdo()
     })
 }
 
@@ -130,12 +162,14 @@ fn archive_done(tx: &mut Tx, id: TaskId, done: Arc<[u8]>) -> Result<()> {
 }
 
 /// `line` completed: the mark and the date in front, the creation date
-/// after them, and the priority as a `pri:` tag when it is kept.
+/// after them, `wontdo:true` when asked for and not there yet, and the
+/// priority as a `pri:` tag when it is kept.
 fn completion(
     tx: &Tx,
     env: &Env<'_>,
     id: TaskId,
     line: &Line,
+    wontdo: bool,
 ) -> Result<Line> {
     let today = env.clock.today().to_string();
     let head = Line::parse(build(&Parts {
@@ -146,6 +180,9 @@ fn completion(
         ..Parts::default()
     }));
     let mut done = finished_by(tx, &env.actor, id, line, head)?;
+    if wontdo && !done.has_wontdo() {
+        done = tx.append_tok(id, &done, b"wontdo:true")?;
+    }
     if line.tags().underway {
         done = with_end(tx, id, &done, &env.clock.stamp())?;
     }

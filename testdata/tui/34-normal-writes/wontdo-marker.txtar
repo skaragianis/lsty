@@ -1,0 +1,65 @@
+size 100 16
+start
+frame marker
+keys :
+type wontdo 1
+keys <CR>
+frame decided
+keys j j j x
+frame reopened_without_the_tag
+-- todo.txt --
+Open task
+Tagged but open wontdo:true
+x 2026-09-28 Plain done
+x 2026-09-28 Decided against +p wontdo:true
+-- marker --
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
+│ +p       0/1││  1   Open task                                                                    │
+│             ││  1   Tagged but open wontdo:true                                                  │
+│             ││  2 ✓ Plain done                                                            1d ago │
+├[4]─Contexts─┤│  3 ✗ Decided against +p wontdo:true                                        1d ago │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤└───────────────────────────────────────────────────────────────────────────────────┘
+│ [x] Done    │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ [ ] Later   ││ Open task                                                                         │
+│ [x] Blocked ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [ ] Archive ││ state  todo                                                                       │
+│ ─────────── ││ nr     1                                                                          │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo        9.9.9
+-- decided --
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
+│ +p       0/1││  1 ✗ Open task wontdo:true                                                        │
+│             ││  2   Tagged but open wontdo:true                                                  │
+│             ││  1 ✓ Plain done                                                            1d ago │
+├[4]─Contexts─┤│  2 ✗ Decided against +p wontdo:true                                        1d ago │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤└───────────────────────────────────────────────────────────────────────────────────┘
+│ [x] Done    │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ [ ] Later   ││ Tagged but open wontdo:true                                                       │
+│ [x] Blocked ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [ ] Archive ││ state   todo                                                                      │
+│ ─────────── ││ …                                                                                 │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 won't do: Open task  x done  t state  T stop  o new  a append    9.9.9
+-- reopened_without_the_tag --
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
+│ +p       1/1││  3 ✗ Open task wontdo:true                                                        │
+│             ││  2   Tagged but open wontdo:true                                                  │
+│             ││  1 ✓ Plain done                                                            1d ago │
+├[4]─Contexts─┤│  4   Decided against +p                                                           │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[5]─Filters──┤└───────────────────────────────────────────────────────────────────────────────────┘
+│ [x] Done    │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ [ ] Later   ││ Decided against +p                                                                │
+│ [x] Blocked ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [ ] Archive ││ state  todo                                                                       │
+│ ─────────── ││ nr     4                                                                          │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  4 reopened  x done  t state  T stop  o new  a append  dd delete    9.9.9

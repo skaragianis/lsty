@@ -8,10 +8,10 @@ pub type Names<'a> = (bool, Vec<&'a [u8]>);
 
 impl Query {
     /// The narrowing filters, in the order the Filters panel lists them:
-    /// `Today`, `Overdue`, `Upcoming`, `Doing`, `Waiting` and
-    /// `No project`. `upcoming_days` is how far `Upcoming` looks ahead.
+    /// `Today`, `Overdue`, `Upcoming`, `Doing`, `Waiting`, `No project` and
+    /// `Won't do`. `upcoming_days` is how far `Upcoming` looks ahead.
     #[must_use]
-    pub fn builtins(upcoming_days: u64) -> [(&'static str, Self); 6] {
+    pub fn builtins(upcoming_days: u64) -> [(&'static str, Self); 7] {
         let text = |text| Self::parse(text).unwrap_or_default();
         [
             ("Today", text("due:today|completed:today")),
@@ -20,6 +20,7 @@ impl Query {
             (DOING, text("is:doing")),
             ("Waiting", text("is:blocked")),
             ("No project", text("-+")),
+            ("Won't do", text("is:wontdo")),
         ]
     }
 

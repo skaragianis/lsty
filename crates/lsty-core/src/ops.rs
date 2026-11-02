@@ -135,3 +135,5 @@ pub(crate) mod test_util;
 mod text_tests;
 #[cfg(test)]
 mod undo_apply_tests;
+#[cfg(test)]
+mod wontdo_tests;

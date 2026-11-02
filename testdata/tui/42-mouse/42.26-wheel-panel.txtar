@@ -62,19 +62,19 @@ Task 40 +proj40
 │             ││ 11   Task 12 +proj12                                                                                            │
 │             ││ 12   Task 13 +proj13                                                                                            │
 │             ││ 13   Task 14 +proj14                                                                                            │
-│             ││ 14   Task 15 +proj15                                                                                            │
-├[5]─Filters──┤│ 15   Task 16 +proj16                                                                                            │
-│ [x] Done    ││ 16   Task 17 +proj17                                                                                            │
-│ [ ] Later   ││ 17   Task 18 +proj18                                                                                            │
-│ [x] Blocked ││ 18   Task 19 +proj19                                                                                            │
-│ [ ] Archive ││ 19   Task 20 +proj20                                                                                            │
-│ ─────────── ││ 20   Task 21 +proj21                                                                                            │
-│ Today       ││ 21   Task 22 +proj22                                                                                            │
-│ Overdue     ││ 22   Task 23 +proj23                                                                                            │
-│ Upcoming    ││ 23   Task 24 +proj24                                                                                            │
-│ Doing       ││ 24   Task 25 +proj25                                                                                            │
-│ Waiting     ││ 25   Task 26 +proj26                                                                                            │
-│ No project  ││ 26   Task 27 +proj27                                                                                            │
+├[5]─Filters──┤│ 14   Task 15 +proj15                                                                                            │
+│ [x] Done    ││ 15   Task 16 +proj16                                                                                            │
+│ [ ] Later   ││ 16   Task 17 +proj17                                                                                            │
+│ [x] Blocked ││ 17   Task 18 +proj18                                                                                            │
+│ [ ] Archive ││ 18   Task 19 +proj19                                                                                            │
+│ ─────────── ││ 19   Task 20 +proj20                                                                                            │
+│ Today       ││ 20   Task 21 +proj21                                                                                            │
+│ Overdue     ││ 21   Task 22 +proj22                                                                                            │
+│ Upcoming    ││ 22   Task 23 +proj23                                                                                            │
+│ Doing       ││ 23   Task 24 +proj24                                                                                            │
+│ Waiting     ││ 24   Task 25 +proj25                                                                                            │
+│ No project  ││ 25   Task 26 +proj26                                                                                            │
+│ Won't do    ││ 26   Task 27 +proj27                                                                                            │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- frame-bg --

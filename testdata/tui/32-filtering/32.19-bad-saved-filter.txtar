@@ -31,7 +31,6 @@ Bad = "due:soon"
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
@@ -44,5 +43,6 @@ Bad = "due:soon"
 │ Doing       ││                                                                          ││                                     │
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  config.toml: filters: "Bad": filter: "due:soon" is not a date  x done  t state     9.9.9
