@@ -69,6 +69,9 @@ impl Model {
         {
             return Vec::new();
         }
+        if matches!(event.gesture, Gesture::Down(_)) {
+            self.hist.stopped = None;
+        }
         let click =
             matches!(event.gesture, Gesture::Down(Button::Left) | Gesture::Up);
         if !(click

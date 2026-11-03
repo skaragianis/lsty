@@ -1,0 +1,113 @@
+size 100 7
+start
+keys v j t
+file todo.txt both-stopped
+keys t
+frame selection-then-t
+file todo.txt first-new-claim
+keys u
+file todo.txt both-stopped
+keys u
+frame undo-brings-both-back
+file todo.txt claim-file
+keys v j t
+file todo.txt both-stopped
+keys v j t
+frame selection-then-selection
+file todo.txt both-new-claims
+keys u u
+file todo.txt claim-file
+keys 2 t
+file todo.txt both-stopped
+keys 2 t
+frame count-then-count
+file todo.txt claim-file
+keys u
+frame undo-of-one-press
+file todo.txt both-stopped
+keys u
+file todo.txt claim-file
+keys t 1 t
+frame t-then-count-of-one
+file todo.txt claim-file
+keys u u
+keys t 2 t
+frame t-then-count-of-two
+file todo.txt t-then-count-of-two-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+Mail started:2026-09-29T0700Z owner:agent2
+-- both-stopped --
+Call
+Mail
+-- first-new-claim --
+Call started:2026-09-29T0900Z
+Mail
+-- both-new-claims --
+Call started:2026-09-29T0900Z
+Mail started:2026-09-29T0900Z
+-- claim-file --
+Call started:2026-09-29T0800Z owner:agent1
+Mail started:2026-09-29T0700Z owner:agent2
+-- selection-then-t --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call                                                                                     0m │
+│  1   Mail                                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
+-- undo-brings-both-back --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call                                                                                     1h │
+│  1 ▶ Mail                                                                                     2h │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in doing  undid: 1 stopped  x done  t stop  T wont  o new      9.9.9
+-- selection-then-selection --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call                                                                                     0m │
+│  1 ▷ Mail                                                                                     0m │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 2 started  x done  t stop  T wont  o new  9.9.9
+-- count-then-count --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call                                                                                     1h │
+│  1 ▶ Mail                                                                                     2h │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9
+-- undo-of-one-press --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call                                                                                        │
+│  1   Mail                                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: put back as it was  x done  t start  T wont  o new          9.9.9
+-- t-then-count-of-one --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call                                                                                     1h │
+│  1 ▶ Mail                                                                                     2h │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9
+-- t-then-count-of-two --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call                                                                                        │
+│  1 ▶ Mail                                                                                     2h │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  mixed states (1 todo, 1 doing) — nothing changed     9.9.9
+-- t-then-count-of-two-file --
+Call
+Mail started:2026-09-29T0700Z owner:agent2

@@ -3,6 +3,7 @@ start
 keys t
 frame stopped
 file todo.txt stopped-file
+tick 2s
 keys t
 frame started-again
 -- config.toml --

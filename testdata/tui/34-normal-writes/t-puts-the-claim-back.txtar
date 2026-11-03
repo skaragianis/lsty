@@ -1,0 +1,76 @@
+size 100 7
+start
+keys t
+frame stopped
+file todo.txt stopped-file
+tick 1900ms
+keys t
+frame back
+file todo.txt claim-file
+keys t t
+file todo.txt claim-file
+keys u
+frame undo-of-the-put-back
+file todo.txt stopped-file
+keys u
+frame undo-of-the-stop
+file todo.txt claim-file
+keys u u
+file todo.txt claim-file
+keys u
+status nothing to undo
+keys t t . t
+frame repeat-stops-then-t-puts-back
+file todo.txt claim-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+Other
+-- stopped --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call                                                                                        │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t start  T wont        9.9.9
+-- stopped-file --
+Call
+Other
+-- claim-file --
+Call started:2026-09-29T0800Z owner:agent1
+Other
+-- undo-of-the-stop --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call                                                                                     1h │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  undid: 1 stopped  x done  t stop  T wont  o new      9.9.9
+-- back --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call                                                                                     1h │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9
+-- undo-of-the-put-back --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call                                                                                        │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: put back as it was  x done  t start  T wont  o new          9.9.9
+-- repeat-stops-then-t-puts-back --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call                                                                                     1h │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9

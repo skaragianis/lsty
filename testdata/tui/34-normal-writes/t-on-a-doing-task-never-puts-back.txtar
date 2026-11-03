@@ -1,0 +1,41 @@
+size 100 7
+start
+keys g t
+type +x
+keys <CR>
+file todo.txt tagged
+write todo.txt plain
+keys t
+frame nothing-to-stop
+file todo.txt plain
+write todo.txt tagged
+keys t
+frame an-ordinary-stop
+file todo.txt tagged-stopped
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+-- plain --
+Call
+-- tagged --
+Call started:2026-09-29T0800Z owner:agent1 +x
+-- tagged-stopped --
+Call +x
+-- nothing-to-stop --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call +x                                                                                  1h │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 is not underway  x done  t stop  T wont  o new     9.9.9
+-- an-ordinary-stop --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call +x                                                                                     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t start  T wont        9.9.9

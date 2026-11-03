@@ -1,0 +1,37 @@
+size 100 7
+start
+keys t
+lock hold
+keys t
+frame busy
+file todo.txt stopped
+lock release
+keys t
+frame retry-is-a-new-claim
+file todo.txt new-claim
+-- config.toml --
+show_sidebar = false
+show_detail = false
+lock_timeout = "1ms"
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+-- stopped --
+Call
+-- new-claim --
+Call started:2026-09-29T0900Z
+-- busy --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call                                                                                        │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  todo.txt is busy (locked by another writer) — nothing changed, try again
+-- retry-is-a-new-claim --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call                                                                                     0m │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9

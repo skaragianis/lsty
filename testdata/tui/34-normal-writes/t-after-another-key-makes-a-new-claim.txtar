@@ -1,0 +1,49 @@
+size 100 7
+start
+keys t j k t
+file todo.txt new-claim
+keys u u
+keys t <Esc> t
+file todo.txt new-claim
+keys u u
+keys t <F9> t
+file todo.txt new-claim
+keys u u
+keys t 1 <Esc> t
+file todo.txt new-claim
+keys u u
+keys t .
+frame repeat
+file todo.txt new-claim
+keys u u
+keys S t
+frame after-the-stop-key
+file todo.txt new-claim
+-- keys.toml --
+[normal]
+stop = ["S"]
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+Other
+-- new-claim --
+Call started:2026-09-29T0900Z
+Other
+-- repeat --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call                                                                                     0m │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
+-- after-the-stop-key --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call                                                                                     0m │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9

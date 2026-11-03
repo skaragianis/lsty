@@ -1,0 +1,43 @@
+size 100 7
+start
+keys t
+tick 2s
+keys t
+frame new-claim
+file todo.txt new-claim-file
+keys u
+file todo.txt stopped-file
+keys u
+frame undo-brings-the-claim-back
+file todo.txt claim-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+Other
+-- new-claim --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call                                                                                     0m │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
+-- new-claim-file --
+Call started:2026-09-29T0900Z
+Other
+-- stopped-file --
+Call
+Other
+-- undo-brings-the-claim-back --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call                                                                                     1h │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  undid: 1 stopped  x done  t stop  T wont  o new      9.9.9
+-- claim-file --
+Call started:2026-09-29T0800Z owner:agent1
+Other

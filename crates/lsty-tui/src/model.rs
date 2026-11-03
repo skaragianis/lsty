@@ -51,7 +51,7 @@ use crate::{
 const NANOS_PER_MINUTE: i128 = 60_000_000_000;
 
 /// How long a message stays in the status line.
-const MESSAGE_LIFE: Duration = Duration::from_secs(2);
+pub(crate) const MESSAGE_LIFE: Duration = Duration::from_secs(2);
 
 /// The screen of the list, and what it holds between key presses.
 #[expect(
@@ -394,6 +394,16 @@ impl Model {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
+        self.hist.stopped = self.hist.stopped.filter(|_| {
+            matches!(
+                fed.outcome,
+                Outcome::Pending
+                    | Outcome::Matched {
+                        action: Action::ToggleStart,
+                        ..
+                    }
+            )
+        });
         if !matches!(
             fed.outcome,
             Outcome::Matched {

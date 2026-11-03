@@ -97,10 +97,16 @@ impl Model {
             return false;
         };
         let again = self.count_for(count, tasks.len());
+        let back = write == Write::Start
+            && state != State::Doing
+            && self.just_stopped(&ids);
         let ran = self.ending(&ids, |m| {
             if let Some(text) = refusal(write, &tasks) {
                 m.alert(text);
                 return false;
+            }
+            if let Some(ran) = back.then(|| m.put_back()).flatten() {
+                return ran;
             }
             let result = m.attempt(|env| m.perform(env, write, state, &tasks));
             m.settle(result)
@@ -110,6 +116,9 @@ impl Model {
                 action,
                 count: again,
             });
+            if write == Write::Start && state == State::Doing {
+                self.remember_stop();
+            }
         }
         ran
     }
