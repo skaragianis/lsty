@@ -2,10 +2,10 @@ size 100 12
 start
 keys v j x
 frame a-frame
-keys T
+keys u g g v j T
 frame b-frame
-keys S
-status mixed states
+keys u g g v j S
+status 1 stopped; 1 not underway\b
 file todo.txt a-file
 -- keys.toml --
 [visual]
@@ -19,9 +19,9 @@ B started:2026-09-29T0900Z
 C
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   A                                                                                           │
-│  2 ▷ B                                                                                        0m │
-│  1   C                                                                                           │
+│  2 ✓ A                                                                                           │
+│  1 ✓ B                                                                                        0m │
+│  3   C                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -29,12 +29,12 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  mixed states (1 todo, 1 doing) — nothing change
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t start  T wont  o new  a append     9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   A                                                                                           │
-│  2 ▷ B                                                                                        0m │
-│  1   C                                                                                           │
+│  2 ✗ A wontdo:true                                                                               │
+│  1 ✗ B wontdo:true                                                                            0m │
+│  3   C                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -42,8 +42,8 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  mixed states (1 todo, 1 doing) — nothing change
+ NORMAL  todo.txt  manual  1 won't do: A; 2 won't do: B  x done  t start  T wont  o new       9.9.9
 -- a-file --
 A
-B started:2026-09-29T0900Z
+B
 C

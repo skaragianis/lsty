@@ -13,6 +13,7 @@ use crate::{
     hints::{hints, label},
     messages::Tone,
     model::Model,
+    press::decide,
     rows::MARKER_DOING,
     text::{Span, cut, pad, put, width, width_of},
 };
@@ -60,12 +61,12 @@ impl Model {
         } else {
             "open"
         };
-        let task = self.tasks_of(1).first().and_then(|id| self.snap.task(*id));
-        let task = task.map(|t| (t.state(), self.snap.is_wontdo(t)));
+        let summary = self.summary(1);
         let mut used = width(&line);
         let taken = self.version_room(used, w);
         let room = w - taken;
-        let label = |action| label(table, action, accept, task);
+        let label =
+            |action| label(table, action, accept, decide(action, &summary));
         for hint in hints(table, configured, keys, hidden, label) {
             let cells = 2 + width(&hint);
             if used + cells > room {

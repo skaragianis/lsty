@@ -1,0 +1,50 @@
+size 120 10
+start
+keys v j t
+status some are done — nothing changed  x done  t start  T wont\b
+frame todo-and-done
+keys <Esc> j v j t
+status task 3 is blocked by 5
+frame blocked-and-unblocked
+keys x
+status task 3 is blocked by 5
+keys T
+status 3 won't do: Waiter.*; 4 won't do: Free
+file todo.txt t-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open
+x 2026-09-01 Closed
+Waiter dep:w
+Free
+Blocker id:w
+-- todo-and-done --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open                                                                                                            │
+│  2 ✓ Closed                                                                                               28d ago    │
+│  1 ⧗ Waiter dep:w                                                                                                    │
+│  2   Free                                                                                                            │
+│  3   Blocker                                                                                                       w │
+│                                                                                                                      │
+│                                                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  some are done — nothing changed  x done  t start  T wont  d delete         9.9.9
+-- blocked-and-unblocked --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  3   Open                                                                                                            │
+│  2 ✓ Closed                                                                                               28d ago    │
+│  1 ⧗ Waiter dep:w                                                                                                    │
+│  4   Free                                                                                                            │
+│  1   Blocker                                                                                                       w │
+│                                                                                                                      │
+│                                                                                                                      │
+└──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  task 3 is blocked by 5 (Blocker)  x done  t start  T wont  d delete        9.9.9
+-- t-file --
+Open
+x 2026-09-01 Closed
+x 2026-09-29 Waiter dep:w wontdo:true
+x 2026-09-29 Free wontdo:true
+Blocker id:w

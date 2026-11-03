@@ -10,6 +10,7 @@ use lsty_core::{
 
 use crate::{
     actions::{Chosen, archived_refusal},
+    counts::ids_of,
     history::Again,
     messages,
     model::Model,
@@ -43,7 +44,7 @@ impl Model {
         } else {
             lo.checked_sub(1)
         };
-        let ids = self.row_tasks(lo, hi);
+        let ids = ids_of(self.rows_between(lo, hi));
         let again = Again::Block {
             action,
             count: ids.len(),
@@ -58,11 +59,11 @@ impl Model {
     /// `.` after a block move: `count` rows from the cursor move as one
     /// block again.
     pub(crate) fn repeat_block(&mut self, action: Action, count: usize) {
-        let ids = self.picked(count);
-        if ids.is_empty() {
+        let n = self.picked_rows(count).len();
+        if n == 0 {
             return;
         }
-        self.move_rows(action, self.cursor, self.cursor + ids.len() - 1);
+        self.move_rows(action, self.cursor, self.cursor + n - 1);
     }
 
     /// Moves `ids` past the task that `past` finds, in one write, unless

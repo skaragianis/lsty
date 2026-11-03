@@ -6,6 +6,7 @@ use std::collections::HashMap;
 use lsty_core::{keys::Mode, list::TaskId};
 
 use crate::{
+    counts::ids_of,
     model::Model,
     rows::Row,
     track::{Place, Remap},
@@ -59,13 +60,18 @@ impl Model {
         self.rows.iter().position(|r| r.id == id)
     }
 
-    /// The tasks an action is about: the selection, or what a count
-    /// asks for in NORMAL mode.
-    pub(crate) fn tasks_of(&self, count: usize) -> Vec<TaskId> {
+    /// The rows an action is about: the selection, or what a count asks
+    /// for in NORMAL mode.
+    pub(crate) fn rows_of(&self, count: usize) -> &[Row] {
         self.selected_rows().map_or_else(
-            || self.picked(count),
-            |(lo, hi)| self.row_tasks(lo, hi),
+            || self.picked_rows(count),
+            |(lo, hi)| self.rows_between(lo, hi),
         )
+    }
+
+    /// The tasks of `rows_of`.
+    pub(crate) fn tasks_of(&self, count: usize) -> Vec<TaskId> {
+        ids_of(self.rows_of(count))
     }
 
     /// The count that repeats an action over `n` tasks: the selection

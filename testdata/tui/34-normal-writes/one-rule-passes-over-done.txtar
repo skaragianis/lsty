@@ -1,0 +1,67 @@
+size 100 16
+start
+keys v G x
+status 1 done; 9 already done\b
+frame selection
+file todo.txt selection-file
+keys u
+status undid: 1 done: Open
+keys <C-r>
+status redid: 1 done: Open
+keys u g g
+keys 1 0 x
+status 1 done; 9 already done\b
+file todo.txt count-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open
+x 2026-09-01 Done one
+x 2026-09-02 Done two
+x 2026-09-03 Done three
+x 2026-09-04 Done four
+x 2026-09-05 Done five
+x 2026-09-06 Done six
+x 2026-09-07 Done seven
+x 2026-09-08 Done eight
+x 2026-09-09 Done nine
+-- selection --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  9 ✓ Open                                                                                        │
+│  8 ✓ Done one                                                                            28d ago │
+│  7 ✓ Done two                                                                            27d ago │
+│  6 ✓ Done three                                                                          26d ago │
+│  5 ✓ Done four                                                                           25d ago │
+│  4 ✓ Done five                                                                           24d ago │
+│  3 ✓ Done six                                                                            23d ago │
+│  2 ✓ Done seven                                                                          22d ago │
+│  1 ✓ Done eight                                                                          21d ago │
+│ 10 ✓ Done nine                                                                           20d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done; 9 already done  x reopen  T wont  o new  a append          9.9.9
+-- selection-file --
+x 2026-09-29 Open
+x 2026-09-01 Done one
+x 2026-09-02 Done two
+x 2026-09-03 Done three
+x 2026-09-04 Done four
+x 2026-09-05 Done five
+x 2026-09-06 Done six
+x 2026-09-07 Done seven
+x 2026-09-08 Done eight
+x 2026-09-09 Done nine
+-- count-file --
+x 2026-09-29 Open
+x 2026-09-01 Done one
+x 2026-09-02 Done two
+x 2026-09-03 Done three
+x 2026-09-04 Done four
+x 2026-09-05 Done five
+x 2026-09-06 Done six
+x 2026-09-07 Done seven
+x 2026-09-08 Done eight
+x 2026-09-09 Done nine

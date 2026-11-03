@@ -14,14 +14,16 @@ use lsty_core::{
 use ratatui::{layout::Rect, style::Style};
 
 use crate::{
-    actions::{Chosen, archived_refusal, places},
+    actions::{Chosen, places, refusal},
     cmdpool::filter_span,
     complete::ring,
+    counts::ids_of,
     field::{Field, is_sep},
     history::Again,
     line::{Line, LineKind},
     messages,
     model::Model,
+    press::{Answer, Summary, decide},
     search::alternative,
     text::{Span, fit, pad, put, width, width_of},
     track::{Place, Remap},
@@ -46,6 +48,15 @@ pub(crate) enum Kind {
 }
 
 impl Kind {
+    /// The action that opens the prompt.
+    const fn action(self) -> Action {
+        match self {
+            Self::SetDue => Action::SetDue,
+            Self::AddTag => Action::AddTag,
+            Self::RemoveTag => Action::RemoveTag,
+        }
+    }
+
     const fn label(self) -> &'static str {
         match self {
             Self::SetDue => "due: ",
@@ -177,14 +188,15 @@ impl Model {
     /// Opens the prompt of `kind` on the task under the cursor, or
     /// `count` tasks from it, unless one of them is archived.
     pub(crate) fn open_prompt(&mut self, kind: Kind, count: usize) {
+        let answer = decide(kind.action(), &self.summary(count));
         let tasks = self.tasks_of(count);
         let count = self.count_for(count, tasks.len());
         let chosen = self.chosen(&tasks);
         if chosen.is_empty() {
             return;
         }
-        if let Some(text) = archived_refusal(&chosen) {
-            self.alert(text);
+        if let Answer::Refused(why) = answer {
+            self.alert(refusal(why, &chosen));
             return;
         }
         let places = places(&self.snap, &tasks);
@@ -275,12 +287,14 @@ impl Model {
         count: usize,
         text: &str,
     ) {
-        let chosen = self.chosen(&self.picked(count));
+        let rows = self.picked_rows(count);
+        let answer = decide(kind.action(), &Summary::of(&self.snap, rows));
+        let chosen = self.chosen(&ids_of(rows));
         if chosen.is_empty() {
             return;
         }
-        if let Some(refusal) = archived_refusal(&chosen) {
-            self.alert(refusal);
+        if let Answer::Refused(why) = answer {
+            self.alert(refusal(why, &chosen));
             return;
         }
         let result = self.attempt(|env| write(env, kind, &chosen, text));

@@ -3,6 +3,7 @@ use std::{fs, path::Path};
 use lsty_core::{errs::Source, keys::Mode};
 
 use crate::{
+    messages,
     model::Model,
     test_util::{
         alone, at, deps, keys, press, reload, screen, started, todo_of,
@@ -108,13 +109,10 @@ fn a_selection_is_one_write_and_ends_on_its_first_task() {
 fn a_refused_action_keeps_the_selection() {
     let dir = workdir("A\nx 2026-01-01 B\nC\n");
     let mut model = model_of(dir.path());
-    press(&mut model, "vjx");
+    press(&mut model, "vjt");
     assert_eq!(model.mode(), Mode::Visual);
     assert_eq!(model.selected_rows(), Some((0, 1)));
-    assert_eq!(
-        model.message.as_deref(),
-        Some("mixed states (1 todo, 1 done) — nothing changed")
-    );
+    assert_eq!(model.message.as_deref(), Some(messages::SOME_DONE));
 }
 
 #[test]
@@ -135,12 +133,9 @@ fn a_delete_or_a_priority_takes_tasks_of_any_state() {
 fn a_counted_action_never_shows_visual() {
     let dir = workdir("A\nx 2026-01-01 B\nC\n");
     let mut model = model_of(dir.path());
-    press(&mut model, "2x");
+    press(&mut model, "2t");
     assert_eq!(model.mode(), Mode::Normal);
-    assert_eq!(
-        model.message.as_deref(),
-        Some("mixed states (1 todo, 1 done) — nothing changed")
-    );
+    assert_eq!(model.message.as_deref(), Some(messages::SOME_DONE));
 }
 
 #[test]

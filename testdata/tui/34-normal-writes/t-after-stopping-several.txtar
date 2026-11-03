@@ -102,12 +102,12 @@ Mail started:2026-09-29T0700Z owner:agent2
  NORMAL  todo.txt  manual  ▶ 2 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9
 -- t-then-count-of-two --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call                                                                                        │
-│  1 ▶ Mail                                                                                     2h │
+│  1 ▷ Call                                                                                     0m │
+│  1 ▷ Mail                                                                                     0m │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  mixed states (1 todo, 1 doing) — nothing changed     9.9.9
+ NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 2 was claimed by agent2; now yours        9.9.9
 -- t-then-count-of-two-file --
-Call
-Mail started:2026-09-29T0700Z owner:agent2
+Call started:2026-09-29T0900Z
+Mail started:2026-09-29T0900Z

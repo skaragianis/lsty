@@ -77,7 +77,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  mixed states (1 todo, 1 done) — nothing changed        9.9.9
+ VISUAL  2 selected  todo.txt  manual  some are done — nothing changed  x done  t start       9.9.9
 -- untouched-file --
 Open
 x 2026-09-01 Plain

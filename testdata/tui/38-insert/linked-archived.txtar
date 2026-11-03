@@ -28,7 +28,7 @@ x 2026-09-02 Bare
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Bare is archived and has no id — x restores it first  x reopen     9.9.9
+ NORMAL  todo.txt  manual  Bare is archived and has no id — x restores it first  x restore    9.9.9
 -- no-id-file --
 Open
 -- waiting --
@@ -41,7 +41,7 @@ Open
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old is archived — x restores it  x reopen  T wont  o new           9.9.9
+ NORMAL  todo.txt  manual  Old is archived — x restores it  x restore  T wont  o new          9.9.9
 -- with-id --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open                                                                                        │

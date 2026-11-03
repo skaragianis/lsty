@@ -1,0 +1,54 @@
+size 100 6
+start
+keys 3 x
+status 1 done; 2 already done\b
+frame count
+keys u g g
+keys v j j j x
+status 2 done; 2 already done\b
+frame selection
+keys u g g j j j
+keys v G x
+status 2 done; 1 already done\b
+frame at-the-end
+keys u g g
+keys 3 x .
+frame repeat
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open
+x 2026-09-01 D1
+x 2026-09-02 D2
+Other
+x 2026-09-03 D3
+Last
+-- count --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2 ✓ D1                                                                                  28d ago │
+│  1 ✓ D2                                                                                  27d ago │
+│  4   Other                                                                                       │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done; 2 already done  x done  t start  T wont  o new  a append   9.9.9
+-- selection --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2 ✓ D2                                                                                  27d ago │
+│  1 ✓ Other                                                                                       │
+│  5 ✓ D3                                                                                  26d ago │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 done; 2 already done  x reopen  T wont  o new  a append          9.9.9
+-- at-the-end --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2 ✓ Other                                                                                       │
+│  1 ✓ D3                                                                                  26d ago │
+│  6 ✓ Last                                                                                        │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 done; 1 already done  x reopen  T wont  o new  a append          9.9.9
+-- repeat --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2 ✓ Other                                                                                       │
+│  1 ✓ D3                                                                                  26d ago │
+│  6 ✓ Last                                                                                        │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 done; 1 already done  x reopen  T wont  o new  a append          9.9.9
