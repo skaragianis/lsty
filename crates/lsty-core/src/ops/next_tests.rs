@@ -47,14 +47,14 @@ const READS: &[Case] = &[
     Case {
         name: "preview takes the first priority A",
         nr: Some(4),
-        messages: &["1 stale claims skipped"],
+        messages: &["1 stale claim skipped"],
         ..BASE
     },
     Case {
         name: "a filter skips the blocked and the claimed",
         filter: "+spec02",
         nr: Some(2),
-        messages: &["1 stale claims skipped"],
+        messages: &["1 stale claim skipped"],
         later: 0,
         ..BASE
     },
@@ -62,7 +62,7 @@ const READS: &[Case] = &[
         name: "file order",
         sort: SortField::File,
         nr: Some(1),
-        messages: &["1 stale claims skipped"],
+        messages: &["1 stale claim skipped"],
         ..BASE
     },
     Case {
@@ -245,7 +245,7 @@ const READS: &[Case] = &[
     Case {
         name: "a stale claim is stale only, not claimed",
         todo: "A started:2026-09-29T0100Z owner:agent9\n",
-        messages: &["nothing ready", "1 stale claims skipped"],
+        messages: &["nothing ready", "1 stale claim skipped"],
         stale: &[1],
         later: 0,
         blocked: 0,
@@ -371,7 +371,7 @@ fn start_claims_and_gives_an_id() {
         said(&[
             "2 is id:k3f9",
             "k3f9 started by agent1: Write docs",
-            "1 stale claims skipped",
+            "1 stale claim skipped",
         ])
     );
     assert!(!outcome.no_op());
@@ -397,7 +397,7 @@ fn start_again_returns_the_same_claim() {
     assert!(again.no_op());
     assert_eq!(
         again.messages(),
-        said(&["k3f9 resumed: Write docs", "1 stale claims skipped"])
+        said(&["k3f9 resumed: Write docs", "1 stale claim skipped"])
     );
 }
 

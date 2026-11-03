@@ -1,7 +1,7 @@
 //! The texts the writes of the list show, besides those of the
 //! operations.
 
-use lsty_core::{errs, todotxt::Line};
+use lsty_core::{errs, ops, todotxt::Line};
 
 /// How the message in the status line is drawn.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -103,7 +103,7 @@ pub(crate) const UNREADABLE: &str =
 
 /// What the status line says after a yank of `n` tasks.
 pub(crate) fn yanked(n: usize) -> String {
-    format!("yanked {n} task{}", if n == 1 { "" } else { "s" })
+    format!("yanked {}", ops::counted(n, "task"))
 }
 
 /// The refusal to move a task in a view that is not in file order.

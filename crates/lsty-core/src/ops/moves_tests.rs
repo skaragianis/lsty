@@ -121,7 +121,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         done: Some("x 2026-09-01 Z\n"),
         want_todo: "A\nD\n",
         want_done: Some("x 2026-09-01 Z\nx 2026-09-28 B\nx 2026-09-27 C\n"),
-        msgs: &["archived 2 to done.txt", "removed 1 blank lines"],
+        msgs: &["archived 2 to done.txt", "removed 1 blank line"],
         renumbered: true,
         ..BASE
     },
@@ -140,7 +140,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         name: "21.4 blank lines without a done file",
         todo: "A\n\nB\n",
         want_todo: "A\nB\n",
-        msgs: &["removed 1 blank lines"],
+        msgs: &["removed 1 blank line"],
         renumbered: true,
         ..BASE
     },
@@ -150,7 +150,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         done: Some("x 2026-09-01 Z\n\n\nx 2026-09-28 B\n"),
         want_todo: "A\nB\n",
         want_done: Some("x 2026-09-01 Z\n\n\nx 2026-09-28 B\n"),
-        msgs: &["removed 1 blank lines"],
+        msgs: &["removed 1 blank line"],
         renumbered: true,
         ..BASE
     },

@@ -4,6 +4,7 @@
 
 use super::{
     claim::owner_of,
+    counted,
     env::{Actor, Env},
     ids::Taken,
     lifecycle::with_claim,
@@ -268,7 +269,9 @@ fn blocked_note(snap: &Snapshot, task: &Task, handle: &str) -> Vec<u8> {
 }
 
 fn stale_note(count: usize) -> Option<Vec<u8>> {
-    (count > 0).then(|| format!("{count} stale claims skipped").into_bytes())
+    (count > 0).then(|| {
+        format!("{} skipped", counted(count, "stale claim")).into_bytes()
+    })
 }
 
 /// What a walk over the todo file collects.

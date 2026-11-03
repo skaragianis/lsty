@@ -19,8 +19,8 @@ x 2026-09-28 Old +spec02
 2 (B) Write docs +spec02 id:<id1> started:2026-09-29T0900Z owner:agent1
 2 is id:<id1>
 <id1> started by agent1: Write docs
-1 stale claims skipped
+1 stale claim skipped
 -- out2 --
 2 (B) Write docs +spec02 id:<id1> started:2026-09-29T0900Z owner:agent1
 <id1> resumed: Write docs
-1 stale claims skipped
+1 stale claim skipped
