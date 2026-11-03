@@ -10,7 +10,7 @@ use lsty_core::{
 use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
-    hints::hints,
+    hints::{hints, label},
     messages::Tone,
     model::Model,
     rows::MARKER_DOING,
@@ -60,10 +60,13 @@ impl Model {
         } else {
             "open"
         };
+        let task = self.tasks_of(1).first().and_then(|id| self.snap.task(*id));
+        let task = task.map(|t| (t.state(), self.snap.is_wontdo(t)));
         let mut used = width(&line);
         let taken = self.version_room(used, w);
         let room = w - taken;
-        for hint in hints(table, configured, keys, hidden, accept) {
+        let label = |action| label(table, action, accept, task);
+        for hint in hints(table, configured, keys, hidden, label) {
             let cells = 2 + width(&hint);
             if used + cells > room {
                 break;

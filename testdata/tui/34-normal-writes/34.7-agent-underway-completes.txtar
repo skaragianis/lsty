@@ -1,6 +1,6 @@
 size 100 8
 start
-keys t
+keys x
 frame a-frame
 file todo.txt a-file
 -- config.toml --
@@ -18,4 +18,4 @@ x 2026-09-29 Call started:2026-09-29T0800Z ended:2026-09-29T0900Z
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Call; 1 was claimed by agent1  x done  t state  T stop     9.9.9
+ NORMAL  todo.txt  manual  1 done: Call; 1 was claimed by agent1  x reopen  t reopen          9.9.9

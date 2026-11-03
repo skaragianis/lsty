@@ -20,11 +20,13 @@ use crate::{
 /// What a key does to its tasks.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Write {
-    /// `cycle_state`: start, complete or reopen, by state.
-    Cycle,
+    /// `toggle_start`: start, stop or reopen, by state.
+    Start,
     Stop,
     /// `toggle_complete`: complete, or reopen a done task.
     Toggle,
+    /// `wontdo`: finish as won't do, or reopen a won't do task.
+    Wontdo,
     Delete,
     /// `cycle_priority` and its way back.
     Step {
@@ -40,9 +42,10 @@ impl Write {
     )]
     fn of(action: Action) -> Option<Self> {
         Some(match action {
-            Action::CycleState => Self::Cycle,
+            Action::ToggleStart => Self::Start,
             Action::Stop => Self::Stop,
             Action::ToggleComplete => Self::Toggle,
+            Action::Wontdo => Self::Wontdo,
             Action::Delete => Self::Delete,
             Action::CyclePriority => Self::Step { forward: true },
             Action::CyclePriorityBack => Self::Step { forward: false },
@@ -52,7 +55,7 @@ impl Write {
 
     /// Whether the tasks must all be in one state.
     const fn same_state(self) -> bool {
-        matches!(self, Self::Cycle | Self::Stop | Self::Toggle)
+        matches!(self, Self::Start | Self::Stop | Self::Toggle | Self::Wontdo)
     }
 }
 
@@ -61,6 +64,7 @@ pub(crate) struct Chosen {
     source: Source,
     nr: Nr,
     state: State,
+    wontdo: bool,
     pub(crate) text: Vec<u8>,
     name: String,
     priority: Option<Priority>,
@@ -137,6 +141,7 @@ impl Model {
                     source: task.source(),
                     nr: task.nr(),
                     state: task.state(),
+                    wontdo: self.snap.is_wontdo(task),
                     text: line.text(),
                     name: messages::name_of(line),
                     priority: line.effective_priority(),
@@ -175,7 +180,9 @@ impl Model {
             return ops::restore(env, &targets, claim);
         }
         match (write, state) {
-            (Write::Stop, _) => ops::stop(env, &targets, claim),
+            (Write::Stop, _) | (Write::Start, State::Doing) => {
+                ops::stop(env, &targets, claim)
+            }
             (Write::Delete, _) => ops::del(env, &targets, claim),
             (Write::Step { forward }, _) => {
                 let last = self.deps.config.priority_range;
@@ -186,19 +193,20 @@ impl Model {
                     });
                 ops::pri(env, &pairs.collect::<Vec<_>>())
             }
-            (Write::Cycle, State::Todo) => {
+            (Write::Start, State::Todo) => {
                 ops::start(env, &targets, StartOpts::default())
             }
             (Write::Toggle, State::Doing | State::Todo) => {
                 ops::finish(env, &targets, DoOpts::default())
             }
-            // `t` keeps the cursor on its task: the record is not a `do`.
-            (Write::Cycle, State::Doing) => {
-                let mut done = ops::finish(env, &targets, DoOpts::default())?;
-                done.name_undo("cycle");
-                Ok(done)
+            (Write::Wontdo, State::Doing | State::Todo) => {
+                let opts = DoOpts {
+                    wontdo: true,
+                    ..DoOpts::default()
+                };
+                ops::finish(env, &targets, opts)
             }
-            (Write::Cycle | Write::Toggle, State::Done) => {
+            (Write::Start | Write::Toggle | Write::Wontdo, State::Done) => {
                 ops::reopen(env, &targets, claim)
             }
         }
@@ -312,7 +320,19 @@ fn refusal(write: Write, tasks: &[Chosen]) -> Option<String> {
             return None;
         }
         let states: Vec<State> = tasks.iter().map(|i| i.state).collect();
-        messages::mixed_states(&states)
+        messages::mixed_states(&states).or_else(|| done_refusal(write, tasks))
+    })
+}
+
+/// The refusal of `T` on tasks of which some are done but not won't do.
+fn done_refusal(write: Write, tasks: &[Chosen]) -> Option<String> {
+    let plain = |t: &Chosen| t.state == State::Done && !t.wontdo;
+    if write != Write::Wontdo || !tasks.iter().any(plain) {
+        return None;
+    }
+    Some(match tasks {
+        [one] => messages::done_task(&one.name),
+        _ => messages::DONE_TASKS.to_owned(),
     })
 }
 

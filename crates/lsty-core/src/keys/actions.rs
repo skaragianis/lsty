@@ -307,10 +307,14 @@ actions! {
         "Add a task above that this one waits for",
         "new blocker", Other
     );
-    CycleState => (
-        "cycle_state", Tasks, "Cycle todo, doing and done", "state", TaskAction
+    ToggleStart => (
+        "toggle_start", Tasks, "Start or stop a task", "start", TaskAction
     );
     Stop => ("stop", Tasks, "Stop doing a task", "stop", TaskAction);
+    Wontdo => (
+        "wontdo", Tasks, "Mark a task won't do, or reopen it", "wontdo",
+        TaskAction
+    );
     ToggleComplete => (
         "toggle_complete", Tasks,
         "Complete or reopen a task",
@@ -496,8 +500,14 @@ actions! {
 }
 
 impl Action {
-    /// The action called `name` in `keys.toml`.
+    /// The action called `name` in `keys.toml`, where `cycle_state` still
+    /// means `toggle_start`.
     pub fn from_name(name: &str) -> Option<Self> {
+        let name = if name == "cycle_state" {
+            "toggle_start"
+        } else {
+            name
+        };
         Self::ALL.iter().copied().find(|a| a.name() == name)
     }
 }
@@ -520,6 +530,7 @@ impl fmt::Display for Action {
 /// The action called `name` if `mode` has it: the detail panel has those
 /// of the normal table too.
 pub(super) fn action_in(mode: Mode, name: &str) -> Option<Action> {
+    let named = Action::from_name(name)?;
     let normal = defaults(Mode::Normal)
         .iter()
         .filter(|_| mode == Mode::Detail);
@@ -527,5 +538,5 @@ pub(super) fn action_in(mode: Mode, name: &str) -> Option<Action> {
         .iter()
         .chain(normal)
         .map(|&(action, _)| action)
-        .find(|action| action.name() == name)
+        .find(|action| *action == named)
 }

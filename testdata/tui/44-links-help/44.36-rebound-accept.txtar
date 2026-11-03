@@ -71,4 +71,4 @@ accept = ["o"]
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append       9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wontdo  o new  a append     9.9.9

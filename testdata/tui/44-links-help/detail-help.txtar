@@ -42,8 +42,8 @@ a
 │ │    go  Add a task below that waits for this one                                                                            │ │
 │ │    gO  Add a task above that this one waits for                                                                            │ │
 │ │  Tasks                                                                                                                     │ │
-│ │    t  Cycle todo, doing and done                                                                                           │ │
-│ │    T  Stop doing a task                                                                                                    │ │
+│ │    t  Start or stop a task                                                                                                 │ │
+│ │    T  Mark a task won't do, or reopen it                                                                                   │ │
 │ │    x , <Space>  Complete or reopen a task                                                                                  │ │
 │ │    dd , <Del>  Delete a task                                                                                               │ │
 │ │    yy  Copy a task                                                                                                         │ │

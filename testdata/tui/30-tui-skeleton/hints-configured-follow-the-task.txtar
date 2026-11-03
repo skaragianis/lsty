@@ -1,0 +1,13 @@
+size 80 8
+start
+status  t start  T wontdo  x done
+keys j
+status  t reopen  T reopen  x reopen
+-- config.toml --
+show_sidebar = false
+show_detail = false
+[hints]
+normal = ["cycle_state", "wontdo", "toggle_complete"]
+-- todo.txt --
+Open
+x 2026-09-01 Decided wontdo:true

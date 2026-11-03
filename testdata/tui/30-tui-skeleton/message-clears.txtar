@@ -28,4 +28,4 @@ Plain task
 │  1   Plain task                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wontdo  9.9.9

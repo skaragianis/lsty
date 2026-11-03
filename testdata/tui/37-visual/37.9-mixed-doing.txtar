@@ -4,7 +4,12 @@ keys v j x
 frame a-frame
 keys T
 frame b-frame
+keys S
+status mixed states
 file todo.txt a-file
+-- keys.toml --
+[visual]
+stop = ["S"]
 -- config.toml --
 show_sidebar = false
 show_detail = false

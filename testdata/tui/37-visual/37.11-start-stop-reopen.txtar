@@ -1,63 +1,89 @@
-size 100 8
+size 100 12
 start
-keys t
+keys v j t
 frame a-frame
 file todo.txt a-file
-keys t
+keys v j t
 frame b-frame
 file todo.txt b-file
-keys t
+keys v j x
 frame c-frame
 file todo.txt c-file
-keys T
+keys g g v j t
 frame d-frame
 file todo.txt d-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-(A) Call client +work
+A
+B
+C
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▷ (A) Call client +work                                                                    0m │
+│  1 ▷ A                                                                                        0m │
+│  1 ▷ B                                                                                        0m │
+│  2   C                                                                                           │
+│                                                                                                  │
+│                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t state  T stop  o new  a append  9.9.9
+ NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 2 started  x done  t stop  T wontdo       9.9.9
 -- a-file --
-(A) Call client +work started:2026-09-29T0900Z
+A started:2026-09-29T0900Z
+B started:2026-09-29T0900Z
+C
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ✓ Call client +work                                                                        0m │
+│  1   A                                                                                           │
+│  1   B                                                                                           │
+│  2   C                                                                                           │
+│                                                                                                  │
+│                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Call client  x done  t state  T stop  o new  a append      9.9.9
+ NORMAL  todo.txt  manual  1 stopped; 2 stopped  x done  t start  T wontdo  o new  a append   9.9.9
 -- b-file --
-x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z pri:A
+A
+B
+C
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▷ (A) Call client +work                                                                    0m │
+│  2 ✓ A                                                                                           │
+│  1 ✓ B                                                                                           │
+│  3   C                                                                                           │
+│                                                                                                  │
+│                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; yours again  x done  t state  T stop     9.9.9
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t start  T wontdo  o new  a append   9.9.9
 -- c-file --
-(A) Call client +work started:2026-09-29T0900Z
+x 2026-09-29 A
+x 2026-09-29 B
+C
 -- d-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   (A) Call client +work                                                                       │
+│  1   A                                                                                           │
+│  1   B                                                                                           │
+│  2   C                                                                                           │
+│                                                                                                  │
+│                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped  x done  t state  T stop  o new  a append  dd delete     9.9.9
+ NORMAL  todo.txt  manual  1 reopened; 2 reopened  x done  t start  T wontdo  o new           9.9.9
 -- d-file --
-(A) Call client +work
+A
+B
+C

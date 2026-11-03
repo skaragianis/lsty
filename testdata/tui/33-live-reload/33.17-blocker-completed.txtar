@@ -23,7 +23,7 @@ Ship +p dep:prep
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wontdo  9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1 ✓ Prepare +p                                     prep │
@@ -34,4 +34,4 @@ Ship +p dep:prep
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
+ NORMAL  todo.txt  manual  x reopen  t reopen         9.9.9

@@ -25,7 +25,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 done: C  x done  t state  T stop  o new  a append  dd delete     9.9.9
+ NORMAL  todo.txt  manual  3 done: C  x reopen  t reopen  T wontdo  o new  a append           9.9.9
 -- a-file --
 x 2026-09-29 A
 ZB

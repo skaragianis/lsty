@@ -39,4 +39,4 @@ Call +work
 │ Upcoming    ││ nr     1                                                      │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  other.txt  manual  x done  t state  T stop  o new  a append      9.9.9
+ NORMAL  other.txt  manual  x done  t start  T wontdo  o new  a append    9.9.9

@@ -6,6 +6,7 @@ use lsty_core::{
     config::Warning,
     errs::{quote, shown},
     keys::{Action, Keymap, Mode},
+    list::State,
     theme::Slot,
 };
 
@@ -17,8 +18,8 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
         Mode::Normal => &[
             Action::ClearSearch,
             Action::ToggleComplete,
-            Action::CycleState,
-            Action::Stop,
+            Action::ToggleStart,
+            Action::Wontdo,
             Action::InsertBelow,
             Action::EditAppend,
             Action::Delete,
@@ -28,8 +29,8 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
         ],
         Mode::Visual => &[
             Action::ToggleComplete,
-            Action::CycleState,
-            Action::Stop,
+            Action::ToggleStart,
+            Action::Wontdo,
             Action::Delete,
             Action::Yank,
             Action::ExitVisual,
@@ -85,15 +86,14 @@ pub(crate) fn warnings(hints: &BTreeMap<String, Vec<String>>) -> Vec<Warning> {
     out
 }
 
-/// The hints of `mode`, in order: the first key of each action and its
-/// label, with `accept` as the label of a picker's choice and of the
-/// Enter of the text line. An action without a key has no hint.
+/// The hints of `mode`, in order: the first key of each action and what
+/// `label` calls it. An action without a key has no hint.
 pub(crate) fn hints<'a>(
     mode: Mode,
     configured: &BTreeMap<String, Vec<String>>,
     keymap: &'a Keymap,
     hidden: &[Action],
-    accept: &'static str,
+    label: impl Fn(Action) -> &'static str,
 ) -> Vec<[Span<'a>; 3]> {
     let actions: Vec<Action> = match configured.get(mode.as_str()) {
         Some(names) => {
@@ -109,19 +109,32 @@ pub(crate) fn hints<'a>(
             Some([
                 Span::new(written, Some(Slot::HintKey)),
                 Span::new(" ", None),
-                Span::new(label(mode, action, accept), Some(Slot::HintDesc)),
+                Span::new(label(action), Some(Slot::HintDesc)),
             ])
         })
         .collect()
 }
 
-fn label(mode: Mode, action: Action, accept: &'static str) -> &'static str {
-    if matches!(
-        (mode, action),
-        (Mode::Picker, Action::Accept) | (Mode::Command, Action::Execute)
-    ) {
-        accept
-    } else {
-        action.hint()
+/// What the hint of `action` says in `mode`: `accept` for a picker's
+/// choice and the Enter of the text line, and for the task keys what they
+/// do to `task`, the state of the task they are about and whether it is
+/// won't do.
+pub(crate) fn label(
+    mode: Mode,
+    action: Action,
+    accept: &'static str,
+    task: Option<(State, bool)>,
+) -> &'static str {
+    match (mode, action, task) {
+        (Mode::Picker, Action::Accept, _)
+        | (Mode::Command, Action::Execute, _) => accept,
+        (_, Action::ToggleStart, Some((State::Doing, _))) => "stop",
+        (
+            _,
+            Action::ToggleStart | Action::ToggleComplete,
+            Some((State::Done, _)),
+        )
+        | (_, Action::Wontdo, Some((State::Done, true))) => "reopen",
+        _ => action.hint(),
     }
 }

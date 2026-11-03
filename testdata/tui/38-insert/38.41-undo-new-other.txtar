@@ -27,7 +27,7 @@ B +y
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 added as id:t001: N  x done  t state  T stop  o new       9.9.9
+ NORMAL  todo.txt  manual  undid: 2 added as id:t001: N  x done  t start  T wontdo  o new     9.9.9
 -- a-file --
 A
 B +y

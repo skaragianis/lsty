@@ -76,7 +76,7 @@ Task 40 +proj40
 │ No project  ││ 25   Task 26 +proj26                                                                                            │
 │ Won't do    ││ 26   Task 27 +proj27                                                                                            │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wontdo  o new  a append  dd delete  u undo  / search  ? help                  9.9.9
 -- frame-bg --
 ..................................................................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
