@@ -88,14 +88,19 @@ pub(crate) fn warnings(hints: &BTreeMap<String, Vec<String>>) -> Vec<Warning> {
     out
 }
 
-/// The hints of `mode`, in order: the first key of each action and what
-/// `label` calls it. An action without a key has no hint.
+/// Whether a hint is dim: `answer` says its key would change nothing.
+pub(crate) const fn dim(answer: Answer) -> bool {
+    matches!(answer, Answer::Refused(_) | Answer::CoreRefuses(_))
+}
+
+/// The hints of `mode`, in order: the first key of each action, what `label`
+/// calls it and whether it is dim. An action without a key has no hint.
 pub(crate) fn hints<'a>(
     mode: Mode,
     configured: &BTreeMap<String, Vec<String>>,
     keymap: &'a Keymap,
     hidden: &[Action],
-    label: impl Fn(Action) -> Option<&'static str>,
+    label: impl Fn(Action) -> Option<(&'static str, bool)>,
 ) -> Vec<[Span<'a>; 3]> {
     let actions: Vec<Action> = match configured.get(mode.as_str()) {
         Some(names) => {
@@ -108,10 +113,12 @@ pub(crate) fn hints<'a>(
         .filter(|action| !hidden.contains(action))
         .filter_map(|action| {
             let written = keymap.keys(mode, action).into_iter().next()?;
+            let (word, dim) = label(action)?;
+            let slot = |lit| if dim { Slot::HintDim } else { lit };
             Some([
-                Span::new(written, Some(Slot::HintKey)),
+                Span::new(written, Some(slot(Slot::HintKey))),
                 Span::new(" ", None),
-                Span::new(label(action)?, Some(Slot::HintDesc)),
+                Span::new(word, Some(slot(Slot::HintDesc))),
             ])
         })
         .collect()

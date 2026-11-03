@@ -48,5 +48,6 @@ chip                = { fg = "fg", bg = "bg_visual" }
 status_bg           = { bg = "bg_dark" }
 hint_key            = { fg = "blue1", bold = true }
 hint_desc           = "fg_dark"
+hint_dim            = "comment"
 warning             = "yellow"
 error               = { fg = "red", bold = true }

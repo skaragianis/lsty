@@ -36,6 +36,7 @@ const fn letter(slot: Slot) -> char {
         Slot::StatusBg => 'G',
         Slot::HintKey => 'k',
         Slot::HintDesc => 'y',
+        Slot::HintDim => 'D',
         Slot::Warning => 'w',
         Slot::Error => 'x',
     }

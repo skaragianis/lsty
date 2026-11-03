@@ -15,6 +15,7 @@ use tempfile::TempDir;
 
 use crate::{
     actions::{Chosen, stepped},
+    hints::dim,
     messages::Tone,
     model::Model,
     press::{Answer, Command, Refusal, decide},
@@ -229,6 +230,7 @@ fn check(key: (Action, &str, &str), way: Way, kinds: &[usize]) {
     let before = files(dir.path());
     send(&mut model, key, way, kinds.len());
     let after = files(dir.path());
+    assert_eq!(dim(answer), after == before, "{name}: {answer:?}");
     let mut pressed = Pressed {
         name,
         way,
@@ -484,6 +486,23 @@ fn t_takes_over_an_agents_claim_and_says_so() {
         model.message.as_deref(),
         Some("2 started; 3 was claimed by agent2; now yours")
     );
+}
+
+/// The one dim hint that writes: a second `t` puts back the claim of the task
+/// the first one stopped, though that task is blocked and cannot start.
+#[test]
+fn a_dim_t_still_puts_a_claim_back() {
+    let dir = workdir(
+        "Blocker id:blk\nStuck dep:blk started:2026-09-29T0800Z owner:agent2\n",
+    );
+    let mut model = started(deps(dir.path(), config()));
+    press(&mut model, "jt");
+    let answer = decide(Action::ToggleStart, &model.summary(1));
+    assert_eq!(answer, Answer::CoreRefuses(Command::Start));
+    assert!(dim(answer));
+    let before = files(dir.path());
+    press(&mut model, "t");
+    assert_ne!(files(dir.path()), before);
 }
 
 /// A doing task whose blocker came later: `x` is refused, the others are not.

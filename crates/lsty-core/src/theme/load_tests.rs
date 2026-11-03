@@ -389,6 +389,48 @@ fn a_user_theme_falls_back_to_the_built_in_one_of_its_name_or_ansi() {
     }
 }
 
+/// A file that sets `muted` and not `hint_dim` dims with its `muted`; else
+/// `hint_dim` is a slot like any other.
+#[test]
+fn hint_dim_falls_back_to_muted() {
+    let muted = Style::fg(Colour::Index(100));
+    let dim = Style::fg(Colour::Index(101));
+    let ansi = builtin_theme("ansi").style(Slot::HintDim);
+    let nord = builtin_theme("nord").style(Slot::HintDim);
+    let rows = [
+        ("mine", "[slots]\nmuted = \"100\"\n", muted),
+        ("nord", "[slots]\nmuted = \"100\"\n", muted),
+        (
+            "mine",
+            "[slots]\nmuted = \"100\"\nhint_dim = \"101\"\n",
+            dim,
+        ),
+        (
+            "mine",
+            "[slots]\nhint_dim = \"101\"\nmuted = \"100\"\n",
+            dim,
+        ),
+        ("mine", "[slots]\ntext = \"100\"\n", ansi),
+        ("nord", "[slots]\ntext = \"100\"\n", nord),
+    ];
+    for (name, text, want) in rows {
+        let (theme, warnings) = load_user(name, text);
+        assert_eq!(warnings, vec![], "{text}");
+        assert_eq!(theme.style(Slot::HintDim), want, "{name} {text}");
+    }
+}
+
+/// A dim hint shows: no built-in theme paints it like a lit one.
+#[test]
+fn every_built_in_theme_shows_a_dim_hint() {
+    for name in BUILTIN_NAMES {
+        let theme = builtin_theme(name);
+        let dim = theme.style(Slot::HintDim);
+        assert_ne!(dim.fg, theme.style(Slot::HintDesc).fg, "{name}");
+        assert_ne!(dim.fg, theme.style(Slot::HintKey).fg, "{name}");
+    }
+}
+
 #[test]
 fn an_unknown_theme_warns_and_loads_the_default() {
     let (theme, warnings) = load("nope", Path::new(""), Path::new("/"), true);
