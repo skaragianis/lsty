@@ -130,8 +130,8 @@ pub(crate) fn label(
         | (Mode::Command, Action::Execute, _) => accept,
         (_, Action::ToggleStart, Some((State::Done, _))) => return None,
         (_, Action::ToggleStart, Some((State::Doing, _))) => "stop",
-        (_, Action::ToggleComplete, Some((State::Done, _)))
-        | (_, Action::Wontdo, Some((State::Done, true))) => "reopen",
+        (_, Action::ToggleComplete, Some((State::Done, _))) => "reopen",
+        (_, Action::Wontdo, Some((State::Done, true))) => "will",
         _ => action.hint(),
     })
 }

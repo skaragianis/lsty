@@ -25,7 +25,7 @@ x 2026-09-01 Old task wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x reopen  T reopen  o new    9.9.9
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x reopen  T will  o new      9.9.9
 -- refused-done --
 x 2026-09-01 Old task wontdo:true
 -- t-refused --
@@ -36,7 +36,7 @@ x 2026-09-01 Old task wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x reopen  T reopen  o new    9.9.9
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x reopen  T will  o new      9.9.9
 -- x-restores --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Buy                                                                                         │

@@ -95,7 +95,7 @@ x 2026-09-01 Plain done
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Open one is done — x reopens it  x reopen  T reopen  o new         9.9.9
+ NORMAL  todo.txt  manual  Open one is done — x reopens it  x reopen  T will  o new           9.9.9
 -- t-refused-file --
 x 2026-09-29 Open one wontdo:true
 x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z

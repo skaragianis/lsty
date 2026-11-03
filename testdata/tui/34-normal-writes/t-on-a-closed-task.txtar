@@ -44,7 +44,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Decided is done — x reopens it  x reopen  T reopen  o new          9.9.9
+ NORMAL  todo.txt  manual  Decided is done — x reopens it  x reopen  T will  o new  a append  9.9.9
 -- count-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open                                                                                        │

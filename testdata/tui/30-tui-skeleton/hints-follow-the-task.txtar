@@ -6,7 +6,7 @@ status  x done  t stop  T wont  o new
 keys j
 status  x reopen  T wont  o new
 keys j
-status  x reopen  T reopen  o new
+status  x reopen  T will  o new
 keys g g v
 status  x done  t start  T wont  d delete
 keys j
@@ -14,7 +14,7 @@ status  x done  t start  T wont  d delete
 keys <Esc> v
 status  x done  t stop  T wont  d delete
 keys <Esc> G v
-status  x reopen  T reopen  d delete
+status  x reopen  T will  d delete
 keys k
 status  x reopen  T wont  d delete
 keys <Esc> G
@@ -24,7 +24,7 @@ keys g g
 frame narrow-todo
 size 90 8
 keys j j j v
-status  x reopen  T reopen
+status  x reopen  T will\b
 keys k k
 status  x done  t stop  T wont\b
 -- config.toml --
@@ -43,7 +43,7 @@ x 2026-09-01 Decided wontdo:true
 │  4 ✗ Decided wontdo:true                                 28d ago     │
 │                                                                      │
 └──────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  T reopen       9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  T will  o new  9.9.9
 -- narrow-todo --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐
 │  1   Open                                                            │
