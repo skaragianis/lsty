@@ -92,7 +92,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x reopen  t reopen     9.9.9
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x reopen  T wont       9.9.9
 -- second --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1 ▷ (B) Send invoice +work                                2d late       2h  │

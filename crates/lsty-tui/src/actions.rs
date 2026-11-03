@@ -20,7 +20,7 @@ use crate::{
 /// What a key does to its tasks.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum Write {
-    /// `toggle_start`: start, stop or reopen, by state.
+    /// `toggle_start`: start or stop, by state.
     Start,
     Stop,
     /// `toggle_complete`: complete, or reopen a done task.
@@ -193,7 +193,8 @@ impl Model {
                     });
                 ops::pri(env, &pairs.collect::<Vec<_>>())
             }
-            (Write::Start, State::Todo) => {
+            // `refusal` turned a done task away, and `start` refuses one.
+            (Write::Start, State::Todo | State::Done) => {
                 ops::start(env, &targets, StartOpts::default())
             }
             (Write::Toggle, State::Doing | State::Todo) => {
@@ -206,7 +207,7 @@ impl Model {
                 };
                 ops::finish(env, &targets, opts)
             }
-            (Write::Start | Write::Toggle | Write::Wontdo, State::Done) => {
+            (Write::Toggle | Write::Wontdo, State::Done) => {
                 ops::reopen(env, &targets, claim)
             }
         }
@@ -324,28 +325,35 @@ fn refusal(write: Write, tasks: &[Chosen]) -> Option<String> {
     })
 }
 
-/// The refusal of `T` on tasks of which some are done but not won't do.
+/// The refusal of `t` on done tasks, won't do or not, and of `T` on tasks
+/// of which some are done but not won't do.
 fn done_refusal(write: Write, tasks: &[Chosen]) -> Option<String> {
-    let plain = |t: &Chosen| t.state == State::Done && !t.wontdo;
-    if write != Write::Wontdo || !tasks.iter().any(plain) {
-        return None;
+    let done = |t: &Chosen| t.state == State::Done;
+    let plain = |t: &Chosen| done(t) && !t.wontdo;
+    if write == Write::Start && tasks.iter().any(done) {
+        Some(named(tasks, messages::closed_task, messages::CLOSED_TASKS))
+    } else if write == Write::Wontdo && tasks.iter().any(plain) {
+        Some(named(tasks, messages::done_task, messages::DONE_TASKS))
+    } else {
+        None
     }
-    Some(match tasks {
-        [one] => messages::done_task(&one.name),
-        _ => messages::DONE_TASKS.to_owned(),
-    })
 }
 
 /// The refusal of tasks of which some are archived, or `None` when none
 /// is.
 pub(crate) fn archived_refusal(tasks: &[Chosen]) -> Option<String> {
-    if !tasks.iter().any(Chosen::archived) {
-        return None;
-    }
-    Some(match tasks {
-        [one] => messages::archived_task(&one.name),
-        _ => messages::ARCHIVED_TASKS.to_owned(),
+    let some = tasks.iter().any(Chosen::archived);
+    some.then(|| {
+        named(tasks, messages::archived_task, messages::ARCHIVED_TASKS)
     })
+}
+
+/// A refusal: `one` of the name of a lone task, `many` of several.
+fn named(tasks: &[Chosen], one: fn(&str) -> String, many: &str) -> String {
+    match tasks {
+        [task] => one(&task.name),
+        _ => many.to_owned(),
+    }
 }
 
 /// The message of `e`, followed by the forms it accepts.

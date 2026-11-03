@@ -93,7 +93,7 @@ pub(crate) fn hints<'a>(
     configured: &BTreeMap<String, Vec<String>>,
     keymap: &'a Keymap,
     hidden: &[Action],
-    label: impl Fn(Action) -> &'static str,
+    label: impl Fn(Action) -> Option<&'static str>,
 ) -> Vec<[Span<'a>; 3]> {
     let actions: Vec<Action> = match configured.get(mode.as_str()) {
         Some(names) => {
@@ -109,7 +109,7 @@ pub(crate) fn hints<'a>(
             Some([
                 Span::new(written, Some(Slot::HintKey)),
                 Span::new(" ", None),
-                Span::new(label(action), Some(Slot::HintDesc)),
+                Span::new(label(action)?, Some(Slot::HintDesc)),
             ])
         })
         .collect()
@@ -118,23 +118,20 @@ pub(crate) fn hints<'a>(
 /// What the hint of `action` says in `mode`: `accept` for a picker's
 /// choice and the Enter of the text line, and for the task keys what they
 /// do to `task`, the state of the task they are about and whether it is
-/// won't do.
+/// won't do. `None` when the key does nothing there: `t` on a done task.
 pub(crate) fn label(
     mode: Mode,
     action: Action,
     accept: &'static str,
     task: Option<(State, bool)>,
-) -> &'static str {
-    match (mode, action, task) {
+) -> Option<&'static str> {
+    Some(match (mode, action, task) {
         (Mode::Picker, Action::Accept, _)
         | (Mode::Command, Action::Execute, _) => accept,
+        (_, Action::ToggleStart, Some((State::Done, _))) => return None,
         (_, Action::ToggleStart, Some((State::Doing, _))) => "stop",
-        (
-            _,
-            Action::ToggleStart | Action::ToggleComplete,
-            Some((State::Done, _)),
-        )
+        (_, Action::ToggleComplete, Some((State::Done, _)))
         | (_, Action::Wontdo, Some((State::Done, true))) => "reopen",
         _ => action.hint(),
-    }
+    })
 }

@@ -359,9 +359,12 @@ fn the_state_decides_what_t_does() {
             "A\n",
             "A started:2026-09-29T0900Z\n",
             "x 2026-09-29 A started:2026-09-29T0900Z ended:2026-09-29T0900Z\n",
-            "A started:2026-09-29T0900Z\n",
+            "x 2026-09-29 A started:2026-09-29T0900Z ended:2026-09-29T0900Z\n",
         ]
     );
+    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.as_deref(), Some("A is done — x reopens it"));
+    assert_eq!(model.hist.undo.len(), 4, "the refused t records nothing");
 }
 
 // A restored line lands hidden (it is blocked): the cursor goes to the

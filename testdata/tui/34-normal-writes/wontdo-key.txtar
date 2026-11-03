@@ -15,8 +15,8 @@ frame x-reopens
 file todo.txt x-reopens-file
 keys g g T
 keys g g t
-frame t-reopens
-file todo.txt t-reopens-file
+frame t-refused
+file todo.txt t-refused-file
 keys G
 keys T
 frame other-done-refused
@@ -53,7 +53,7 @@ x 2026-09-01 Plain done
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 won't do: Doing one; 2 was claimed by agent1  x reopen           9.9.9
+ NORMAL  todo.txt  manual  2 won't do: Doing one; 2 was claimed by agent1  x reopen  T wont   9.9.9
 -- on-doing-file --
 x 2026-09-29 Open one wontdo:true
 x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z
@@ -86,35 +86,7 @@ x 2026-09-01 Plain done
 Open one
 x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z
 x 2026-09-01 Plain done
--- t-reopens --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Open one                                                                                    │
-│  1 ✗ Doing one wontdo:true                                                                    1h │
-│  2 ✓ Plain done                                                                      28d ago     │
-│                                                                                                  │
-│                                                                                                  │
-│                                                                                                  │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 reopened  x done  t start  T wont  o new  a append  dd delete    9.9.9
--- t-reopens-file --
-Open one
-x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z
-x 2026-09-01 Plain done
--- other-done-refused --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2   Open one                                                                                    │
-│  1 ✗ Doing one wontdo:true                                                                    1h │
-│  3 ✓ Plain done                                                                      28d ago     │
-│                                                                                                  │
-│                                                                                                  │
-│                                                                                                  │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Plain done is done, not won't do — x reopens it  x reopen          9.9.9
--- other-done-file --
-Open one
-x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z
-x 2026-09-01 Plain done
--- undo-is-the-last-write --
+-- t-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ✗ Open one wontdo:true                                                                        │
 │  1 ✗ Doing one wontdo:true                                                                    1h │
@@ -123,4 +95,32 @@ x 2026-09-01 Plain done
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 reopened  x reopen  t reopen  T reopen  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  Open one is done — x reopens it  x reopen  T reopen  o new         9.9.9
+-- t-refused-file --
+x 2026-09-29 Open one wontdo:true
+x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z
+x 2026-09-01 Plain done
+-- other-done-refused --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2 ✗ Open one wontdo:true                                                                        │
+│  1 ✗ Doing one wontdo:true                                                                    1h │
+│  3 ✓ Plain done                                                                      28d ago     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Plain done is done, not won't do — x reopens it  x reopen  T wont  9.9.9
+-- other-done-file --
+x 2026-09-29 Open one wontdo:true
+x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z
+x 2026-09-01 Plain done
+-- undo-is-the-last-write --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open one                                                                                    │
+│  1 ✗ Doing one wontdo:true                                                                    1h │
+│  2 ✓ Plain done                                                                      28d ago     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 won't do: Open one  x done  t start  T wont  o new        9.9.9
