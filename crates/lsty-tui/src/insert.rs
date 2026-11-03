@@ -15,7 +15,7 @@ use lsty_core::{
 };
 
 use crate::{
-    actions::{archived_refusal, places},
+    actions::places,
     candidates::tokens_of,
     complete::Completion,
     field::{Field, is_sep},
@@ -177,14 +177,12 @@ impl Model {
     /// `change_description`: opens the field on the line of the task
     /// under the cursor.
     pub(crate) fn open_edit(&mut self, action: Action) {
+        if self.refused(action, 1) {
+            return;
+        }
         let Some(row) = self.rows.get(self.cursor) else {
             return;
         };
-        let chosen = self.chosen(&[row.id]);
-        if let Some(text) = archived_refusal(&chosen) {
-            self.alert(text);
-            return;
-        }
         let Some(task) = self.snap.task(row.id) else {
             return;
         };
@@ -213,6 +211,9 @@ impl Model {
     /// An archived task is the prerequisite only with an id, as for
     /// `dep`, and the new task goes at the end of the todo file.
     pub(crate) fn open_dependent(&mut self) {
+        if self.refused(Action::InsertDependent, 1) {
+            return;
+        }
         let Some(task) = self
             .rows
             .get(self.cursor)
@@ -222,10 +223,6 @@ impl Model {
         };
         let task_id = task.task_id();
         let id = self.snap.id_of(task).map(errs::lossy);
-        if id.is_none() && task.source() == Source::Done {
-            let name = messages::name_of(self.snap.line(task));
-            return self.alert(messages::archived_no_id(&name));
-        }
         self.open_new(true);
         let word = match id {
             Some(id) => Ok(format!("{DEP}{id}")),
@@ -245,9 +242,8 @@ impl Model {
     /// one under the cursor, which waits for it once it is written.
     /// Where `insert_above` has no anchor, it is `insert_above`.
     pub(crate) fn open_prerequisite(&mut self) {
-        let chosen = self.rows.get(self.cursor).map(|r| self.chosen(&[r.id]));
-        if let Some(text) = chosen.as_deref().and_then(archived_refusal) {
-            return self.alert(text);
+        if self.refused(Action::InsertPrerequisite, 1) {
+            return;
         }
         self.open_new(false);
         if let Some(Subject::New { blocks, .. }) =

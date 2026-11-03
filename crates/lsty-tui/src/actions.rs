@@ -30,10 +30,6 @@ pub(crate) struct Chosen {
 }
 
 impl Chosen {
-    pub(crate) const fn archived(&self) -> bool {
-        matches!(self.source, Source::Done)
-    }
-
     /// The reference to the line, guarded by the text it had when the
     /// list showed it.
     pub(crate) fn target(&self) -> Target {
@@ -66,7 +62,7 @@ impl Model {
     /// Does a task action over the task under the cursor, or `count`
     /// tasks from it.
     pub(crate) fn act(&mut self, action: Action, count: usize) -> bool {
-        let answer = decide(action, &self.summary(count));
+        let answer = decide(action, self, &self.summary(count));
         let ids = self.tasks_of(count);
         let tasks = self.chosen(&ids);
         let again = self.count_for(count, tasks.len());
@@ -97,7 +93,7 @@ impl Model {
         let (command, passes) = match answer {
             Answer::Applies => return false,
             Answer::Refused(why) => {
-                self.alert(refusal(why, tasks));
+                self.refuse(why, tasks);
                 return false;
             }
             Answer::CoreRefuses(command) => (command, false),
@@ -265,6 +261,48 @@ impl Model {
         }
     }
 
+    /// Whether the rule refuses `action` over the tasks of `count`, having
+    /// said why.
+    pub(crate) fn refused(&mut self, action: Action, count: usize) -> bool {
+        let answer = decide(action, self, &self.summary(count));
+        let Answer::Refused(why) = answer else {
+            return false;
+        };
+        let tasks = self.chosen(&self.tasks_of(count));
+        self.refuse(why, &tasks);
+        true
+    }
+
+    /// Says why a press over `tasks` writes nothing: in the error style when
+    /// a task stands in the way, else as a plain message.
+    pub(crate) fn refuse(&mut self, why: Refusal, tasks: &[Chosen]) {
+        let text = match why {
+            Refusal::Quiet => return,
+            Refusal::Sorted => messages::sorted(self.sort.name()),
+            Refusal::Says(text) => text.to_owned(),
+            Refusal::Closed | Refusal::Archived => {
+                named(tasks, messages::archived_task, messages::ARCHIVED_TASKS)
+            }
+            Refusal::NoId => named(
+                tasks,
+                messages::archived_no_id,
+                messages::ARCHIVED_TASKS,
+            ),
+            Refusal::AllDone => {
+                named(tasks, messages::closed_task, messages::CLOSED_TASKS)
+            }
+            Refusal::SomeDone => messages::SOME_DONE.to_owned(),
+            Refusal::NotWontdo => {
+                named(tasks, messages::done_task, messages::DONE_TASKS)
+            }
+        };
+        if matches!(why, Refusal::Sorted | Refusal::Says(_)) {
+            self.message = Some(text);
+        } else {
+            self.alert(text);
+        }
+    }
+
     /// Shows a refusal of the keys in the error style.
     pub(crate) fn alert(&mut self, text: String) {
         self.tone = Tone::Alert;
@@ -327,31 +365,6 @@ pub(crate) fn places(snap: &Snapshot, ids: &[TaskId]) -> Vec<Place> {
         .filter_map(|id| snap.task(*id))
         .map(place_of)
         .collect()
-}
-
-/// What a refusal of the keys says over `tasks`.
-pub(crate) fn refusal(why: Refusal, tasks: &[Chosen]) -> String {
-    match why {
-        Refusal::Closed | Refusal::Archived => {
-            named(tasks, messages::archived_task, messages::ARCHIVED_TASKS)
-        }
-        Refusal::AllDone => {
-            named(tasks, messages::closed_task, messages::CLOSED_TASKS)
-        }
-        Refusal::SomeDone => messages::SOME_DONE.to_owned(),
-        Refusal::NotWontdo => {
-            named(tasks, messages::done_task, messages::DONE_TASKS)
-        }
-    }
-}
-
-/// The refusal of tasks of which some are archived, or `None` when none
-/// is.
-pub(crate) fn archived_refusal(tasks: &[Chosen]) -> Option<String> {
-    let some = tasks.iter().any(Chosen::archived);
-    some.then(|| {
-        named(tasks, messages::archived_task, messages::ARCHIVED_TASKS)
-    })
 }
 
 /// A refusal: `one` of the name of a lone task, `many` of several.
