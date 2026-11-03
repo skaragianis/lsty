@@ -428,6 +428,17 @@ fn ctrl_h_deletes_a_character() -> Check {
     screen.ends_with(&mut child, 0)
 }
 
+/// A digit is drawn as it is typed, with no other key after it.
+fn a_digit_shows_at_once() -> Check {
+    let work = Work::new()?;
+    let (mut child, mut screen) = start(&work.root)?;
+    screen.wait_for("NORMAL")?;
+    screen.type_keys(b"7531")?;
+    screen.wait_for("7531")?;
+    screen.type_keys(b"q")?;
+    screen.ends_with(&mut child, 0)
+}
+
 /// Mouse reports are asked for unless `mouse` is off, and `:set` changes
 /// that at once.
 fn mouse_reports_follow_the_option() -> Check {
@@ -574,6 +585,7 @@ fn main() -> std::process::ExitCode {
         }),
         Trial::test("30.31 q restores the terminal", q_quits_and_restores),
         Trial::test("ctrl-h deletes a character", ctrl_h_deletes_a_character),
+        Trial::test("a digit shows at once", a_digit_shows_at_once),
         Trial::test(
             "mouse reports follow the option",
             mouse_reports_follow_the_option,

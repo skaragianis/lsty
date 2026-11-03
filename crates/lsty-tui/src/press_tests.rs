@@ -135,7 +135,15 @@ fn begin(way: Way, kinds: &[usize]) -> (TempDir, Model, usize) {
     (dir, model, count)
 }
 
-/// Sends a write with its keys in NORMAL and VISUAL mode, the way `way` says.
+/// Types the count of `way`, as a press does before its key.
+fn type_count(model: &mut Model, way: Way, n: usize) {
+    if matches!(way, Way::Count) && n > 1 {
+        press(model, &n.to_string());
+    }
+}
+
+/// Sends a write with its keys in NORMAL and VISUAL mode, the way `way` says,
+/// after `type_count`.
 fn send(
     model: &mut Model,
     (action, normal, visual): (Action, &str, &str),
@@ -148,8 +156,7 @@ fn send(
     }
     match way {
         Way::Selection => press(model, visual),
-        Way::Count if n == 1 => press(model, normal),
-        Way::Count => press(model, &format!("{n}{normal}")),
+        Way::Count => press(model, normal),
     };
 }
 
@@ -227,7 +234,12 @@ impl Pressed<'_> {
 fn check(key: (Action, &str, &str), way: Way, kinds: &[usize]) {
     let name = format!("{} {way:?} {kinds:?}", key.1);
     let (dir, mut model, count) = begin(way, kinds);
-    let answer = decide(key.0, &model, &model.summary(count));
+    let answer = if key.1.is_empty() {
+        decide(key.0, &model, &model.summary(count))
+    } else {
+        type_count(&mut model, way, kinds.len());
+        model.answers()(key.0)
+    };
     let before = files(dir.path());
     send(&mut model, key, way, kinds.len());
     let after = files(dir.path());
@@ -253,15 +265,13 @@ fn check(key: (Action, &str, &str), way: Way, kinds: &[usize]) {
 }
 
 /// Checks that a prompt opens unless the rule refuses the tasks.
-fn check_prompt(way: Way, kinds: &[usize]) {
-    let name = format!("gd {way:?} {kinds:?}");
-    let (dir, mut model, count) = begin(way, kinds);
-    let answer = decide(Action::SetDue, &model, &model.summary(count));
+fn check_prompt((action, key): (Action, &str), way: Way, kinds: &[usize]) {
+    let name = format!("{key} {way:?} {kinds:?}");
+    let (dir, mut model, _count) = begin(way, kinds);
+    type_count(&mut model, way, kinds.len());
+    let answer = model.answers()(action);
     let before = files(dir.path());
-    match way {
-        Way::Selection => press(&mut model, "gd"),
-        Way::Count => press(&mut model, &format!("{}gd", kinds.len())),
-    };
+    press(&mut model, key);
     let opened = model.line.is_some();
     assert_eq!(!opened, matches!(answer, Answer::Refused(_)), "{name}");
     assert_eq!(files(dir.path()), before, "{name}");
@@ -329,9 +339,15 @@ fn stop_does_what_the_rule_says() {
 #[test]
 fn a_prompt_opens_as_the_rule_says() {
     for kinds in every_choice() {
-        check_prompt(Way::Selection, &kinds);
-        if kinds.len() < 3 {
-            check_prompt(Way::Count, &kinds);
+        for key in [
+            (Action::SetDue, "gd"),
+            (Action::AddTag, "gt"),
+            (Action::RemoveTag, "gT"),
+        ] {
+            check_prompt(key, Way::Selection, &kinds);
+            if kinds.len() < 3 {
+                check_prompt(key, Way::Count, &kinds);
+            }
         }
     }
 }
@@ -390,6 +406,7 @@ const OLD: &str = "x 2026-09-01 Old\n";
 const OLD_ID: &str = "x 2026-09-01 Old id:o\n";
 const DONE: &str = "x 2026-09-01 Done\n";
 const LINK: &str = "Read https://x.org/a\n";
+const LINKS: &str = "Read https://x.org/a https://x.org/b\n";
 const OLD_LINK: &str = "x 2026-09-01 Read https://x.org/a\n";
 const STUCK: &str = "Plain\nBlocker id:b\nStuck dep:b\n";
 
@@ -416,15 +433,23 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
         (TODO, "", "yy", false),
         (TODO, OLD, "yyj", false),
         (TODO, "", "yydd", false),
+        (TODO, "", "2", true),
+        (TODO, "", "yy2", false),
         ("", OLD, "yy", false),
     ];
     const FIELDS: &[Case] = &[
+        (TODO, OLD, "2", false),
         (TODO, "", "", false),
         (DONE, "", "", false),
         ("", OLD, "", true),
         (TODO, OLD, "j", true),
     ];
     const MOVES_DOWN: &[Case] = &[
+        (TWO, "", "9", false),
+        (TODO, "", "9", true),
+        (TWO, OLD, "j9", true),
+        (THREE, "", "vj9", false),
+        (TWO, "", "vj9", true),
         ("", "", "", true),
         (TWO, "", "", false),
         (TODO, "", "", true),
@@ -439,6 +464,9 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
         (THREE, "", "svj", true),
     ];
     const MOVES_UP: &[Case] = &[
+        (TWO, "", "j9", false),
+        (TWO, "", "9", true),
+        (THREE, "", "jvj9", false),
         ("", "", "", true),
         (TWO, "", "", true),
         (TWO, "", "j", false),
@@ -455,6 +483,8 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
             &[
                 (TODO, "", "", true),
                 (TODO, "", "x", false),
+                (TODO, "", "x3", false),
+                (TODO, "", "3", true),
                 (TODO, "", "xu", true),
                 (TODO, "", "aZ<C-x>", false),
             ],
@@ -466,6 +496,7 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
                 (TODO, "", "", true),
                 (TODO, "", "x", true),
                 (TODO, "", "xu", false),
+                (TODO, "", "xu3", false),
             ],
         ),
         (PasteBelow, "p", PASTES),
@@ -497,6 +528,16 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
                 (THREE, "", "5Jgg", false),
                 (THREE, OLD, "3Jgg", false),
                 (TWO, OLD, "3J", true),
+                (TODO, "", "2", true),
+                (MIXED, "", "TGk2", false),
+                (MIXED, "", "2TGk1", true),
+                (THREE, "", "vjJ<Esc>Gk1", false),
+                (FOUR, "", "vjJ<Esc>gg9", true),
+                (TWO, "", "Jgg2", false),
+                (TWO, "", "J2", true),
+                (TWO, OLD, "gtk:v<CR>j2", true),
+                (TWO, OLD, "gtk:v<CR>j1", false),
+                (TODO, "", "yyp2", false),
             ],
         ),
         (Down, "J", MOVES_DOWN),
@@ -514,6 +555,7 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
                 (DONE, "", "", false),
                 ("", OLD, "", true),
                 (TODO, OLD, "j", true),
+                (TODO, OLD, "2", false),
             ],
         ),
         (
@@ -523,6 +565,7 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
                 ("", "", "", false),
                 (TODO, "", "", false),
                 ("", OLD_ID, "", false),
+                (TODO, OLD, "2", false),
                 ("", OLD, "", true),
                 (TODO, OLD, "j", true),
             ],
@@ -534,6 +577,13 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
                 ("", "", "", true),
                 (TODO, "", "", true),
                 (LINK, "", "", false),
+                (LINK, "", "1", false),
+                (LINK, "", "2", true),
+                (LINKS, "", "2", false),
+                (LINKS, "", "3", true),
+                (LINK, "", "vj2", true),
+                (LINK, "", "<C-w>23", false),
+                (TODO, "", "<C-w>23", true),
                 ("", OLD_LINK, "", false),
                 ("", OLD, "", true),
             ],
@@ -543,7 +593,9 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
             "yy",
             &[
                 ("", "", "", true),
+                ("", "", "2", true),
                 (TODO, "", "", false),
+                (TODO, OLD, "2", false),
                 ("", OLD, "", false),
             ],
         ),
@@ -557,6 +609,7 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
             "<CR>",
             &[
                 (LINK, "", "<C-w>2", false),
+                (LINK, "", "<C-w>23", false),
                 (TODO, "", "<C-w>2", true),
                 ("", "", "<C-w>2", true),
             ],
@@ -588,7 +641,8 @@ fn agrees(action: Action, key: &str, case: &Case, in_detail: bool) -> bool {
     before_the_key(&mut model, first);
     if in_detail {
         let bound = model.deps.keys.keys(Mode::Detail, action);
-        if model.mode() != Mode::Normal || !bound.contains(&key) {
+        let counted = model.typed_count() > 0;
+        if counted || model.mode() != Mode::Normal || !bound.contains(&key) {
             return false;
         }
         keys(&mut model, "<C-w>2");
@@ -596,7 +650,7 @@ fn agrees(action: Action, key: &str, case: &Case, in_detail: bool) -> bool {
             return false;
         }
     }
-    let answer = decide(action, &model, &model.summary(1));
+    let answer = model.answers()(action);
     assert_eq!(dim(answer), want, "{name}: {answer:?}");
     let before = effect(dir.path(), &model, &opened);
     keys(&mut model, key);
@@ -628,7 +682,7 @@ fn a_repeat_on_no_task_is_lit_and_does_nothing() {
     let (dir, mut model, _opened) = watched((TODO, ""), &Board::default());
     keys(&mut model, "dd");
     let before = files(dir.path());
-    assert!(!dim(decide(Action::Repeat, &model, &model.summary(1))));
+    assert!(!dim(model.answers()(Action::Repeat)));
     keys(&mut model, ".");
     assert_eq!(files(dir.path()), before, "a . of dd on no task");
 }

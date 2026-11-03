@@ -5,11 +5,11 @@
 
 use lsty_core::{
     errs::Source,
-    keys::Action,
+    keys::{Action, Matcher},
     list::{Snapshot, State},
 };
 
-use crate::{history::Again, messages, model::Model, rows::Row};
+use crate::{focus::Focus, history::Again, messages, model::Model, rows::Row};
 
 /// The `lsty` command a key resolves to.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -140,6 +140,25 @@ impl Model {
             None => Summary::of(snap, self.cursor, self.picked_rows(count)),
         }
     }
+
+    /// The count typed so far; 0 when none, or where a digit is no count.
+    pub(crate) fn typed_count(&self) -> usize {
+        self.matchers
+            .get(&self.key_mode())
+            .map_or(0, Matcher::count)
+    }
+
+    /// What the hints ask of the rule, with the count typed so far. A second
+    /// summary only with a count, for the keys that do not read it.
+    pub(crate) fn answers(&self) -> impl Fn(Action) -> Answer + '_ {
+        let count = self.typed_count();
+        let typed = self.summary(count);
+        let one = (count > 1).then(|| self.summary(1));
+        move |action| {
+            let cursor = one.as_ref().filter(|_| !action.reads_count());
+            decide(action, self, cursor.unwrap_or(&typed))
+        }
+    }
 }
 
 /// `x`: any open task, `lsty do`, which refuses a blocked one; all done,
@@ -226,21 +245,21 @@ const fn lit_if(lit: bool, why: Refusal) -> Answer {
     }
 }
 
-/// `.`: as the key it repeats over the tasks it stored, whose word it does not
-/// take. `J` and `K` store a distance, not tasks. Nothing to repeat says
-/// nothing.
+/// `.`: as the key it repeats over the tasks it stored or the count typed over
+/// them, whose word it does not take. `J` and `K` take a distance, not tasks.
+/// Nothing to repeat says nothing.
 fn repeat(m: &Model) -> Answer {
     let Some(again) = &m.again else {
         return Answer::Refused(Refusal::Quiet);
     };
     let count = match again {
-        Again::Task {
-            action: Action::MoveTaskDown | Action::MoveTaskUp,
-            ..
-        } => 1,
+        Again::Task { action, .. } if !action.reads_count() => 1,
         Again::Task { count, .. }
         | Again::Block { count, .. }
-        | Again::Prompt { count, .. } => *count,
+        | Again::Prompt { count, .. } => {
+            let typed = m.typed_count();
+            if typed > 0 { typed } else { *count }
+        }
     };
     match decide(again.action(), m, &m.summary(count)) {
         Answer::Resolved(_) => Answer::Applies,
@@ -292,8 +311,15 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             return Answer::Refused(Refusal::Quiet);
         }
         Action::OpenLink => {
-            let links = !m.cursor_links().is_empty();
-            return lit_if(links, Refusal::Says(messages::NO_LINK));
+            let links = m.cursor_links().len();
+            // The panel opens the link it has selected.
+            let wanted = if m.focus == Focus::Detail {
+                1
+            } else {
+                m.typed_count()
+            };
+            let lit = links >= wanted.max(1);
+            return lit_if(lit, Refusal::Says(messages::NO_LINK));
         }
         Action::Undo => {
             let lit = m.kept.is_some() || !m.hist.undo.is_empty();

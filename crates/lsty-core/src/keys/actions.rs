@@ -211,6 +211,12 @@ macro_rules! actions {
                 matches!(self.kind(), Kind::Motion | Kind::Jump)
             }
 
+            /// Whether a count before the action is its own to read, or a
+            /// number of tasks; not a distance, a line or dropped.
+            pub const fn reads_count(self) -> bool {
+                matches!(self.kind(), Kind::TaskAction | Kind::Own)
+            }
+
             /// What a count typed before the action means.
             pub(crate) const fn kind(self) -> Kind {
                 match self {
