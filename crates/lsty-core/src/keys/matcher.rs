@@ -77,6 +77,31 @@ impl Matcher {
         }
     }
 
+    /// The count typed so far; 0 when none.
+    pub const fn count(&self) -> usize {
+        self.count as usize
+    }
+
+    /// Whether `<Esc>` now drops the pending keys and the count, whatever it
+    /// is bound to; a longer binding that it ends is taken first.
+    pub fn cancels(&self) -> bool {
+        self.drops(Stroke::named(Named::Esc))
+    }
+
+    /// Whether `s` is `<Esc>` or `<C-c>` with something to drop.
+    fn drops(&self, s: Stroke) -> bool {
+        let escape = Stroke::named(Named::Esc);
+        let ctrl_c = Stroke::char('c').with_mods(Mods::CTRL);
+        let busy = !self.pending.is_empty() || self.count > 0;
+        if !self.counts || !busy || (s != escape && s != ctrl_c) {
+            return false;
+        }
+        let mut next = self.pending.clone();
+        next.push(s);
+        next.len() == 1
+            || !self.bindings.iter().any(|b| b.strokes.starts_with(&next))
+    }
+
     /// Moves the pending keys of `other` into this matcher and returns
     /// those that start none of its bindings, to be typed as text.
     pub fn take(&mut self, other: &mut Self) -> Vec<Stroke> {
@@ -107,14 +132,7 @@ impl Matcher {
 
     /// Adds a stroke and says whether it completes a binding.
     pub fn feed(&mut self, s: Stroke) -> Fed {
-        let escape = Stroke::named(Named::Esc);
-        let ctrl_c = Stroke::char('c').with_mods(Mods::CTRL);
-        let busy = !self.pending.is_empty() || self.count > 0;
-        let mut next = self.pending.clone();
-        next.push(s);
-        let bound = next.len() > 1
-            && self.bindings.iter().any(|b| b.strokes.starts_with(&next));
-        if self.counts && (s == escape || s == ctrl_c) && busy && !bound {
+        if self.drops(s) {
             self.reset();
             return Fed::new(Outcome::NoMatch);
         }

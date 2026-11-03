@@ -3,17 +3,16 @@
 
 use lsty_core::{
     errs::Source,
-    keys::{Action, Mode},
+    keys::{Action, Matcher, Mode},
     list::State,
     theme::Slot,
 };
 use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
-    hints::{dim, hints, label},
+    hints::{cancelling, dim, hints, label},
     messages::Tone,
     model::Model,
-    press::decide,
     rows::MARKER_DOING,
     text::{Span, cut, pad, put, width, width_of},
 };
@@ -61,15 +60,20 @@ impl Model {
         } else {
             "open"
         };
-        let summary = self.summary(1);
+        let answer = self.answers();
         let mut used = width(&line);
         let taken = self.version_room(used, w);
         let room = w - taken;
         let label = |action| {
-            let answer = decide(action, self, &summary);
+            let answer = answer(action);
             Some((label(table, action, accept, answer)?, dim(answer)))
         };
-        for hint in hints(table, configured, keys, hidden, label) {
+        let mut shown = hints(table, configured, keys, hidden, label);
+        if self.matchers.get(&table).is_some_and(Matcher::cancels) {
+            let left = room.saturating_sub(used);
+            cancelling(&mut shown, (self.typed_count() > 0).then_some(left));
+        }
+        for hint in shown {
             let cells = 2 + width(&hint);
             if used + cells > room {
                 break;
@@ -107,7 +111,11 @@ impl Model {
 
     /// The status line before the hints.
     pub(crate) fn status_base(&self) -> Vec<Span<'_>> {
-        let mode = format!(" {} ", self.mode().as_str().to_uppercase());
+        let name = self.mode().as_str().to_uppercase();
+        let mode = match self.typed_count() {
+            0 => format!(" {name} "),
+            count => format!(" {name} {count} "),
+        };
         let mut out = vec![
             Span::new(mode, Some(mode_slot(self.mode()))),
             Span::new(" ", None),

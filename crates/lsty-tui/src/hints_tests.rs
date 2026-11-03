@@ -417,12 +417,250 @@ fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
 #[test]
 fn a_repeat_keeps_its_own_word() {
     let (_dir, model) = hinted(("A\n", ""), None, "", "x");
-    let answer = decide(Action::Repeat, &model, &model.summary(1));
+    let answer = model.answers()(Action::Repeat);
     let word = label(Mode::Normal, Action::Repeat, "open", answer);
     assert_eq!(word, Some(Action::Repeat.hint()));
     let answer = decide(Action::ToggleComplete, &model, &model.summary(1));
     let word = label(Mode::Normal, Action::ToggleComplete, "open", answer);
     assert_eq!(word, Some("reopen"));
+}
+
+/// The status line's text.
+fn status_after(model: &Model, width: u16) -> String {
+    let mut buf = Buffer::empty(Rect::new(0, 0, width, 1));
+    model.draw_status(&mut buf, (width, 0));
+    buf.content.iter().map(Cell::symbol).collect()
+}
+
+/// A count shows from its first digit, and goes with the key that ends it.
+#[test]
+fn a_count_shows_until_a_key_ends_it() {
+    let (_dir, mut model) = hinted(("A\nB\nC\n", ""), None, "", "");
+    let plain = status_after(&model, 80);
+    assert!(plain.starts_with(" NORMAL  todo.txt"), "{plain}");
+    for (typed, want) in [
+        ("2", " NORMAL 2  todo.txt"),
+        ("5", " NORMAL 25  todo.txt"),
+        ("<Esc>", " NORMAL  todo.txt"),
+        ("2", " NORMAL 2  todo.txt"),
+        ("x", " NORMAL  todo.txt"),
+        ("2", " NORMAL 2  todo.txt"),
+        ("g", " NORMAL 2  todo.txt"),
+        ("<Esc>", " NORMAL  todo.txt"),
+        ("2d", " NORMAL 2  todo.txt"),
+        ("<Esc>", " NORMAL  todo.txt"),
+        ("g2", " NORMAL  todo.txt"),
+        ("z2", " NORMAL  todo.txt"),
+        ("j20", " NORMAL 20  todo.txt"),
+        ("<Esc>", " NORMAL  todo.txt"),
+        ("0", " NORMAL  todo.txt"),
+        ("j99999", " NORMAL 9999  todo.txt"),
+        ("<Esc>", " NORMAL  todo.txt"),
+        ("ggvj3", " VISUAL 3  2 selected"),
+        ("<Esc>", " VISUAL  2 selected"),
+        ("<Esc><C-w>24", " NORMAL 4  todo.txt"),
+        ("<Esc><C-w>32", " NORMAL 2  todo.txt"),
+    ] {
+        keys(&mut model, typed);
+        let line = status_after(&model, 80);
+        assert!(line.starts_with(want), "{typed}: {line}");
+    }
+}
+
+/// Whether the status line says `word`, on a screen `width` wide.
+fn says_at(model: &Model, width: u16, word: &str) -> bool {
+    status_after(model, width).contains(word)
+}
+
+/// Whether the status line says `word`, on a screen wide enough for all.
+fn says(model: &Model, word: &str) -> bool {
+    says_at(model, 200, word)
+}
+
+/// `<Esc>` drops a count first, and the hint says so where it goes, in place
+/// of what `<Esc>` will do next, and goes with the count.
+#[test]
+fn a_count_says_esc_cancels() {
+    let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", "/A<CR>");
+    assert!(says(&model, "<Esc> clear search"));
+    keys(&mut model, "2");
+    assert!(says(&model, "manual  <Esc> cancel  x done"));
+    assert!(!says(&model, "clear search"));
+    keys(&mut model, "<Esc>");
+    assert!(says(&model, "<Esc> clear search"), "the search stays");
+
+    let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", "vj");
+    assert!(says(&model, "<Esc> exit"));
+    keys(&mut model, "3");
+    assert!(says(&model, "manual  <Esc> cancel  x done"));
+    assert!(!says(&model, "<Esc> exit"));
+    keys(&mut model, "<Esc>");
+    assert_eq!(model.mode(), Mode::Visual);
+    assert!(says(&model, "<Esc> exit"));
+}
+
+/// With no `<Esc>` hint before, one comes with the count, first.
+#[test]
+fn a_count_brings_the_esc_hint() {
+    for first in ["", "<C-w>2", "<C-w>3"] {
+        let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", first);
+        assert!(!says(&model, "<Esc>"), "{first}");
+        keys(&mut model, "2");
+        let line = status_after(&model, 200);
+        assert!(line.contains("manual  <Esc> cancel  "), "{first}: {line}");
+        keys(&mut model, "<Esc>");
+        assert!(!says(&model, "<Esc>"), "{first}");
+    }
+}
+
+/// A pending key is dropped first too: the hint that shows says so, and none
+/// comes where none showed, so that `dd` and `gg` do not move the line.
+#[test]
+fn a_pending_key_says_esc_cancels() {
+    let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", "/A<CR>");
+    for first in ["g", "d", "<C-w>"] {
+        keys(&mut model, first);
+        assert!(says(&model, "<Esc> cancel"), "{first}");
+        assert!(!says(&model, "clear search"), "{first}");
+        keys(&mut model, "<Esc>");
+        assert!(says(&model, "<Esc> clear search"), "{first}: stays");
+    }
+    let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", "vj");
+    keys(&mut model, "g");
+    assert!(says(&model, "y yank  <Esc> cancel"), "where it stands");
+    assert!(!says(&model, "<Esc> exit"));
+    keys(&mut model, "<Esc>");
+    assert_eq!(model.mode(), Mode::Visual);
+
+    let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", "");
+    let plain = status_after(&model, 200);
+    keys(&mut model, "g");
+    assert_eq!(status_after(&model, 200), plain);
+    assert_eq!(model.typed_count(), 0);
+}
+
+/// A row with no hints asked for none, and a count adds none to it.
+#[test]
+fn a_count_adds_no_hint_to_an_empty_row() {
+    let (_dir, model) = hinted(("A\n", ""), Some(("normal", &[])), "", "2");
+    assert!(!says(&model, "<Esc>"));
+
+    let only = Some(("normal", &["clear_search"][..]));
+    let (_dir, model) = hinted(("A\n", ""), only, "", "/A<CR>2");
+    assert!(says(&model, "<Esc> cancel"), "its one hint");
+}
+
+/// `<Esc> cancel` makes way for the first hint behind it, which it would
+/// otherwise take off the line, and says nothing untrue meanwhile.
+#[test]
+fn cancel_gives_way_to_the_next_hint() {
+    let (_dir, model) = hinted((STUCK, ""), None, "", "2");
+    assert_eq!(shown_dim(&model, 43), "x done");
+    assert_eq!(shown_dim(&model, 56), "x done t start");
+    assert!(!says_at(&model, 56, "<Esc>"));
+    assert_eq!(shown_dim(&model, 57), "x done");
+    assert!(says_at(&model, 57, "<Esc> cancel"));
+
+    let (_dir, model) = hinted(("A\nAlso A\n", ""), None, "", "/A<CR>2");
+    assert!(says_at(&model, 50, "x done"));
+    assert!(!says_at(&model, 50, "<Esc>"));
+}
+
+/// The drop is the matcher's, whatever is bound: a key that is not `<Esc>`
+/// keeps its word, one that is `<Esc>` or `<C-c>` under any spelling says
+/// cancel, and a binding that a pending key and `<Esc>` make is taken first.
+#[test]
+fn cancel_follows_the_bindings() {
+    let moved = "[normal]\nclear_search = [\"<C-l>\"]\n";
+    let (_dir, model) = hinted(("A\nB\n", ""), None, moved, "/A<CR>2");
+    assert!(says(&model, "manual  <Esc> cancel  <C-l> clear search"));
+
+    let others = [("<esc>", "<esc> cancel"), ("<C-c>", "<C-c> cancel")];
+    for (key, want) in others {
+        let keymap = format!("[normal]\nclear_search = [\"{key}\"]\n");
+        let (_dir, model) = hinted(("A\n", ""), None, &keymap, "/A<CR>2");
+        assert!(says(&model, &format!("manual  {want}  x done")), "{key}");
+        assert!(!says(&model, "clear search"), "{key}");
+        let line = status_after(&model, 200);
+        assert_eq!(line.matches("cancel").count(), 1, "{key}: {line}");
+    }
+
+    let longer = "[normal]\nclear_search = [\"<Esc>\", \"g<Esc>\"]\n";
+    let (_dir, mut model) = hinted(("A\n", ""), None, longer, "/A<CR>g");
+    assert!(says(&model, "<Esc> clear search"));
+    keys(&mut model, "<Esc>");
+    assert!(!says(&model, "clear search"));
+}
+
+/// A key the user gave `stop`: its hint reads the typed count, as the key
+/// does.
+#[test]
+fn a_bound_stop_follows_a_count() {
+    let list = ("Open\nDoing started:2026-09-29T0900Z\n", "");
+    let bound = "[normal]\nstop = [\"S\"]\n";
+    let (dir, mut model) =
+        hinted(list, Some(("normal", &["stop"])), bound, "");
+    let file = dir.path().join("todo.txt");
+    assert_eq!(shown_dim(&model, 200), "S stop");
+    keys(&mut model, "2");
+    assert_eq!(shown_dim(&model, 200), "");
+    let before = fs::read(&file).unwrap_or_else(|e| panic!("{e}"));
+    keys(&mut model, "S");
+    assert_ne!(fs::read(&file).unwrap_or_else(|e| panic!("{e}")), before);
+}
+
+/// A digit is no count in a field, a line or a picker.
+#[test]
+fn a_digit_in_a_field_shows_no_count() {
+    for typed in ["a2", ":2", "/2", "gd2"] {
+        let (_dir, model) = hinted(("A\n", ""), None, "", typed);
+        assert_eq!(model.typed_count(), 0, "{typed}");
+        let line = status_after(&model, 80);
+        let chip = line.trim_start().split(' ').nth(1);
+        assert_eq!(chip, Some(""), "{typed}: {line}");
+    }
+}
+
+/// A count on a window too narrow for it is cut with the mode.
+#[test]
+fn a_count_is_cut_with_the_mode() {
+    let (_dir, model) = hinted(("A\n", ""), None, "", "9999");
+    for (width, want) in [(10, " NORMAL 99"), (4, " NOR")] {
+        assert_eq!(status_after(&model, width), want);
+    }
+}
+
+/// The hints follow the digits: dim over the blocked task, the word over the
+/// open one, and back with `<Esc>`.
+#[test]
+fn the_hints_follow_a_count() {
+    let (_dir, mut model) =
+        hinted(("Blocker id:b\nStuck dep:b\n", ""), None, "", "");
+    assert!(!shown_dim(&model, 200).contains("x done"));
+    keys(&mut model, "2");
+    assert!(shown_dim(&model, 200).contains("x done"));
+    keys(&mut model, "<Esc>");
+    assert!(!shown_dim(&model, 200).contains("x done"));
+    keys(&mut model, "<C-w>2");
+    assert!(!shown_dim(&model, 200).contains("x done"));
+    keys(&mut model, "2");
+    assert!(shown_dim(&model, 200).contains("x done"));
+
+    let (_dir, mut model) =
+        hinted(("x 2026-09-01 Done\nOpen\n", ""), None, "", "");
+    assert!(status_after(&model, 200).contains("x reopen"));
+    keys(&mut model, "2");
+    assert!(status_after(&model, 200).contains("x done"));
+    keys(&mut model, "<Esc>");
+    assert!(status_after(&model, 200).contains("x reopen"));
+}
+
+/// A selection overrides a count over the tasks.
+#[test]
+fn a_selection_overrides_a_count_over_the_hints() {
+    let list = ("A\nBlocker id:b\nStuck dep:b\n", "");
+    let (_dir, model) = hinted(list, None, "", "vj3");
+    assert!(!shown_dim(&model, 200).contains("x done"));
 }
 
 /// No other mode dims: none of its keys is an action the rule can refuse.
@@ -460,10 +698,10 @@ fn a_dim_hint_shifts_nothing() {
     }
 }
 
-/// `LSTY_BENCH_DRAWS` draws of the status line with a whole large list
-/// selected, so that two runs under `perf stat` give the instructions of one.
+/// `LSTY_BENCH_DRAWS` draws of the status line over a whole large list, after
+/// `typed`, so that two runs under `perf stat` give the instructions of one.
 /// `cargo test -p lsty-tui --lib --release -- --ignored status_line_over`.
-fn draws_over_all_of(line: impl Fn(usize) -> String) {
+fn draws_after(typed: &str, line: impl Fn(usize) -> String) {
     #[expect(clippy::disallowed_methods, reason = "a test run by hand")]
     let draws = std::env::var("LSTY_BENCH_DRAWS")
         .ok()
@@ -472,18 +710,30 @@ fn draws_over_all_of(line: impl Fn(usize) -> String) {
     let lines: String = (0..10_000).map(line).collect();
     let dir = workdir(lines);
     let mut model = started(deps(dir.path(), alone()));
-    press(&mut model, "ggVG");
-    assert_eq!(model.rows_of(1).len(), 10_000);
+    press(&mut model, typed);
+    assert!(model.rows_of(model.typed_count()).len() >= 9999);
     let mut buf = Buffer::empty(Rect::new(0, 0, 200, 1));
     for _ in 0..draws {
         model.draw_status(&mut buf, (200, 0));
     }
 }
 
+fn draws_over_all_of(line: impl Fn(usize) -> String) {
+    draws_after("ggVG", line);
+}
+
 #[test]
 #[ignore = "timing, run by hand"]
 fn status_line_over_open_tasks() {
     draws_over_all_of(|i| format!("Task {i} +p{} id:i{i}\n", i % 7));
+}
+
+/// `9999` typed, over a list as long: a summary over them and one over the
+/// cursor task on each draw.
+#[test]
+#[ignore = "timing, run by hand"]
+fn status_line_over_a_count() {
+    draws_after("9999", |i| format!("Task {i} +p{} id:i{i}\n", i % 7));
 }
 
 /// The links of the cursor task are found on each draw.

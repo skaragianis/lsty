@@ -11,7 +11,7 @@ use lsty_core::{
 
 use crate::{
     press::{Answer, Command, Refusal},
-    text::Span,
+    text::{Span, width},
 };
 
 /// The actions of a mode's hints when `[hints]` says nothing.
@@ -122,6 +122,49 @@ pub(crate) fn hints<'a>(
             ])
         })
         .collect()
+}
+
+/// While the matcher has keys or a count to drop, `<Esc>` and `<C-c>` drop
+/// them whatever they are bound to, so their hints say so.
+///
+/// With a count (`room` holds the cells left), one hint says it, first. It
+/// gives way when the next hint would not fit behind it, and a line with no
+/// hints stays without. With only pending keys, each hint changes its word
+/// where it stands.
+pub(crate) fn cancelling<'a>(
+    shown: &mut Vec<[Span<'a>; 3]>,
+    room: Option<usize>,
+) {
+    let drops = |[key, ..]: &[Span<'a>; 3]| {
+        ["<Esc>", "<C-c>"]
+            .iter()
+            .any(|name| key.text.eq_ignore_ascii_case(name))
+    };
+    let says = |key: &Span<'a>| {
+        [
+            Span::new(key.text.clone(), Some(Slot::HintKey)),
+            Span::new(" ", None),
+            Span::new("cancel", Some(Slot::HintDesc)),
+        ]
+    };
+    let Some(room) = room else {
+        for hint in shown.iter_mut().filter(|hint| drops(hint)) {
+            let [key, ..] = &*hint;
+            *hint = says(key);
+        }
+        return;
+    };
+    if shown.is_empty() {
+        return;
+    }
+    let esc = [Span::new("<Esc>", None)];
+    let key = shown.iter().find(|hint| drops(hint));
+    let hint = says(key.map_or(&esc[0], |[key, ..]| key));
+    shown.retain(|hint| !drops(hint));
+    let next = shown.first().map_or(0, |next| 2 + width(next));
+    if 2 + width(&hint) + next <= room {
+        shown.insert(0, hint);
+    }
 }
 
 /// What the hint of `action` says in `mode`: `accept` for a picker's

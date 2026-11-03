@@ -1,0 +1,35 @@
+size 40 10
+start
+keys 2
+frame normal
+keys <Esc><C-w>2
+keys 9999
+frame detail
+keys <Esc>
+status  NORMAL  todo.txt
+-- todo.txt --
+Blocker id:b
+Stuck dep:b
+Other
+-- normal --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  1   Blocker                       b │
+└──────────────────────────────────────┘
+┌[2]─Detail────────────────────────────┐
+│ Blocker id:b                         │
+│ ──────────────────────────────────── │
+│ state  todo                          │
+│ …                                    │
+└──────────────────────────────────────┘
+ NORMAL 2  todo.txt  manual       9.9.9
+-- detail --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  1   Blocker                       b │
+└──────────────────────────────────────┘
+┌[2]─Detail────────────────────────────┐
+│ Blocker id:b                         │
+│ ──────────────────────────────────── │
+│ state  todo                          │
+│ …                                    │
+└──────────────────────────────────────┘
+ NORMAL 9999  todo.txt  manual    9.9.9
