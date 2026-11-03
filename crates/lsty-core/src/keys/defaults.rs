@@ -76,8 +76,9 @@ const NORMAL: &[Entry] = moving![
     (Action::InsertAbove, &["O"]),
     (Action::InsertDependent, &["go"]),
     (Action::InsertPrerequisite, &["gO"]),
-    (Action::CycleState, &["t"]),
-    (Action::Stop, &["T"]),
+    (Action::ToggleStart, &["t"]),
+    (Action::Stop, &[]),
+    (Action::Wontdo, &["T"]),
     (Action::ToggleComplete, &["x", "<Space>"]),
     (Action::Delete, &["dd", "<Del>"]),
     (Action::Yank, &["yy"]),
@@ -119,8 +120,9 @@ const NORMAL: &[Entry] = moving![
 ];
 
 const VISUAL: &[Entry] = moving![
-    (Action::CycleState, &["t"]),
-    (Action::Stop, &["T"]),
+    (Action::ToggleStart, &["t"]),
+    (Action::Stop, &[]),
+    (Action::Wontdo, &["T"]),
     (Action::ToggleComplete, &["x", "<Space>"]),
     (Action::Delete, &["d", "<Del>"]),
     (Action::Yank, &["y"]),

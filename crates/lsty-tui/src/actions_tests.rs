@@ -148,6 +148,7 @@ fn cases() -> Vec<Case> {
         ("t", LIST, "", alone(), "jt"),
         ("x", LIST, "", alone(), "jx"),
         ("T", "A started:2026-09-29T0800Z\nB\n", "", alone(), "T"),
+        ("stop", "A started:2026-09-29T0800Z\nB\n", "", alone(), "t"),
         ("dd", LIST, "", alone(), "jdd"),
         ("2dd", LIST, "", alone(), "j2dd"),
         ("gp", LIST, "", alone(), "jgp"),
@@ -347,17 +348,18 @@ fn the_state_decides_what_t_does() {
     let dir = workdir("A\n");
     let mut model = model_of(dir.path(), alone());
     let mut seen = Vec::new();
-    for _ in 0..4 {
-        press(&mut model, "t");
+    for key in ["t", "t", "t", "x", "t"] {
+        press(&mut model, key);
         seen.push(todo_of(dir.path()));
     }
     assert_eq!(
         seen,
         [
             "A started:2026-09-29T0900Z\n",
-            "x 2026-09-29 A started:2026-09-29T0900Z ended:2026-09-29T0900Z\n",
+            "A\n",
             "A started:2026-09-29T0900Z\n",
             "x 2026-09-29 A started:2026-09-29T0900Z ended:2026-09-29T0900Z\n",
+            "A started:2026-09-29T0900Z\n",
         ]
     );
 }

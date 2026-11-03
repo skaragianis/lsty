@@ -477,8 +477,9 @@ impl Model {
             Action::MoveTaskDown | Action::MoveTaskUp => {
                 self.move_task(action, count);
             }
-            Action::CycleState
+            Action::ToggleStart
             | Action::Stop
+            | Action::Wontdo
             | Action::ToggleComplete
             | Action::CyclePriority
             | Action::CyclePriorityBack => {

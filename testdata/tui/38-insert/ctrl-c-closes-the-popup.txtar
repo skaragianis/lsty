@@ -63,7 +63,7 @@ Write docs +spec01
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 Write docs +spec01 +s  x done  t state  T stop  o new  a append  9.9.9
+ NORMAL  todo.txt  manual  3 Write docs +spec01 +s  x done  t start  T wontdo  o new          9.9.9
 -- a-file --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

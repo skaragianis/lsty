@@ -51,4 +51,4 @@ Buy milk +home t:2026-10-05
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> clear search  x done  t state  T stop  o new  a append  dd delete  u undo  / search        9.9.9
+ NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wontdo  o new  a append  dd delete  u undo  / search      9.9.9

@@ -200,14 +200,14 @@ const ROWS: &[Row] = &[
         mode: Mode::Detail,
         file: "[detail]\ncycle_state = [\"d\"]",
         keys: &["d"],
-        want: &[matched(Action::CycleState, 0)],
+        want: &[matched(Action::ToggleStart, 0)],
     },
     Row {
         case: "a normal key that starts a panel one is hidden by it",
         mode: Mode::Detail,
-        file: "[detail]\ncycle_state = [\"ddd\"]",
+        file: "[detail]\ntoggle_start = [\"ddd\"]",
         keys: &["d", "d", "d"],
-        want: &[PENDING, PENDING, matched(Action::CycleState, 0)],
+        want: &[PENDING, PENDING, matched(Action::ToggleStart, 0)],
     },
     Row {
         case: "a count in the panel",

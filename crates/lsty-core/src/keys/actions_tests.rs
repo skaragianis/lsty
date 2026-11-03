@@ -57,6 +57,7 @@ fn names_are_unique_and_round_trip() {
         assert_eq!(Action::from_name(a.name()), Some(*a));
         assert_eq!(a.to_string(), a.name());
     }
+    assert_eq!(Action::from_name("cycle_state"), Some(Action::ToggleStart));
     assert_eq!(Action::from_name("frobnicate"), None);
     assert_eq!(Action::from_name("Quit"), None);
 }
@@ -76,8 +77,9 @@ const MOTION: &[Action] = &[
 ];
 const TASK: &[Action] = &[
     Action::ToggleComplete,
-    Action::CycleState,
+    Action::ToggleStart,
     Action::Stop,
+    Action::Wontdo,
     Action::Delete,
     Action::Yank,
     Action::CyclePriority,

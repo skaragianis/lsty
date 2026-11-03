@@ -38,7 +38,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added as id:t001: New task  x done  t state  T stop  o new       9.9.9
+ NORMAL  todo.txt  manual  2 added as id:t001: New task  x done  t start  T wontdo  o new     9.9.9
 -- a-file --
 A
 2026-09-29 New task id:t001

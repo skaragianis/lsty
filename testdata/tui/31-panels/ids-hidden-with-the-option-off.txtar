@@ -24,7 +24,7 @@ Buy milk
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wontdo  9.9.9
 -- hidden --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Write parser +work                                  │
@@ -33,7 +33,7 @@ Buy milk
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wontdo  9.9.9
 -- shown-again --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Write parser +work                                p │
@@ -42,4 +42,4 @@ Buy milk
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wontdo  9.9.9

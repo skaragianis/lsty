@@ -76,6 +76,14 @@ pub(crate) fn archived_task(name: &str) -> String {
     format!("{name} is archived — x restores it")
 }
 
+/// The refusal of `T` on the one done task named `name`.
+pub(crate) fn done_task(name: &str) -> String {
+    format!("{name} is done, not won't do — x reopens it")
+}
+
+pub(crate) const DONE_TASKS: &str =
+    "some are done, not won't do — nothing changed";
+
 /// The refusal of a new task that waits for the archived task named
 /// `name`, which has no id.
 pub(crate) fn archived_no_id(name: &str) -> String {

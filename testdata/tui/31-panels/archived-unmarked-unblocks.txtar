@@ -14,4 +14,4 @@ Draft id:draft
 │  1   Write the report dep:draft                          │
 │    ✓ Draft                                         draft │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t state  T stop    9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wontdo  9.9.9
