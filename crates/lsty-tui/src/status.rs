@@ -66,7 +66,7 @@ impl Model {
         let taken = self.version_room(used, w);
         let room = w - taken;
         let label = |action| {
-            let answer = decide(action, &summary);
+            let answer = decide(action, self, &summary);
             Some((label(table, action, accept, answer)?, dim(answer)))
         };
         for hint in hints(table, configured, keys, hidden, label) {

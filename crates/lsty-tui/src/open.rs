@@ -5,15 +5,13 @@ use std::{ffi::OsStr, os::unix::ffi::OsStrExt as _, path::Path};
 
 use lsty_core::{
     errs::lossy_path,
+    keys::Action,
     links::{self, Kind, Link, editor_command},
 };
 
 use crate::{
     focus::Focus, hit::Target, model::Model, msg::Cmd, picker::Picker,
 };
-
-/// What the status line says about a task without links.
-const NO_LINK: &str = "no link on this task";
 
 /// The sign of a file that exists or does not.
 pub(crate) fn exists_mark(exists: bool) -> &'static str {
@@ -36,19 +34,17 @@ impl Model {
     /// `open_link`: opens the numbered link when there is a count, else
     /// the only one, else asks which.
     pub(crate) fn open_link(&mut self, count: usize) -> Vec<Cmd> {
-        if self.cursor >= self.rows.len() {
+        if self.refused(Action::OpenLink, 1) {
             return Vec::new();
         }
         let links = self.cursor_links();
-        if links.is_empty() {
-            self.message = Some(NO_LINK.to_owned());
-        } else if count > 0 {
+        if count > 0 {
             return self.open_number(&links, count);
-        } else if links.len() == 1 {
-            return self.open_number(&links, 1);
-        } else {
-            self.opening = Some(Picker::new(links));
         }
+        if links.len() == 1 {
+            return self.open_number(&links, 1);
+        }
+        self.opening = Some(Picker::new(links));
         Vec::new()
     }
 

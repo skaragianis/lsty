@@ -14,7 +14,7 @@ use lsty_core::{
 
 use crate::{
     actions::Chosen, history::Again, insert::first_touched, messages,
-    model::Model, msg::Cmd, track::Remap,
+    model::Model, msg::Cmd, press::Refusal, track::Remap,
 };
 
 /// A line of the last yank, and the dependents a delete of it unlinked.
@@ -151,10 +151,10 @@ impl Model {
     /// `yank`: copies the tasks to the clipboard and keeps them as the
     /// last yank. In VISUAL mode the selection ends.
     pub(crate) fn yank(&mut self, count: usize) -> Vec<Cmd> {
-        let ids = self.tasks_of(count);
-        if ids.is_empty() {
+        if self.refused(Action::Yank, count) {
             return Vec::new();
         }
+        let ids = self.tasks_of(count);
         let yank = Yank::of(&self.snap, &ids);
         let (text, n) = (yank.text.clone(), yank.lines.len());
         self.ending(&ids, |m| {
@@ -212,8 +212,7 @@ impl Model {
     /// to the task under the cursor, in one write.
     pub(crate) fn paste_tasks(&mut self, action: Action) {
         let Some(source) = self.paste_source() else {
-            self.message = Some(messages::NOTHING_TO_PASTE.to_owned());
-            return;
+            return self.refuse(Refusal::Says(messages::NO_PASTE), &[]);
         };
         let place = self.paste_place(action);
         let result =

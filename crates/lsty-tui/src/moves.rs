@@ -9,11 +9,11 @@ use lsty_core::{
 };
 
 use crate::{
-    actions::{Chosen, archived_refusal},
+    actions::Chosen,
     counts::ids_of,
     history::Again,
-    messages,
     model::Model,
+    press::{Answer, Summary, decide},
 };
 
 impl Model {
@@ -25,14 +25,10 @@ impl Model {
             self.move_rows(action, lo, hi);
             return;
         }
-        let Some(row) = self.rows.get(self.cursor) else {
-            return;
-        };
-        let ids = [row.id];
         let down = action == Action::MoveTaskDown;
         let again = Again::Task { action, count };
         let past = |m: &Self| m.neighbour(count.max(1), down);
-        self.reorder_past(&ids, down, past, again);
+        self.reorder_past((self.cursor, self.cursor), down, past, again);
     }
 
     /// Moves the rows `lo` to `hi` past the next shown row, and tells
@@ -44,16 +40,12 @@ impl Model {
         } else {
             lo.checked_sub(1)
         };
-        let ids = ids_of(self.rows_between(lo, hi));
         let again = Again::Block {
             action,
-            count: ids.len(),
+            count: hi - lo + 1,
         };
-        let past = |m: &Self| {
-            let row = m.rows.get(next?)?;
-            (row.source != Source::Done).then_some(row.id)
-        };
-        self.reorder_past(&ids, down, past, again);
+        let past = |m: &Self| Some(m.rows.get(next?)?.id);
+        self.reorder_past((lo, hi), down, past, again);
     }
 
     /// `.` after a block move: `count` rows from the cursor move as one
@@ -66,23 +58,21 @@ impl Model {
         self.move_rows(action, self.cursor, self.cursor + n - 1);
     }
 
-    /// Moves `ids` past the task that `past` finds, in one write, unless
-    /// the view is sorted, a task is archived or there is none; it
-    /// then sets what `.` repeats.
+    /// Moves the rows `lo` to `hi` past the task that `past` finds, in one
+    /// write, unless the rule refuses; it then sets what `.` repeats.
     fn reorder_past(
         &mut self,
-        ids: &[TaskId],
+        (lo, hi): (usize, usize),
         down: bool,
         past: impl FnOnce(&Self) -> Option<TaskId>,
         again: Again,
     ) {
-        if self.sorted() {
-            self.message = Some(messages::sorted(self.sort.name()));
-            return;
-        }
-        let tasks = self.chosen(ids);
-        if let Some(text) = archived_refusal(&tasks) {
-            self.alert(text);
+        let rows = self.rows_between(lo, hi);
+        let s = Summary::of(&self.snap, lo, rows);
+        let answer = decide(again.action(), self, &s);
+        let tasks = self.chosen(&ids_of(rows));
+        if let Answer::Refused(why) = answer {
+            self.refuse(why, &tasks);
             return;
         }
         let Some(past) = past(self) else {

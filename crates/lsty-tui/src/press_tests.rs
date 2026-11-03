@@ -2,24 +2,25 @@
 //! Prompts open rather than write, `+` and `-` step each task from its own
 //! priority, and the claim memory of `t` has frames of its own.
 
-use std::{fs, path::Path};
+use std::{cell::Cell, fs, path::Path, rc::Rc};
 
 use lsty_core::{
     config::{Config, Hidden},
     dates::Clock,
     errs::{self, Code},
-    keys::Action,
+    keys::{Action, Mode},
     ops::{self, ClaimOpts, DoOpts, Outcome, PriPair, StartOpts, Target},
 };
 use tempfile::TempDir;
 
 use crate::{
     actions::{Chosen, stepped},
+    deps::Deps,
     hints::dim,
     messages::Tone,
     model::Model,
     press::{Answer, Command, Refusal, decide},
-    test_util::{alone, deps, press, started, workdir},
+    test_util::{Board, alone, deps, keys, press, started, workdir},
 };
 
 /// The tasks, in the order of the rows. The first stays in the list, since
@@ -226,7 +227,7 @@ impl Pressed<'_> {
 fn check(key: (Action, &str, &str), way: Way, kinds: &[usize]) {
     let name = format!("{} {way:?} {kinds:?}", key.1);
     let (dir, mut model, count) = begin(way, kinds);
-    let answer = decide(key.0, &model.summary(count));
+    let answer = decide(key.0, &model, &model.summary(count));
     let before = files(dir.path());
     send(&mut model, key, way, kinds.len());
     let after = files(dir.path());
@@ -255,7 +256,7 @@ fn check(key: (Action, &str, &str), way: Way, kinds: &[usize]) {
 fn check_prompt(way: Way, kinds: &[usize]) {
     let name = format!("gd {way:?} {kinds:?}");
     let (dir, mut model, count) = begin(way, kinds);
-    let answer = decide(Action::SetDue, &model.summary(count));
+    let answer = decide(Action::SetDue, &model, &model.summary(count));
     let before = files(dir.path());
     match way {
         Way::Selection => press(&mut model, "gd"),
@@ -335,6 +336,391 @@ fn a_prompt_opens_as_the_rule_says() {
     }
 }
 
+/// A model of `todo` and `done` with the detail panel on, whose clipboard is
+/// `board`, and how many times its opener ran. `<C-x>` discards a draft, which
+/// no default key does.
+fn watched(
+    (todo, done): (&str, &str),
+    board: &Board,
+) -> (TempDir, Model, Rc<Cell<usize>>) {
+    let dir = workdir(todo);
+    fs::write(dir.path().join("done.txt"), done)
+        .unwrap_or_else(|e| panic!("{e}"));
+    fs::write(
+        dir.path().join("keys.toml"),
+        "[insert]\ncancel = [\"<C-x>\"]\n",
+    )
+    .unwrap_or_else(|e| panic!("{e}"));
+    let opened = Rc::new(Cell::new(0));
+    let runs = Rc::clone(&opened);
+    let deps = Deps {
+        clipboard: Box::new(board.clone()),
+        opener: Box::new(move |_| {
+            runs.set(runs.get() + 1);
+            Ok(())
+        }),
+        ..deps(
+            dir.path(),
+            Config {
+                show_detail: true,
+                show_sidebar: true,
+                ..config()
+            },
+        )
+    };
+    (dir, started(deps), opened)
+}
+
+/// All a key that is lit can do: write, fill the clip, open a field or run
+/// the opener.
+type Effect = ([Vec<u8>; 2], String, bool, usize);
+
+fn effect(dir: &Path, model: &Model, opened: &Cell<usize>) -> Effect {
+    let field = model.edit.is_some() || model.line.is_some();
+    let clip = format!("{:?}", model.clip);
+    (files(dir), clip, field, opened.get())
+}
+
+const TODO: &str = "A\n";
+const TWO: &str = "A\nB\n";
+const THREE: &str = "A\nB\nC\n";
+const FOUR: &str = "A\nB\nC\nD\n";
+const MIXED: &str = "A\nB\nx 2026-09-01 D\nC\n";
+const OLD: &str = "x 2026-09-01 Old\n";
+const OLD_ID: &str = "x 2026-09-01 Old id:o\n";
+const DONE: &str = "x 2026-09-01 Done\n";
+const LINK: &str = "Read https://x.org/a\n";
+const OLD_LINK: &str = "x 2026-09-01 Read https://x.org/a\n";
+const STUCK: &str = "Plain\nBlocker id:b\nStuck dep:b\n";
+
+/// A state of a key: its files, what is typed first, whether its hint is dim.
+type Case = (&'static str, &'static str, &'static str, bool);
+
+/// A key and its action, with its states.
+type KeyCases = (Action, &'static str, &'static [Case]);
+
+/// Each key, in NORMAL or VISUAL as the first keys leave it and again in the
+/// detail panel where it has that key: the hint is dim and the key has no
+/// effect, or lit and it has one.
+#[test]
+#[expect(clippy::too_many_lines, reason = "a table")]
+fn the_keys_that_write_no_task_do_what_their_hint_says() {
+    use Action::{
+        ChangeDescription as Cc, EditAppend, EditDescription, EditLineStart,
+        InsertDependent as Go, InsertPrerequisite as Prerequisite,
+        MoveTaskDown as Down, MoveTaskUp as Up, OpenLink, PasteAbove,
+        PasteBelow, Redo, Repeat, Undo, Yank,
+    };
+    const PASTES: &[Case] = &[
+        (TODO, "", "", true),
+        (TODO, "", "yy", false),
+        (TODO, OLD, "yyj", false),
+        (TODO, "", "yydd", false),
+        ("", OLD, "yy", false),
+    ];
+    const FIELDS: &[Case] = &[
+        (TODO, "", "", false),
+        (DONE, "", "", false),
+        ("", OLD, "", true),
+        (TODO, OLD, "j", true),
+    ];
+    const MOVES_DOWN: &[Case] = &[
+        ("", "", "", true),
+        (TWO, "", "", false),
+        (TODO, "", "", true),
+        (TODO, OLD, "", true),
+        ("", OLD, "", true),
+        (TWO, OLD, "j", true),
+        (TWO, "", "s", true),
+        ("x 2026-09-01 A\nB\n", "", "", false),
+        (THREE, "", "vj", false),
+        (TWO, "", "vj", true),
+        (TODO, OLD, "vj", true),
+        (THREE, "", "svj", true),
+    ];
+    const MOVES_UP: &[Case] = &[
+        ("", "", "", true),
+        (TWO, "", "", true),
+        (TWO, "", "j", false),
+        (TWO, OLD, "jj", true),
+        (TWO, "", "sj", true),
+        (THREE, "", "jvj", false),
+        (THREE, "", "vj", true),
+        (TODO, OLD, "vj", true),
+    ];
+    let rows: [KeyCases; 17] = [
+        (
+            Undo,
+            "u",
+            &[
+                (TODO, "", "", true),
+                (TODO, "", "x", false),
+                (TODO, "", "xu", true),
+                (TODO, "", "aZ<C-x>", false),
+            ],
+        ),
+        (
+            Redo,
+            "<C-r>",
+            &[
+                (TODO, "", "", true),
+                (TODO, "", "x", true),
+                (TODO, "", "xu", false),
+            ],
+        ),
+        (PasteBelow, "p", PASTES),
+        (PasteAbove, "P", PASTES),
+        (
+            Repeat,
+            ".",
+            &[
+                (TODO, "", "", true),
+                (TWO, "", "x", false),
+                (STUCK, "", "xjj", true),
+                (TWO, "", "xk", false),
+                (TODO, OLD, "xj", false),
+                (TODO, OLD, "Tj", true),
+                (TWO, "", "gtk:v<CR>j", false),
+                (TODO, OLD, "gtk:v<CR>j", true),
+                (TWO, "", "gd2030-01-01<CR>j", false),
+                (TODO, OLD, "gd2030-01-01<CR>j", true),
+                (THREE, "", "J", false),
+                (TWO, "", "J", true),
+                (TODO, "", "yyp", false),
+                (MIXED, "", "2TGk", false),
+                (MIXED, "", "vjTGk", false),
+                (TWO, OLD, "2gtk:v<CR>j", true),
+                (TWO, OLD, "vjgtk:v<CR>j", true),
+                (FOUR, "", "vjJ<Esc>gg", false),
+                (THREE, "", "vjJ<Esc>Gk", true),
+                (FOUR, "", "3Jgg", false),
+                (THREE, "", "5Jgg", false),
+                (THREE, OLD, "3Jgg", false),
+                (TWO, OLD, "3J", true),
+            ],
+        ),
+        (Down, "J", MOVES_DOWN),
+        (Up, "K", MOVES_UP),
+        (EditDescription, "i", FIELDS),
+        (EditAppend, "a", FIELDS),
+        (EditLineStart, "I", FIELDS),
+        (Cc, "cc", FIELDS),
+        (
+            Prerequisite,
+            "gO",
+            &[
+                ("", "", "", false),
+                (TODO, "", "", false),
+                (DONE, "", "", false),
+                ("", OLD, "", true),
+                (TODO, OLD, "j", true),
+            ],
+        ),
+        (
+            Go,
+            "go",
+            &[
+                ("", "", "", false),
+                (TODO, "", "", false),
+                ("", OLD_ID, "", false),
+                ("", OLD, "", true),
+                (TODO, OLD, "j", true),
+            ],
+        ),
+        (
+            OpenLink,
+            "gx",
+            &[
+                ("", "", "", true),
+                (TODO, "", "", true),
+                (LINK, "", "", false),
+                ("", OLD_LINK, "", false),
+                ("", OLD, "", true),
+            ],
+        ),
+        (
+            Yank,
+            "yy",
+            &[
+                ("", "", "", true),
+                (TODO, "", "", false),
+                ("", OLD, "", false),
+            ],
+        ),
+        (
+            Yank,
+            "y",
+            &[(TODO, "", "v", false), (TWO, OLD, "vjj", false)],
+        ),
+        (
+            OpenLink,
+            "<CR>",
+            &[
+                (LINK, "", "<C-w>2", false),
+                (TODO, "", "<C-w>2", true),
+                ("", "", "<C-w>2", true),
+            ],
+        ),
+    ];
+    let mut detail = 0;
+    for (action, key, cases) in rows {
+        for case in cases {
+            agrees(action, key, case, false);
+            detail += usize::from(agrees(action, key, case, true));
+        }
+    }
+    assert!(detail > 40, "{detail}");
+}
+
+fn before_the_key(model: &mut Model, first: &str) {
+    if !first.is_empty() {
+        keys(model, first);
+    }
+}
+
+/// One key in one state against its hint, and whether it could be asked: the
+/// detail panel opens from NORMAL only, on a task, and has not every key.
+fn agrees(action: Action, key: &str, case: &Case, in_detail: bool) -> bool {
+    let &(todo, done, first, want) = case;
+    let name = format!("{key} on {todo:?} {done:?} after {first} {in_detail}");
+    let board = Board::default();
+    let (dir, mut model, opened) = watched((todo, done), &board);
+    before_the_key(&mut model, first);
+    if in_detail {
+        let bound = model.deps.keys.keys(Mode::Detail, action);
+        if model.mode() != Mode::Normal || !bound.contains(&key) {
+            return false;
+        }
+        keys(&mut model, "<C-w>2");
+        if model.key_mode() != Mode::Detail {
+            return false;
+        }
+    }
+    let answer = decide(action, &model, &model.summary(1));
+    assert_eq!(dim(answer), want, "{name}: {answer:?}");
+    let before = effect(dir.path(), &model, &opened);
+    keys(&mut model, key);
+    let after = effect(dir.path(), &model, &opened);
+    assert_eq!(after == before, want, "{name}: {answer:?}");
+    true
+}
+
+/// A listed difference of hint and key: a field key on no task is lit as every
+/// key is there, and does nothing.
+#[test]
+fn a_field_key_on_no_task_is_lit_and_does_nothing() {
+    for key in ["i", "a", "I", "cc"] {
+        let (dir, mut model, opened) = watched(("", ""), &Board::default());
+        let before = effect(dir.path(), &model, &opened);
+        assert!(!dim(decide(
+            key_action(&model, key),
+            &model,
+            &model.summary(1)
+        )));
+        keys(&mut model, key);
+        assert_eq!(effect(dir.path(), &model, &opened), before, "{key}");
+    }
+}
+
+/// A listed difference: so is a `.` of a key that is lit on no task.
+#[test]
+fn a_repeat_on_no_task_is_lit_and_does_nothing() {
+    let (dir, mut model, _opened) = watched((TODO, ""), &Board::default());
+    keys(&mut model, "dd");
+    let before = files(dir.path());
+    assert!(!dim(decide(Action::Repeat, &model, &model.summary(1))));
+    keys(&mut model, ".");
+    assert_eq!(files(dir.path()), before, "a . of dd on no task");
+}
+
+/// The listed differences of `p`: the clipboard is not read for a hint, since
+/// that runs a program, so what it holds can surprise the hint both ways.
+#[test]
+fn a_paste_reads_a_clipboard_its_hint_does_not() {
+    let board = Board::default();
+    board.set("Foreign");
+    let (dir, mut model, _opened) = watched((TODO, ""), &board);
+    assert!(dim(decide(Action::PasteBelow, &model, &model.summary(1))));
+    let before = files(dir.path());
+    keys(&mut model, "p");
+    assert_ne!(files(dir.path()), before, "foreign text is pasted");
+
+    let (dir, mut model, _opened) = watched((TODO, ""), &board);
+    keys(&mut model, "yy");
+    board.set("  ");
+    assert!(!dim(decide(Action::PasteBelow, &model, &model.summary(1))));
+    let before = files(dir.path());
+    keys(&mut model, "p");
+    assert_eq!(files(dir.path()), before, "blank text is not");
+    assert_eq!(model.message.as_deref(), Some("nothing to paste"));
+}
+
+/// The action `key` runs in NORMAL mode.
+fn key_action(model: &Model, key: &str) -> Action {
+    let found = Action::ALL.iter().find(|action| {
+        let keys = model.deps.keys.keys(Mode::Normal, **action);
+        keys.contains(&key)
+    });
+    *found.unwrap_or_else(|| panic!("{key}"))
+}
+
+/// What each key says when the rule refuses it, and in which style. Now that
+/// they ask the rule, a refusal must still reach the status line as before.
+#[test]
+fn a_refused_key_says_what_it_always_said() {
+    const ONE: &str = "Old is archived — x restores it";
+    const NO_ID: &str = "Old is archived and has no id — x restores it first";
+    const MANY: &str = "the selection has archived tasks — nothing changed";
+    const SORTED: &str = "sorted by priority — press s for manual order";
+    let rows = [
+        ("", OLD, "", "a", ONE, true),
+        ("", OLD, "", "i", ONE, true),
+        ("", OLD, "", "I", ONE, true),
+        ("", OLD, "", "cc", ONE, true),
+        ("", OLD, "", "gO", ONE, true),
+        ("", OLD, "", "J", ONE, true),
+        ("", OLD, "", "K", ONE, true),
+        ("", OLD, "v", "J", ONE, true),
+        ("", OLD, "", "go", NO_ID, true),
+        (TODO, OLD, "vj", "J", MANY, true),
+        (TODO, OLD, "vj", "K", MANY, true),
+        (TWO, "", "s", "J", SORTED, false),
+        ("", OLD, "s", "K", SORTED, false),
+        (TODO, "", "", "u", "nothing to undo", false),
+        (TODO, "", "", "<C-r>", "nothing to redo", false),
+        (TODO, "", "", "p", "nothing to paste", false),
+        (TODO, "", "", "gx", "no link on this task", false),
+        (TODO, OLD, "gtk:v<CR>j", ".", ONE, true),
+    ];
+    for (todo, done, first, key, said, alert) in rows {
+        let name = format!("{key} on {todo:?} {done:?} after {first}");
+        let (dir, mut model, _opened) =
+            watched((todo, done), &Board::default());
+        before_the_key(&mut model, first);
+        let before = files(dir.path());
+        keys(&mut model, key);
+        assert_eq!(model.message.as_deref(), Some(said), "{name}");
+        assert_eq!(model.tone == Tone::Alert, alert, "{name}");
+        assert_eq!(files(dir.path()), before, "{name}");
+    }
+}
+
+/// A key with nothing to work on says nothing at all.
+#[test]
+fn a_key_with_nothing_to_work_on_says_nothing() {
+    for key in ["yy", "J", "K", "gx", "."] {
+        let (_dir, mut model, _opened) = watched(("", ""), &Board::default());
+        keys(&mut model, key);
+        assert_eq!(model.message, None, "{key}");
+    }
+    for key in ["J", "K"] {
+        let (_dir, mut model, _opened) =
+            watched((TODO, ""), &Board::default());
+        keys(&mut model, key);
+        assert_eq!(model.message, None, "{key}");
+    }
+}
+
 type Rule = (Action, &'static [usize], Answer);
 
 /// The rule, as the kinds of `KINDS` name the tasks.
@@ -389,7 +775,7 @@ fn the_rule() {
     ];
     for (action, kinds, want) in rows {
         let (_dir, model, count) = begin(Way::Count, kinds);
-        let got = decide(action, &model.summary(count));
+        let got = decide(action, &model, &model.summary(count));
         assert_eq!(got, want, "{action:?} {kinds:?}");
     }
 }
@@ -497,7 +883,7 @@ fn a_dim_t_still_puts_a_claim_back() {
     );
     let mut model = started(deps(dir.path(), config()));
     press(&mut model, "jt");
-    let answer = decide(Action::ToggleStart, &model.summary(1));
+    let answer = decide(Action::ToggleStart, &model, &model.summary(1));
     assert_eq!(answer, Answer::CoreRefuses(Command::Start));
     assert!(dim(answer));
     let before = files(dir.path());
@@ -519,7 +905,7 @@ fn a_doing_task_that_is_blocked() {
     let mut model = started(deps(dir.path(), config()));
     press(&mut model, "j");
     assert_eq!(
-        decide(Action::ToggleComplete, &model.summary(1)),
+        decide(Action::ToggleComplete, &model, &model.summary(1)),
         Answer::CoreRefuses(Command::Do)
     );
     for (typed, says, writes) in rows {

@@ -90,8 +90,11 @@ pub(crate) fn archived_no_id(name: &str) -> String {
 pub(crate) const STICKY: &str =
     "hidden by current filters in 2 seconds or at the next key";
 
-/// What the status line says when there is nothing to paste.
-pub(crate) const NOTHING_TO_PASTE: &str = "nothing to paste";
+/// What the status line says about a task without links.
+pub(crate) const NO_LINK: &str = "no link on this task";
+
+/// What the status line says with no yank and nothing in the clipboard.
+pub(crate) const NO_PASTE: &str = "nothing to paste";
 
 /// What the status line adds when the clipboard could not be read and
 /// the last yank was pasted.

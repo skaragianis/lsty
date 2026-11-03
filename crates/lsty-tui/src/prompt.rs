@@ -14,7 +14,7 @@ use lsty_core::{
 use ratatui::{layout::Rect, style::Style};
 
 use crate::{
-    actions::{Chosen, places, refusal},
+    actions::{Chosen, places},
     cmdpool::filter_span,
     complete::ring,
     counts::ids_of,
@@ -49,7 +49,7 @@ pub(crate) enum Kind {
 
 impl Kind {
     /// The action that opens the prompt.
-    const fn action(self) -> Action {
+    pub(crate) const fn action(self) -> Action {
         match self {
             Self::SetDue => Action::SetDue,
             Self::AddTag => Action::AddTag,
@@ -188,7 +188,7 @@ impl Model {
     /// Opens the prompt of `kind` on the task under the cursor, or
     /// `count` tasks from it, unless one of them is archived.
     pub(crate) fn open_prompt(&mut self, kind: Kind, count: usize) {
-        let answer = decide(kind.action(), &self.summary(count));
+        let answer = decide(kind.action(), self, &self.summary(count));
         let tasks = self.tasks_of(count);
         let count = self.count_for(count, tasks.len());
         let chosen = self.chosen(&tasks);
@@ -196,7 +196,7 @@ impl Model {
             return;
         }
         if let Answer::Refused(why) = answer {
-            self.alert(refusal(why, &chosen));
+            self.refuse(why, &chosen);
             return;
         }
         let places = places(&self.snap, &tasks);
@@ -288,13 +288,14 @@ impl Model {
         text: &str,
     ) {
         let rows = self.picked_rows(count);
-        let answer = decide(kind.action(), &Summary::of(&self.snap, rows));
+        let s = Summary::of(&self.snap, self.cursor, rows);
+        let answer = decide(kind.action(), self, &s);
         let chosen = self.chosen(&ids_of(rows));
         if chosen.is_empty() {
             return;
         }
         if let Answer::Refused(why) = answer {
-            self.alert(refusal(why, &chosen));
+            self.refuse(why, &chosen);
             return;
         }
         let result = self.attempt(|env| write(env, kind, &chosen, text));

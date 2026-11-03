@@ -12,7 +12,7 @@ use ratatui::{
 use tempfile::TempDir;
 
 use crate::{
-    hints::{defaults, warnings},
+    hints::{defaults, label, warnings},
     model::Model,
     msg::Msg,
     press::{Answer, decide},
@@ -223,14 +223,16 @@ const DONE: &str = "x 2026-09-01 Done\n";
 #[test]
 fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
     let rows = [
-        ("no task", "", "", "", ""),
-        ("todo", "A\n", "", "", ""),
-        ("doing", "A started:2026-09-29T0800Z\n", "", "", ""),
-        ("blocked", STUCK, "", "j", "x done t start"),
-        ("blocked doing", STUCK_DOING, "", "j", "x done"),
-        ("done", DONE, "", "", "T wont"),
-        ("won't do", SKIP, "", "", ""),
-        ("archived", "", OLD, "", "T wont dd delete"),
+        ("no task", "", "", "", "u undo"),
+        ("todo", "A\n", "", "", "u undo"),
+        ("after a write", "A\n", "", "x", "T wont"),
+        ("after an undo", "A\n", "", "xu", "u undo"),
+        ("doing", "A started:2026-09-29T0800Z\n", "", "", "u undo"),
+        ("blocked", STUCK, "", "j", "x done t start u undo"),
+        ("blocked doing", STUCK_DOING, "", "j", "x done u undo"),
+        ("done", DONE, "", "", "T wont u undo"),
+        ("won't do", SKIP, "", "", "u undo"),
+        ("archived", "", OLD, "", "T wont a append dd delete u undo"),
         ("visual todo", "A\nB\n", "", "vj", ""),
         ("visual blocked", STUCK, "", "vj", "x done t start"),
         (
@@ -255,9 +257,10 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
             "vj",
             "x done t start T wont d delete",
         ),
-        ("detail todo", "A\n", "", "<C-w>2", ""),
-        ("detail blocked", STUCK, "", "j<C-w>2", "x done"),
-        ("detail archived", "", OLD, "<C-w>2", "dd delete"),
+        ("detail todo", "A\n", "", "<C-w>2", "<CR> link"),
+        ("detail link", "A https://x.org\n", "", "<C-w>2", ""),
+        ("detail blocked", STUCK, "", "j<C-w>2", "<CR> link x done"),
+        ("detail archived", "", OLD, "<C-w>2", "<CR> link dd delete"),
     ];
     for (name, todo, done, typed, want) in rows {
         let (_dir, model) = hinted((todo, done), None, "", typed);
@@ -299,6 +302,129 @@ fn the_configured_hints_are_dim_by_the_same_rule() {
     }
 }
 
+/// The keys that write no task, listed in `[hints]`, dim by the same rule in
+/// the three modes.
+#[test]
+#[expect(clippy::too_many_lines, reason = "a table")]
+fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
+    const NORMAL: &[&str] = &[
+        "undo",
+        "redo",
+        "paste_below",
+        "paste_above",
+        "repeat",
+        "edit_description",
+        "edit_append",
+        "edit_line_start",
+        "change_description",
+        "insert_dependent",
+        "insert_prerequisite",
+        "open_link",
+        "yank",
+        "move_task_down",
+        "move_task_up",
+    ];
+    const VISUAL: &[&str] = &["yank", "move_task_down", "move_task_up"];
+    const NONE: &str = "u undo <C-r> redo p paste P paste above . repeat";
+    let rows = [
+        (
+            "todo alone",
+            "normal",
+            NORMAL,
+            "A\n",
+            "",
+            "",
+            format!("{NONE} gx link J move down K move up"),
+        ),
+        (
+            "no task",
+            "normal",
+            NORMAL,
+            "",
+            "",
+            "",
+            format!("{NONE} gx link yy yank J move down K move up"),
+        ),
+        (
+            "after a yank and a write, with a link and a row to pass",
+            "normal",
+            NORMAL,
+            "A https://x.org\nB\n",
+            "",
+            "yyxk",
+            "<C-r> redo K move up".to_owned(),
+        ),
+        (
+            "archived",
+            "normal",
+            NORMAL,
+            "",
+            OLD,
+            "",
+            format!(
+                "{NONE} i edit a append I line start cc change \
+                 go new waiting gO new blocker gx link J move down K move up"
+            ),
+        ),
+        (
+            "detail, archived",
+            "detail",
+            NORMAL,
+            "",
+            OLD,
+            "<C-w>2",
+            format!(
+                "{NONE} i edit a append I line start cc change \
+                 go new waiting gO new blocker <CR> link J move down K move up"
+            ),
+        ),
+        (
+            "visual, a row each way",
+            "visual",
+            VISUAL,
+            "A\nB\nC\n",
+            "",
+            "jv",
+            String::new(),
+        ),
+        (
+            "visual, the whole list",
+            "visual",
+            VISUAL,
+            "A\nB\n",
+            "",
+            "vj",
+            "J move down K move up".to_owned(),
+        ),
+        (
+            "visual, sorted",
+            "visual",
+            VISUAL,
+            "A\nB\nC\n",
+            "",
+            "sjv",
+            "J move down K move up".to_owned(),
+        ),
+    ];
+    for (name, mode, names, todo, done, typed, want) in rows {
+        let hints = Some((mode, names));
+        let (_dir, model) = hinted((todo, done), hints, "", typed);
+        assert_eq!(shown_dim(&model, 300), want, "{name}");
+    }
+}
+
+/// `.` of a key that takes another word keeps its own.
+#[test]
+fn a_repeat_keeps_its_own_word() {
+    let (_dir, model) = hinted(("A\n", ""), None, "", "x");
+    let answer = decide(Action::Repeat, &model, &model.summary(1));
+    let word = label(Mode::Normal, Action::Repeat, "open", answer);
+    assert_eq!(word, Some(Action::Repeat.hint()));
+    let answer = decide(Action::ToggleComplete, &model, &model.summary(1));
+    let word = label(Mode::Normal, Action::ToggleComplete, "open", answer);
+    assert_eq!(word, Some("reopen"));
+}
+
 /// No other mode dims: none of its keys is an action the rule can refuse.
 #[test]
 fn other_modes_never_dim() {
@@ -310,7 +436,7 @@ fn other_modes_never_dim() {
         }
         for action in Action::ALL {
             let keyed = !model.deps.keys.keys(mode, *action).is_empty();
-            let answer = decide(*action, &summary);
+            let answer = decide(*action, &model, &summary);
             assert!(!keyed || answer == Answer::Applies, "{action:?}");
         }
     }
@@ -321,8 +447,8 @@ fn other_modes_never_dim() {
 fn a_dim_hint_shifts_nothing() {
     let (_dir, lit) = hinted(("Blocker id:b\nStuck\n", ""), None, "", "j");
     let (_dir2, dimmed) = hinted((STUCK, ""), None, "", "j");
-    assert_eq!(shown_dim(&lit, 200), "");
-    assert_eq!(shown_dim(&dimmed, 200), "x done t start");
+    assert_eq!(shown_dim(&lit, 200), "u undo");
+    assert_eq!(shown_dim(&dimmed, 200), "x done t start u undo");
     for width in 1..=120 {
         let row = |model: &Model| {
             let mut buf = Buffer::empty(Rect::new(0, 0, width, 1));
@@ -358,6 +484,13 @@ fn draws_over_all_of(line: impl Fn(usize) -> String) {
 #[ignore = "timing, run by hand"]
 fn status_line_over_open_tasks() {
     draws_over_all_of(|i| format!("Task {i} +p{} id:i{i}\n", i % 7));
+}
+
+/// The links of the cursor task are found on each draw.
+#[test]
+#[ignore = "timing, run by hand"]
+fn status_line_over_long_tasks() {
+    draws_over_all_of(|i| format!("Task {i} {}\n", "word ".repeat(200)));
 }
 
 #[test]

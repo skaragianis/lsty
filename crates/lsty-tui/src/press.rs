@@ -1,6 +1,7 @@
 //! What a key would do over the tasks it is about: one rule for every key
-//! that writes, asked by the key itself and by its hint. The core keeps its
-//! own checks, for the CLI and for files changed on disk.
+//! that writes tasks or opens a field on them, and for those with nothing to
+//! do in some state, asked by the key itself and by its hint. The core keeps
+//! its own checks, for the CLI and for files changed on disk.
 
 use lsty_core::{
     errs::Source,
@@ -8,7 +9,7 @@ use lsty_core::{
     list::{Snapshot, State},
 };
 
-use crate::{model::Model, rows::Row};
+use crate::{history::Again, messages, model::Model, rows::Row};
 
 /// The `lsty` command a key resolves to.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -48,7 +49,7 @@ impl Command {
 pub(crate) enum Refusal {
     /// No task is open, and some are archived.
     Closed,
-    /// Some of the tasks are archived, and some open.
+    /// Some of the tasks are archived, and some open; or any, for `J` and `K`.
     Archived,
     /// `t` on tasks that are all done.
     AllDone,
@@ -56,13 +57,21 @@ pub(crate) enum Refusal {
     SomeDone,
     /// `T` on done tasks of which some are not won't do.
     NotWontdo,
+    /// The key has nothing to work on, and says nothing.
+    Quiet,
+    /// `J` and `K` in a view that is not in file order.
+    Sorted,
+    /// `go` on an archived task without an id.
+    NoId,
+    /// The key has nothing to work on, and says this.
+    Says(&'static str),
 }
 
 /// What a press would do.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Answer {
-    /// Nothing to decide: no task, a key that does not write tasks, or a
-    /// prompt that may open.
+    /// The key does its work: no task to decide on, a key that does not
+    /// write tasks, or a prompt that may open.
     Applies,
     /// The command runs over the tasks it changes, at least one, and passes
     /// over the rest.
@@ -77,6 +86,8 @@ pub(crate) enum Answer {
 /// What the rule reads of the tasks of a press.
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct Summary {
+    /// The row of the first task.
+    lo: usize,
     total: usize,
     archived: usize,
     todo: usize,
@@ -89,9 +100,13 @@ pub(crate) struct Summary {
 }
 
 impl Summary {
-    /// One pass over the tasks of `rows`, reading fields only.
-    pub(crate) fn of(snap: &Snapshot, rows: &[Row]) -> Self {
-        let mut s = Self::default();
+    /// One pass over the tasks of `rows`, the first at row `lo`, reading
+    /// fields only.
+    pub(crate) fn of(snap: &Snapshot, lo: usize, rows: &[Row]) -> Self {
+        let mut s = Self {
+            lo,
+            ..Self::default()
+        };
         for task in rows.iter().filter_map(|row| snap.task(row.id)) {
             s.total += 1;
             let blocked = usize::from(task.blocked());
@@ -117,9 +132,13 @@ impl Summary {
 }
 
 impl Model {
-    /// What the tasks of a press with `count` are.
+    /// What a press with `count` reads.
     pub(crate) fn summary(&self, count: usize) -> Summary {
-        Summary::of(&self.snap, self.rows_of(count))
+        let snap = &self.snap;
+        match self.selected_rows() {
+            Some((lo, hi)) => Summary::of(snap, lo, self.rows_between(lo, hi)),
+            None => Summary::of(snap, self.cursor, self.picked_rows(count)),
+        }
     }
 }
 
@@ -182,11 +201,61 @@ const fn step(s: &Summary, forward: bool) -> Answer {
     }
 }
 
+/// `J` and `K`: a task to move, the file's order, nothing archived, and a
+/// todo row to move past, at row `past`.
+fn moving(m: &Model, s: &Summary, past: Option<usize>) -> Answer {
+    let past = past.and_then(|at| m.rows.get(at));
+    if s.total == 0 {
+        Answer::Refused(Refusal::Quiet)
+    } else if m.sorted() {
+        Answer::Refused(Refusal::Sorted)
+    } else if s.archived > 0 {
+        Answer::Refused(Refusal::Archived)
+    } else {
+        let todo_row = past.is_some_and(|row| row.source != Source::Done);
+        lit_if(todo_row, Refusal::Quiet)
+    }
+}
+
+/// A key that does its work, or says `why` not.
+const fn lit_if(lit: bool, why: Refusal) -> Answer {
+    if lit {
+        Answer::Applies
+    } else {
+        Answer::Refused(why)
+    }
+}
+
+/// `.`: as the key it repeats over the tasks it stored, whose word it does not
+/// take. `J` and `K` store a distance, not tasks. Nothing to repeat says
+/// nothing.
+fn repeat(m: &Model) -> Answer {
+    let Some(again) = &m.again else {
+        return Answer::Refused(Refusal::Quiet);
+    };
+    let count = match again {
+        Again::Task {
+            action: Action::MoveTaskDown | Action::MoveTaskUp,
+            ..
+        } => 1,
+        Again::Task { count, .. }
+        | Again::Block { count, .. }
+        | Again::Prompt { count, .. } => *count,
+    };
+    match decide(again.action(), m, &m.summary(count)) {
+        Answer::Resolved(_) => Answer::Applies,
+        answer @ (Answer::Applies
+        | Answer::Refused(_)
+        | Answer::CoreRefuses(_)) => answer,
+    }
+}
+
 /// What a press of `action` over the tasks of `s` would do. Every action is
 /// named, so a new one does not compile until it is decided. An archived
-/// task refuses every key that writes, except `x` on archived tasks alone.
+/// task refuses every key that writes or opens a field on it, except `x` on
+/// archived tasks alone and `go` on one with an id.
 #[expect(clippy::too_many_lines, reason = "every action is listed")]
-pub(crate) fn decide(action: Action, s: &Summary) -> Answer {
+pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
     let rule: fn(&Summary) -> Answer = match action {
         Action::ToggleComplete => complete,
         Action::ToggleStart => toggle_start,
@@ -195,10 +264,47 @@ pub(crate) fn decide(action: Action, s: &Summary) -> Answer {
         Action::Delete => |_| Answer::Resolved(Command::Delete),
         Action::CyclePriority => |s| step(s, true),
         Action::CyclePriorityBack => |s| step(s, false),
-        Action::SetDue | Action::AddTag | Action::RemoveTag => {
-            |_| Answer::Applies
+        Action::SetDue
+        | Action::AddTag
+        | Action::RemoveTag
+        | Action::EditDescription
+        | Action::EditAppend
+        | Action::EditLineStart
+        | Action::ChangeDescription
+        | Action::InsertPrerequisite => |_| Answer::Applies,
+        Action::InsertDependent => {
+            let task = m.rows.get(m.cursor).and_then(|r| m.snap.task(r.id));
+            let no_id = task.is_some_and(|task| {
+                task.source() == Source::Done && m.snap.id_of(task).is_none()
+            });
+            return lit_if(!no_id, Refusal::NoId);
         }
-        // These do not write tasks; for now they always apply.
+        Action::Yank => return lit_if(s.total > 0, Refusal::Quiet),
+        // A yank of this session. The clipboard is not read: that runs a
+        // program.
+        Action::PasteBelow | Action::PasteAbove => {
+            let clip = m.clip.is_some();
+            return lit_if(clip, Refusal::Says(messages::NO_PASTE));
+        }
+        Action::MoveTaskDown => return moving(m, s, Some(s.lo + s.total)),
+        Action::MoveTaskUp => return moving(m, s, s.lo.checked_sub(1)),
+        Action::OpenLink if s.total == 0 => {
+            return Answer::Refused(Refusal::Quiet);
+        }
+        Action::OpenLink => {
+            let links = !m.cursor_links().is_empty();
+            return lit_if(links, Refusal::Says(messages::NO_LINK));
+        }
+        Action::Undo => {
+            let lit = m.kept.is_some() || !m.hist.undo.is_empty();
+            return lit_if(lit, Refusal::Says("nothing to undo"));
+        }
+        Action::Redo => {
+            let lit = !m.hist.redo.is_empty();
+            return lit_if(lit, Refusal::Says("nothing to redo"));
+        }
+        Action::Repeat => return repeat(m),
+        // These always apply.
         Action::CursorDown
         | Action::CursorUp
         | Action::GoTop
@@ -215,23 +321,8 @@ pub(crate) fn decide(action: Action, s: &Summary) -> Answer {
         | Action::GoViewTop
         | Action::GoViewMiddle
         | Action::GoViewBottom
-        | Action::EditDescription
-        | Action::EditAppend
-        | Action::EditLineStart
-        | Action::ChangeDescription
         | Action::InsertBelow
         | Action::InsertAbove
-        | Action::InsertDependent
-        | Action::InsertPrerequisite
-        | Action::Yank
-        | Action::PasteBelow
-        | Action::PasteAbove
-        | Action::MoveTaskDown
-        | Action::MoveTaskUp
-        | Action::OpenLink
-        | Action::Undo
-        | Action::Redo
-        | Action::Repeat
         | Action::Search
         | Action::ClearSearch
         | Action::ClearFilters

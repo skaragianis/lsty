@@ -144,10 +144,10 @@ pub(crate) enum Way {
 }
 
 impl Way {
-    const fn verb(self) -> &'static str {
+    const fn action(self) -> Action {
         match self {
-            Self::Undo => "undo",
-            Self::Redo => "redo",
+            Self::Undo => Action::Undo,
+            Self::Redo => Action::Redo,
         }
     }
 
@@ -182,6 +182,16 @@ pub(crate) enum Again {
     },
 }
 
+impl Again {
+    /// The action it runs again.
+    pub(crate) const fn action(&self) -> Action {
+        match self {
+            Self::Task { action, .. } | Self::Block { action, .. } => *action,
+            Self::Prompt { kind, .. } => kind.action(),
+        }
+    }
+}
+
 impl Model {
     /// `undo`: puts back the last action of the session.
     pub(crate) fn undo_last(&mut self) {
@@ -200,12 +210,14 @@ impl Model {
     /// Applies the top step of one stack and moves it to the other. A
     /// step that is refused is dropped; one that met a busy lock stays.
     fn rewind(&mut self, way: Way) {
+        if self.refused(way.action(), 1) {
+            return;
+        }
         let stack = match way {
             Way::Undo => &self.hist.undo,
             Way::Redo => &self.hist.redo,
         };
         let Some(top) = stack.last() else {
-            self.message = Some(format!("nothing to {}", way.verb()));
             return;
         };
         let held = top.tracking(&self.snap);
