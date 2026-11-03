@@ -48,5 +48,6 @@ chip                = { fg = "dark1", bg = "light2" }
 status_bg           = { bg = "light1" }
 hint_key            = { fg = "faded_orange", bold = true }
 hint_desc           = "dark2"
+hint_dim            = "dark4"
 warning             = "faded_yellow"
 error               = { fg = "faded_red", bold = true }

@@ -28,5 +28,6 @@ chip                = { fg = "7", bold = true }
 status_bg           = { faint = true }
 hint_key            = { fg = "6", bold = true }
 hint_desc           = "7"
+hint_dim            = "8"
 warning             = "3"
 error               = { fg = "9", bold = true }

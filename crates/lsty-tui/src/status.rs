@@ -10,7 +10,7 @@ use lsty_core::{
 use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
-    hints::{hints, label},
+    hints::{dim, hints, label},
     messages::Tone,
     model::Model,
     press::decide,
@@ -65,8 +65,10 @@ impl Model {
         let mut used = width(&line);
         let taken = self.version_room(used, w);
         let room = w - taken;
-        let label =
-            |action| label(table, action, accept, decide(action, &summary));
+        let label = |action| {
+            let answer = decide(action, &summary);
+            Some((label(table, action, accept, answer)?, dim(answer)))
+        };
         for hint in hints(table, configured, keys, hidden, label) {
             let cells = 2 + width(&hint);
             if used + cells > room {

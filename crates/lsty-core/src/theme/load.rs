@@ -82,7 +82,8 @@ fn user_names(dir: &Path) -> Vec<String> {
 ///
 /// A file in `themes_dir` with a built-in theme's name overrides it; a
 /// slot it leaves out takes the built-in theme's, or `ansi`'s when there
-/// is no built-in theme of that name.
+/// is no built-in theme of that name. One slot differs: a file that sets
+/// `muted` and not `hint_dim` dims with its `muted`.
 pub fn load(
     mut name: &str,
     themes_dir: &Path,
@@ -144,7 +145,8 @@ fn read_user(
     }
 }
 
-/// `base` with the slots of the file applied, and the file's warnings.
+/// `base` with the slots of the file applied, `hint_dim` following a `muted`
+/// set without it, and the file's warnings.
 pub(super) fn parse(
     source: &str,
     data: &[u8],
@@ -194,6 +196,10 @@ impl<'a> Reader<'a> {
             if let Some(style) = self.style(name, value, &mut warnings) {
                 styles[slot.index()] = style;
             }
+        }
+        let sets = |slot: Slot| self.slots.iter().any(|s| s.0 == slot.name());
+        if sets(Slot::Muted) && !sets(Slot::HintDim) {
+            styles[Slot::HintDim.index()] = styles[Slot::Muted.index()];
         }
         (styles, warnings)
     }

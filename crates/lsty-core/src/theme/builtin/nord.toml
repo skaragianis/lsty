@@ -45,5 +45,6 @@ chip                = { fg = "nord6", bg = "nord2" }
 status_bg           = { bg = "nord1" }
 hint_key            = { fg = "nord8", bold = true }
 hint_desc           = "nord4"
+hint_dim            = "nord10"
 warning             = "nord13"
 error               = { fg = "nord11", bold = true }

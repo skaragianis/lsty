@@ -91,6 +91,8 @@ slots! {
     HintKey => "hint_key";
     /// Text shown in a hint
     HintDesc => "hint_desc";
+    /// A hint whose key would change nothing, key and text
+    HintDim => "hint_dim";
     /// Warnings and stale claims
     Warning => "warning";
     /// Errors

@@ -37,8 +37,9 @@ built-in themes, each file NAME.toml in $XDG_CONFIG_HOME/lsty/themes \
 called NAME. LSTY_CONFIG moves config.toml, not that folder; --no-config \
 ignores it. A slot a file leaves out looks like the same slot of the \
 built-in theme of that name, so a file named like one adjusts it; a file with \
-any other name starts from {FALLBACK}. A name that is neither falls back to \
-{DEFAULT_NAME} with a warning."
+any other name starts from {FALLBACK}. One slot differs: a file that sets \
+muted and not hint_dim dims with its muted. A name that is neither falls back \
+to {DEFAULT_NAME} with a warning."
     )
 }
 

@@ -56,5 +56,6 @@ chip                = { fg = "text", bg = "surface1" }
 status_bg           = { bg = "mantle" }
 hint_key            = { fg = "lavender", bold = true }
 hint_desc           = "subtext0"
+hint_dim            = "overlay1"
 warning             = "yellow"
 error               = { fg = "red", bold = true }

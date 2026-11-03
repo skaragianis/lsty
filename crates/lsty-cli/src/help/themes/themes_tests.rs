@@ -48,6 +48,7 @@ fn the_page_says_what_a_theme_is_and_where_a_name_falls_back() {
     for want in [
         "A theme gives each part of the screen a look.".to_owned(),
         format!("starts from {FALLBACK}."),
+        "sets muted and not hint_dim dims with its muted.".to_owned(),
         format!("falls back to {DEFAULT_NAME} with a warning."),
     ] {
         assert!(text.contains(&want), "{want}");
