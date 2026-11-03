@@ -312,7 +312,7 @@ actions! {
     );
     Stop => ("stop", Tasks, "Stop doing a task", "stop", TaskAction);
     Wontdo => (
-        "wontdo", Tasks, "Mark a task won't do, or reopen it", "wontdo",
+        "wontdo", Tasks, "Mark a task won't do, or reopen it", "wont",
         TaskAction
     );
     ToggleComplete => (

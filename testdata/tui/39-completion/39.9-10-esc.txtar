@@ -53,7 +53,7 @@ x 2026-09-03 Pitch +work.acme
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  5 Call client +w  x done  t start  T wontdo  o new  a append       9.9.9
+ NORMAL  todo.txt  manual  5 Call client +w  x done  t start  T wont  o new  a append         9.9.9
 -- a-file --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

@@ -21,7 +21,7 @@ Plan
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added as id:abcd: call  x done  t start  T wontdo  o new         9.9.9
+ NORMAL  todo.txt  manual  2 added as id:abcd: call  x done  t start  T wont  o new           9.9.9
 -- a-file --
 Buy
 2026-09-29 call id:abcd +p

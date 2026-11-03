@@ -31,7 +31,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 2 started  x done  t stop  T wontdo       9.9.9
+ NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 2 started  x done  t stop  T wont  o new  9.9.9
 -- a-file --
 A started:2026-09-29T0900Z
 B started:2026-09-29T0900Z
@@ -48,7 +48,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped; 2 stopped  x done  t start  T wontdo  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  1 stopped; 2 stopped  x done  t start  T wont  o new  a append     9.9.9
 -- b-file --
 A
 B
@@ -65,7 +65,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t start  T wontdo  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t start  T wont  o new  a append     9.9.9
 -- c-file --
 x 2026-09-29 A
 x 2026-09-29 B
@@ -82,7 +82,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 reopened; 2 reopened  x done  t start  T wontdo  o new           9.9.9
+ NORMAL  todo.txt  manual  1 reopened; 2 reopened  x done  t start  T wont  o new  a append   9.9.9
 -- d-file --
 A
 B

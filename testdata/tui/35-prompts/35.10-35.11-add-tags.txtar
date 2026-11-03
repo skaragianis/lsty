@@ -23,7 +23,7 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 tagged +work; 1 tagged @phone  x done  t start  T wontdo  o new  9.9.9
+ NORMAL  todo.txt  manual  1 tagged +work; 1 tagged @phone  x done  t start  T wont  o new    9.9.9
 -- a-file --
 Call +work @phone
 -- b-frame --

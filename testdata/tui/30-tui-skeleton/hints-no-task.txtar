@@ -1,6 +1,6 @@
 size 100 8
 start
-status  x done  t start  T wontdo  o new
+status  x done  t start  T wont  o new
 -- config.toml --
 show_sidebar = false
 show_detail = false

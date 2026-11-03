@@ -79,4 +79,4 @@ x 2026-09-01 Old task +work
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  <Esc> clear search  x done  t start  T wontdo  o new  a append  dd delete  u undo  9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo    9.9.9

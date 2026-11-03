@@ -44,4 +44,4 @@ start_filter = "Nope"
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  config.toml: start_filter: no filter "Nope"  x done  t start  T wontdo  o new      9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  config.toml: start_filter: no filter "Nope"  x done  t start  T wont  o new        9.9.9

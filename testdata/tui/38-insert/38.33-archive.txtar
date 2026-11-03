@@ -28,7 +28,7 @@ x 2026-09-01 Old task
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x reopen  t reopen           9.9.9
+ NORMAL  todo.txt  manual  Old task is archived — x restores it  x reopen  t reopen  T wont   9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Buy                                                                                         │
@@ -39,7 +39,7 @@ x 2026-09-01 Old task
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 added as id:t001: N  x done  t start  T wontdo  o new  a append  9.9.9
+ NORMAL  todo.txt  manual  3 added as id:t001: N  x done  t start  T wont  o new  a append    9.9.9
 -- a-file --
 Buy
 Call

@@ -1,9 +1,9 @@
 size 100 12
 start
 keys <C-w>2
-status  t start  T wontdo  x done
+status  t start  T wont  x done
 keys t
-status  t stop  T wontdo  x done
+status  t stop  T wont  x done
 frame started
 keys T
 status  t reopen  T reopen  x reopen
@@ -27,7 +27,7 @@ Open
 │ state    doing                                                                                   │
 │ …                                                                                                │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  t stop  T wontdo  x done                  9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  t stop  T wont  x done                    9.9.9
 -- wontdo --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ✗ Open wontdo:true                                                                         0m │

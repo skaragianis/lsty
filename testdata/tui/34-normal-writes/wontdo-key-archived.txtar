@@ -45,7 +45,7 @@ x 2026-09-01 Old task wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  done:1 restored as 2  x done  t start  T wontdo  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  done:1 restored as 2  x done  t start  T wont  o new  a append     9.9.9
 -- restored-file --
 Buy
 Old task

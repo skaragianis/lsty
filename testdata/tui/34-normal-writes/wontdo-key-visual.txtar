@@ -50,7 +50,7 @@ x 2026-09-01 F wontdo:true
 │  5 ✗ F wontdo:true                                                                   28d ago     │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; 2 reopened  x done  t start  T wontdo    9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; 2 reopened  x done  t start  T wont      9.9.9
 -- reopened-file --
 A
 B
@@ -86,7 +86,7 @@ x 2026-09-01 F wontdo:true
 │  1   F                                                                                           │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  5 reopened; 6 reopened  x done  t start  T wontdo    9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  5 reopened; 6 reopened  x done  t start  T wont      9.9.9
 -- all-wontdo-file --
 A
 B

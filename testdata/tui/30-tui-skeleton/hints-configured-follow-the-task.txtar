@@ -1,6 +1,6 @@
 size 80 8
 start
-status  t start  T wontdo  x done
+status  t start  T wont  x done
 keys j
 status  t reopen  T reopen  x reopen
 -- config.toml --
