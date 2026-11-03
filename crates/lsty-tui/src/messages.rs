@@ -91,6 +91,9 @@ pub(crate) fn closed_task(name: &str) -> String {
 
 pub(crate) const CLOSED_TASKS: &str = "all are done — x reopens them";
 
+/// What a second `t` says when it puts back what the first one stopped.
+pub(crate) const PUT_BACK: &str = "put back as it was";
+
 /// The refusal of a new task that waits for the archived task named
 /// `name`, which has no id.
 pub(crate) fn archived_no_id(name: &str) -> String {

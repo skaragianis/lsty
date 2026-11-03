@@ -327,6 +327,32 @@ fn stop_during_a_busy_write() -> Check {
     stop_while_locked(|_, screen| screen.type_keys(b"x"), LIST)
 }
 
+/// A second `t` that finds the file busy says so; it makes no new claim
+/// once the lock is free. A slow machine only passes without testing.
+fn busy_put_back_makes_no_new_claim() -> Check {
+    const CLAIM: &str = "Call started:2026-09-29T0800Z owner:agent1\n";
+    let work = Work::new()?.config("lock_timeout = \"200ms\"\n")?;
+    let todo = work.root.join("todo.txt");
+    fs::write(&todo, CLAIM)?;
+    let (mut child, mut screen) = start(&work.root)?;
+    screen.wait_for("Call")?;
+    screen.type_keys(b"t")?;
+    screen.wait_for("stopped")?;
+    let folder = File::open(&work.root)?;
+    folder.lock()?;
+    screen.type_keys(b"t")?;
+    thread::sleep(Duration::from_millis(300));
+    folder.unlock()?;
+    thread::sleep(Duration::from_millis(300));
+    let list = fs::read_to_string(&todo)?;
+    signal(&child, Signal::TERM)?;
+    screen.ends_with(&mut child, 0)?;
+    if list != "Call\n" && list != CLAIM {
+        return Err(format!("a new claim: {list:?}").into());
+    }
+    Ok(())
+}
+
 /// A signal while the first reading waits for the lock ends the process
 /// at once, before any screen is open.
 fn signal_during_the_first_read() -> Check {
@@ -574,6 +600,7 @@ fn main() -> std::process::ExitCode {
             "a stop signal ends a busy write",
             stop_during_a_busy_write,
         ),
+        Trial::test("a busy put back", busy_put_back_makes_no_new_claim),
         // Only xdg-open needs a display: open on macOS is always started.
         Trial::test(
             "gx on a url without a display",

@@ -1,0 +1,76 @@
+size 100 7
+start
+keys t
+tick 1s
+lock hold
+write todo.txt other-line
+tick 50ms
+frame another-message
+lock release
+event
+tick 50ms
+keys t
+frame still-puts-back
+file todo.txt other-line-put-back
+write todo.txt todo.txt
+event
+tick 50ms
+keys t
+tick 1s
+lock hold
+write todo.txt other-line
+tick 50ms
+lock release
+tick 1s
+frame message-outlives-the-window
+keys t
+frame not-extended
+file todo.txt new-claim
+-- config.toml --
+show_sidebar = false
+show_detail = false
+lock_timeout = "1ms"
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+Other
+-- other-line --
+Call
+Other +outside
+-- other-line-put-back --
+Call started:2026-09-29T0800Z owner:agent1
+Other +outside
+-- new-claim --
+Call started:2026-09-29T0900Z
+Other +outside
+-- another-message --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call                                                                                        │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  todo.txt is busy; showing the last state read  1 stopped; 1 was claimed b
+-- still-puts-back --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call                                                                                     1h │
+│  1   Other +outside                                                                              │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9
+-- message-outlives-the-window --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call                                                                                        │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  todo.txt is busy; showing the last state read  x done  t start     9.9.9
+-- not-extended --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call                                                                                     0m │
+│  1   Other +outside                                                                              │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  todo.txt is busy; showing the last state read  1 started

@@ -1,0 +1,71 @@
+size 100 7
+start
+keys t
+write todo.txt task-changed
+event
+tick 50ms
+keys t
+frame task-changed-and-seen
+file todo.txt task-changed-then-started
+write todo.txt todo.txt
+event
+tick 50ms
+keys t
+write todo.txt task-changed
+keys t
+frame task-changed-not-seen
+file todo.txt task-changed-then-started
+write todo.txt todo.txt
+event
+tick 50ms
+keys t
+write todo.txt line-above
+event
+tick 50ms
+keys t
+frame only-another-line-changed
+file todo.txt line-above-put-back
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+Other
+-- task-changed --
+Call +outside
+Other
+-- task-changed-then-started --
+Call +outside started:2026-09-29T0900Z
+Other
+-- line-above --
+New line
+Call
+Other
+-- line-above-put-back --
+New line
+Call started:2026-09-29T0800Z owner:agent1
+Other
+-- task-changed-and-seen --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call +outside                                                                            0m │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
+-- task-changed-not-seen --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call +outside                                                                            0m │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
+-- only-another-line-changed --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   New line                                                                                    │
+│  2 ▶ Call                                                                                     1h │
+│  1   Other                                                                                       │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9

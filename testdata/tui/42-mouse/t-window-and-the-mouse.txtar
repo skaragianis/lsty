@@ -1,0 +1,43 @@
+size 100 7
+start
+keys t
+click 10 2
+keys t
+frame click-on-the-other-task
+file todo.txt other-new-claim
+keys u u
+click 10 1
+keys t
+click 10 2
+click 10 1
+keys t
+frame clicks-end-the-window
+file todo.txt call-new-claim
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call started:2026-09-29T0800Z owner:agent1
+Other
+-- other-new-claim --
+Call
+Other started:2026-09-29T0900Z
+-- call-new-claim --
+Call started:2026-09-29T0900Z
+Other
+-- click-on-the-other-task --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Call                                                                                        │
+│  2 ▷ Other                                                                                    0m │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  2 started  x done  t stop  T wont  o new  a append   9.9.9
+-- clicks-end-the-window --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Call                                                                                     0m │
+│  1   Other                                                                                       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9

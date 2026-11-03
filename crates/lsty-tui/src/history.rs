@@ -6,15 +6,18 @@ use std::{
     sync::Arc,
 };
 
+use jiff::Timestamp;
 use lsty_core::{
-    errs::{Code, Source},
+    errs::{Code, Nr, Source},
     keys::Action,
-    list::Snapshot,
+    list::{Snapshot, TaskId},
     ops::{self, FileRecord, Followed, UndoRecord},
 };
 
 use crate::{
-    model::Model,
+    actions::places,
+    messages,
+    model::{MESSAGE_LIFE, Model},
     msg::Cmd,
     prompt::Kind as PromptKind,
     track::{Place, Remap, Touched, Wrote},
@@ -68,6 +71,19 @@ impl Step {
         }
     }
 
+    /// Where the lines the record was about stand in the last reading.
+    fn own_places(&self) -> Vec<Place> {
+        let files = self.rec.files.iter().zip(&self.at);
+        files
+            .flat_map(|(f, at)| {
+                f.changes.iter().filter(|c| c.own).filter_map(move |c| {
+                    let line = at.get(c.nr_after?.index()).copied()??;
+                    Some((f.source, Nr::from_index(line)?))
+                })
+            })
+            .collect()
+    }
+
     /// The lines of the record in the files as `snap` has them.
     fn tracking<'a>(&'a self, snap: &'a Snapshot) -> Vec<Followed<'a>> {
         self.rec
@@ -87,6 +103,10 @@ impl Step {
 pub(crate) struct History {
     pub(crate) undo: Vec<Step>,
     pub(crate) redo: Vec<Step>,
+    /// When the window ends in which a second `t` puts back what the step
+    /// on top of the undo stack stopped. Any other key, or a mouse press,
+    /// ends it; a message neither ends nor extends it.
+    pub(crate) stopped: Option<Timestamp>,
 }
 
 impl History {
@@ -234,6 +254,51 @@ impl Model {
         self.keep_sticky(&touched);
         let next = Step::new(record, step.message, step.pairs);
         self.hist.stack(way.back()).push(next);
+    }
+
+    /// Opens the window of the `t` that just stopped tasks.
+    pub(crate) fn remember_stop(&mut self) {
+        let now = self.clock_now().map(|c| c.now());
+        self.hist.stopped =
+            now.ok().and_then(|t| t.checked_add(MESSAGE_LIFE).ok());
+    }
+
+    /// Ends the window, and tells whether `ids` are exactly the tasks it
+    /// is about, in time.
+    pub(crate) fn just_stopped(&mut self, ids: &[TaskId]) -> bool {
+        let (Some(until), Some(top)) =
+            (self.hist.stopped.take(), self.hist.undo.last())
+        else {
+            return false;
+        };
+        let mut asked = places(&self.snap, ids);
+        let mut own = top.own_places();
+        asked.sort_unstable();
+        own.sort_unstable();
+        self.clock_now().is_ok_and(|c| c.now() < until) && asked == own
+    }
+
+    /// Puts back the lines of the step on top of the undo stack, as a
+    /// write of its own. Tells whether it ran, or nothing if one of the
+    /// lines has changed, when the press is an ordinary one.
+    pub(crate) fn put_back(&mut self) -> Option<bool> {
+        let top = self.hist.undo.last()?;
+        let held = top.tracking(&self.snap);
+        let result = self.attempt(|env| ops::undo(env, &top.rec, &held));
+        if result
+            .as_ref()
+            .is_err_and(|e| e.code() == Code::ExpectMismatch)
+        {
+            return None;
+        }
+        if !self.settle(result) {
+            return Some(false);
+        }
+        self.message = Some(messages::PUT_BACK.to_owned());
+        if let Some(step) = self.hist.undo.last_mut() {
+            messages::PUT_BACK.clone_into(&mut step.message);
+        }
+        Some(true)
     }
 
     /// `repeat`: the last change again, on the task under the cursor.
