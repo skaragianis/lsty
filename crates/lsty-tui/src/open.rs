@@ -7,6 +7,7 @@ use lsty_core::{
     errs::lossy_path,
     keys::Action,
     links::{self, Kind, Link, editor_command},
+    ops,
 };
 
 use crate::{
@@ -64,8 +65,10 @@ impl Model {
         n: usize,
     ) -> Vec<Cmd> {
         let Some(link) = n.checked_sub(1).and_then(|i| links.get(i)) else {
-            self.message =
-                Some(format!("this task has {} links", links.len()));
+            self.message = Some(format!(
+                "this task has {}",
+                ops::counted(links.len(), "link")
+            ));
             return Vec::new();
         };
         self.launch(link)

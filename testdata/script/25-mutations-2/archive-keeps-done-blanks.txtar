@@ -15,7 +15,7 @@ x 2026-09-01 Old
 x 2026-09-02 Older
 -- out --
 archived 1 to done.txt
-removed 1 blank lines
+removed 1 blank line
 -- want-todo --
 Call client
 -- want-done --

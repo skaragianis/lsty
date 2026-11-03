@@ -6,6 +6,7 @@ use std::collections::HashSet;
 
 use super::{
     claim::ClaimMode,
+    counted,
     env::Env,
     refs::Target,
     result::Outcome,
@@ -269,7 +270,7 @@ pub fn deduplicate(env: &Env<'_>) -> Result<Outcome> {
         if repeats.is_empty() {
             tx.say("no duplicates");
         } else {
-            tx.say(format!("removed {} duplicates", repeats.len()));
+            tx.say(format!("removed {}", counted(repeats.len(), "duplicate")));
         }
         Ok(())
     })

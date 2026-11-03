@@ -425,14 +425,14 @@ const DEDUP: &[DedupRow] = &[
         "22.31",
         "A id:k\nA id:k\nB dep:k\n",
         "A id:k\n\nB dep:k\n",
-        &["removed 1 duplicates"],
+        &["removed 1 duplicate"],
         false,
     ),
     (
         "22.33",
         "A\n\n\nA\n",
         "A\n\n\n\n",
-        &["removed 1 duplicates"],
+        &["removed 1 duplicate"],
         false,
     ),
 ];

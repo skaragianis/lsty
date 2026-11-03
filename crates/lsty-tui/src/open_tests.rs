@@ -120,6 +120,22 @@ fn the_picker_stops_at_both_ends() {
     assert!(model.opening.is_none());
 }
 
+/// `gx` past the links: the words agree with the number.
+#[test]
+fn a_link_past_the_last_counts_them() {
+    for (todo, want) in [
+        ("Read https://x.org/a\n", "this task has 1 link"),
+        (
+            "Read https://x.org/a https://x.org/b\n",
+            "this task has 2 links",
+        ),
+    ] {
+        let (_dir, mut model) = workdir_model(todo, alone());
+        keys(&mut model, "9gx");
+        assert_eq!(model.message.as_deref(), Some(want));
+    }
+}
+
 /// What the help shows: for each heading its entries' keys and texts.
 fn shown(help: &Help) -> Vec<(String, String, String)> {
     let mut out = Vec::new();

@@ -3,7 +3,7 @@
 
 use std::sync::Arc;
 
-use super::{env::Env, result::Outcome, run::run, tx::Tx};
+use super::{counted, env::Env, result::Outcome, run::run, tx::Tx};
 use crate::{
     errs::{Result, Source},
     list::State,
@@ -35,7 +35,7 @@ pub(super) fn plan(tx: &mut Tx) -> Result<()> {
         tx.say("nothing to archive");
     }
     if blanks > 0 {
-        tx.say(format!("removed {blanks} blank lines"));
+        tx.say(format!("removed {}", counted(blanks, "blank line")));
     }
     for id in finished {
         tx.say_interrupted(&id);

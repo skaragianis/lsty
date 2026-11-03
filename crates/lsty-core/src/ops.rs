@@ -137,3 +137,9 @@ mod text_tests;
 mod undo_apply_tests;
 #[cfg(test)]
 mod wontdo_tests;
+
+/// `n` of `what`: `1 task`, `2 tasks`.
+#[must_use]
+pub fn counted(n: usize, what: &str) -> String {
+    format!("{n} {what}{}", if n == 1 { "" } else { "s" })
+}

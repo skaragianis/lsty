@@ -20,7 +20,7 @@ x 2026-09-28 Old +spec02
 -- want --
 4 (A) Write parser +spec01 id:parser started:2026-09-29T0700Z owner:agent1
 parser resumed: Write parser
-1 stale claims skipped
+1 stale claim skipped
 -- want-bad --
 2 (A) Write parser +spec01 started:garbage owner:agent1
 2 resumed: Write parser

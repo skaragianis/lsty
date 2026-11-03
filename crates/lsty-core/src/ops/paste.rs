@@ -5,6 +5,7 @@ use std::collections::HashSet;
 
 use super::{
     add::{Place, drawn_id, insert_point},
+    counted,
     env::Env,
     ids::Taken,
     newline::{copy_error, invalid_text},
@@ -232,8 +233,7 @@ impl<'a> Pasting<'a> {
     }
 
     fn summary(&self, n: usize) -> String {
-        let plural = if n == 1 { "" } else { "s" };
-        let head = format!("pasted {n} task{plural}");
+        let head = format!("pasted {}", counted(n, "task"));
         if !self.moved.is_empty() {
             format!("{head} ({} moved)", self.moved.len())
         } else if self.joined > 0 {

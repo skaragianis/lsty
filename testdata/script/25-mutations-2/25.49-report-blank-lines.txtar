@@ -18,7 +18,7 @@ x 2026-09-01 Old
 
 x 2026-09-02 Older
 -- out --
-removed 1 blank lines
+removed 1 blank line
 2026-10-15T09:30:00 2 2
 -- want --
 2026-10-14T08:00:00 9 9
