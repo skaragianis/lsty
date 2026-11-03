@@ -20,7 +20,7 @@ Call client
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wontdo  9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wont    9.9.9
 -- without --
 ┌ [1]─/milk ───────────────────────────────────────────────┐
 │  2   Buy milk                                            │

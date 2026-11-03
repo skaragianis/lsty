@@ -28,7 +28,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wontdo  o new           9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
 -- a-file --
 (A) Call client +work started:2026-09-29T0900Z
 -- b-frame --
@@ -39,7 +39,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped  x done  t start  T wontdo  o new  a append  dd delete   9.9.9
+ NORMAL  todo.txt  manual  1 stopped  x done  t start  T wont  o new  a append  dd delete     9.9.9
 -- b-file --
 (A) Call client +work
 -- c-frame --
@@ -50,7 +50,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Call client  x reopen  t reopen  T wontdo  o new           9.9.9
+ NORMAL  todo.txt  manual  1 done: Call client  x reopen  t reopen  T wont  o new  a append   9.9.9
 -- c-file --
 x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z pri:A
 -- d-frame --
@@ -61,7 +61,7 @@ x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z p
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; yours again  x done  t stop  T wontdo    9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; yours again  x done  t stop  T wont      9.9.9
 -- d-file --
 (A) Call client +work started:2026-09-29T0900Z
 -- e-frame --
@@ -72,6 +72,6 @@ x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z p
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped  x done  t start  T wontdo  o new  a append  dd delete   9.9.9
+ NORMAL  todo.txt  manual  1 stopped  x done  t start  T wont  o new  a append  dd delete     9.9.9
 -- e-file --
 (A) Call client +work

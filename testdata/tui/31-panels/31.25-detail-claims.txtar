@@ -38,7 +38,7 @@ show_sidebar = false
 │                                                                                  ││                                  │
 │                                                                                  ││                                  │
 └──────────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t stop  T wontdo  o new  a append  dd delete  u undo  / search   9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t stop  T wont  o new  a append  dd delete  u undo  / search     9.9.9
 -- done --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────┐
 │  1 ▷ Write notes                                                              1h ││ Fix bug owner:agent1             │
@@ -69,4 +69,4 @@ show_sidebar = false
 │                                                                                  ││                                  │
 │                                                                                  ││                                  │
 └──────────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  t reopen  T wontdo  o new  a append  dd delete  u undo         9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  t reopen  T wont  o new  a append  dd delete  u undo           9.9.9

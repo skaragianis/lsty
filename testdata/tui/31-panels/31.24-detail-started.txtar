@@ -35,4 +35,4 @@ show_sidebar = false
 │                                                                                  ││                                  │
 │                                                                                  ││                                  │
 └──────────────────────────────────────────────────────────────────────────────────┘└──────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing (1 stale)  x done  t stop  T wontdo  o new  a append  dd delete  u undo   9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing (1 stale)  x done  t stop  T wont  o new  a append  dd delete  u undo     9.9.9

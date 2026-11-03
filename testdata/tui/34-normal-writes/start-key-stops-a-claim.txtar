@@ -18,7 +18,7 @@ Call started:2026-09-29T0800Z owner:agent1
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t start  T wontdo      9.9.9
+ NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t start  T wont        9.9.9
 -- stopped-file --
 Call
 -- started-again --
@@ -29,4 +29,4 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wontdo  o new           9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9

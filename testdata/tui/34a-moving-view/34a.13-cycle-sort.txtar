@@ -27,7 +27,7 @@ Echo
 │  2       Echo                                                                                    │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  priority  x done  t start  T wontdo  o new  a append  dd delete  u undo    9.9.9
+ NORMAL  todo.txt  priority  x done  t start  T wont  o new  a append  dd delete  u undo      9.9.9
 -- due --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   (B) Bravo                                                                               thu │
@@ -36,7 +36,7 @@ Echo
 │  3       Echo                                                                                    │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  due  x done  t start  T wontdo  o new  a append  dd delete  u undo         9.9.9
+ NORMAL  todo.txt  due  x done  t start  T wont  o new  a append  dd delete  u undo           9.9.9
 -- created --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2       Charlie                                                                                 │
@@ -45,7 +45,7 @@ Echo
 │  1       Echo                                                                                    │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  created  x done  t start  T wontdo  o new  a append  dd delete  u undo     9.9.9
+ NORMAL  todo.txt  created  x done  t start  T wont  o new  a append  dd delete  u undo       9.9.9
 -- manual --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   (B) Bravo                                                                               thu │
@@ -54,7 +54,7 @@ Echo
 │  3       Echo                                                                                    │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wontdo  o new  a append  dd delete  u undo      9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9
 -- a-file --
 (B) 2026-09-03 Bravo due:2026-10-01
 2026-09-01 Charlie
@@ -68,4 +68,4 @@ Echo
 │  3       Echo                                                                                    │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  done, newest first  x done  t start  T wontdo  o new  a append  dd delete  9.9.9
+ NORMAL  todo.txt  done, newest first  x done  t start  T wont  o new  a append  dd delete    9.9.9

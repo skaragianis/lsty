@@ -32,7 +32,7 @@ x 2026-09-01 Old task +work
 │ [x] Archive ││ state     todo                                                                    │
 │ ─────────── ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  <Esc> clear search  x done  t start  T wontdo        9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  <Esc> clear search  x done  t start  T wont  o new   9.9.9
 -- after --
 ┌[3]─Projects─┐┌ [1]─/cl ──────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                                           today │

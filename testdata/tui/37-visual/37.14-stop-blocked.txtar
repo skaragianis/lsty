@@ -26,7 +26,7 @@ Z id:z
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped; 2 stopped; 3 stopped  x done  t start  T wontdo  o new  9.9.9
+ NORMAL  todo.txt  manual  1 stopped; 2 stopped; 3 stopped  x done  t start  T wont  o new    9.9.9
 -- a-file --
 A
 B
