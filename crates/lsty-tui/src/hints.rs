@@ -6,11 +6,13 @@ use lsty_core::{
     config::Warning,
     errs::{quote, shown},
     keys::{Action, Keymap, Mode},
-    list::State,
     theme::Slot,
 };
 
-use crate::text::Span;
+use crate::{
+    press::{Answer, Command, Refusal},
+    text::Span,
+};
 
 /// The actions of a mode's hints when `[hints]` says nothing.
 pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
@@ -116,22 +118,27 @@ pub(crate) fn hints<'a>(
 }
 
 /// What the hint of `action` says in `mode`: `accept` for a picker's
-/// choice and the Enter of the text line, and for the task keys what they
-/// do to `task`, the state of the task they are about and whether it is
-/// won't do. `None` when the key does nothing there: `t` on a done task.
+/// choice and the Enter of the text line, and for the task keys the command
+/// `answer` resolves to. `None` when the key does nothing there: `t` on a
+/// done task.
 pub(crate) fn label(
     mode: Mode,
     action: Action,
     accept: &'static str,
-    task: Option<(State, bool)>,
+    answer: Answer,
 ) -> Option<&'static str> {
-    Some(match (mode, action, task) {
+    Some(match (mode, action, answer) {
         (Mode::Picker, Action::Accept, _)
         | (Mode::Command, Action::Execute, _) => accept,
-        (_, Action::ToggleStart, Some((State::Done, _))) => return None,
-        (_, Action::ToggleStart, Some((State::Doing, _))) => "stop",
-        (_, Action::ToggleComplete, Some((State::Done, _))) => "reopen",
-        (_, Action::Wontdo, Some((State::Done, true))) => "will",
+        (
+            _,
+            Action::ToggleStart,
+            Answer::Refused(Refusal::AllDone | Refusal::Closed),
+        ) => return None,
+        (_, Action::Wontdo, Answer::Resolved(Command::Reopen)) => "will",
+        (_, _, Answer::Resolved(Command::Reopen)) => "reopen",
+        (_, _, Answer::Resolved(Command::Restore)) => "restore",
+        (_, _, Answer::Resolved(Command::Stop)) => "stop",
         _ => action.hint(),
     })
 }

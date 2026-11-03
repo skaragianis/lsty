@@ -52,6 +52,7 @@ mod panel;
 mod peek;
 mod picker;
 mod popup;
+mod press;
 mod prompt;
 mod reldate;
 mod rows;
@@ -119,6 +120,8 @@ mod open_tests;
 mod panels_tests;
 #[cfg(test)]
 mod pinned_tests;
+#[cfg(test)]
+mod press_tests;
 #[cfg(test)]
 mod prompt_tests;
 #[cfg(test)]

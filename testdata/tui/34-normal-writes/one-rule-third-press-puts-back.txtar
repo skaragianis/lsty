@@ -1,0 +1,32 @@
+size 110 7
+start
+keys 2 t
+status 1 stopped; 1 was claimed by agent2; 1 not underway\b
+file todo.txt stopped
+keys 2 t
+status some are done — nothing changed
+file todo.txt stopped
+keys t
+status put back as it was
+frame back
+file todo.txt back-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Theirs started:2026-09-29T0700Z owner:agent2
+x 2026-09-01 Closed
+-- stopped --
+Theirs
+x 2026-09-01 Closed
+-- back --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Theirs                                                                                             2h │
+│  1 ✓ Closed                                                                                    28d ago     │
+│                                                                                                            │
+│                                                                                                            │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont  o new  a append    9.9.9
+-- back-file --
+Theirs started:2026-09-29T0700Z owner:agent2
+x 2026-09-01 Closed

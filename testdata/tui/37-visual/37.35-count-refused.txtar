@@ -1,6 +1,6 @@
 size 100 12
 start
-keys 2 x
+keys 2 t
 frame a-frame
 file todo.txt a-file
 -- config.toml --
@@ -22,7 +22,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  mixed states (1 todo, 1 done) — nothing changed  x done  t start   9.9.9
+ NORMAL  todo.txt  manual  some are done — nothing changed  x done  t start  T wont  o new    9.9.9
 -- a-file --
 A
 x 2026-09-29 B

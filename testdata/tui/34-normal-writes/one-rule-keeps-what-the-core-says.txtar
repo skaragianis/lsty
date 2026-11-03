@@ -1,0 +1,90 @@
+size 130 16
+start
+keys v j x
+status 1 done: Daily; 2 next: Daily \(due 2026-09-30\); 1 already done\b
+frame rec-and-done
+file todo.txt rec-file
+keys u
+status undid: 1 done: Daily
+keys g g j j j
+keys v j x
+status 5 done: Theirs; 5 was claimed by agent2; 1 already done\b
+frame agents-and-done
+file todo.txt agents-file
+keys u g g j j j j j
+keys v j T
+status 6 won't do: Yearly; 6 has rec:; the series ended; 1 already done\b
+keys u g g j j j j j j j
+keys v j j t
+status 8 started; 9 was claimed by agent3; now yours; 1 already underway\b
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Daily rec:1d
+x 2026-09-01 Done one
+Spare
+x 2026-09-02 Done two
+Theirs started:2026-09-29T0700Z owner:agent2
+Yearly rec:1y
+x 2026-09-03 Done three
+Fresh
+Held started:2026-09-29T0700Z owner:agent3
+Mine started:2026-09-29T0800Z
+-- rec-and-done --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  3 ✓ Daily rec:1d                                                                                                              │
+│  2   Daily rec:1d                                                                                           tomorrow  t001     │
+│  1 ✓ Done one                                                                                               28d ago            │
+│  4   Spare                                                                                                                     │
+│  1 ✓ Done two                                                                                               27d ago            │
+│  2 ▶ Theirs                                                                                                                 2h │
+│  3   Yearly rec:1y                                                                                                             │
+│  4 ✓ Done three                                                                                             26d ago            │
+│  5   Fresh                                                                                                                     │
+│  6 ▶ Held                                                                                                                   2h │
+│  7 ▷ Mine                                                                                                                   1h │
+│                                                                                                                                │
+│                                                                                                                                │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 3 in doing  1 done: Daily; 2 next: Daily (due 2026-09-30); 1 already done  x done  t start     9.9.9
+-- rec-file --
+x 2026-09-29 Daily rec:1d
+2026-09-29 Daily rec:1d due:2026-09-30 id:t001
+x 2026-09-01 Done one
+Spare
+x 2026-09-02 Done two
+Theirs started:2026-09-29T0700Z owner:agent2
+Yearly rec:1y
+x 2026-09-03 Done three
+Fresh
+Held started:2026-09-29T0700Z owner:agent3
+Mine started:2026-09-29T0800Z
+-- agents-and-done --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  5   Daily rec:1d                                                                                                              │
+│  4 ✓ Done one                                                                                                      28d ago     │
+│  3   Spare                                                                                                                     │
+│  2 ✓ Done two                                                                                                      27d ago     │
+│  1 ✓ Theirs                                                                                                                 2h │
+│  6   Yearly rec:1y                                                                                                             │
+│  1 ✓ Done three                                                                                                    26d ago     │
+│  2   Fresh                                                                                                                     │
+│  3 ▶ Held                                                                                                                   2h │
+│  4 ▷ Mine                                                                                                                   1h │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in doing  5 done: Theirs; 5 was claimed by agent2; 1 already done  x done  t start  T wont   9.9.9
+-- agents-file --
+Daily rec:1d
+x 2026-09-01 Done one
+Spare
+x 2026-09-02 Done two
+x 2026-09-29 Theirs started:2026-09-29T0700Z ended:2026-09-29T0900Z
+Yearly rec:1y
+x 2026-09-03 Done three
+Fresh
+Held started:2026-09-29T0700Z owner:agent3
+Mine started:2026-09-29T0800Z

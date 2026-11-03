@@ -1,11 +1,11 @@
-//! The keys that write: each one is a single operation over all the
-//! tasks it is about, run as the human.
+//! The keys that write: each one runs the single command it resolves to,
+//! as the human.
 
 use lsty_core::{
     dates::Clock,
     errs::{self, Code, Field as Extra, Nr, Source},
     keys::Action,
-    list::{Snapshot, State, TaskId},
+    list::{Claim, Snapshot, State, TaskId},
     ops::{self, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, Target},
     todotxt::Priority,
 };
@@ -14,57 +14,16 @@ use crate::{
     history::{Again, pairs_of},
     messages::{self, Tone},
     model::Model,
+    press::{Answer, Command, Refusal, decide},
     track::{Place, Touched, Wrote, place_of},
 };
-
-/// What a key does to its tasks.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-enum Write {
-    /// `toggle_start`: start or stop, by state.
-    Start,
-    Stop,
-    /// `toggle_complete`: complete, or reopen a done task.
-    Toggle,
-    /// `wontdo`: finish as won't do, or reopen a won't do task.
-    Wontdo,
-    Delete,
-    /// `cycle_priority` and its way back.
-    Step {
-        forward: bool,
-    },
-}
-
-impl Write {
-    /// What `action` writes, if it is one of the task actions.
-    #[expect(
-        clippy::wildcard_enum_match_arm,
-        reason = "the other actions do not write tasks"
-    )]
-    fn of(action: Action) -> Option<Self> {
-        Some(match action {
-            Action::ToggleStart => Self::Start,
-            Action::Stop => Self::Stop,
-            Action::ToggleComplete => Self::Toggle,
-            Action::Wontdo => Self::Wontdo,
-            Action::Delete => Self::Delete,
-            Action::CyclePriority => Self::Step { forward: true },
-            Action::CyclePriorityBack => Self::Step { forward: false },
-            _ => return None,
-        })
-    }
-
-    /// Whether the tasks must all be in one state.
-    const fn same_state(self) -> bool {
-        matches!(self, Self::Start | Self::Stop | Self::Toggle | Self::Wontdo)
-    }
-}
 
 /// A task an action is about, as the list showed it.
 pub(crate) struct Chosen {
     source: Source,
     nr: Nr,
     state: State,
-    wontdo: bool,
+    claim: Claim,
     pub(crate) text: Vec<u8>,
     name: String,
     priority: Option<Priority>,
@@ -82,45 +41,108 @@ impl Chosen {
         target.set_expect(self.text.clone(), true);
         target
     }
+
+    /// Whether `command` changes this task, rather than say it is already
+    /// there.
+    const fn changed_by(&self, command: Command) -> bool {
+        match command {
+            Command::Do | Command::Wontdo => {
+                !matches!(self.state, State::Done)
+            }
+            Command::Start => {
+                matches!(self.state, State::Todo)
+                    || matches!(self.claim, Claim::Agent)
+            }
+            Command::Stop => matches!(self.state, State::Doing),
+            Command::Reopen
+            | Command::Restore
+            | Command::Delete
+            | Command::Step { .. } => true,
+        }
+    }
 }
 
 impl Model {
     /// Does a task action over the task under the cursor, or `count`
     /// tasks from it.
     pub(crate) fn act(&mut self, action: Action, count: usize) -> bool {
-        let Some(write) = Write::of(action) else {
-            return false;
-        };
+        let answer = decide(action, &self.summary(count));
         let ids = self.tasks_of(count);
         let tasks = self.chosen(&ids);
-        let Some(state) = tasks.first().map(|i| i.state) else {
-            return false;
-        };
         let again = self.count_for(count, tasks.len());
-        let back = write == Write::Start
-            && state != State::Doing
-            && self.just_stopped(&ids);
-        let ran = self.ending(&ids, |m| {
-            if let Some(text) = refusal(write, &tasks) {
-                m.alert(text);
-                return false;
-            }
-            if let Some(ran) = back.then(|| m.put_back()).flatten() {
-                return ran;
-            }
-            let result = m.attempt(|env| m.perform(env, write, state, &tasks));
-            m.settle(result)
-        });
+        let toggles = action == Action::ToggleStart;
+        let stops = answer == Answer::Resolved(Command::Stop);
+        let back = toggles && !stops && self.just_stopped(&ids);
+        let ran = self.ending(&ids, |m| m.answered(answer, back, &tasks));
         if ran {
             self.again = Some(Again::Task {
                 action,
                 count: again,
             });
-            if write == Write::Start && state == State::Doing {
+            if toggles && stops {
                 self.remember_stop();
             }
         }
         ran
+    }
+
+    /// Does what `answer` says over `tasks`, or, for `back`, puts back the
+    /// claims `t` just ended. Tells whether a write ran.
+    fn answered(
+        &mut self,
+        answer: Answer,
+        back: bool,
+        tasks: &[Chosen],
+    ) -> bool {
+        let (command, passes) = match answer {
+            Answer::Applies => return false,
+            Answer::Refused(why) => {
+                self.alert(refusal(why, tasks));
+                return false;
+            }
+            Answer::CoreRefuses(command) => (command, false),
+            Answer::Resolved(command) => (command, true),
+        };
+        if let Some(ran) = back.then(|| self.put_back()).flatten() {
+            return ran;
+        }
+        let changing: Vec<&Chosen> = tasks
+            .iter()
+            .filter(|task| !passes || task.changed_by(command))
+            .collect();
+        let (change, there) = (changing.len(), tasks.len() - changing.len());
+        // A completion goes on below its press, not to a task it passed over.
+        let cursor = self.cursor;
+        if there > 0 && matches!(command, Command::Do | Command::Wontdo) {
+            self.cursor = (cursor + tasks.len()).min(self.rows.len() - 1);
+        }
+        let result = self.attempt(|env| self.perform(env, command, &changing));
+        let said: Vec<String> = result.as_ref().map_or_else(
+            |_| Vec::new(),
+            |(outcome, _)| {
+                outcome.messages().iter().map(|m| errs::lossy(m)).collect()
+            },
+        );
+        if !self.settle(result) {
+            self.cursor = cursor;
+            return false;
+        }
+        if let Some((did, already)) = command.words().filter(|_| there > 0) {
+            let all = said.join("; ");
+            // Taking a claim over has one line, which the count would lose.
+            let plain =
+                !changing.iter().any(|t| matches!(t.claim, Claim::Agent));
+            let head = if plain && said.len() == change {
+                format!("{change} {did}")
+            } else {
+                all.clone()
+            };
+            let short = format!("{head}; {there} {already}");
+            self.message =
+                self.message.take().map(|m| m.replacen(&all, &short, 1));
+        }
+        self.scroll();
+        true
     }
 
     /// Takes what an operation did, or shows why it did not run. Tells
@@ -150,7 +172,7 @@ impl Model {
                     source: task.source(),
                     nr: task.nr(),
                     state: task.state(),
-                    wontdo: self.snap.is_wontdo(task),
+                    claim: task.claim(),
                     text: line.text(),
                     name: messages::name_of(line),
                     priority: line.effective_priority(),
@@ -174,26 +196,30 @@ impl Model {
         Ok((run(&env)?, clock))
     }
 
-    /// Runs the operation of `write` over `tasks`, the first of which
-    /// is in `state`.
+    /// Runs `command` over `tasks`.
     fn perform(
         &self,
         env: &Env<'_>,
-        write: Write,
-        state: State,
-        tasks: &[Chosen],
+        command: Command,
+        tasks: &[&Chosen],
     ) -> errs::Result<Outcome> {
-        let targets: Vec<Target> = tasks.iter().map(Chosen::target).collect();
+        let targets: Vec<Target> = tasks.iter().map(|t| t.target()).collect();
         let claim = ClaimOpts::default();
-        if tasks.iter().any(Chosen::archived) {
-            return ops::restore(env, &targets, claim);
-        }
-        match (write, state) {
-            (Write::Stop, _) | (Write::Start, State::Doing) => {
-                ops::stop(env, &targets, claim)
+        match command {
+            Command::Do => ops::finish(env, &targets, DoOpts::default()),
+            Command::Wontdo => {
+                let opts = DoOpts {
+                    wontdo: true,
+                    ..DoOpts::default()
+                };
+                ops::finish(env, &targets, opts)
             }
-            (Write::Delete, _) => ops::del(env, &targets, claim),
-            (Write::Step { forward }, _) => {
+            Command::Start => ops::start(env, &targets, StartOpts::default()),
+            Command::Stop => ops::stop(env, &targets, claim),
+            Command::Reopen => ops::reopen(env, &targets, claim),
+            Command::Restore => ops::restore(env, &targets, claim),
+            Command::Delete => ops::del(env, &targets, claim),
+            Command::Step { forward } => {
                 let last = self.deps.config.priority_range;
                 let pairs =
                     tasks.iter().zip(targets).map(|(task, target)| PriPair {
@@ -201,23 +227,6 @@ impl Model {
                         priority: stepped(task.priority, last, forward),
                     });
                 ops::pri(env, &pairs.collect::<Vec<_>>())
-            }
-            // `refusal` turned a done task away, and `start` refuses one.
-            (Write::Start, State::Todo | State::Done) => {
-                ops::start(env, &targets, StartOpts::default())
-            }
-            (Write::Toggle, State::Doing | State::Todo) => {
-                ops::finish(env, &targets, DoOpts::default())
-            }
-            (Write::Wontdo, State::Doing | State::Todo) => {
-                let opts = DoOpts {
-                    wontdo: true,
-                    ..DoOpts::default()
-                };
-                ops::finish(env, &targets, opts)
-            }
-            (Write::Toggle | Write::Wontdo, State::Done) => {
-                ops::reopen(env, &targets, claim)
             }
         }
     }
@@ -320,31 +329,19 @@ pub(crate) fn places(snap: &Snapshot, ids: &[TaskId]) -> Vec<Place> {
         .collect()
 }
 
-/// Why the keys turn the tasks away before any operation.
-fn refusal(write: Write, tasks: &[Chosen]) -> Option<String> {
-    if write == Write::Toggle && tasks.iter().all(Chosen::archived) {
-        return None;
-    }
-    archived_refusal(tasks).or_else(|| {
-        if !write.same_state() {
-            return None;
+/// What a refusal of the keys says over `tasks`.
+pub(crate) fn refusal(why: Refusal, tasks: &[Chosen]) -> String {
+    match why {
+        Refusal::Closed | Refusal::Archived => {
+            named(tasks, messages::archived_task, messages::ARCHIVED_TASKS)
         }
-        let states: Vec<State> = tasks.iter().map(|i| i.state).collect();
-        messages::mixed_states(&states).or_else(|| done_refusal(write, tasks))
-    })
-}
-
-/// The refusal of `t` on done tasks, won't do or not, and of `T` on tasks
-/// of which some are done but not won't do.
-fn done_refusal(write: Write, tasks: &[Chosen]) -> Option<String> {
-    let done = |t: &Chosen| t.state == State::Done;
-    let plain = |t: &Chosen| done(t) && !t.wontdo;
-    if write == Write::Start && tasks.iter().any(done) {
-        Some(named(tasks, messages::closed_task, messages::CLOSED_TASKS))
-    } else if write == Write::Wontdo && tasks.iter().any(plain) {
-        Some(named(tasks, messages::done_task, messages::DONE_TASKS))
-    } else {
-        None
+        Refusal::AllDone => {
+            named(tasks, messages::closed_task, messages::CLOSED_TASKS)
+        }
+        Refusal::SomeDone => messages::SOME_DONE.to_owned(),
+        Refusal::NotWontdo => {
+            named(tasks, messages::done_task, messages::DONE_TASKS)
+        }
     }
 }
 

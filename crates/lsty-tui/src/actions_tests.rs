@@ -3,7 +3,6 @@ use std::{fs, path::Path, sync::Arc, time::Duration};
 use lsty_core::{
     config::{Config, Hidden},
     errs::{Nr, Source},
-    list::State,
     ops::FileRecord,
     todotxt::Priority,
 };
@@ -53,30 +52,6 @@ fn the_priority_cycle() {
             forward,
         );
         assert_eq!(got, want.and_then(letter), "{name}");
-    }
-}
-
-type Mixed = (&'static str, &'static [State], Option<&'static str>);
-
-const MIXED: [Mixed; 4] = [
-    ("one state", &[State::Todo, State::Todo], None),
-    (
-        "two",
-        &[State::Todo, State::Doing, State::Todo],
-        Some("mixed states (2 todo, 1 doing) — nothing changed"),
-    ),
-    (
-        "three, in the order of the states",
-        &[State::Done, State::Doing, State::Todo],
-        Some("mixed states (1 todo, 1 doing, 1 done) — nothing changed"),
-    ),
-    ("one task", &[State::Done], None),
-];
-
-#[test]
-fn the_mixed_states_message() {
-    for (name, states, want) in MIXED {
-        assert_eq!(messages::mixed_states(states).as_deref(), want, "{name}");
     }
 }
 
@@ -296,11 +271,8 @@ fn a_refused_write_changes_nothing_and_records_nothing() {
     let dir = workdir("A\nx 2026-09-29 B\nC id:c\nD dep:c\n");
     let before = todo_of(dir.path());
     let mut model = model_of(dir.path(), alone());
-    press(&mut model, "3x");
-    assert_eq!(
-        model.message.as_deref(),
-        Some("mixed states (2 todo, 1 done) — nothing changed")
-    );
+    press(&mut model, "3t");
+    assert_eq!(model.message.as_deref(), Some(messages::SOME_DONE));
     assert_eq!(model.tone, Tone::Alert);
     keys(&mut model, "jjjx");
     assert_eq!(model.tone, Tone::Alert);

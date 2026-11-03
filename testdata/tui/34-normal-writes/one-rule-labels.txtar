@@ -1,0 +1,139 @@
+size 130 16
+start
+status x done  t start  T wont\b
+keys v j
+status x done  t start  T wont\b
+keys j
+status x done  t start  T wont\b
+keys <Esc>
+status x done  t stop  T wont\b
+keys v j
+status x done  t stop  T wont\b
+keys <Esc>
+status x reopen  T wont\b
+keys v j
+status x reopen  T wont\b
+keys j
+status x reopen  T wont\b
+frame plain-and-wontdo
+keys <Esc>
+status x reopen  T will\b
+keys v j
+status x reopen  T will\b
+frame all-wontdo
+keys j
+status x reopen  T wont\b
+frame wontdo-then-plain
+keys j
+status x done  T wont\b
+frame some-archived
+keys <Esc>
+status x restore  T wont\b
+keys v j
+status x restore  T wont\b
+frame all-archived
+keys <Esc> j
+status x restore  T wont\b
+keys g g v G
+status x done  t start  T wont\b
+-- config.toml --
+show_sidebar = false
+show_detail = false
+hidden_tasks = ["later"]
+-- todo.txt --
+Open
+Other
+Mine started:2026-09-29T0800Z
+x 2026-09-01 Plain
+x 2026-09-01 Plain two
+x 2026-09-01 Skip wontdo:true
+x 2026-09-01 Skip two wontdo:true
+x 2026-09-01 Plain three
+-- done.txt --
+x 2026-09-01 Old
+x 2026-09-01 Old skip wontdo:true
+-- plain-and-wontdo --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  5   Open                                                                                                                      │
+│  4   Other                                                                                                                     │
+│  3 ▷ Mine                                                                                                                   1h │
+│  2 ✓ Plain                                                                                                         28d ago     │
+│  1 ✓ Plain two                                                                                                     28d ago     │
+│  6 ✗ Skip wontdo:true                                                                                              28d ago     │
+│  1 ✗ Skip two wontdo:true                                                                                          28d ago     │
+│  2 ✓ Plain three                                                                                                   28d ago     │
+│    ✓ Old                                                                                                           28d ago     │
+│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  3 selected  todo.txt  manual  ▶ 1 in doing  x reopen  T wont  d delete  y yank  <Esc> exit                         9.9.9
+-- all-wontdo --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  6   Open                                                                                                                      │
+│  5   Other                                                                                                                     │
+│  4 ▷ Mine                                                                                                                   1h │
+│  3 ✓ Plain                                                                                                         28d ago     │
+│  2 ✓ Plain two                                                                                                     28d ago     │
+│  1 ✗ Skip wontdo:true                                                                                              28d ago     │
+│  7 ✗ Skip two wontdo:true                                                                                          28d ago     │
+│  1 ✓ Plain three                                                                                                   28d ago     │
+│    ✓ Old                                                                                                           28d ago     │
+│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  x reopen  T will  d delete  y yank  <Esc> exit                         9.9.9
+-- wontdo-then-plain --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  7   Open                                                                                                                      │
+│  6   Other                                                                                                                     │
+│  5 ▷ Mine                                                                                                                   1h │
+│  4 ✓ Plain                                                                                                         28d ago     │
+│  3 ✓ Plain two                                                                                                     28d ago     │
+│  2 ✗ Skip wontdo:true                                                                                              28d ago     │
+│  1 ✗ Skip two wontdo:true                                                                                          28d ago     │
+│  8 ✓ Plain three                                                                                                   28d ago     │
+│    ✓ Old                                                                                                           28d ago     │
+│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  3 selected  todo.txt  manual  ▶ 1 in doing  x reopen  T wont  d delete  y yank  <Esc> exit                         9.9.9
+-- some-archived --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  8   Open                                                                                                                      │
+│  7   Other                                                                                                                     │
+│  6 ▷ Mine                                                                                                                   1h │
+│  5 ✓ Plain                                                                                                         28d ago     │
+│  4 ✓ Plain two                                                                                                     28d ago     │
+│  3 ✗ Skip wontdo:true                                                                                              28d ago     │
+│  2 ✗ Skip two wontdo:true                                                                                          28d ago     │
+│  1 ✓ Plain three                                                                                                   28d ago     │
+│    ✓ Old                                                                                                           28d ago     │
+│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  4 selected  todo.txt  manual  ▶ 1 in doing  x done  T wont  d delete  y yank  <Esc> exit                           9.9.9
+-- all-archived --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│  9   Open                                                                                                                      │
+│  8   Other                                                                                                                     │
+│  7 ▷ Mine                                                                                                                   1h │
+│  6 ✓ Plain                                                                                                         28d ago     │
+│  5 ✓ Plain two                                                                                                     28d ago     │
+│  4 ✗ Skip wontdo:true                                                                                              28d ago     │
+│  3 ✗ Skip two wontdo:true                                                                                          28d ago     │
+│  2 ✓ Plain three                                                                                                   28d ago     │
+│    ✓ Old                                                                                                           28d ago     │
+│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│                                                                                                                                │
+│                                                                                                                                │
+│                                                                                                                                │
+└────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  x restore  T wont  d delete  y yank  <Esc> exit                        9.9.9

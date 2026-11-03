@@ -12,9 +12,9 @@ x 2026-09-29 B
 C
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   A                                                                                           │
-│  2 ✓ B                                                                                           │
-│  1   C                                                                                           │
+│  2 ✓ A                                                                                           │
+│  1 ✓ B                                                                                           │
+│  3   C                                                                                           │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -22,8 +22,8 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  mixed states (1 todo, 1 done) — nothing changed        9.9.9
+ NORMAL  todo.txt  manual  1 done; 1 already done  x done  t start  T wont  o new  a append   9.9.9
 -- a-file --
-A
+x 2026-09-29 A
 x 2026-09-29 B
 C

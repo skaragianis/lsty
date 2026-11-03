@@ -1,0 +1,46 @@
+size 100 8
+start
+keys v j
+status x done  t start  T wont\b
+keys x
+status 1 done: Open; 2 done: Mine
+frame x-both
+file todo.txt x-file
+keys u g g v j t
+status 1 started; 1 already underway\b
+frame t-the-todo
+file todo.txt t-file
+keys g g v j t
+status 1 stopped; 2 stopped
+keys u u g g v j T
+status 1 won't do: Open; 2 won't do: Mine
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open
+Mine started:2026-09-29T0800Z
+-- x-both --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓ Open                                                                                        │
+│  1 ✓ Mine                                                                                     1h │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done: Open; 2 done: Mine  x reopen  T wont  o new  a append      9.9.9
+-- x-file --
+x 2026-09-29 Open
+x 2026-09-29 Mine started:2026-09-29T0800Z ended:2026-09-29T0900Z
+-- t-the-todo --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Open                                                                                     0m │
+│  1 ▷ Mine                                                                                     1h │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 2 in doing  1 started; 1 already underway  x done  t stop        9.9.9
+-- t-file --
+Open started:2026-09-29T0900Z
+Mine started:2026-09-29T0800Z

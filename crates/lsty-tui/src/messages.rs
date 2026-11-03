@@ -1,7 +1,7 @@
 //! The texts the writes of the list show, besides those of the
 //! operations.
 
-use lsty_core::{errs, list::State, todotxt::Line};
+use lsty_core::{errs, todotxt::Line};
 
 /// How the message in the status line is drawn.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -22,9 +22,6 @@ pub(crate) const PREREQUISITE_GONE: &str = "the task it waits for is gone";
 /// What it ends with when that task is gone.
 pub(crate) const DELETE_DEP: &str = " — delete its dep: to go on";
 
-/// The states in the order a message names them.
-const ORDER: [State; 3] = [State::Todo, State::Doing, State::Done];
-
 /// The message of `e`, followed by its hint when it has one.
 pub(crate) fn hinted(e: &errs::Error) -> String {
     e.hint().map_or_else(
@@ -41,20 +38,8 @@ pub(crate) fn busy(name: &str) -> String {
     )
 }
 
-/// The refusal of tasks that are not all in one state, or `None` when
-/// they are.
-pub(crate) fn mixed_states(states: &[State]) -> Option<String> {
-    let parts: Vec<String> = ORDER
-        .into_iter()
-        .filter_map(|state| {
-            let n = states.iter().filter(|s| **s == state).count();
-            (n > 0).then(|| format!("{n} {}", state.as_str()))
-        })
-        .collect();
-    (parts.len() > 1).then(|| {
-        format!("mixed states ({}) — nothing changed", parts.join(", "))
-    })
-}
+/// The refusal of `t` over todo and done tasks.
+pub(crate) const SOME_DONE: &str = "some are done — nothing changed";
 
 /// The refusal of a selection of which some tasks are archived.
 pub(crate) const ARCHIVED_TASKS: &str =

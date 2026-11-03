@@ -263,11 +263,11 @@ impl Model {
             now.ok().and_then(|t| t.checked_add(MESSAGE_LIFE).ok());
     }
 
-    /// Ends the window, and tells whether `ids` are exactly the tasks it
-    /// is about, in time.
+    /// Tells whether `ids` are exactly the tasks the window is about, in
+    /// time, and ends the window if they are the tasks.
     pub(crate) fn just_stopped(&mut self, ids: &[TaskId]) -> bool {
         let (Some(until), Some(top)) =
-            (self.hist.stopped.take(), self.hist.undo.last())
+            (self.hist.stopped, self.hist.undo.last())
         else {
             return false;
         };
@@ -275,6 +275,7 @@ impl Model {
         let mut own = top.own_places();
         asked.sort_unstable();
         own.sort_unstable();
+        self.hist.stopped = self.hist.stopped.filter(|_| asked != own);
         self.clock_now().is_ok_and(|c| c.now() < until) && asked == own
     }
 
