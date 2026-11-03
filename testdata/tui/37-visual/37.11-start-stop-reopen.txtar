@@ -9,7 +9,7 @@ file todo.txt b-file
 keys v j x
 frame c-frame
 file todo.txt c-file
-keys g g v j t
+keys g g v j x
 frame d-frame
 file todo.txt d-file
 -- config.toml --

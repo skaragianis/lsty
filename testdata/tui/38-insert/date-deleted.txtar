@@ -20,6 +20,6 @@ x 2026-10-14 2026-10-01 Buy milk
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 x Buy milk  x reopen  t reopen  T wont  o new  a append          9.9.9
+ NORMAL  todo.txt  manual  1 x Buy milk  x reopen  T wont  o new  a append  dd delete         9.9.9
 -- a-file --
 x Buy milk

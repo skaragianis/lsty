@@ -42,7 +42,7 @@ show_sidebar = false
 │ ended      2026-09-29 08:30 (2h)                                   │
 │ claim      finished (by you)                                       │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x reopen  t reopen  T wont  o new    9.9.9
+ NORMAL  todo.txt  manual  x reopen  T wont  o new  a append    9.9.9
 -- colours --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
@@ -79,4 +79,4 @@ e.mmmmmmmmmmmtttttttttttttttt........................................e
 e.mmmmmmmmmmmttttttttttttttttttttt...................................e
 e.mmmmmmmmmmmttttttttttttttttt.......................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..k.yyyyyy..k.yyyy..k.yyy....mmmmm.
+NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..k.yyyy..k.yyy..k.yyyyyy....mmmmm.

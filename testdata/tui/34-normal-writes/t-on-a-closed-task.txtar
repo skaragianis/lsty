@@ -1,0 +1,110 @@
+size 100 10
+start
+keys j t
+frame done-refused
+keys j t
+frame wontdo-refused
+keys k 2 t
+frame count-refused
+keys V j t
+frame selection-refused
+keys <Esc> g g V j t
+frame mixed-refused
+file todo.txt untouched-file
+keys <Esc> u
+frame nothing-to-undo
+keys g g t j .
+frame repeat-refused
+file todo.txt started-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Open
+x 2026-09-01 Plain
+x 2026-09-01 Decided wontdo:true
+-- done-refused --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open                                                                                        │
+│  2 ✓ Plain                                                                               28d ago │
+│  1 ✗ Decided wontdo:true                                                                 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Plain is done — x reopens it  x reopen  T wont  o new  a append    9.9.9
+-- wontdo-refused --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   Open                                                                                        │
+│  1 ✓ Plain                                                                               28d ago │
+│  3 ✗ Decided wontdo:true                                                                 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  Decided is done — x reopens it  x reopen  T reopen  o new          9.9.9
+-- count-refused --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open                                                                                        │
+│  2 ✓ Plain                                                                               28d ago │
+│  1 ✗ Decided wontdo:true                                                                 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  all are done — x reopens them  x reopen  T wont  o new  a append   9.9.9
+-- selection-refused --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   Open                                                                                        │
+│  1 ✓ Plain                                                                               28d ago │
+│  3 ✗ Decided wontdo:true                                                                 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  all are done — x reopens them  x reopen  T wont        9.9.9
+-- mixed-refused --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open                                                                                        │
+│  2 ✓ Plain                                                                               28d ago │
+│  1 ✗ Decided wontdo:true                                                                 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  mixed states (1 todo, 1 done) — nothing changed        9.9.9
+-- untouched-file --
+Open
+x 2026-09-01 Plain
+x 2026-09-01 Decided wontdo:true
+-- nothing-to-undo --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Open                                                                                        │
+│  2 ✓ Plain                                                                               28d ago │
+│  1 ✗ Decided wontdo:true                                                                 28d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  nothing to undo  x reopen  T wont  o new  a append  dd delete      9.9.9
+-- repeat-refused --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▷ Open                                                                                     0m │
+│  2 ✓ Plain                                                                           28d ago     │
+│  1 ✗ Decided wontdo:true                                                             28d ago     │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  Plain is done — x reopens it  x reopen  T wont       9.9.9
+-- started-file --
+Open started:2026-09-29T0900Z
+x 2026-09-01 Plain
+x 2026-09-01 Decided wontdo:true

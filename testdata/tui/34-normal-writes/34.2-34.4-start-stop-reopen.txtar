@@ -9,7 +9,7 @@ file todo.txt b-file
 keys t x
 frame c-frame
 file todo.txt c-file
-keys t
+keys x
 frame d-frame
 file todo.txt d-file
 keys t
@@ -50,7 +50,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Call client  x reopen  t reopen  T wont  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  1 done: Call client  x reopen  T wont  o new  a append  dd delete  9.9.9
 -- c-file --
 x 2026-09-29 Call client +work started:2026-09-29T0900Z ended:2026-09-29T0900Z pri:A
 -- d-frame --
