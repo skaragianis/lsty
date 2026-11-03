@@ -6,7 +6,7 @@ keys t
 status  t stop  T wont  x done
 frame started
 keys T
-status  T reopen  x reopen
+status  T will  x reopen
 frame wontdo
 file todo.txt wontdo-file
 -- config.toml --
@@ -40,6 +40,6 @@ Open
 │ state      done                                                                                  │
 │ …                                                                                                │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 won't do: Open  T reopen  x reopen                               9.9.9
+ NORMAL  todo.txt  manual  1 won't do: Open  T will  x reopen                                 9.9.9
 -- wontdo-file --
 x 2026-09-29 Open started:2026-09-29T0900Z wontdo:true ended:2026-09-29T0900Z
