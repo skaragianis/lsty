@@ -306,7 +306,7 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
         ),
         ("detail todo", "A\n", "", "<C-w>2", "<CR> link"),
         ("detail link", "A https://x.org\n", "", "<C-w>2", ""),
-        ("detail blocked", STUCK, "", "j<C-w>2", "<CR> link x done"),
+        ("detail blocked", STUCK, "", "j<C-w>2", "x done <CR> link"),
         ("detail archived", "", OLD, "<C-w>2", "<CR> link dd delete"),
     ];
     for (name, todo, done, typed, want) in rows {

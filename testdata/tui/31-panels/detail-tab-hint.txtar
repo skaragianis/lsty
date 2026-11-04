@@ -27,7 +27,7 @@ Read docs file:a.md file:b.md
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> projects  x done  dd delete  <C-w>1 list                                        9.9.9
+ NORMAL  todo.txt  manual  x done  <CR> link  <Tab> projects  dd delete  <C-w>1 list                                        9.9.9
 -- link-next --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │  1   Plain                                                                              ││ Read docs file:a.md file:b.md       │
@@ -42,7 +42,7 @@ Read docs file:a.md file:b.md
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
+ NORMAL  todo.txt  manual  x done  <CR> link  <Tab> next link  dd delete  <C-w>1 list                                       9.9.9
 -- last-link --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │  1   Plain                                                                              ││ Read docs file:a.md file:b.md       │
@@ -57,7 +57,7 @@ Read docs file:a.md file:b.md
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> projects  x done  dd delete  <C-w>1 list                                        9.9.9
+ NORMAL  todo.txt  manual  x done  <CR> link  <Tab> projects  dd delete  <C-w>1 list                                        9.9.9
 -- link-next-again --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │  1   Plain                                                                              ││ Read docs file:a.md file:b.md       │
@@ -72,4 +72,4 @@ Read docs file:a.md file:b.md
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
+ NORMAL  todo.txt  manual  x done  <CR> link  <Tab> next link  dd delete  <C-w>1 list                                       9.9.9

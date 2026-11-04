@@ -24,7 +24,7 @@ Third
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 deleted  <CR> link  <Tab> projects  x done  dd delete  <C-w>1 list                             9.9.9
+ NORMAL  todo.txt  manual  2 deleted  x done  <CR> link  <Tab> projects  dd delete  <C-w>1 list                             9.9.9
 -- gone-todo --
 First
 
