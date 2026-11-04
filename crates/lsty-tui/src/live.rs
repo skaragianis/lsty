@@ -321,6 +321,20 @@ impl Model {
         }
     }
 
+    /// Reads the files now and tells whether they had moved on from the list
+    /// shown, which then shows them. `at_once` does not wait for the lock.
+    pub(crate) fn moved_on(&mut self, at_once: bool) -> errs::Result<bool> {
+        let clock = self.clock_now()?;
+        let mut config = self.deps.config.clone();
+        if at_once {
+            config.lock_timeout = Duration::ZERO;
+        }
+        let snap = fetch(self.snap.found(), &config, &clock, &self.cancel)?;
+        let moved = !same_state(&snap, &self.snap);
+        self.accept(snap, clock);
+        Ok(moved)
+    }
+
     /// Owes a reload: the files are not what the list shows.
     pub(crate) fn owe_reload(&mut self) {
         self.live.debt.owed = true;

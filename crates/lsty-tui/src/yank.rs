@@ -13,8 +13,15 @@ use lsty_core::{
 };
 
 use crate::{
-    actions::Chosen, history::Again, insert::first_touched, messages,
-    model::Model, msg::Cmd, press::Refusal, track::Remap,
+    actions::Chosen,
+    hints::dim,
+    history::Again,
+    insert::first_touched,
+    messages,
+    model::Model,
+    msg::Cmd,
+    press::{Refusal, decide},
+    track::Remap,
 };
 
 /// A line of the last yank, and the dependents a delete of it unlinked.
@@ -176,6 +183,10 @@ impl Model {
 
     /// `delete`: yanks the tasks it deletes, once the delete is written.
     pub(crate) fn delete_tasks(&mut self, count: usize) -> Vec<Cmd> {
+        if dim(decide(Action::Delete, self, &self.summary(count))) {
+            self.act(Action::Delete, count);
+            return Vec::new();
+        }
         let yank = Yank::of(&self.snap, &self.tasks_of(count));
         let text = yank.text.clone();
         let was = self.clip.replace(yank);

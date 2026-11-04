@@ -167,6 +167,24 @@ fn a_kept_dependent_follows_its_line_through_an_outside_change() {
     );
 }
 
+// A refused delete reads with the last yank in its place, which follows it.
+#[test]
+fn a_refused_delete_leaves_the_kept_dependents_to_follow_their_lines() {
+    let dir = workdir("A id:a\nB dep:a\nC\n");
+    fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    let board = Board::default();
+    let mut model = model_with_archive(dir.path(), &board);
+    board.take(&press(&mut model, "dd"));
+    keys(&mut model, "G");
+    fs::write(dir.path().join("todo.txt"), "X\nY\n\nB\nC\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    press(&mut model, "dd");
+    reload(&mut model);
+    keys(&mut model, "Gkp");
+    assert_eq!(todo_of(dir.path()), "X\nY\n\nB dep:a\nC\nA id:a\n");
+}
+
 // 43.41: what the cascade kept is used once
 #[test]
 fn the_kept_links_are_used_by_one_paste() {
