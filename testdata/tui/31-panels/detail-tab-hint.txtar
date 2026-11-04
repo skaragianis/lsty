@@ -1,0 +1,75 @@
+size 130 14
+start
+keys <C-w>2
+frame no-link
+keys <C-w>1 j <C-w>2
+frame link-next
+keys j
+frame last-link
+keys k
+frame link-next-again
+-- config.toml --
+show_sidebar = false
+-- todo.txt --
+Plain
+Read docs file:a.md file:b.md
+-- no-link --
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   Plain                                                                              ││ Plain                               │
+│  1   Read docs file:a.md file:b.md                                                      ││ ─────────────────────────────────── │
+│                                                                                         ││ state  todo                         │
+│                                                                                         ││ nr     1                            │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> projects  x done  dd delete  <C-w>1 list                                        9.9.9
+-- link-next --
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   Plain                                                                              ││ Read docs file:a.md file:b.md       │
+│  2   Read docs file:a.md file:b.md                                                      ││ ─────────────────────────────────── │
+│                                                                                         ││ state  todo                         │
+│                                                                                         ││ nr     2                            │
+│                                                                                         ││ links                               │
+│                                                                                         ││ ✗ a.md                              │
+│                                                                                         ││ ✗ b.md                              │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
+-- last-link --
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   Plain                                                                              ││ Read docs file:a.md file:b.md       │
+│  2   Read docs file:a.md file:b.md                                                      ││ ─────────────────────────────────── │
+│                                                                                         ││ state  todo                         │
+│                                                                                         ││ nr     2                            │
+│                                                                                         ││ links                               │
+│                                                                                         ││ ✗ a.md                              │
+│                                                                                         ││ ✗ b.md                              │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> projects  x done  dd delete  <C-w>1 list                                        9.9.9
+-- link-next-again --
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1   Plain                                                                              ││ Read docs file:a.md file:b.md       │
+│  2   Read docs file:a.md file:b.md                                                      ││ ─────────────────────────────────── │
+│                                                                                         ││ state  todo                         │
+│                                                                                         ││ nr     2                            │
+│                                                                                         ││ links                               │
+│                                                                                         ││ ✗ a.md                              │
+│                                                                                         ││ ✗ b.md                              │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9

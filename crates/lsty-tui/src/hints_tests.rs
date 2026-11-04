@@ -13,11 +13,15 @@ use ratatui::{
 use tempfile::TempDir;
 
 use crate::{
+    focus::Focus,
     hints::{defaults, label, warnings},
     model::Model,
     msg::Msg,
     press::{Answer, decide},
-    test_util::{alone, deps, keys, press, screen, started, workdir},
+    test_util::{
+        alone, deps, keys, plain, press, screen, started, workdir,
+        workdir_model,
+    },
 };
 
 type Hints = BTreeMap<String, Vec<String>>;
@@ -766,6 +770,76 @@ fn draws_after(typed: &str, line: impl Fn(usize) -> String) {
 
 fn draws_over_all_of(line: impl Fn(usize) -> String) {
     draws_after("ggVG", line);
+}
+
+/// The status line after `tabs` presses of `<Tab>` in the detail panel: `key`
+/// has the word of the place it `leaves` for and goes there, or has its own
+/// word and moves the link.
+fn tab_says(
+    (todo, tabs, show_sidebar): (&str, usize, bool),
+    key: &str,
+    leaves: Option<(&str, Focus)>,
+) {
+    let config = Config {
+        show_sidebar,
+        hints: table("detail", &["next_link", "prev_link"]),
+        ..plain()
+    };
+    let (_dir, mut model) = workdir_model(todo, config);
+    model.update(Msg::Resize(130, 30));
+    keys(&mut model, "<C-w>2");
+    for _ in 0..tabs {
+        keys(&mut model, "<Tab>");
+    }
+    let what = format!("{todo:?} at {tabs} {key} {show_sidebar}");
+    let (own, step) = if key == "<Tab>" {
+        ("next link", 1)
+    } else {
+        ("prev link", -1)
+    };
+    let word = leaves.map_or(own, |(word, _)| word);
+    let status = status_after(&model, 130);
+    assert!(
+        status.contains(&format!("{key} {word}")),
+        "{what}: {status}"
+    );
+    let link = model.detail_link().saturating_add_signed(step);
+    keys(&mut model, key);
+    let place = leaves.map_or(Focus::Detail, |(_, place)| place);
+    assert_eq!(model.focus, place, "{what}");
+    if leaves.is_none() {
+        assert_eq!(model.detail_link(), link, "{what}");
+    }
+}
+
+/// With the sidebar beside the list or coming over it.
+#[test]
+fn the_tab_words_say_what_the_keys_do() {
+    const LINKS: &str = "A file:a.md file:b.md file:c.md\n";
+    const PROJECTS: Option<(&str, Focus)> =
+        Some(("projects", Focus::Projects));
+    const LIST: Option<(&str, Focus)> = Some(("list", Focus::List));
+    let cases = [
+        ("A\n", 0, PROJECTS, LIST),
+        (LINKS, 0, None, LIST),
+        (LINKS, 1, None, None),
+        (LINKS, 2, PROJECTS, None),
+    ];
+    for (todo, tabs, next, prev) in cases {
+        for show_sidebar in [true, false] {
+            tab_says((todo, tabs, show_sidebar), "<Tab>", next);
+            tab_says((todo, tabs, show_sidebar), "<S-Tab>", prev);
+        }
+    }
+}
+
+/// On an empty list the panel gives the keyboard back, and its hints go.
+#[test]
+fn an_empty_list_shows_the_hints_of_the_list() {
+    let (_dir, model) = hinted(("", ""), None, "", "<C-w>2");
+    let status = status_after(&model, 130);
+    assert!(status.contains("/ search"), "{status}");
+    assert!(!status.contains("<CR> link"), "{status}");
 }
 
 #[test]

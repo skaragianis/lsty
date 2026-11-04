@@ -38,17 +38,7 @@ impl Model {
         let w = usize::from(width_cells);
         let mut line = self.status_base();
         let configured = &self.deps.config.hints;
-        let hidden: &[Action] = if self.typing_help() || self.typing_theme() {
-            &[Action::CompleteNext]
-        } else if self.opening.is_some()
-            || self.output.as_ref().is_some_and(|o| o.help.is_none())
-        {
-            &[Action::Search]
-        } else if self.search_in_effect() {
-            &[]
-        } else {
-            &[Action::ClearSearch]
-        };
+        let hidden = self.hidden_hints();
         let keys = &self.deps.keys;
         let table = self.key_mode();
         let accept = if table == Mode::Command {
@@ -66,7 +56,10 @@ impl Model {
         let room = w - taken;
         let label = |action| {
             let answer = answer(action);
-            Some((label(table, action, accept, answer)?, dim(answer)))
+            let word = self
+                .tab_word(action)
+                .or_else(|| label(table, action, accept, answer))?;
+            Some((word, dim(answer)))
         };
         let mut shown = hints(table, configured, keys, hidden, label);
         if self.matchers.get(&table).is_some_and(Matcher::cancels) {
@@ -94,6 +87,21 @@ impl Model {
         let area = Rect::new(0, y, width_cells, 1);
         buf.set_style(area, self.styles.fill(Slot::StatusBg));
         put(buf, (0, y), w, &line, &self.styles);
+    }
+
+    /// The actions that have no hint now, whatever the mode lists.
+    fn hidden_hints(&self) -> &'static [Action] {
+        if self.typing_help() || self.typing_theme() {
+            &[Action::CompleteNext]
+        } else if self.opening.is_some()
+            || self.output.as_ref().is_some_and(|o| o.help.is_none())
+        {
+            &[Action::Search]
+        } else if self.search_in_effect() {
+            &[]
+        } else {
+            &[Action::ClearSearch]
+        }
     }
 
     /// The cells at the right of a status line `w` cells wide that the

@@ -27,7 +27,7 @@ a
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> link  <Tab> next link  x done  dd delete  <C-w>1 list                                       9.9.9
+ NORMAL  todo.txt  manual  <CR> link  <Tab> projects  x done  dd delete  <C-w>1 list                                        9.9.9
 -- list --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │  1   First                                                                              ││ Second file:a.md                    │
