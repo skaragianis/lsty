@@ -190,9 +190,9 @@ impl Remap {
         (!gone && (followed || free)).then_some(now)
     }
 
-    /// The place of `at` now when the reading can say it is the same line:
-    /// it was followed, or it is the first of the lines that changed where
-    /// it stood.
+    /// The place of `at` now, unless the reading gives no ground to take a
+    /// line there for it: it was followed, or it is the first of the lines
+    /// that changed where it stood, which is taken for it.
     pub(crate) fn stays(&self, at: Place) -> Option<Place> {
         let plain = &self.of(at.0).plain;
         let first = at.1.index().checked_sub(1).is_none_or(|before| {

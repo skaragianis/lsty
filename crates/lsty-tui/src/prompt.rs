@@ -162,6 +162,8 @@ pub(crate) struct Prompt {
     count: usize,
     /// The lines of the tasks, followed across reloads.
     places: Vec<Place>,
+    /// A reading could not tell whether one of the tasks is still its line.
+    changed: bool,
 }
 
 impl LineKind {
@@ -201,18 +203,23 @@ impl Model {
             kind,
             count,
             places,
+            changed: false,
         };
         self.line = Some(Line::new(LineKind::Tasks(prompt), ""));
     }
 
     /// Follows the lines of the prompt's tasks to a new reading; those
-    /// that are gone, or that it cannot tell, are left out.
+    /// that are gone are left out, and one it cannot tell keeps the prompt
+    /// from writing at all.
     pub(crate) fn remap_prompt(&mut self, moved: &Remap) {
         if let Some(Line {
             kind: LineKind::Tasks(prompt),
             ..
         }) = &mut self.line
         {
+            prompt.changed |= prompt.places.iter().any(|at| {
+                moved.track(*at).is_some() && moved.stays(*at).is_none()
+            });
             prompt.places = prompt
                 .places
                 .iter()
@@ -249,12 +256,18 @@ impl Model {
         else {
             return;
         };
-        let (kind, count) = (prompt.kind, prompt.count);
+        let (kind, count, changed) =
+            (prompt.kind, prompt.count, prompt.changed);
         let text = field.text().trim_matches(is_sep).to_owned();
         let tasks = self.prompt_tasks();
-        if tasks.is_empty() {
+        if changed || tasks.is_empty() {
             self.close_input();
-            self.alert(messages::GONE.to_owned());
+            let why = if changed {
+                messages::CHANGED
+            } else {
+                messages::GONE
+            };
+            self.alert(why.to_owned());
             return;
         }
         if text.is_empty() && kind.needs_text() {

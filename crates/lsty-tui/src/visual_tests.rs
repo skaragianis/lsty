@@ -302,6 +302,14 @@ fn a_reload_taking_the_cursor_off_its_task_drops_the_keys_typed() {
             "A2\nB2\nC\n",
         ),
         (
+            "A\nB\nC\n",
+            "vj",
+            "gd",
+            "A2\nB2\nC\n",
+            "fri<CR>",
+            "A2\nB2\nC\n",
+        ),
+        (
             "A +k\nB +k\nC +k\n",
             "<C-w>3x|<C-w>1j",
             "d",
@@ -323,5 +331,9 @@ fn a_reload_taking_the_cursor_off_its_task_drops_the_keys_typed() {
         let lines: Vec<&str> =
             file.lines().filter(|l| !l.is_empty()).collect();
         assert_eq!(lines.join("\n") + "\n", want, "{typed} {outside} {then}");
+        if typed == "gd" {
+            let said = model.message.as_deref();
+            assert_eq!(said, Some(messages::CHANGED), "{to} {typed}");
+        }
     }
 }
