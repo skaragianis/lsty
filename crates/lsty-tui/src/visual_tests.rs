@@ -1,6 +1,6 @@
 use std::{fs, path::Path};
 
-use lsty_core::{errs::Source, keys::Mode};
+use lsty_core::{errs::Source, keys::Mode, ops::LIST_CHANGED};
 
 use crate::{
     messages,
@@ -282,43 +282,83 @@ fn a_reload_keeps_the_keys_typed_on_an_open_line_or_in_a_field() {
     }
 }
 
-// Keys typed on a task go no further when a reading takes the cursor off it,
-// or cannot tell it has not.
+const ABC: &str = "A\nB\nC\n";
+const ABCD: &str = "A\nB\nC\nD\n";
+const LOOK: Option<&str> = Some(LIST_CHANGED);
+
+/// The file, keys to where they are typed, those typed before the reading,
+/// what it reads, those typed after, the file left, and the word said.
+type Under = (
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    Option<&'static str>,
+);
+
+const UNDER_WAY: &[Under] = &[
+    (ABC, "j", "d", "A\nC\n", "d", "A\nC\n", LOOK),
+    (ABC, "j", "d", "A\nC\n", "ddd", "A\n", None),
+    (ABC, "j", "d", "A\nB2\nC\n", "d", "A\nB2\nC\n", LOOK),
+    (ABC, "j", "d", "A\nB +k\nC\n", "d", "A\nB +k\nC\n", LOOK),
+    (ABC, "j", "d", "C\nB\nA\n", "d", "C\nB\nA\n", LOOK),
+    (ABC, "j", "d", "A\nB\nB\nC\n", "d", "A\nB\nB\nC\n", LOOK),
+    (ABC, "j", "g", "A\nB +k\nC\n", "d", "A\nB +k\nC\n", LOOK),
+    (ABC, "j", "c", "A\nB +k\nC\n", "c", "A\nB +k\nC\n", LOOK),
+    (ABC, "j", "g", "A\nB +k\nC\n", "g", "A\nB +k\nC\n", None),
+    (ABC, "j", "2", "A\nB +k\nC\n", "j", "A\nB +k\nC\n", None),
+    (ABC, "j", "d", "A\nB +k\nC\n", "<Esc>dd", "A\nC\n", None),
+    (ABC, "j", "d", "Z\nA\nB\nC\n", "d", "Z\nA\nC\n", None),
+    (ABC, "j", "d", "B\nC\n", "d", "C\n", None),
+    (ABC, "j", "d", "A\nB\nC +k\n", "d", "A\nC +k\n", None),
+    (ABCD, "j", "2", "A\nC\nD\n", "dd", "A\nC\nD\n", LOOK),
+    (
+        ABCD,
+        "j",
+        "2",
+        "A\nB\nN\nC\nD\n",
+        "dd",
+        "A\nB\nN\nC\nD\n",
+        LOOK,
+    ),
+    (ABCD, "j", "2", "Z\nA\nB\nC\nD\n", "dd", "Z\nA\nD\n", None),
+    (
+        ABC,
+        "j",
+        "gd",
+        "A2\nB2\nC\n",
+        "fri<CR>",
+        "A2\nB2\nC\n",
+        Some(messages::CHANGED),
+    ),
+    (
+        ABC,
+        "vj",
+        "gd",
+        "A2\nB2\nC\n",
+        "fri<CR>",
+        "A2\nB2\nC\n",
+        Some(messages::CHANGED),
+    ),
+    (
+        "A +k\nB +k\nC +k\n",
+        "<C-w>3x|<C-w>1j",
+        "d",
+        "A +k\nB\nC +k\n",
+        "d",
+        "A +k\nB\nC +k\n",
+        LOOK,
+    ),
+];
+
+// Keys typed on a task refuse at the last of them when a reading took the
+// line from under them, or cannot tell it did not. A line that only shifted
+// goes on, and so does a key that writes nothing.
 #[test]
-fn a_reload_taking_the_cursor_off_its_task_drops_the_keys_typed() {
-    let cases = [
-        ("A\nB\nC\n", "j", "d", "A\nC\n", "d", "A\nC\n"),
-        ("A\nB\nC\n", "j", "d", "A\nC\n", "dd", "A\n"),
-        ("A\nB\nC\nD\n", "j", "2", "A\nC\nD\n", "dd", "A\nD\n"),
-        ("A\nB\nC\n", "j", "d", "Z\nA\nB\nC\n", "d", "Z\nA\nC\n"),
-        ("A\nB\nC\n", "j", "d", "A\nB2\nC\n", "d", "A\nC\n"),
-        ("A\nB\nC\n", "j", "d", "A2\nB2\nC\n", "d", "A2\nB2\nC\n"),
-        (
-            "A\nB\nC\n",
-            "j",
-            "gd",
-            "A2\nB2\nC\n",
-            "fri<CR>",
-            "A2\nB2\nC\n",
-        ),
-        (
-            "A\nB\nC\n",
-            "vj",
-            "gd",
-            "A2\nB2\nC\n",
-            "fri<CR>",
-            "A2\nB2\nC\n",
-        ),
-        (
-            "A +k\nB +k\nC +k\n",
-            "<C-w>3x|<C-w>1j",
-            "d",
-            "A +k\nB\nC +k\n",
-            "d",
-            "A +k\nB\nC +k\n",
-        ),
-    ];
-    for (todo, to, typed, outside, then, want) in cases {
+fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
+    for &(todo, to, typed, outside, then, want, says) in UNDER_WAY {
         let dir = workdir(todo);
         let mut model = model_of(dir.path());
         to.split('|').for_each(|part| settled(&mut model, part));
@@ -330,10 +370,13 @@ fn a_reload_taking_the_cursor_off_its_task_drops_the_keys_typed() {
         let file = todo_of(dir.path());
         let lines: Vec<&str> =
             file.lines().filter(|l| !l.is_empty()).collect();
-        assert_eq!(lines.join("\n") + "\n", want, "{typed} {outside} {then}");
-        if typed == "gd" {
-            let said = model.message.as_deref();
-            assert_eq!(said, Some(messages::CHANGED), "{to} {typed}");
+        let name = format!("{typed} {outside} {then}");
+        assert_eq!(lines.join("\n") + "\n", want, "{name}");
+        let said = model.message.as_deref();
+        if says.is_some() {
+            assert_eq!(said, says, "{name}");
+        } else {
+            assert_ne!(said, LOOK, "{name}");
         }
     }
 }

@@ -7,14 +7,15 @@
 //! under its own lock.
 //!
 //! Callers keep a line number or an id across reloads and ask here where
-//! it went; they never hold a task of an old snapshot.
+//! it went; they never hold a task of an old snapshot. An action that writes
+//! on a line asks [`kept`] instead, which follows nothing.
 
 mod diff;
 #[cfg(any(test, feature = "fuzzing"))]
 pub mod fuzzing;
 mod remap;
 
-pub use remap::{follow, remap};
+pub use remap::{follow, kept, remap};
 
 #[cfg(test)]
 mod diff_tests;

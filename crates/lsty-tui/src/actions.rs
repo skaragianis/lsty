@@ -25,18 +25,15 @@ pub(crate) struct Chosen {
     nr: Nr,
     state: State,
     claim: Claim,
-    pub(crate) text: Vec<u8>,
     name: String,
     priority: Option<Priority>,
 }
 
 impl Chosen {
-    /// The reference to the line, guarded by the text it had when the
-    /// list showed it.
+    /// The reference to the line, which [`Model::attempt`] aims from the
+    /// reading the list shows.
     pub(crate) fn target(&self) -> Target {
-        let mut target = Target::at(self.source, i64::from(self.nr.get()));
-        target.set_expect(self.text.clone(), true);
-        target
+        Target::at(self.source, i64::from(self.nr.get()))
     }
 
     /// Whether `command` changes this task, rather than say it is already
@@ -71,8 +68,7 @@ impl Model {
             Some(Ok(true)) => {
                 answer = decide(action, self, &self.summary(count));
                 if !dim(answer) || (had && self.rows.is_empty()) {
-                    self.message =
-                        Some("the list changed — look again".to_owned());
+                    self.message = Some(ops::LIST_CHANGED.to_owned());
                     return false;
                 }
             }
@@ -188,7 +184,6 @@ impl Model {
                     nr: task.nr(),
                     state: task.state(),
                     claim: task.claim(),
-                    text: line.text(),
                     name: messages::name_of(line),
                     priority: line.effective_priority(),
                 })
@@ -197,7 +192,8 @@ impl Model {
     }
 
     /// Runs `run` over an environment of the current files, as the
-    /// human; the clock is the one it used.
+    /// human, aimed from the reading the list shows; the clock is the one
+    /// it used.
     pub(crate) fn attempt<T>(
         &self,
         run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
@@ -208,6 +204,7 @@ impl Model {
         env.record_undo = true;
         env.cancel = self.cancel.clone();
         env.ids = self.deps.ids.as_ref();
+        env.aim = Some(&self.snap);
         Ok((run(&env)?, clock))
     }
 

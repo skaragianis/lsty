@@ -3,12 +3,13 @@ use std::{fs, path::Path, sync::Arc, time::Duration};
 use lsty_core::{
     config::{Config, Hidden},
     errs::{Nr, Source},
-    ops::FileRecord,
+    ops::{FileRecord, LIST_CHANGED},
     todotxt::Priority,
 };
 
 use crate::{
     actions::stepped,
+    focus::Focus,
     messages::{self, Tone},
     model::Model,
     test_util::{
@@ -247,23 +248,127 @@ fn a_delete_keeps_the_top_of_a_sorted_view() {
     }
 }
 
-// A line that is not UTF-8 is guarded like any other.
+/// The file drawn, the keys, the file they find, and what is being checked.
+type Refused = (&'static str, &'static str, &'static str, &'static str);
+
+const ALPHA_TAGGED: &str = "Alpha +outside\nB\n";
+const REFUSED: &[Refused] = &[
+    ("Alpha\nB\n", "x", ALPHA_TAGGED, "tagged"),
+    ("Alpha\nB\n", "dd", ALPHA_TAGGED, "tagged"),
+    (
+        "Alpha\nB\n",
+        "gi<C-w>2x",
+        ALPHA_TAGGED,
+        "from the detail panel",
+    ),
+    ("Alpha\nB\n", "t", ALPHA_TAGGED, "tagged"),
+    ("Alpha\nB\n", "J", ALPHA_TAGGED, "tagged"),
+    (
+        "Alpha\nB\n",
+        "J",
+        "Alpha\nB +outside\n",
+        "what it goes past",
+    ),
+    ("Alpha\nB\n", ":do 1<CR>", ALPHA_TAGGED, "by its number"),
+    ("Alpha\n", "x", "Alpha  \n", "white space"),
+    ("(B) Alpha\n", "-", "(A) Alpha\n", "a stale priority"),
+    ("(B) Alpha\n", "+", "(C) Alpha\n", "a stale priority"),
+    ("caf\u{e9} A\n", "x", "caf\u{e8} A\n", "one byte"),
+    ("A\nB\n", "x", "B\n", "gone"),
+    ("A\nB\nC\n", "x", "C\nB\nA\n", "reordered"),
+    ("A\nB\nC\n", "x", "A\nC\nB\n", "another pair reordered"),
+    ("A\nB\n", "x", "A\nA\nB\n", "a twin came"),
+];
+
+/// The file drawn, the keys, the file they find, and the file they leave.
+const WRITTEN: &[Refused] = &[
+    (
+        "Call +a\nO\n",
+        "x",
+        "Call +b\nCall +a\nO\n",
+        "Call +b\n{D}Call +a\nO\n",
+    ),
+    ("Alpha\n", "x", "New\nAlpha\n", "New\n{D}Alpha\n"),
+    ("Alpha\n", "x", "Alpha\r\n", "{D}Alpha\r\n"),
+    ("Alpha\n", ":do 1<CR>", "New\nAlpha\n", "New\n{D}Alpha\n"),
+    ("Alpha\n", "gi<C-w>2x", "New\nAlpha\n", "New\n{D}Alpha\n"),
+    ("Z\nA\nB\n", "jx", "A\nB\n", "{D}A\nB\n"),
+    (
+        "caf\u{e9} A\n",
+        "x",
+        "X\ncaf\u{e9} A\n",
+        "X\n{D}caf\u{e9} A\n",
+    ),
+    ("(B) A\n", "+", "N\n(B) A\n", "N\n(A) A\n"),
+    ("A\nA\nB\n", "x", "Z\nA\nA\nB\n", "Z\n{D}A\nA\nB\n"),
+    ("\nA\nB\n", "x", "A\n\nB\n", "{D}A\n\nB\n"),
+    ("A\nB\n", "x", "A\nB\nC\n", "{D}A\nB\nC\n"),
+    ("A\nB\n", "J", "N\nA\nB\n", "N\nB\nA\n"),
+    ("A\nB\n", "dd", "N\nA\nB\n", "N\n\nB\n"),
+];
+
+/// A model on the file `shown`, with `outside` written and not read.
+fn ahead(shown: &str, outside: &str) -> (tempfile::TempDir, Model) {
+    let dir = workdir(latin(shown));
+    let model = model_of(dir.path(), alone());
+    fs::write(dir.path().join("todo.txt"), latin(outside))
+        .unwrap_or_else(|e| panic!("{e}"));
+    (dir, model)
+}
+
+// A key aims from the list shown, whatever the files have become under the
+// lock: a line that only shifted is written where it stands now, and anything
+// else writes nothing and asks to look again. Bytes that are not UTF-8 count
+// like any others.
 #[test]
-fn a_stale_view_does_not_write_a_line_that_is_not_utf8() {
-    let dir = workdir(b"caf\xe9 A\nB\n");
-    let path = dir.path().join("todo.txt");
-    let mut model = model_of(dir.path(), alone());
-    let outside = b"X\ncaf\xe9 A\nB\n";
-    fs::write(&path, outside).unwrap_or_else(|e| panic!("{e}"));
-    press(&mut model, "x");
-    assert_eq!(fs::read(&path).unwrap_or_default(), outside);
-    assert_eq!(model.tone, Tone::Alert);
-    assert_eq!(
-        model.message.as_deref(),
-        Some("task 1 is \"X\", expected \"caf\\xe9 A\"")
-    );
-    assert_eq!(model.hist.undo.len(), 0);
-    assert!(model.reload_owed().is_some(), "the files are read again");
+fn a_key_aims_from_the_list_it_was_pressed_on() {
+    for (shown, typed, outside, name) in REFUSED {
+        let (dir, mut model) = ahead(shown, outside);
+        keys(&mut model, typed);
+        let file = fs::read(dir.path().join("todo.txt")).unwrap_or_default();
+        assert_eq!(file, latin(outside), "{name}");
+        assert_eq!(model.tone, Tone::Alert, "{name}");
+        assert_eq!(model.message.as_deref(), Some(LIST_CHANGED), "{name}");
+        assert_eq!(model.hist.undo.len(), 0, "{name}");
+        assert!(model.reload_owed().is_some(), "{name}: read again");
+        let panel = typed.contains("<C-w>2");
+        assert_eq!(model.focus == Focus::Detail, panel, "{name}");
+    }
+    for (shown, typed, outside, want) in WRITTEN {
+        let (dir, mut model) = ahead(shown, outside);
+        keys(&mut model, typed);
+        let file = fs::read(dir.path().join("todo.txt")).unwrap_or_default();
+        let want = latin(&want.replace("{D}", "x 2026-09-29 "));
+        assert_eq!(file, want, "{typed} {outside}");
+    }
+}
+
+/// The bytes of `text`, each `char` one byte, as a file that is not UTF-8 has.
+fn latin(text: &str) -> Vec<u8> {
+    text.chars()
+        .map(|c| u8::try_from(c as u32).unwrap_or(b'?'))
+        .collect()
+}
+
+// A paste takes the task under the cursor as a position only, and goes
+// whatever that task has become.
+#[test]
+fn a_paste_goes_beside_a_line_that_changed() {
+    for (outside, want) in [
+        ("Copy\nA +k\nB\n", "Copy\nA +k\nNew\nB\n"),
+        ("N\nCopy\nA\nB\n", "N\nCopy\nA\nNew\nB\n"),
+        ("Copy\nB\n", "Copy\nNew\nB\n"),
+    ] {
+        let dir = workdir("Copy\nA\nB\n");
+        let path = dir.path().join("todo.txt");
+        let mut model = model_of(dir.path(), alone());
+        press(&mut model, "yyj");
+        fs::write(&path, outside).unwrap_or_else(|e| panic!("{e}"));
+        press(&mut model, "p");
+        let file = fs::read_to_string(&path).unwrap_or_default();
+        let pasted = "2026-09-29 Copy id:t001";
+        assert_eq!(file.replace(pasted, "New"), want);
+    }
 }
 
 #[test]

@@ -1,8 +1,9 @@
 //! The mapping from the lines of one reading to those of the next.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use super::diff::common_pairs;
+use crate::todotxt::Line;
 
 /// Maps each line of `old` to its place in `new`.
 ///
@@ -36,6 +37,52 @@ where
     B: AsRef<[u8]>,
 {
     remap(old, new).get(i).copied().flatten()
+}
+
+/// Maps each line of `old` to its place in `new` for an action aimed at it
+/// from `old`, which takes no line for another.
+///
+/// Entry `i` is `None` when line `i` changed or went, or when the count of
+/// its text differs between the two, so that it cannot be told from a
+/// twin. Every entry is `None` when the file was reordered: a line both
+/// hold could not be kept in order. A blank line is no task, and moving one
+/// reorders nothing.
+pub fn kept<A, B>(old: &[A], new: &[B]) -> Vec<Option<usize>>
+where
+    A: AsRef<[u8]>,
+    B: AsRef<[u8]>,
+{
+    let mut mapping = vec![None; old.len()];
+    let mut taken = vec![false; new.len()];
+    for (i, j) in common_pairs(old, new) {
+        mapping[i] = Some(j);
+        taken[j] = true;
+    }
+    let went: HashSet<&[u8]> = old
+        .iter()
+        .zip(&mapping)
+        .filter(|(_, m)| m.is_none())
+        .map(|(line, _)| line.as_ref())
+        .collect();
+    let came: HashSet<&[u8]> = new
+        .iter()
+        .zip(&taken)
+        .filter(|(_, t)| !**t)
+        .map(|(line, _)| line.as_ref())
+        .collect();
+    if went
+        .intersection(&came)
+        .any(|line| !Line::is_blank_text(line))
+    {
+        return vec![None; old.len()];
+    }
+    for (line, slot) in old.iter().zip(&mut mapping) {
+        let text = line.as_ref();
+        if went.contains(text) || came.contains(text) {
+            *slot = None;
+        }
+    }
+    mapping
 }
 
 /// Maps a line the diff left alone when its text is unmapped exactly

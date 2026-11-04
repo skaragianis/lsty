@@ -8,12 +8,14 @@ use lsty_core::{
     errs::Source,
     keys::Action,
     list::{Snapshot, TaskId},
-    ops::{self, Change, ChangeKind, PasteLine, Place, Relink},
+    ops::{
+        self, Change, ChangeKind, PasteLine, Pin, Place, Relink, Seen, Settle,
+        Tracked,
+    },
     todotxt::{Line, trim},
 };
 
 use crate::{
-    actions::Chosen,
     hints::dim,
     history::Again,
     insert::first_touched,
@@ -242,23 +244,26 @@ impl Model {
         self.cursor_to(first);
     }
 
-    /// Where the lines go: next to the task under the cursor, or at the
-    /// end of the todo file when there is none to go next to.
+    /// Where the lines go: next to the task under the cursor, or about
+    /// where it was, or at the end of the todo file when there is none to
+    /// go next to. The task is only a position, so nothing it became can
+    /// refuse a paste.
     fn paste_place(&self, action: Action) -> Place {
-        let Some(row) = self.rows.get(self.cursor) else {
+        let task = self.rows.get(self.cursor).and_then(|row| {
+            self.snap
+                .task(row.id)
+                .filter(|_| row.source != Source::Done)
+        });
+        let Some(task) = task else {
             return Place::End;
         };
-        if row.source == Source::Done {
-            return Place::End;
-        }
-        let Some(task) = self.chosen(&[row.id]).first().map(Chosen::target)
-        else {
-            return Place::End;
-        };
-        if action == Action::PasteAbove {
-            Place::Before(task)
-        } else {
-            Place::After(task)
+        let raw = self.snap.line(task).raw().to_vec();
+        Place::Beside {
+            anchor: Tracked::new(
+                Pin::new(task.nr(), raw, Settle::Line),
+                Seen::of(&self.snap),
+            ),
+            below: action != Action::PasteAbove,
         }
     }
 

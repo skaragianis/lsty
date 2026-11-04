@@ -10,6 +10,7 @@ use lsty_core::{
     keys::{Action, Category, Matcher, Mode, Outcome, Stroke},
     list::{Params, Snapshot, SortField},
     lock::Cancel,
+    ops,
     theme::Theme,
     todotxt::File,
 };
@@ -34,6 +35,7 @@ use crate::{
     output::Output,
     panel::Panel,
     picker::Picker,
+    press::writes_line,
     prompt::Kind as PromptKind,
     reldate::Today,
     rows::{self, Context, Inline, Row, Shows},
@@ -79,6 +81,8 @@ pub(crate) struct Model {
     pub(crate) cursor: usize,
     /// The line the selection started on, in VISUAL mode.
     pub(crate) visual: Option<Place>,
+    /// A reading took the lines from under the keys typed so far.
+    pub(crate) keys_lost: bool,
     pub(crate) top: usize,
     pub(crate) width: u16,
     pub(crate) height: u16,
@@ -203,6 +207,7 @@ impl Model {
             natural: Natural::default(),
             cursor: 0,
             visual: None,
+            keys_lost: false,
             top: 0,
             width: 0,
             height: 0,
@@ -453,7 +458,15 @@ impl Model {
         if self.line.is_some() {
             return self.prompt_keys(fed);
         }
+        if matches!(fed.outcome, Outcome::Pending) {
+            return Vec::new();
+        }
+        let lost = std::mem::take(&mut self.keys_lost);
         match fed.outcome {
+            Outcome::Matched { action, .. } if lost && writes_line(action) => {
+                self.alert(ops::LIST_CHANGED.to_owned());
+                Vec::new()
+            }
             Outcome::Matched { action, count } => self.run(action, count),
             Outcome::Pending | Outcome::NoMatch => Vec::new(),
         }
