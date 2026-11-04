@@ -88,12 +88,16 @@ impl Matcher {
         self.drops(Stroke::named(Named::Esc))
     }
 
+    /// Whether a count or the first keys of a binding are waiting for more.
+    pub fn waits(&self) -> bool {
+        !self.pending.is_empty() || self.count > 0
+    }
+
     /// Whether `s` is `<Esc>` or `<C-c>` with something to drop.
     fn drops(&self, s: Stroke) -> bool {
         let escape = Stroke::named(Named::Esc);
         let ctrl_c = Stroke::char('c').with_mods(Mods::CTRL);
-        let busy = !self.pending.is_empty() || self.count > 0;
-        if !self.counts || !busy || (s != escape && s != ctrl_c) {
+        if !self.counts || !self.waits() || (s != escape && s != ctrl_c) {
             return false;
         }
         let mut next = self.pending.clone();

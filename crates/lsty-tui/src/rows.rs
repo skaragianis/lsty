@@ -51,8 +51,7 @@ pub(crate) struct Row {
     pub(crate) duration: Cell,
     /// The width of the task text, in cells.
     pub(crate) text_width: usize,
-    /// The view does not match the task; it is shown until the cursor
-    /// leaves it.
+    /// The view does not match the task; it is held in sight for now.
     pub(crate) sticky: bool,
     /// The rows the text takes with `wrap` on, once worked out.
     pub(crate) lines: RefCell<Option<Wrapped>>,

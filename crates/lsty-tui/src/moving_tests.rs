@@ -10,7 +10,10 @@ use lsty_core::{
 use crate::{
     messages::{self, Tone},
     model::Model,
-    test_util::{alone, deps, keys, press, reload, started, todo_of, workdir},
+    test_util::{
+        alone, deps, keys, press, reload, started, todo_of, workdir,
+        workdir_cancelling,
+    },
 };
 
 fn config(hidden: &[Hidden]) -> Config {
@@ -235,9 +238,28 @@ fn archive_rows_stay_last_in_every_sort_but_done() {
     }
 }
 
-// 34a.16, 34a.17: sticky until the next key.
+/// `typed` after completing the last of three tasks with done tasks hidden
+/// and `<C-x>` bound to cancel: the rows, the file, and the cursor on the
+/// row that is held, if the last is.
+fn check_after_completing_the_last(typed: &str, rows: &str, file: &str) {
+    let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
+    let (dir, mut model) = workdir_cancelling("A\nB\nC\n", config(&hidden));
+    press(&mut model, "Gx");
+    keys(&mut model, typed);
+    assert_eq!(rows_of(&model).join("|"), rows, "{typed}");
+    assert_eq!(todo_of(dir.path()), file, "{typed}");
+    let held = rows.ends_with('*');
+    assert_eq!(model.rows[model.cursor].sticky, held, "{typed}");
+}
+
+// 34a.16, 34a.17: sticky until the next key, or the end of what it starts.
 #[test]
-fn a_completed_task_stays_until_the_next_key() {
+fn a_completed_task_stays_until_what_the_next_key_starts_is_over() {
+    const HELD: &str = "A|B|x 2026-09-29 C*";
+    const GONE: &str = "A|B";
+    const OPEN: &str = "A|B|C";
+    const CZ: &str = "A|B|x 2026-09-29 Cz*";
+    const FILE: &str = "A\nB\nx 2026-09-29 C\n";
     let dir = workdir("A\nB\nC\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
@@ -250,6 +272,42 @@ fn a_completed_task_stays_until_the_next_key() {
     press(&mut model, "j");
     assert_eq!(rows_of(&model), ["B", "C"]);
     assert!(model.sticky.is_empty());
+    // What starts from the row under the cursor finds it there, and it goes
+    // when that is over.
+    let both = "A\nx 2026-09-29 B\nx 2026-09-29 C\n";
+    let cases = [
+        ("v", HELD, FILE),
+        ("vkggG", HELD, FILE),
+        ("vk<Esc>", GONE, FILE),
+        ("Vx", OPEN, "A\nB\nC\n"),
+        ("vkx", "A|x 2026-09-29 B*", both),
+        ("2", HELD, FILE),
+        ("2<Esc>", GONE, FILE),
+        ("2x", OPEN, "A\nB\nC\n"),
+        ("d", HELD, FILE),
+        ("dk", GONE, FILE),
+        ("dd", GONE, "A\nB\n\n"),
+        ("a", HELD, FILE),
+        ("a<Esc>", GONE, FILE),
+        ("gd", HELD, FILE),
+        ("gd<Esc>", GONE, FILE),
+        ("go", HELD, FILE),
+        ("go<Esc>", GONE, FILE),
+        ("az<C-x>", GONE, FILE),
+        ("az<C-x>u", HELD, FILE),
+        ("az<C-x>u<CR>", CZ, "A\nB\nx 2026-09-29 Cz\n"),
+        ("goN<C-x>u", HELD, FILE),
+    ];
+    for (typed, rows, file) in cases {
+        check_after_completing_the_last(typed, rows, file);
+    }
+    let dir = workdir("A\nB\nC\n");
+    let mut model = model_of(dir.path(), config(&hidden));
+    press(&mut model, "Gxvk");
+    fs::write(dir.path().join("todo.txt"), format!("{FILE}N\n")).unwrap();
+    reload(&mut model);
+    assert_eq!(rows_of(&model)[..3].join("|"), HELD);
+    assert_eq!(model.selected_rows(), Some((1, 2)));
 }
 
 // A held row keeps its id, muted like the rest of it.

@@ -429,6 +429,9 @@ impl Model {
         let added = self.finish(result);
         if let Some(at) = added.filter(|_| self.deps.config.keep_adding) {
             self.open_new_at(Some(at), true);
+            self.message = self.message.take().map(|said| {
+                said.replace(messages::STICKY, messages::STICKY_IN_FIELD)
+            });
         }
     }
 
@@ -534,11 +537,15 @@ impl Model {
             return;
         };
         let at = draft.place;
-        let there =
-            at.is_some_and(|(source, nr)| self.snap.at(source, nr).is_some());
-        if draft.is_task() && !there {
+        let gone =
+            at.is_none_or(|(source, nr)| self.snap.at(source, nr).is_none());
+        if draft.is_task() && gone {
             self.alert(messages::GONE.to_owned());
             return;
+        }
+        if let Some(place) = at.filter(|&p| self.row_at(p).is_none()) {
+            self.sticky.hold(place);
+            self.rebuild();
         }
         self.cursor_to(at);
         self.begin(draft);

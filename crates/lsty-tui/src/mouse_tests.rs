@@ -452,6 +452,16 @@ fn the_timer_waits_for_the_button_and_a_key_does_not() {
     m.update(timer.expect("a timer was set"));
     keys(&mut m, "<Esc>");
     assert!(m.rows.iter().all(|r| !r.sticky));
+    // A selection keeps the row it started from past a message's timer,
+    // and past the release of the drag that made it.
+    let (_dir, mut m, timer) = held_after("Gxvkt");
+    m.update(timer.expect("a timer was set"));
+    assert_eq!(m.selected_rows(), Some((3, 4)));
+    let (_dir, mut m, _) = held_after("Gx");
+    send(&mut m, Gesture::Down(Button::Left), 5);
+    send(&mut m, Gesture::Drag(Button::Left), 4);
+    send(&mut m, Gesture::Up, 4);
+    assert_eq!(m.selected_rows(), Some((3, 4)));
 }
 
 // A key ends the press, so its release clicks nothing.

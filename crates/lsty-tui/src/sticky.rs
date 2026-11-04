@@ -1,15 +1,18 @@
 //! Sticky tasks: tasks that the human's own action made stop matching
 //! the view stay in sight until the next key or mouse input, or until the
-//! notice that tells of them is over.
+//! notice that tells of them is over; the one that a count, keys under way, a
+//! selection, a field or a prompt started from stays while that lasts.
 
 use std::collections::{BTreeMap, HashSet};
 
 use lsty_core::{
     errs::{Nr, Source},
+    keys::Matcher,
     list::Task,
 };
 
 use crate::{
+    line::{Line, LineKind},
     messages,
     model::Model,
     rows::Row,
@@ -54,9 +57,10 @@ impl Sticky {
 
     /// Drops the lines an earlier input held, but `keep`; whether there
     /// were any.
-    pub(crate) fn drop_aged(&mut self, keep: Option<Place>) -> bool {
+    pub(crate) fn drop_aged(&mut self, keep: &[Option<Place>]) -> bool {
         let before = self.held.len();
-        self.held.retain(|at, fresh| *fresh || Some(*at) == keep);
+        self.held
+            .retain(|at, fresh| *fresh || keep.contains(&Some(*at)));
         self.origin.retain(|at, _| self.held.contains_key(at));
         self.held.len() != before
     }
@@ -150,7 +154,8 @@ impl Model {
     }
 
     /// Adds the sticky notice to the message when any touched task is
-    /// shown as sticky.
+    /// shown as sticky, unless a selection keeps that row past what the
+    /// notice says.
     pub(crate) fn keep_sticky(&mut self, touched: &[Touched]) {
         let stuck: HashSet<Place> = self
             .rows
@@ -158,7 +163,9 @@ impl Model {
             .filter(|r| r.sticky)
             .map(Row::place)
             .collect();
-        if touched.iter().any(|t| stuck.contains(&t.now)) {
+        if self.visual.is_none()
+            && touched.iter().any(|t| stuck.contains(&t.now))
+        {
             self.note(messages::STICKY);
         }
     }
@@ -190,15 +197,34 @@ impl Model {
         })
     }
 
+    /// Whether keys, a field or a prompt are under way from the row under the
+    /// cursor.
+    fn goes_on_from_cursor(&self) -> bool {
+        let typing = self.matchers.get(&self.key_mode());
+        typing.is_some_and(Matcher::waits)
+            || self.edit.is_some()
+            || matches!(
+                self.line,
+                Some(Line {
+                    kind: LineKind::Tasks(_),
+                    ..
+                })
+            )
+    }
+
     /// Lists the rows again without the tasks that an earlier input kept
     /// in sight, the cursor on the first row at or after where its row
     /// was drawn and the view as it was.
     /// A key keeps the row under the cursor for itself, so that a move
-    /// counts over the rows that stay and may step off it.
+    /// counts over the rows that stay and may step off it. What goes on from
+    /// that row keeps it for as long as it lasts, and a selection the row it
+    /// started from.
     pub(crate) fn leave_sticky(&mut self, keep: Option<Place>) {
         let place = self.drawn_cursor();
         let view = self.view_offset();
-        if self.sticky.drop_aged(keep) {
+        let going_on = self.goes_on_from_cursor().then(|| self.cursor_place());
+        let keep = [keep, going_on.flatten(), self.visual];
+        if self.sticky.drop_aged(&keep) {
             self.rebuild_at(place, view);
         }
     }

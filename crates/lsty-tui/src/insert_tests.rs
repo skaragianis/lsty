@@ -137,7 +137,7 @@ fn a_new_task_with_only_spaces_is_not_created() {
 // 38.34 and 38.35: the draft comes back with `u`, once.
 #[test]
 fn u_brings_a_discarded_draft_back_once() {
-    let (dir, mut model) = workdir_cancelling(LIST);
+    let (dir, mut model) = workdir_cancelling(LIST, alone());
     keys(&mut model, "izzz<C-x>");
     assert_eq!(
         model.message.as_deref(),
@@ -156,7 +156,7 @@ fn u_brings_a_discarded_draft_back_once() {
 // 38.35: the task is gone when `u` brings the draft back.
 #[test]
 fn a_kept_draft_of_a_deleted_task_says_so() {
-    let (dir, mut model) = workdir_cancelling(LIST);
+    let (dir, mut model) = workdir_cancelling(LIST, alone());
     keys(&mut model, "izzz<C-x>");
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
     reload(&mut model);
