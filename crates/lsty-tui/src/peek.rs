@@ -121,16 +121,33 @@ impl Model {
         }
     }
 
-    /// Does `<Tab>` (`NextLink`) or `<S-Tab>` in the detail panel: the
-    /// next link, or the next place of the ring past the last one.
-    pub(crate) fn tab_link(&mut self, action: Action) {
-        let back = action == Action::PrevLink;
+    /// Whether `<Tab>` or `<S-Tab>` leaves the detail panel: no link is next.
+    fn tab_leaves(&self, back: bool) -> bool {
         let count = self.cursor_links().len();
         let at = self.detail_link();
-        if count == 0 || (back && at == 0) || (!back && at + 1 == count) {
+        count == 0 || (back && at == 0) || (!back && at + 1 == count)
+    }
+
+    /// Does `<Tab>` or `<S-Tab>` in the detail panel.
+    pub(crate) fn tab_link(&mut self, action: Action) {
+        let back = action == Action::PrevLink;
+        if self.tab_leaves(back) {
             self.ring_step(back);
         } else {
             self.step_link(Step::By(if back { -1 } else { 1 }));
         }
+    }
+
+    /// What the hint of `action` says where `<Tab>` or `<S-Tab>` leaves the
+    /// panel.
+    pub(crate) fn tab_word(&self, action: Action) -> Option<&'static str> {
+        let (back, to) = if action == Action::NextLink {
+            (false, Action::FocusProjects)
+        } else if action == Action::PrevLink {
+            (true, Action::FocusList)
+        } else {
+            return None;
+        };
+        self.tab_leaves(back).then(|| to.hint())
     }
 }
