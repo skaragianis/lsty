@@ -1,6 +1,7 @@
 size 100 8
 start
 write todo.txt next
+tick 50ms
 keys T
 frame a-frame
 file todo.txt a-file

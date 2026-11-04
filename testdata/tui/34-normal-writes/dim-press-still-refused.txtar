@@ -1,0 +1,30 @@
+size 100 8
+start
+keys j
+write todo.txt next
+keys x
+frame a-frame
+file todo.txt a-file
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Blocker id:b
+Stuck dep:b
+-- next --
+New
+Blocker id:b
+Stuck dep:b
+-- a-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   New                                                                                         │
+│  1   Blocker                                                                                   b │
+│  3 ⧗ Stuck dep:b                                                                                 │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  task 3 is blocked by 2 (Blocker)  x done  t start  T wont  o new   9.9.9
+-- a-file --
+New
+Blocker id:b
+Stuck dep:b

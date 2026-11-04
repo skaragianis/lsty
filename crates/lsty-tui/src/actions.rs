@@ -11,6 +11,7 @@ use lsty_core::{
 };
 
 use crate::{
+    hints::dim,
     history::{Again, pairs_of},
     messages::{self, Tone},
     model::Model,
@@ -62,7 +63,25 @@ impl Model {
     /// Does a task action over the task under the cursor, or `count`
     /// tasks from it.
     pub(crate) fn act(&mut self, action: Action, count: usize) -> bool {
-        let answer = decide(action, self, &self.summary(count));
+        let mut answer = decide(action, self, &self.summary(count));
+        let had = !self.rows.is_empty();
+        // A key refused here cannot write, so nothing is owed to its read.
+        let refused = matches!(answer, Answer::Refused(_));
+        match dim(answer).then(|| self.moved_on(refused)) {
+            Some(Ok(true)) => {
+                answer = decide(action, self, &self.summary(count));
+                if !dim(answer) || (had && self.rows.is_empty()) {
+                    self.message =
+                        Some("the list changed — look again".to_owned());
+                    return false;
+                }
+            }
+            Some(Err(e)) if !refused => {
+                self.fail(&e);
+                return false;
+            }
+            _ => {}
+        }
         let ids = self.tasks_of(count);
         let tasks = self.chosen(&ids);
         let again = self.count_for(count, tasks.len());
