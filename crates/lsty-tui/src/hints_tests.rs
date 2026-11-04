@@ -223,7 +223,20 @@ const DONE: &str = "x 2026-09-01 Done\n";
 #[test]
 fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
     let rows = [
-        ("no task", "", "", "", "u undo"),
+        (
+            "no task",
+            "",
+            "",
+            "",
+            "x done t start T wont a append dd delete u undo",
+        ),
+        (
+            "tasks all filtered out",
+            "A\n",
+            "",
+            "/zzz<CR>",
+            "x done t start T wont a append dd delete u undo",
+        ),
         ("todo", "A\n", "", "", "u undo"),
         ("after a write", "A\n", "", "x", "T wont"),
         ("after an undo", "A\n", "", "xu", "u undo"),
@@ -325,7 +338,7 @@ fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
         "move_task_up",
     ];
     const VISUAL: &[&str] = &["yank", "move_task_down", "move_task_up"];
-    const NONE: &str = "u undo <C-r> redo p paste P paste above . repeat";
+    const NONE: &str = "u undo <C-r> redo . repeat";
     let rows = [
         (
             "todo alone",
@@ -343,7 +356,10 @@ fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
             "",
             "",
             "",
-            format!("{NONE} gx link yy yank J move down K move up"),
+            format!(
+                "{NONE} i edit a append I line start cc change \
+                 gx link yy yank J move down K move up"
+            ),
         ),
         (
             "after a yank and a write, with a link and a row to pass",
