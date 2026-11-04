@@ -259,25 +259,31 @@ fn a_pane_key_digit_is_no_count_in_visual_mode() {
     assert_eq!(model.selected_rows(), Some((0, 1)));
 }
 
+// A reading leaves what is typed on an open line or in a field.
 #[test]
-fn a_reload_ending_the_selection_keeps_the_keys_typed_on_the_open_line() {
-    let dir = workdir(LIST);
-    fs::write(
-        dir.path().join("keys.toml"),
-        "[command]\ncancel = [\"jk\"]\n",
-    )
-    .unwrap_or_else(|e| panic!("{e}"));
-    let mut model = model_of(dir.path());
-    press(&mut model, "jvgdj");
-    fs::write(dir.path().join("todo.txt"), "A\nC\nD\nE\n")
+fn a_reload_keeps_the_keys_typed_on_an_open_line_or_in_a_field() {
+    for (mode, typed) in [("command", "jvgdj"), ("insert", "jccj")] {
+        let dir = workdir(LIST);
+        fs::write(
+            dir.path().join("keys.toml"),
+            format!("[{mode}]\ncancel = [\"jk\"]\n"),
+        )
         .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut model);
-    assert_eq!(model.visual, None);
-    press(&mut model, "k");
-    assert!(model.line.is_none(), "j then k cancels the prompt");
+        let mut model = model_of(dir.path());
+        press(&mut model, typed);
+        fs::write(dir.path().join("todo.txt"), "A\nC\nD\nE\n")
+            .unwrap_or_else(|e| panic!("{e}"));
+        reload(&mut model);
+        press(&mut model, "k");
+        let closed = model.line.is_none()
+            && model.visual.is_none()
+            && model.edit.is_none();
+        assert!(closed, "{mode}: j then k closes it");
+    }
 }
 
-// Keys typed on a task go no further when a reading takes the cursor off it.
+// Keys typed on a task go no further when a reading takes the cursor off it,
+// or cannot tell it has not.
 #[test]
 fn a_reload_taking_the_cursor_off_its_task_drops_the_keys_typed() {
     let cases = [
@@ -286,6 +292,15 @@ fn a_reload_taking_the_cursor_off_its_task_drops_the_keys_typed() {
         ("A\nB\nC\nD\n", "j", "2", "A\nC\nD\n", "dd", "A\nD\n"),
         ("A\nB\nC\n", "j", "d", "Z\nA\nB\nC\n", "d", "Z\nA\nC\n"),
         ("A\nB\nC\n", "j", "d", "A\nB2\nC\n", "d", "A\nC\n"),
+        ("A\nB\nC\n", "j", "d", "A2\nB2\nC\n", "d", "A2\nB2\nC\n"),
+        (
+            "A\nB\nC\n",
+            "j",
+            "gd",
+            "A2\nB2\nC\n",
+            "fri<CR>",
+            "A2\nB2\nC\n",
+        ),
         (
             "A +k\nB +k\nC +k\n",
             "<C-w>3x|<C-w>1j",
@@ -309,23 +324,4 @@ fn a_reload_taking_the_cursor_off_its_task_drops_the_keys_typed() {
             file.lines().filter(|l| !l.is_empty()).collect();
         assert_eq!(lines.join("\n") + "\n", want, "{typed} {outside} {then}");
     }
-}
-
-// A field keeps what is typed in it, whatever a reading does to the rows.
-#[test]
-fn a_reload_keeps_the_keys_typed_in_a_field() {
-    let dir = workdir("A\nB\nC\n");
-    fs::write(
-        dir.path().join("keys.toml"),
-        "[insert]\ncancel = [\"jk\"]\n",
-    )
-    .unwrap_or_else(|e| panic!("{e}"));
-    let mut model = model_of(dir.path());
-    keys(&mut model, "jcc");
-    keys(&mut model, "j");
-    fs::write(dir.path().join("todo.txt"), "A\nC\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut model);
-    keys(&mut model, "k");
-    assert!(model.edit.is_none(), "j then k closes the field");
 }

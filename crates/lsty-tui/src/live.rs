@@ -399,9 +399,10 @@ impl Model {
             None => (aim, offset, matches!(offset, View::Cursor(_))),
         };
         self.follow(aim, offset);
-        // Keys typed on a task do not go on to the next one under the cursor.
+        // Keys typed go no further when the cursor is not on the line they
+        // were typed on, or the reading cannot tell it is.
         if self.edit.is_none()
-            && place.and_then(|at| moved.track(at)) != self.cursor_place()
+            && place.and_then(|at| moved.stays(at)) != self.cursor_place()
         {
             self.reset_keys();
         }

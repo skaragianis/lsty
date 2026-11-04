@@ -770,6 +770,7 @@ fn a_key_before_the_refilter_acts_on_the_rows_as_drawn() {
         ("jjj", "2", "x", "Charlie Delta"),
         ("jjjv", "", "x", "Charlie"),
         ("jjjv", "G", "x", "Charlie Delta Echo"),
+        ("vjjj", "G", "x", "Alpha Free Delta Echo"),
         ("jjjjv", "gg", "x", "Alpha Free Delta"),
         ("vjjj", "", "T", "Alpha Free Charlie"),
     ] {
@@ -784,6 +785,9 @@ fn a_key_before_the_refilter_acts_on_the_rows_as_drawn() {
             .join(" ");
         assert_eq!(changed, want, "{to} {gap} {then}: {file}");
     }
+    // What is lit is what those keys write: the row the jump left is not.
+    let (_dir, model) = across_a_refilter("vjjj", "G", "");
+    assert_eq!(model.selected_rows(), Some((0, 3)));
 }
 
 // A task moves past the row drawn beside it.
@@ -802,7 +806,7 @@ fn a_move_before_the_refilter_goes_by_the_rows_as_drawn() {
 // row at or after where it ended. `gg`, `G` and a task's number mean the same
 // whatever is drawn, so they go by the list about to show.
 #[test]
-fn a_motion_before_the_refilter_skips_no_row_drawn() {
+fn a_motion_before_the_refilter_lands_where_it_means() {
     for (to, key, want) in [
         ("", "j", "Free +keep"),
         ("j", "j", "Free +keep"),

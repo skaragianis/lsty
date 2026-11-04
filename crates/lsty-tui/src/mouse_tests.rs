@@ -734,7 +734,7 @@ fn a_gesture_moving_the_cursor_forgets_the_keys_typed_before_it() {
             m.update(Msg::Mouse(Mouse { gesture, at, shift }));
         }
         keys(&mut m, after);
-        assert_eq!(todo_of(dir.path()), "A\nB\nC\n", "{before}");
+        assert_eq!(todo_of(dir.path()), "A\nB\nC\n", "{before} {shift}");
     }
 }
 
