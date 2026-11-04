@@ -79,13 +79,7 @@ pub(crate) enum Msg {
 impl Msg {
     /// Whether this can change the list with no input from the person.
     pub(crate) const fn changes_the_list(&self) -> bool {
-        matches!(
-            self,
-            Self::Refilter(_)
-                | Self::Minute
-                | Self::Loaded(_)
-                | Self::Expire(_)
-        )
+        matches!(self, Self::Minute | Self::Loaded(_) | Self::Expire(_))
     }
 }
 

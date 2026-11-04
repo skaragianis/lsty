@@ -6,8 +6,8 @@ use crate::{
     messages,
     model::Model,
     test_util::{
-        alone, at, deps, keys, press, reload, screen, started, todo_of,
-        workdir,
+        alone, at, deps, keys, press, reload, screen, settled, started,
+        todo_of, workdir,
     },
 };
 
@@ -275,4 +275,57 @@ fn a_reload_ending_the_selection_keeps_the_keys_typed_on_the_open_line() {
     assert_eq!(model.visual, None);
     press(&mut model, "k");
     assert!(model.line.is_none(), "j then k cancels the prompt");
+}
+
+// Keys typed on a task go no further when a reading takes the cursor off it.
+#[test]
+fn a_reload_taking_the_cursor_off_its_task_drops_the_keys_typed() {
+    let cases = [
+        ("A\nB\nC\n", "j", "d", "A\nC\n", "d", "A\nC\n"),
+        ("A\nB\nC\n", "j", "d", "A\nC\n", "dd", "A\n"),
+        ("A\nB\nC\nD\n", "j", "2", "A\nC\nD\n", "dd", "A\nD\n"),
+        ("A\nB\nC\n", "j", "d", "Z\nA\nB\nC\n", "d", "Z\nA\nC\n"),
+        ("A\nB\nC\n", "j", "d", "A\nB2\nC\n", "d", "A\nC\n"),
+        (
+            "A +k\nB +k\nC +k\n",
+            "<C-w>3x|<C-w>1j",
+            "d",
+            "A +k\nB\nC +k\n",
+            "d",
+            "A +k\nB\nC +k\n",
+        ),
+    ];
+    for (todo, to, typed, outside, then, want) in cases {
+        let dir = workdir(todo);
+        let mut model = model_of(dir.path());
+        to.split('|').for_each(|part| settled(&mut model, part));
+        keys(&mut model, typed);
+        fs::write(dir.path().join("todo.txt"), outside)
+            .unwrap_or_else(|e| panic!("{e}"));
+        reload(&mut model);
+        keys(&mut model, then);
+        let file = todo_of(dir.path());
+        let lines: Vec<&str> =
+            file.lines().filter(|l| !l.is_empty()).collect();
+        assert_eq!(lines.join("\n") + "\n", want, "{typed} {outside} {then}");
+    }
+}
+
+// A field keeps what is typed in it, whatever a reading does to the rows.
+#[test]
+fn a_reload_keeps_the_keys_typed_in_a_field() {
+    let dir = workdir("A\nB\nC\n");
+    fs::write(
+        dir.path().join("keys.toml"),
+        "[insert]\ncancel = [\"jk\"]\n",
+    )
+    .unwrap_or_else(|e| panic!("{e}"));
+    let mut model = model_of(dir.path());
+    keys(&mut model, "jcc");
+    keys(&mut model, "j");
+    fs::write(dir.path().join("todo.txt"), "A\nC\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    reload(&mut model);
+    keys(&mut model, "k");
+    assert!(model.edit.is_none(), "j then k closes the field");
 }

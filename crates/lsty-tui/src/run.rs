@@ -243,6 +243,7 @@ pub(crate) fn event_loop(
             handle(model, event)?
         } else {
             screen.draw(model)?;
+            model.unseen = false;
             wait(model, &mut timers, rx)?
         };
         match step {

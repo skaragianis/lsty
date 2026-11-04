@@ -1,9 +1,7 @@
 size 100 12
 start
 keys <C-w>3 j j x <CR>
-tick 50ms
 keys <C-w>4 j x <CR>
-tick 50ms
 keys <C-w>5 G x <CR>
 tick 50ms
 frame ticked

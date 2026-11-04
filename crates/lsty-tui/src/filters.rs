@@ -162,8 +162,10 @@ impl Model {
             self.sticky.age();
             self.sticky.drop_aged(&keep);
             self.sticky.hold_too(&keep);
+            let view = self.view_offset();
             self.rebuild_rows();
-            self.settle_cursor(place);
+            self.follow(place, view);
+            self.unseen = true;
         }
     }
 
