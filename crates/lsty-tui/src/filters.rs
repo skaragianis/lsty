@@ -149,10 +149,21 @@ impl Model {
         self.message = Some("filters cleared".to_owned());
     }
 
-    /// Lists the rows again for the panel steps that wait for it.
+    /// Lists the rows again for the panel steps that wait for it. Only
+    /// what is under way keeps its row: it started from what was drawn.
     pub(crate) fn flush_refilter(&mut self) {
         if self.refilter.owed {
-            self.reshow();
+            let keep = self.under_way();
+            let place = if keep.contains(&self.cursor_place()) {
+                self.cursor_place()
+            } else {
+                self.drawn_cursor()
+            };
+            self.sticky.age();
+            self.sticky.drop_aged(&keep);
+            self.sticky.hold_too(&keep);
+            self.rebuild_rows();
+            self.settle_cursor(place);
         }
     }
 

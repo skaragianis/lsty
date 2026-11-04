@@ -10,8 +10,8 @@ use crate::{
     model::Model,
     msg::Msg,
     test_util::{
-        alone, deps, held_lock, keys, press, reload, screen, started, todo_of,
-        workdir, workdir_cancelling, workdir_model,
+        alone, deps, held_lock, keys, press, reload, screen, settled, started,
+        todo_of, workdir, workdir_cancelling, workdir_model,
     },
 };
 
@@ -242,7 +242,9 @@ fn a_new_task_differing_from_its_prefill_by_a_no_break_space_is_kept() {
 /// What the field of a new task holds after `keys` opened it.
 fn opened(config: Config, todo: &str, keys_: &str) -> String {
     let (_dir, mut model) = workdir_model(todo, config);
-    keys(&mut model, keys_);
+    for part in keys_.split('|') {
+        settled(&mut model, part);
+    }
     model
         .edit
         .as_ref()
@@ -290,7 +292,7 @@ fn the_sidebar_a_search_and_a_filter_have_no_bearing_on_the_prefill() {
     let todo = "A +x @c\nB +y\nC\n";
     for (case, keys_, want) in [
         ("a search", "/B<CR>o", " +y"),
-        ("a chosen project", "<C-w>3x<C-w>1jo", " +x @c"),
+        ("a chosen project", "<C-w>3x|<C-w>1jo", " +x @c"),
         ("a chosen context, none beside", "<C-w>4x<C-w>1/zz<CR>o", ""),
         (
             "a chosen project, an empty list",

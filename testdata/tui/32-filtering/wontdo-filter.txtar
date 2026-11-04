@@ -4,11 +4,13 @@ keys <C-w>5 x
 tick 50ms
 frame done_off
 keys 10 j x <CR>
+tick 50ms
 frame filter_shows_only_wontdo
 keys <C-w> h 7 k x
 tick 50ms
 frame archive_on
 keys 7 j x <CR>
+tick 50ms
 frame filter_off_again
 -- todo.txt --
 Open task

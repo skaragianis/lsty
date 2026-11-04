@@ -1,10 +1,13 @@
 size 130 30
 start
 keys <C-w>5 7 j x <CR>
+tick 50ms
 frame doing
 keys <C-w> h j x <CR>
+tick 50ms
 frame waiting
 keys <C-w> h j x <CR>
+tick 50ms
 frame no_project
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29

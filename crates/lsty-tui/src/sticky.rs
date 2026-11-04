@@ -50,6 +50,11 @@ impl Sticky {
         self.held.insert(at, true);
     }
 
+    /// Holds `places` as well.
+    pub(crate) fn hold_too(&mut self, places: &[Option<Place>]) {
+        places.iter().flatten().for_each(|&at| self.hold(at));
+    }
+
     /// Makes every line held one that an earlier input held.
     pub(crate) fn age(&mut self) {
         self.held.values_mut().for_each(|fresh| *fresh = false);
@@ -197,11 +202,12 @@ impl Model {
         })
     }
 
-    /// Whether keys, a field or a prompt are under way from the row under the
-    /// cursor.
+    /// Whether keys, a selection, a field or a prompt are under way from the
+    /// row under the cursor.
     fn goes_on_from_cursor(&self) -> bool {
         let typing = self.matchers.get(&self.key_mode());
         typing.is_some_and(Matcher::waits)
+            || self.visual.is_some()
             || self.edit.is_some()
             || matches!(
                 self.line,
@@ -212,6 +218,13 @@ impl Model {
             )
     }
 
+    /// The rows that what is under way stands on: the cursor's, where a
+    /// selection started and where the button went down.
+    pub(crate) fn under_way(&self) -> [Option<Place>; 3] {
+        let going_on = self.goes_on_from_cursor().then(|| self.cursor_place());
+        [going_on.flatten(), self.visual, self.pointer.anchor()]
+    }
+
     /// Lists the rows again without the tasks that an earlier input kept
     /// in sight, the cursor on the first row at or after where its row
     /// was drawn and the view as it was.
@@ -219,11 +232,16 @@ impl Model {
     /// counts over the rows that stay and may step off it. What goes on from
     /// that row keeps it for as long as it lasts, and a selection the row it
     /// started from.
+    /// A refilter on its way does this itself, and the rows stay as drawn
+    /// until then.
     pub(crate) fn leave_sticky(&mut self, keep: Option<Place>) {
+        if self.refilter.owed {
+            return;
+        }
         let place = self.drawn_cursor();
         let view = self.view_offset();
-        let going_on = self.goes_on_from_cursor().then(|| self.cursor_place());
-        let keep = [keep, going_on.flatten(), self.visual];
+        let [going_on, visual, press] = self.under_way();
+        let keep = [keep, going_on, visual, press];
         if self.sticky.drop_aged(&keep) {
             self.rebuild_at(place, view);
         }

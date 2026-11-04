@@ -5,6 +5,7 @@ keys gp
 frame one
 fg one-fg
 keys <C-w>3jx<C-w>1
+tick 50ms
 frame filtered
 -- config.toml --
 show_detail = false

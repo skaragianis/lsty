@@ -1,6 +1,7 @@
 size 100 10
 start
 keys <Tab> x <CR>
+tick 50ms
 keys 2 y y
 clipboard expect a-clip
 frame a-frame

@@ -1,10 +1,12 @@
 size 100 12
 start
 keys <C-w>3 j x <CR> <C-w>1
+tick 50ms
 frame chosen
 keys dd
 frame stays
 keys <C-w>3 x x <CR>
+tick 50ms
 frame unchosen
 -- todo.txt --
 Call client +solo @solo
