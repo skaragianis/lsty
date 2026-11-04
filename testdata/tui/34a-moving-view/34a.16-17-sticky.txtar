@@ -6,6 +6,10 @@ fg a-fg
 file todo.txt a-file
 keys j
 frame b-frame
+keys G x v k
+frame c-frame
+keys j K
+frame d-frame
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -45,3 +49,21 @@ E...............................................................................
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.....
+-- c-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   B                                                                                           │
+│  1 ✓ C                                                                                  filtered │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  2 selected  todo.txt  manual  x done  t start  T wont  d delete  y yank  <Esc> exit  9.9.9
+-- d-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2 ✓ C                                                                                  filtered │
+│  1   B                                                                                           │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ VISUAL  1 selected  todo.txt  manual  3 moved to 2  x reopen  T wont  d delete  y yank       9.9.9

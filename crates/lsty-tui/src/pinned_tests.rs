@@ -112,7 +112,7 @@ fn a_draft_that_equals_the_base_writes_nothing() {
 // Enter writes it over the disk line, which gained a tag meanwhile.
 #[test]
 fn a_cancelled_conflict_is_restored_rebased_and_written() {
-    let (dir, mut model) = workdir_cancelling(LIST);
+    let (dir, mut model) = workdir_cancelling(LIST, alone());
     keys(&mut model, "jccRing client");
     let disk = LIST.replace("Call client", "Call the client @x");
     outside(&mut model, dir.path(), &disk);

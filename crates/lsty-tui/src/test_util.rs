@@ -87,16 +87,19 @@ pub(crate) fn workdir_model(todo: &str, config: Config) -> (TempDir, Model) {
     (dir, model)
 }
 
-/// Like `workdir_model` with the alone config, and `<C-x>` bound to
-/// `cancel` in INSERT mode, which no default key does.
-pub(crate) fn workdir_cancelling(todo: &str) -> (TempDir, Model) {
+/// Like `workdir_model`, with `<C-x>` bound to `cancel` in INSERT mode,
+/// which no default key does.
+pub(crate) fn workdir_cancelling(
+    todo: &str,
+    config: Config,
+) -> (TempDir, Model) {
     let dir = workdir(todo);
     fs::write(
         dir.path().join("keys.toml"),
         "[insert]\ncancel = [\"<C-x>\"]\n",
     )
     .unwrap_or_else(|e| panic!("{e}"));
-    let model = started(deps(dir.path(), alone()));
+    let model = started(deps(dir.path(), config));
     (dir, model)
 }
 

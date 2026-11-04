@@ -29,7 +29,7 @@ C +work @phone
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  2 added as id:t001: Call; hidden by current filters in 2 seconds or at th
+ INSERT  todo.txt  manual  2 added as id:t001: Call; hidden when this field closes            9.9.9
 -- a-cursor --
 ├[4]─Contexts─┤│     +work                                                                         │
                     ^

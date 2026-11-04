@@ -90,6 +90,9 @@ pub(crate) fn archived_no_id(name: &str) -> String {
 pub(crate) const STICKY: &str =
     "hidden by current filters in 2 seconds or at the next key";
 
+/// The same, when `keep_adding` has opened the next field under the task.
+pub(crate) const STICKY_IN_FIELD: &str = "hidden when this field closes";
+
 /// What the status line says about a task without links.
 pub(crate) const NO_LINK: &str = "no link on this task";
 
