@@ -50,10 +50,10 @@ fn text_style(profile: Profile, style: ThemeStyle) -> Style {
 }
 
 /// What a slot paints when it is used as a background: its own
-/// background, or else its foreground.
+/// background, or else its foreground, and its attributes.
 fn fill_style(profile: Profile, style: ThemeStyle) -> Style {
     let bg = style.bg.or(style.fg).map(|c| colour(profile, c));
-    paint(None, bg, Modifier::empty())
+    paint(None, bg, modifiers(style))
 }
 
 impl Styles {

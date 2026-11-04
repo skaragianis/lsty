@@ -217,8 +217,7 @@ impl Model {
             row.push(Span::new("│", slot));
             self.put_at(buf, (at.x, at.y + 1 + i), at.w, &row);
         }
-        let foot = fit(vec![Span::new(out.foot(rows), None)], inner);
-        let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
+        let foot = out.foot(rows);
         let bottom = titled_spans(("└", &foot, "┘"), at.w, (slot, text));
         self.put_at(buf, (at.x, at.y + 1 + rows), at.w, &bottom);
     }

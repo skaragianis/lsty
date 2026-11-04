@@ -439,6 +439,18 @@ fn a_digit_shows_at_once() -> Check {
     screen.ends_with(&mut child, 0)
 }
 
+/// At 16 colours a lit hint is bold in the terminal's own text colour: no
+/// colour stands between the bold and the key, and the word is not bold.
+fn a_hint_at_16_colours_is_in_the_terminals_own() -> Check {
+    let work = Work::new()?;
+    let term = [("TERM", Path::new("xterm"))];
+    let (mut child, mut screen) = start_with(&work.root, &term, &[])?;
+    screen.wait_for("\x1b[1mx")?;
+    screen.wait_for("\x1b[22mdone")?;
+    screen.type_keys(b"q")?;
+    screen.ends_with(&mut child, 0)
+}
+
 /// Mouse reports are asked for unless `mouse` is off, and `:set` changes
 /// that at once.
 fn mouse_reports_follow_the_option() -> Check {
@@ -586,6 +598,7 @@ fn main() -> std::process::ExitCode {
         Trial::test("30.31 q restores the terminal", q_quits_and_restores),
         Trial::test("ctrl-h deletes a character", ctrl_h_deletes_a_character),
         Trial::test("a digit shows at once", a_digit_shows_at_once),
+        Trial::test("16-colour", a_hint_at_16_colours_is_in_the_terminals_own),
         Trial::test(
             "mouse reports follow the option",
             mouse_reports_follow_the_option,
@@ -608,10 +621,7 @@ fn main() -> std::process::ExitCode {
             "a stop signal ends a busy reload",
             stop_during_a_busy_reload,
         ),
-        Trial::test(
-            "a stop signal ends a busy write",
-            stop_during_a_busy_write,
-        ),
+        Trial::test("a signal ends a busy write", stop_during_a_busy_write),
         Trial::test("a busy put back", busy_put_back_makes_no_new_claim),
         // Only xdg-open needs a display: open on macOS is always started.
         Trial::test(

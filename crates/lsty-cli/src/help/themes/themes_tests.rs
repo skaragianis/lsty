@@ -1,6 +1,8 @@
 use std::{fs, path::Path};
 
-use lsty_core::theme::{self, Colour, DEFAULT_NAME, FALLBACK, Slot, Theme};
+use lsty_core::theme::{
+    self, Colour, DEFAULT_NAME, FALLBACK, Profile, Slot, Theme,
+};
 
 use super::{EXAMPLE, GUIDE_WIDTH, themes_page};
 
@@ -18,8 +20,13 @@ fn section<'a>(page: &'a [String], heading: &str) -> Vec<&'a str> {
 fn load_file(name: &str, text: &str) -> (Theme, Vec<String>) {
     let dir = tempfile::tempdir().unwrap();
     fs::write(dir.path().join(format!("{name}.toml")), text).unwrap();
-    let (theme, warnings) =
-        theme::load(name, dir.path(), Path::new("/"), false);
+    let (theme, warnings) = theme::load(
+        name,
+        dir.path(),
+        Path::new("/"),
+        false,
+        Profile::TrueColor,
+    );
     (theme, warnings.iter().map(|w| w.message.clone()).collect())
 }
 
@@ -47,9 +54,12 @@ fn the_page_says_what_a_theme_is_and_where_a_name_falls_back() {
         .join(" ");
     for want in [
         "A theme gives each part of the screen a look.".to_owned(),
-        format!("starts from {FALLBACK}."),
+        format!("starts from {FALLBACK},"),
         "sets muted and not hint_dim dims with its muted.".to_owned(),
         format!("falls back to {DEFAULT_NAME} with a warning."),
+        "and COLORTERM does not say true colour)".to_owned(),
+        "choosing one changes nothing on screen.".to_owned(),
+        "COLORTERM=truecolor brings the themes back.".to_owned(),
     ] {
         assert!(text.contains(&want), "{want}");
     }
@@ -86,7 +96,13 @@ fn the_example_loads_without_a_warning_and_sets_what_it_says() {
         theme.style(Slot::Text).fg,
         Some(Colour::Rgb(0xd8, 0xde, 0xe9))
     );
-    let (ansi, _) = theme::load(FALLBACK, Path::new(""), Path::new(""), true);
+    let (ansi, _) = theme::load(
+        FALLBACK,
+        Path::new(""),
+        Path::new(""),
+        true,
+        Profile::TrueColor,
+    );
     assert_eq!(theme.style(Slot::Link), ansi.style(Slot::Link));
 }
 

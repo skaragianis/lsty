@@ -106,7 +106,13 @@ pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
     let (keymap, _) =
         keys::load(&dir.join("keys.toml"), dir, false, &config.leader);
     let themes = dir.join("themes");
-    let (theme, _) = theme::load(theme::DEFAULT_NAME, &themes, dir, true);
+    let (theme, _) = theme::load(
+        theme::DEFAULT_NAME,
+        &themes,
+        dir,
+        true,
+        Profile::TrueColor,
+    );
     let now = Rc::new(Cell::new(instant(NOW)));
     Deps {
         version: "9.9.9",

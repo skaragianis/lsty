@@ -37,11 +37,21 @@ built-in themes, each file NAME.toml in $XDG_CONFIG_HOME/lsty/themes \
 called NAME. LSTY_CONFIG moves config.toml, not that folder; --no-config \
 ignores it. A slot a file leaves out looks like the same slot of the \
 built-in theme of that name, so a file named like one adjusts it; a file with \
-any other name starts from {FALLBACK}. One slot differs: a file that sets \
+any other name starts from {FALLBACK}, as every file does at 16 colours. One \
+slot differs: a file that sets \
 muted and not hint_dim dims with its muted. A name that is neither falls back \
 to {DEFAULT_NAME} with a warning."
     )
 }
+
+const SIXTEEN: &str = "On a terminal counted as showing 16 colours (TERM is \
+xterm, linux, vt100, rxvt, putty, konsole or most others not ending in \
+256color, and COLORTERM does not say true colour), every built-in theme looks \
+the same, in the terminal's own colours, as ansi does, and choosing one \
+changes nothing on screen. If the terminal can show more, TERM=xterm-256color \
+or COLORTERM=truecolor brings the themes back. A file in the themes folder \
+keeps the colours it sets, as near as 16 allow; what it leaves out comes from \
+ansi.";
 
 const PALETTE: &str = "[palette] names colours: ink = \"#d8dee9\". A name may \
 stand for another name; a loop is a bad colour. A value that is not a string \
@@ -71,7 +81,7 @@ unknown top-level key or table gives no warning.";
 pub(super) fn themes_page() -> Vec<String> {
     let prose = |text: &str| wrap("", "", text, GUIDE_WIDTH);
     let mut lines = vec![format!("lsty help themes: {ABOUT}")];
-    for text in [&intro(), PALETTE, COLOURS, SLOTS] {
+    for text in [&intro(), SIXTEEN, PALETTE, COLOURS, SLOTS] {
         lines.push(String::new());
         lines.extend(prose(text));
     }

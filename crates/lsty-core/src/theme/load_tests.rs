@@ -3,7 +3,8 @@ use std::{fs, path::Path};
 use tempfile::TempDir;
 
 use super::{
-    Colour, Slot, Style, Theme, builtin::BUILTIN, load, load::parse, names,
+    Colour, Profile, Slot, Style, Theme, builtin::BUILTIN, load, load::parse,
+    names,
 };
 use crate::{config::Warning, ops::test_util::strings};
 
@@ -34,11 +35,16 @@ fn themes_dir<T: AsRef<[u8]>>(files: &[(&str, T)]) -> TempDir {
 
 fn load_user(name: &str, text: impl AsRef<[u8]>) -> (Theme, Vec<Warning>) {
     let dir = themes_dir(&[(name, text)]);
-    load(name, dir.path(), Path::new("/"), false)
+    load(name, dir.path(), Path::new("/"), false, Profile::TrueColor)
 }
 
 fn builtin_theme(name: &str) -> Theme {
-    let (theme, warnings) = load(name, Path::new(""), Path::new("/"), true);
+    builtin_at(name, Profile::TrueColor)
+}
+
+fn builtin_at(name: &str, profile: Profile) -> Theme {
+    let (theme, warnings) =
+        load(name, Path::new(""), Path::new("/"), true, profile);
     assert_eq!(warnings, vec![], "{name}");
     theme
 }
@@ -420,20 +426,238 @@ fn hint_dim_falls_back_to_muted() {
     }
 }
 
+const PROFILES: [Profile; 3] =
+    [Profile::Ansi, Profile::Ansi256, Profile::TrueColor];
+
+/// The style of `slot` as a terminal with `profile` gets it.
+fn shown(theme: &Theme, slot: Slot, profile: Profile) -> Style {
+    let style = theme.style(slot);
+    let reduce = |c: Option<Colour>| c.map(|c| profile.reduce(c));
+    Style {
+        fg: reduce(style.fg),
+        bg: reduce(style.bg),
+        ..style
+    }
+}
+
+/// The colour `slot` paints as a fill.
+fn fill(theme: &Theme, slot: Slot, profile: Profile) -> Option<Colour> {
+    let style = shown(theme, slot, profile);
+    style.bg.or(style.fg)
+}
+
 /// A dim hint shows: no built-in theme paints it like a lit one.
 #[test]
 fn every_built_in_theme_shows_a_dim_hint() {
     for name in BUILTIN_NAMES {
-        let theme = builtin_theme(name);
-        let dim = theme.style(Slot::HintDim);
-        assert_ne!(dim.fg, theme.style(Slot::HintDesc).fg, "{name}");
-        assert_ne!(dim.fg, theme.style(Slot::HintKey).fg, "{name}");
+        for profile in PROFILES {
+            let theme = builtin_at(name, profile);
+            let look = |slot| shown(&theme, slot, profile);
+            let dim = look(Slot::HintDim);
+            assert_ne!(dim, look(Slot::HintDesc), "{name} {profile:?}");
+            assert_ne!(dim, look(Slot::HintKey), "{name} {profile:?}");
+            let status = fill(&theme, Slot::StatusBg, profile);
+            assert!(
+                dim.fg != status || dim.fg.is_none(),
+                "{name} {profile:?}"
+            );
+        }
     }
+}
+
+/// `ansi` says lit and dim by attribute alone: no colour of the terminal's
+/// reads on both a dark background and a light one.
+#[test]
+fn the_ansi_hints_differ_by_attribute_alone() {
+    let theme = builtin_theme("ansi");
+    let [key, desc, dim] =
+        [Slot::HintKey, Slot::HintDesc, Slot::HintDim].map(|s| theme.style(s));
+    assert_eq!((key.fg, desc.fg, dim.fg), (None, None, None));
+    assert_ne!(key, desc);
+    assert_ne!(key, dim);
+    assert_ne!(desc, dim);
+}
+
+#[test]
+fn ansi_keeps_its_chosen_warning_mode_border_and_date_styles() {
+    let theme = builtin_theme("ansi");
+    let (blue, red) = (Some(Colour::Index(12)), Some(Colour::Index(9)));
+    for (slot, fg, bold) in [
+        (Slot::Warning, None, true),
+        (Slot::ModeCommand, None, true),
+        (Slot::PanelBorderActive, blue, true),
+        (Slot::DueOverdue, red, true),
+        (Slot::DueToday, red, false),
+    ] {
+        let style = theme.style(slot);
+        assert_eq!((style.fg, style.bold), (fg, bold), "{}", slot.name());
+    }
+}
+
+/// Slots the person has to tell apart where they meet.
+const APART: [(Slot, Slot); 22] = [
+    (Slot::PriorityA, Slot::PriorityB),
+    (Slot::PriorityA, Slot::PriorityC),
+    (Slot::PriorityB, Slot::PriorityC),
+    (Slot::PriorityA, Slot::PriorityOther),
+    (Slot::PriorityB, Slot::PriorityOther),
+    (Slot::PriorityC, Slot::PriorityOther),
+    (Slot::DueOverdue, Slot::DueToday),
+    (Slot::DueOverdue, Slot::DueSoon),
+    (Slot::DueToday, Slot::DueSoon),
+    (Slot::ModeNormal, Slot::ModeInsert),
+    (Slot::ModeNormal, Slot::ModeVisual),
+    (Slot::ModeNormal, Slot::ModeCommand),
+    (Slot::ModeInsert, Slot::ModeVisual),
+    (Slot::ModeInsert, Slot::ModeCommand),
+    (Slot::ModeVisual, Slot::ModeCommand),
+    (Slot::Project, Slot::Context),
+    (Slot::Doing, Slot::Blocked),
+    (Slot::Done, Slot::Muted),
+    (Slot::Warning, Slot::Error),
+    (Slot::PanelBorder, Slot::PanelBorderActive),
+    (Slot::HintKey, Slot::HintDesc),
+    (Slot::Selection, Slot::Cursorline),
+];
+
+/// Every pair of [`APART`] looks different, in colour or in attribute.
+#[test]
+fn no_built_in_theme_loses_a_pair_in_any_profile() {
+    let mut lost = Vec::new();
+    for name in BUILTIN_NAMES {
+        for profile in PROFILES {
+            let theme = builtin_at(name, profile);
+            let same = |&&(one, two): &&(Slot, Slot)| {
+                shown(&theme, one, profile) == shown(&theme, two, profile)
+            };
+            lost.extend(
+                APART
+                    .iter()
+                    .filter(same)
+                    .map(|pair| format!("{name} {profile:?} {pair:?}")),
+            );
+        }
+    }
+    assert_eq!(lost, Vec::<String>::new());
+}
+
+/// What is drawn on the status line.
+const ON_STATUS: [Slot; 10] = [
+    Slot::HintKey,
+    Slot::HintDesc,
+    Slot::HintDim,
+    Slot::Muted,
+    Slot::Warning,
+    Slot::Error,
+    Slot::ModeNormal,
+    Slot::ModeInsert,
+    Slot::ModeVisual,
+    Slot::ModeCommand,
+];
+
+/// What is drawn on the row under the cursor and on a selected one.
+const ON_ROW: [Slot; 17] = [
+    Slot::PriorityA,
+    Slot::PriorityB,
+    Slot::PriorityC,
+    Slot::PriorityOther,
+    Slot::Project,
+    Slot::Context,
+    Slot::Link,
+    Slot::Text,
+    Slot::Muted,
+    Slot::Id,
+    Slot::Code,
+    Slot::DueOverdue,
+    Slot::DueToday,
+    Slot::DueSoon,
+    Slot::Done,
+    Slot::Doing,
+    Slot::Blocked,
+];
+
+/// No colour equals the background it is drawn on: its own, or else the
+/// fill under it. At 16 colours there is no background to equal.
+#[test]
+fn no_built_in_colour_equals_its_background_above_16_colours() {
+    let places = [
+        (Slot::StatusBg, ON_STATUS.as_slice()),
+        (Slot::Cursorline, ON_ROW.as_slice()),
+        (Slot::Selection, ON_ROW.as_slice()),
+    ];
+    let mut lost = Vec::new();
+    for name in BUILTIN_NAMES {
+        for profile in [Profile::Ansi256, Profile::TrueColor] {
+            let theme = builtin_at(name, profile);
+            let on = |slot, under: Option<Colour>| {
+                let style = shown(&theme, slot, profile);
+                let under = style.bg.or(under);
+                (style.fg.is_some() && style.fg == under)
+                    .then(|| format!("{name} {profile:?} {slot:?} {under:?}"))
+            };
+            lost.extend(Slot::ALL.into_iter().filter_map(|s| on(s, None)));
+            for (place, slots) in places {
+                let under = fill(&theme, place, profile);
+                lost.extend(slots.iter().filter_map(|&s| on(s, under)));
+            }
+        }
+    }
+    assert_eq!(lost, Vec::<String>::new());
+}
+
+/// At 16 colours the name makes no difference; at more it is what it was.
+#[test]
+fn a_built_in_theme_is_ansi_at_16_colours_only() {
+    let ansi = builtin_theme("ansi");
+    for name in BUILTIN_NAMES {
+        assert_eq!(builtin_at(name, Profile::Ansi), ansi, "{name}");
+        let own = builtin_theme(name);
+        assert_eq!(builtin_at(name, Profile::Ansi256), own, "{name}");
+        assert_eq!(own == ansi, name == "ansi", "{name}");
+    }
+}
+
+/// At 16 colours a file keeps the slots it sets, reduced when drawn, and
+/// the rest comes from `ansi`, whatever the file is called.
+#[test]
+fn a_file_at_16_colours_keeps_its_slots_over_ansi() {
+    let ansi = builtin_theme("ansi");
+    let text = "[slots]\nproject = \"#ff8800\"\n";
+    for name in ["mine", "nord"] {
+        let dir = themes_dir(&[(name, text)]);
+        let at =
+            |profile| load(name, dir.path(), Path::new("/"), false, profile).0;
+        let theme = at(Profile::Ansi);
+        assert!(theme.from_file(), "{name}");
+        let project = shown(&theme, Slot::Project, Profile::Ansi);
+        assert_eq!(project.fg, Some(Colour::Index(9)), "{name}");
+        for slot in Slot::ALL.into_iter().filter(|&s| s != Slot::Project) {
+            assert_eq!(theme.style(slot), ansi.style(slot), "{name} {slot:?}");
+        }
+        let base = builtin_theme(if name == "nord" { name } else { "ansi" });
+        let text_slot = at(Profile::Ansi256).style(Slot::Text);
+        assert_eq!(text_slot, base.style(Slot::Text), "{name} at 256");
+    }
+}
+
+/// A name that is no theme warns at 16 colours too, and draws as `ansi`.
+#[test]
+fn an_unknown_theme_at_16_colours_warns_and_draws_as_ansi() {
+    let (theme, warnings) =
+        load("nope", Path::new(""), Path::new("/"), true, Profile::Ansi);
+    assert_eq!(warnings.len(), 1);
+    assert_eq!(theme, builtin_theme("ansi"));
 }
 
 #[test]
 fn an_unknown_theme_warns_and_loads_the_default() {
-    let (theme, warnings) = load("nope", Path::new(""), Path::new("/"), true);
+    let (theme, warnings) = load(
+        "nope",
+        Path::new(""),
+        Path::new("/"),
+        true,
+        Profile::TrueColor,
+    );
     let want = vec![Warning {
         source: "config.toml".to_owned(),
         message: "theme: no theme \"nope\"".to_owned(),
@@ -503,7 +727,8 @@ fn an_integer_out_of_range_is_a_warning() {
 #[test]
 fn no_config_ignores_a_user_file_of_a_built_in_name() {
     let dir = themes_dir(&[("nord", ONLY_PROJECT)]);
-    let (theme, warnings) = load("nord", dir.path(), Path::new("/"), true);
+    let (theme, warnings) =
+        load("nord", dir.path(), Path::new("/"), true, Profile::TrueColor);
     assert_eq!(warnings, vec![]);
     assert_eq!(theme, builtin_theme("nord"));
 }
@@ -511,7 +736,8 @@ fn no_config_ignores_a_user_file_of_a_built_in_name() {
 #[test]
 fn a_relative_folder_is_taken_from_the_working_folder() {
     let dir = themes_dir(&[("mine", ONLY_PROJECT)]);
-    let (theme, warnings) = load("mine", Path::new(""), dir.path(), false);
+    let (theme, warnings) =
+        load("mine", Path::new(""), dir.path(), false, Profile::TrueColor);
     assert_eq!(warnings, vec![]);
     assert_eq!(fg(&theme, Slot::Project), Some(Colour::Rgb(1, 2, 3)));
 }
@@ -519,7 +745,13 @@ fn a_relative_folder_is_taken_from_the_working_folder() {
 #[test]
 fn a_user_theme_named_like_the_default_applies_after_an_unknown_name() {
     let dir = themes_dir(&[("catppuccin-frappe", ONLY_PROJECT)]);
-    let (theme, warnings) = load("nope", dir.path(), Path::new("/"), false);
+    let (theme, warnings) = load(
+        "nope",
+        dir.path(),
+        Path::new("/"),
+        false,
+        Profile::TrueColor,
+    );
     assert_eq!(texts(&warnings), [r#"config.toml|theme: no theme "nope""#]);
     assert_eq!(fg(&theme, Slot::Project), Some(Colour::Rgb(1, 2, 3)));
 }

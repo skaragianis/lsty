@@ -40,6 +40,7 @@ const NO_MODEL: &str = "no model: use start first";
 const DEFAULT_SIZE: (u16, u16) = (80, 24);
 const DEFAULT_NOW: &str = "2026-09-29T0900Z";
 const THEME: &str = "probe";
+const PROFILE: Profile = Profile::TrueColor;
 /// How long `lock hold` waits for the lock.
 const HOLD_TIMEOUT: Duration = Duration::from_secs(1);
 
@@ -316,7 +317,7 @@ impl Harness {
             keys::load(&paths.keys_file, &dir, false, &config.leader);
         warnings.extend(more);
         let themes = self.root.join("testdata").join("themes");
-        let (theme, more) = theme::load(THEME, &themes, &dir, false);
+        let (theme, more) = theme::load(THEME, &themes, &dir, false, PROFILE);
         warnings.extend(more);
         let explicit = Path::new(file);
         let vars = |_: &str| None;
@@ -340,7 +341,7 @@ impl Harness {
             config,
             keys: keymap,
             theme,
-            profile: Profile::TrueColor,
+            profile: PROFILE,
             ids: Box::new(Counter::default()),
             clipboard: Box::new(self.clip.clone()),
             now: Box::new(move || now.get()),

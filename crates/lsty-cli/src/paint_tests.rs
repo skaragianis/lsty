@@ -8,15 +8,15 @@ use lsty_core::{
 
 use super::paint::Painter;
 
-fn theme(name: &str) -> Theme {
+fn theme(name: &str, profile: Profile) -> Theme {
     let (theme, warnings) =
-        theme::load(name, Path::new(""), Path::new("/"), true);
+        theme::load(name, Path::new(""), Path::new("/"), true, profile);
     assert_eq!(warnings, vec![]);
     theme
 }
 
 fn painter(name: &str, profile: Profile) -> Painter {
-    Painter::new(&theme(name), profile)
+    Painter::new(&theme(name, profile), profile)
 }
 
 fn text(bytes: Vec<u8>) -> String {
@@ -50,7 +50,7 @@ const ROWS: [Row; 8] = [
         Profile::TrueColor,
         Slot::PriorityB,
         "(B)",
-        "\x1b[33m(B)\x1b[m",
+        "\x1b[1;33m(B)\x1b[m",
     ),
     ("ansi", Profile::TrueColor, Slot::Text, "plain", "plain"),
     ("ansi", Profile::TrueColor, Slot::Muted, "", ""),
@@ -59,14 +59,14 @@ const ROWS: [Row; 8] = [
         Profile::TrueColor,
         Slot::Link,
         "a b",
-        "\x1b[4;34ma b\x1b[m",
+        "\x1b[4;94ma b\x1b[m",
     ),
     (
         "ansi",
         Profile::TrueColor,
         Slot::Done,
         "x y",
-        "\x1b[2;90;9mx y\x1b[m",
+        "\x1b[2;9mx y\x1b[m",
     ),
     (
         "catppuccin-mocha",
@@ -93,39 +93,52 @@ fn slots_are_written_as_their_sequences() {
 }
 
 #[test]
-fn sixteen_colours_reduce_a_24_bit_colour() {
+fn sixteen_colours_draw_a_built_in_theme_in_the_terminals_own() {
     let got = painter("catppuccin-mocha", Profile::Ansi);
     assert_eq!(
         text(got.paint(Slot::PriorityA, b"(A)")),
         "\x1b[1;91m(A)\x1b[m"
     );
+    assert_eq!(text(got.paint(Slot::Project, b"+p")), "\x1b[35m+p\x1b[m");
+}
+
+#[test]
+fn sixteen_colours_reduce_a_24_bit_colour() {
+    let (mine, _) = theme::load(
+        "catppuccin-mocha",
+        Path::new(""),
+        Path::new("/"),
+        true,
+        Profile::TrueColor,
+    );
+    let got = Painter::new(&mine, Profile::Ansi);
     assert_eq!(text(got.paint(Slot::Project, b"+p")), "\x1b[94m+p\x1b[m");
 }
 
 #[test]
 fn a_struck_faint_run_is_one_pair_around_the_whole_text() {
     let got = painter("ansi", Profile::TrueColor).paint(Slot::Done, b"x a b");
-    assert_eq!(text(got), "\x1b[2;90;9mx a b\x1b[m");
+    assert_eq!(text(got), "\x1b[2;9mx a b\x1b[m");
 }
 
 #[test]
 fn an_underlined_run_underlines_once() {
     let got =
         painter("ansi", Profile::TrueColor).paint(Slot::Link, b"file:a b");
-    assert_eq!(text(got), "\x1b[4;34mfile:a b\x1b[m");
+    assert_eq!(text(got), "\x1b[4;94mfile:a b\x1b[m");
 }
 
 #[test]
 fn a_struck_run_draws_bytes_that_are_not_utf8() {
     let got = painter("ansi", Profile::TrueColor).paint(Slot::Done, b"x\xe9");
-    assert_eq!(got, "\x1b[2;90;9mx\u{fffd}\x1b[m".as_bytes());
+    assert_eq!(got, "\x1b[2;9mx\u{fffd}\x1b[m".as_bytes());
 }
 
 #[test]
 fn text_that_is_not_utf8_is_drawn_in_a_plain_run() {
     let got =
         painter("ansi", Profile::TrueColor).paint(Slot::PriorityB, b"\xe9");
-    assert_eq!(got, "\x1b[33m\u{fffd}\x1b[m".as_bytes());
+    assert_eq!(got, "\x1b[1;33m\u{fffd}\x1b[m".as_bytes());
 }
 
 #[test]
@@ -141,6 +154,6 @@ fn errors_and_warnings_have_their_first_words_painted() {
     };
     assert_eq!(
         text(p.warning_line(&warning)),
-        "\x1b[33mlsty: warning:\x1b[m config.toml: x"
+        "\x1b[1mlsty: warning:\x1b[m config.toml: x"
     );
 }

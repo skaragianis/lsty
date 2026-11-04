@@ -325,6 +325,7 @@ impl Model {
         }
         self.show_theme(name);
         self.deps.config.theme.clone_from(name);
+        self.say_alike();
         Ok(())
     }
 }

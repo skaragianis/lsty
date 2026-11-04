@@ -1,33 +1,33 @@
 [slots]
 priority_a          = { fg = "9", bold = true }
-priority_b          = "3"
-priority_c          = "11"
-priority_other      = "7"
+priority_b          = { fg = "3", bold = true }
+priority_c          = "3"
+priority_other      = {}
 project             = "5"
 context             = "6"
-link                = { fg = "4", underline = true }
+link                = { fg = "12", underline = true }
 text                = {}
-muted               = "8"
-id                  = "4"
-code                = "10"
+muted               = { faint = true }
+id                  = "12"
+code                = { fg = "13", italic = true }
 due_overdue         = { fg = "9", bold = true }
-due_today           = { fg = "3", bold = true }
-due_soon            = "11"
-done                = { fg = "8", strike = true, faint = true }
+due_today           = "9"
+due_soon            = "3"
+done                = { strike = true, faint = true }
 doing               = "2"
 blocked             = "1"
-mode_normal         = { fg = "4", bold = true }
+mode_normal         = { fg = "12", bold = true }
 mode_insert         = { fg = "2", bold = true }
 mode_visual         = { fg = "5", bold = true }
-mode_command        = { fg = "3", bold = true }
-panel_border        = "8"
-panel_border_active = "6"
+mode_command        = { bold = true }
+panel_border        = { faint = true }
+panel_border_active = { fg = "12", bold = true }
 selection           = { bold = true, underline = true }
 cursorline          = { bold = true }
-chip                = { fg = "7", bold = true }
-status_bg           = { faint = true }
-hint_key            = { fg = "6", bold = true }
-hint_desc           = "7"
-hint_dim            = "8"
-warning             = "3"
+chip                = { bold = true }
+status_bg           = {}
+hint_key            = { bold = true }
+hint_desc           = {}
+hint_dim            = { faint = true }
+warning             = { bold = true }
 error               = { fg = "9", bold = true }

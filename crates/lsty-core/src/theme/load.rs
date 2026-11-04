@@ -9,7 +9,7 @@ use std::{
 use toml::de::DeValue;
 
 use super::{
-    Colour, Slot, Style, Theme,
+    Colour, Profile, Slot, Style, Theme,
     builtin::{ANSI, BUILTIN, builtin},
     value_text::value_text,
 };
@@ -84,11 +84,17 @@ fn user_names(dir: &Path) -> Vec<String> {
 /// slot it leaves out takes the built-in theme's, or `ansi`'s when there
 /// is no built-in theme of that name. One slot differs: a file that sets
 /// `muted` and not `hint_dim` dims with its `muted`.
+///
+/// `profile` is the terminal's. At 16 colours every built-in theme is
+/// `ansi`, and so is what a file leaves out, whatever its name: the
+/// terminal chooses what those colours look like, so nothing tells what
+/// a theme's colours become there. A file keeps the slots it sets.
 pub fn load(
     mut name: &str,
     themes_dir: &Path,
     cwd: &Path,
     no_config: bool,
+    profile: Profile,
 ) -> (Theme, Vec<Warning>) {
     let user_file = |theme: &str| {
         let path = themes_dir.join(format!("{theme}{EXTENSION}"));
@@ -102,12 +108,13 @@ pub fn load(
         name = DEFAULT_NAME;
         user = user_file(name);
     }
-    let mut styles = builtin_styles(name);
+    let mut styles = builtin_styles(name, profile);
+    let from_file = user.is_some();
     if let Some(path) = user {
         let source = format!("themes/{name}{EXTENSION}");
         styles = read_user(&source, cwd, &path, &styles, &mut warnings);
     }
-    (Theme { styles }, warnings)
+    (Theme { styles, from_file }, warnings)
 }
 
 fn is_file(cwd: &Path, path: &Path) -> bool {
@@ -115,12 +122,14 @@ fn is_file(cwd: &Path, path: &Path) -> bool {
 }
 
 /// The styles of a built-in theme over those of `ansi`; `ansi` for a
-/// name that is no built-in theme.
-fn builtin_styles(name: &str) -> Styles {
+/// name that is no built-in theme, and for any name at 16 colours.
+fn builtin_styles(name: &str, profile: Profile) -> Styles {
     let (base, _) = parse(FALLBACK, ANSI.as_bytes(), &Styles::default());
-    match builtin(name).filter(|_| name != FALLBACK) {
-        Some(text) => parse(name, text.as_bytes(), &base).0,
-        None => base,
+    match builtin(name) {
+        Some(text) if profile != Profile::Ansi && name != FALLBACK => {
+            parse(name, text.as_bytes(), &base).0
+        }
+        _ => base,
     }
 }
 
