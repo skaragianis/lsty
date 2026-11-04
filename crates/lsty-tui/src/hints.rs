@@ -88,7 +88,7 @@ pub(crate) fn warnings(hints: &BTreeMap<String, Vec<String>>) -> Vec<Warning> {
     out
 }
 
-/// Whether a hint is dim: `answer` says its key would change nothing.
+/// Whether a hint is dim: `answer` says its key surely does nothing.
 pub(crate) const fn dim(answer: Answer) -> bool {
     matches!(answer, Answer::Refused(_) | Answer::CoreRefuses(_))
 }

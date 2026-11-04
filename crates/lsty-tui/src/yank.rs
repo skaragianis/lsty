@@ -176,11 +176,7 @@ impl Model {
 
     /// `delete`: yanks the tasks it deletes, once the delete is written.
     pub(crate) fn delete_tasks(&mut self, count: usize) -> Vec<Cmd> {
-        let ids = self.tasks_of(count);
-        if ids.is_empty() {
-            return Vec::new();
-        }
-        let yank = Yank::of(&self.snap, &ids);
+        let yank = Yank::of(&self.snap, &self.tasks_of(count));
         let text = yank.text.clone();
         let was = self.clip.replace(yank);
         if self.act(Action::Delete, count) {

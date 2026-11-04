@@ -1,0 +1,70 @@
+size 100 6
+start
+keys j
+fg doing-colour
+keys t
+frame stopped
+fg stopped-colour
+keys 2
+fg a-count-keeps-it-colour
+tick 2s
+frame window-over
+fg window-over-colour
+keys <Esc>
+keys t
+frame refused
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Blocker id:b
+Stuck dep:b started:2026-09-29T0800Z owner:agent1
+-- doing-colour --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm...ttttttt...............................................................................i.....E
+E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..D.DDDD..k.yyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy...mmmmm.
+-- stopped --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Blocker                                                                                   b │
+│  2 ⧗ Stuck dep:b                                                                                 │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  2 stopped; 2 was claimed by agent1  x done  t start  T wont        9.9.9
+-- stopped-colour --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm...ttttttt...................................................................................i.E
+E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww..D.DDDD..k.yyyyy..k.yyyy........mmmmm.
+-- a-count-keeps-it-colour --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm...ttttttt...................................................................................i.E
+E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..D.DDDD..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy...........mmmmm.
+-- window-over --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Blocker                                                                                   b │
+│  2 ⧗ Stuck dep:b                                                                                 │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL 2  todo.txt  manual  <Esc> cancel  x done  t start  T wont  o new  a append           9.9.9
+-- window-over-colour --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm...ttttttt...................................................................................i.E
+E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyyyyy...........mmmmm.
+-- refused --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   Blocker                                                                                   b │
+│  2 ⧗ Stuck dep:b                                                                                 │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  task 2 is blocked by 1 (Blocker)  x done  t start  T wont  o new   9.9.9

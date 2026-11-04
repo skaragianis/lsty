@@ -70,8 +70,8 @@ pub(crate) enum Refusal {
 /// What a press would do.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Answer {
-    /// The key does its work: no task to decide on, a key that does not
-    /// write tasks, or a prompt that may open.
+    /// The key does its work, or says why not: a key that does not write
+    /// tasks, or a prompt that may open.
     Applies,
     /// The command runs over the tasks it changes, at least one, and passes
     /// over the rest.
@@ -189,6 +189,14 @@ const fn toggle_start(s: &Summary) -> Answer {
     }
 }
 
+/// `t` in the window after it stopped these tasks: it puts their claims back,
+/// which a blocked task does not refuse.
+fn puts_back(m: &Model, s: &Summary) -> bool {
+    s.blocked_todo > 0
+        && m.stopped_over(m.rows_between(s.lo, s.lo + s.total - 1))
+            == Some(true)
+}
+
 /// `stop`, bound by a user: `lsty stop`, which says so when none is underway.
 const fn stop(s: &Summary) -> Answer {
     if s.doing == 0 {
@@ -276,6 +284,26 @@ fn repeat(m: &Model) -> Answer {
 #[expect(clippy::too_many_lines, reason = "every action is listed")]
 pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
     let rule: fn(&Summary) -> Answer = match action {
+        // Nothing to move over, select or show beside the list.
+        action
+            if s.total == 0
+                && m.focus == Focus::List
+                && (action.is_motion()
+                    || matches!(
+                        action,
+                        Action::EnterVisual
+                            | Action::FocusDetail
+                            | Action::FocusDown
+                            | Action::FocusUp
+                            | Action::FocusRight
+                            | Action::FocusList
+                    )) =>
+        {
+            return Answer::Refused(Refusal::Quiet);
+        }
+        Action::ToggleStart if puts_back(m, s) => {
+            return Answer::Resolved(Command::Start);
+        }
         Action::ToggleComplete => complete,
         Action::ToggleStart => toggle_start,
         Action::Stop => stop,
@@ -299,12 +327,6 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             return lit_if(!no_id, Refusal::NoId);
         }
         Action::Yank => return lit_if(s.total > 0, Refusal::Quiet),
-        // A yank of this session. The clipboard is not read: that runs a
-        // program.
-        Action::PasteBelow | Action::PasteAbove => {
-            let clip = m.clip.is_some();
-            return lit_if(clip, Refusal::Says(messages::NO_PASTE));
-        }
         Action::MoveTaskDown => return moving(m, s, Some(s.lo + s.total)),
         Action::MoveTaskUp => return moving(m, s, s.lo.checked_sub(1)),
         Action::OpenLink if s.total == 0 => {
@@ -349,6 +371,9 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::GoViewBottom
         | Action::InsertBelow
         | Action::InsertAbove
+        // What is pasted is known only by running the clipboard's program.
+        | Action::PasteBelow
+        | Action::PasteAbove
         | Action::Search
         | Action::ClearSearch
         | Action::ClearFilters
@@ -404,7 +429,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::Unfold => return Answer::Applies,
     };
     if s.total == 0 {
-        Answer::Applies
+        lit_if(action == Action::InsertPrerequisite, Refusal::Quiet)
     } else if s.archived == 0 {
         rule(s)
     } else if s.todo + s.doing > 0 {

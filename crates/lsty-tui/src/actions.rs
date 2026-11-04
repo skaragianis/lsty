@@ -68,7 +68,7 @@ impl Model {
         let again = self.count_for(count, tasks.len());
         let toggles = action == Action::ToggleStart;
         let stops = answer == Answer::Resolved(Command::Stop);
-        let back = toggles && !stops && self.just_stopped(&ids);
+        let back = toggles && !stops && self.just_stopped(count);
         let ran = self.ending(&ids, |m| m.answered(answer, back, &tasks));
         if ran {
             self.again = Some(Again::Task {

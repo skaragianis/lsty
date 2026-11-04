@@ -1,0 +1,50 @@
+size 100 6
+start
+frame no-tasks
+fg no-tasks-colour
+keys 2
+fg a-count-colour
+keys <Esc>
+keys x
+frame x-says-nothing
+keys /Zzz<CR>
+fg no-hit-colour
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+-- no-tasks --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9
+-- no-tasks-colour --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..DD.DDDDDD..D.DDDD........mmmmm.
+-- a-count-colour --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD...........mmmmm.
+-- x-says-nothing --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9
+-- no-hit-colour --
+EEEEEEhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD.......mmmmm.

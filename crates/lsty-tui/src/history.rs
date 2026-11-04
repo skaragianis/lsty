@@ -10,16 +10,16 @@ use jiff::Timestamp;
 use lsty_core::{
     errs::{Code, Nr, Source},
     keys::Action,
-    list::{Snapshot, TaskId},
+    list::Snapshot,
     ops::{self, FileRecord, Followed, UndoRecord},
 };
 
 use crate::{
-    actions::places,
     messages,
     model::{MESSAGE_LIFE, Model},
     msg::Cmd,
     prompt::Kind as PromptKind,
+    rows::Row,
     track::{Place, Remap, Touched, Wrote},
 };
 
@@ -275,20 +275,23 @@ impl Model {
             now.ok().and_then(|t| t.checked_add(MESSAGE_LIFE).ok());
     }
 
-    /// Tells whether `ids` are exactly the tasks the window is about, in
-    /// time, and ends the window if they are the tasks.
-    pub(crate) fn just_stopped(&mut self, ids: &[TaskId]) -> bool {
-        let (Some(until), Some(top)) =
-            (self.hist.stopped, self.hist.undo.last())
-        else {
-            return false;
-        };
-        let mut asked = places(&self.snap, ids);
-        let mut own = top.own_places();
+    /// Whether the window is still open, when `rows` are exactly the tasks
+    /// it is about.
+    pub(crate) fn stopped_over(&self, rows: &[Row]) -> Option<bool> {
+        let until = self.hist.stopped?;
+        let mut asked: Vec<Place> = rows.iter().map(Row::place).collect();
+        let mut own = self.hist.undo.last()?.own_places();
         asked.sort_unstable();
         own.sort_unstable();
-        self.hist.stopped = self.hist.stopped.filter(|_| asked != own);
-        self.clock_now().is_ok_and(|c| c.now() < until) && asked == own
+        (asked == own).then(|| self.clock_now().is_ok_and(|c| c.now() < until))
+    }
+
+    /// Tells whether the window is open over the tasks of `count`, and ends
+    /// it if they are the tasks.
+    pub(crate) fn just_stopped(&mut self, count: usize) -> bool {
+        let over = self.stopped_over(self.rows_of(count));
+        self.hist.stopped = self.hist.stopped.filter(|_| over.is_none());
+        over == Some(true)
     }
 
     /// Puts back the lines of the step on top of the undo stack, as a

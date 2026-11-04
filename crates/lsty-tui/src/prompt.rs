@@ -192,9 +192,6 @@ impl Model {
         let tasks = self.tasks_of(count);
         let count = self.count_for(count, tasks.len());
         let chosen = self.chosen(&tasks);
-        if chosen.is_empty() {
-            return;
-        }
         if let Answer::Refused(why) = answer {
             self.refuse(why, &chosen);
             return;
@@ -291,9 +288,6 @@ impl Model {
         let s = Summary::of(&self.snap, self.cursor, rows);
         let answer = decide(kind.action(), self, &s);
         let chosen = self.chosen(&ids_of(rows));
-        if chosen.is_empty() {
-            return;
-        }
         if let Answer::Refused(why) = answer {
             self.refuse(why, &chosen);
             return;

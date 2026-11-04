@@ -99,6 +99,8 @@ mod complete_tests;
 #[cfg(test)]
 mod connective_tests;
 #[cfg(test)]
+mod dim_press_tests;
+#[cfg(test)]
 mod filtering_tests;
 #[cfg(test)]
 mod hints_tests;

@@ -1,0 +1,47 @@
+size 100 6
+start
+keys x
+keys /Zzz<CR>
+frame no-hit
+fg no-hit-colour
+keys .
+frame a-repeat-says-nothing
+fg a-repeat-colour
+file todo.txt todo.txt-after
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+Call
+Other
+-- todo.txt-after --
+x 2026-09-29 Call
+Other
+-- no-hit --
+┌ [1]─/Zzz ────────────────────────────────────────────────────────────────────────────────────────┐
+│ nothing matches                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append       9.9.9
+-- no-hit-colour --
+EEEEEEhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+Emmmmmmmmmmmmmmmm..................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD.......mmmmm.
+-- a-repeat-says-nothing --
+┌ [1]─/Zzz ────────────────────────────────────────────────────────────────────────────────────────┐
+│ nothing matches                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append       9.9.9
+-- a-repeat-colour --
+EEEEEEhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+Emmmmmmmmmmmmmmmm..................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+NNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD.......mmmmm.
