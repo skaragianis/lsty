@@ -5,11 +5,14 @@
 
 use lsty_core::{
     errs::Source,
-    keys::{Action, Matcher},
+    keys::{Action, Matcher, Mode},
     list::{Snapshot, State},
 };
 
-use crate::{focus::Focus, history::Again, messages, model::Model, rows::Row};
+use crate::{
+    focus::Focus, history::Again, messages, model::Model, panel::Panel,
+    rows::Row,
+};
 
 /// The `lsty` command a key resolves to.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -149,12 +152,18 @@ impl Model {
     }
 
     /// What the hints ask of the rule, with the count typed so far. A second
-    /// summary only with a count, for the keys that do not read it.
+    /// summary only with a count, for the keys that do not read it. Over
+    /// help or a picker the rule has no say: those keys move there, whatever
+    /// lies behind.
     pub(crate) fn answers(&self) -> impl Fn(Action) -> Answer + '_ {
+        let ruled = !matches!(self.key_mode(), Mode::Help | Mode::Picker);
         let count = self.typed_count();
         let typed = self.summary(count);
         let one = (count > 1).then(|| self.summary(1));
         move |action| {
+            if !ruled {
+                return Answer::Applies;
+            }
             let cursor = one.as_ref().filter(|_| !action.reads_count());
             decide(action, self, cursor.unwrap_or(&typed))
         }
@@ -288,18 +297,43 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         action
             if s.total == 0
                 && m.focus == Focus::List
-                && (action.is_motion()
-                    || matches!(
-                        action,
-                        Action::EnterVisual
-                            | Action::FocusDetail
-                            | Action::FocusDown
-                            | Action::FocusUp
-                            | Action::FocusRight
-                            | Action::FocusList
-                    )) =>
+                && (action.is_motion() || action == Action::EnterVisual) =>
         {
             return Answer::Refused(Refusal::Quiet);
+        }
+        // A panel with no entries has nothing to move over.
+        action
+            if action.is_motion()
+                && m.focused_panel().is_some_and(|p| p.entries.is_empty()) =>
+        {
+            return Answer::Refused(Refusal::Quiet);
+        }
+        Action::ToggleEntry => {
+            let lit = m.focused_panel().is_some_and(|p| !p.entries.is_empty());
+            return lit_if(lit, Refusal::Quiet);
+        }
+        Action::Fold => {
+            let node = m.focused_panel().and_then(Panel::to_fold);
+            return lit_if(node.is_some(), Refusal::Quiet);
+        }
+        Action::Unfold => {
+            let node = m.focused_panel().and_then(Panel::to_unfold);
+            return lit_if(node.is_some(), Refusal::Quiet);
+        }
+        Action::ClearFilters => {
+            let lit = m.panels.iter().any(|p| !p.active.is_empty());
+            return lit_if(lit, Refusal::Says("no filters to clear"));
+        }
+        Action::FocusLeft
+        | Action::FocusDown
+        | Action::FocusUp
+        | Action::FocusRight
+        | Action::FocusList
+        | Action::FocusDetail
+        | Action::FocusProjects
+        | Action::FocusContexts
+        | Action::FocusFilters => {
+            return lit_if(m.focus_after(action).is_some(), Refusal::Quiet);
         }
         Action::ToggleStart if puts_back(m, s) => {
             return Answer::Resolved(Command::Start);
@@ -376,24 +410,15 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::PasteAbove
         | Action::Search
         | Action::ClearSearch
-        | Action::ClearFilters
         | Action::CycleSort
         | Action::ToggleSidebar
         | Action::ToggleDetail
         | Action::ToggleWrap
         | Action::EnterVisual
         | Action::ExitVisual
-        | Action::FocusLeft
-        | Action::FocusDown
-        | Action::FocusUp
-        | Action::FocusRight
         | Action::FocusNext
         | Action::FocusPrev
-        | Action::FocusList
-        | Action::FocusDetail
-        | Action::FocusProjects
-        | Action::FocusContexts
-        | Action::FocusFilters
+        | Action::SelectAndJump
         | Action::CommandLine
         | Action::Help
         | Action::Quit
@@ -422,11 +447,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::CompleteNext
         | Action::CompletePrev
         | Action::HistoryPrev
-        | Action::HistoryNext
-        | Action::ToggleEntry
-        | Action::SelectAndJump
-        | Action::Fold
-        | Action::Unfold => return Answer::Applies,
+        | Action::HistoryNext => return Answer::Applies,
     };
     if s.total == 0 {
         lit_if(action == Action::InsertPrerequisite, Refusal::Quiet)

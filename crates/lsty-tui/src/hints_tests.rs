@@ -251,10 +251,15 @@ const STUCK_DOING: &str =
     "Blocker id:b\nStuck dep:b started:2026-09-29T0800Z\n";
 const SKIP: &str = "x 2026-09-01 Skip wontdo:true\n";
 const DONE: &str = "x 2026-09-01 Done\n";
+const FILTERED: &str = "<C-w>5Gx<C-w>3";
+const NESTED: &str = "A +a.b @x.y\n";
+const NO_FOLD: &str = "h fold l unfold";
+const EMPTY: &str = "x filter h fold l unfold";
 
 /// Each state of the default hints: the files, what is typed on them, and
 /// the hints that are dim.
 #[test]
+#[expect(clippy::too_many_lines, reason = "a table")]
 fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
     let rows = [
         (
@@ -308,6 +313,36 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
         ("detail link", "A https://x.org\n", "", "<C-w>2", ""),
         ("detail blocked", STUCK, "", "j<C-w>2", "x done <CR> link"),
         ("detail archived", "", OLD, "<C-w>2", "<CR> link dd delete"),
+        ("empty Projects", "A\n", "", "<C-w>3", EMPTY),
+        ("empty Contexts", "A\n", "", "<C-w>4", EMPTY),
+        ("Projects, no task", "", "", "<C-w>3", EMPTY),
+        ("empty Projects, search", "A\n", "", "/A<CR><C-w>3", EMPTY),
+        (
+            "empty Projects, search hides all",
+            "A\n",
+            "",
+            "/zzz<CR><C-w>3",
+            EMPTY,
+        ),
+        ("empty Projects, filter", "A\n", "", FILTERED, EMPTY),
+        (
+            "a search keeps the entry",
+            "A +p\n",
+            "",
+            "/zzz<CR><C-w>3",
+            NO_FOLD,
+        ),
+        ("a filter keeps the entry", "A +p\n", "", FILTERED, NO_FOLD),
+        ("flat project", "A +p\n", "", "<C-w>3", NO_FOLD),
+        ("flat context", "A @c\n", "", "<C-w>4", NO_FOLD),
+        ("parent unfolded", NESTED, "", "<C-w>3", "l unfold"),
+        ("parent folded", NESTED, "", "<C-w>3h", "h fold"),
+        ("child folds its parent", NESTED, "", "<C-w>3j", "l unfold"),
+        ("context parent", NESTED, "", "<C-w>4", "l unfold"),
+        ("context parent folded", NESTED, "", "<C-w>4h", "h fold"),
+        ("context child", NESTED, "", "<C-w>4j", "l unfold"),
+        ("a switch", NESTED, "", "<C-w>5", NO_FOLD),
+        ("a filter", NESTED, "", "<C-w>5G", NO_FOLD),
     ];
     for (name, todo, done, typed, want) in rows {
         let (_dir, model) = hinted((todo, done), None, "", typed);
@@ -372,6 +407,19 @@ fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
         "move_task_up",
     ];
     const VISUAL: &[&str] = &["yank", "move_task_down", "move_task_up"];
+    const PANEL: &[&str] = &[
+        "cursor_down",
+        "clear_filters",
+        "focus_left",
+        "focus_down",
+        "focus_up",
+        "focus_right",
+        "focus_list",
+        "focus_detail",
+        "focus_projects",
+        "focus_contexts",
+        "focus_filters",
+    ];
     const NONE: &str = "u undo <C-r> redo . repeat";
     let rows = [
         (
@@ -454,6 +502,36 @@ fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
             "",
             "sjv",
             "J move down K move up".to_owned(),
+        ),
+        (
+            "empty Projects, no filter",
+            "panel",
+            PANEL,
+            "A\n",
+            "",
+            "<C-w>3",
+            "j down gc clear filters <C-w>h left <C-w>k above <C-w>3 projects"
+                .to_owned(),
+        ),
+        (
+            "Projects, a filter on",
+            "panel",
+            PANEL,
+            "A +p\n",
+            "",
+            "<C-w>3x",
+            "<C-w>h left <C-w>k above <C-w>3 projects".to_owned(),
+        ),
+        (
+            "Filters, no task",
+            "panel",
+            PANEL,
+            "",
+            "",
+            "<C-w>5",
+            "gc clear filters <C-w>h left <C-w>j below <C-w>2 detail \
+             <C-w>5 filters"
+                .to_owned(),
         ),
     ];
     for (name, mode, names, todo, done, typed, want) in rows {
@@ -713,19 +791,29 @@ fn a_selection_overrides_a_count_over_the_hints() {
     assert!(!shown_dim(&model, 200).contains("x done"));
 }
 
-/// No other mode dims: none of its keys is an action the rule can refuse.
+/// No other mode dims: help and a picker move whatever lies behind, and the
+/// rule refuses no key of a field.
 #[test]
 fn other_modes_never_dim() {
-    let (_dir, model) = hinted(("", OLD), None, "", "");
-    let summary = model.summary(1);
-    for mode in Mode::ALL {
-        if matches!(mode, Mode::Normal | Mode::Visual | Mode::Detail) {
-            continue;
-        }
+    let opened = [
+        ("", "<C-w>3?", Mode::Help),
+        ("", "<C-w>3:theme<CR>", Mode::Picker),
+        ("", "?", Mode::Help),
+        ("", ":theme<CR>", Mode::Picker),
+        ("", "o", Mode::Insert),
+        ("", ":", Mode::Command),
+        ("A +p\n", "o+", Mode::Completion),
+    ];
+    for (todo, typed, mode) in opened {
+        let (_dir, model) = hinted((todo, ""), None, "", typed);
+        assert_eq!(model.key_mode(), mode, "{typed}");
+        let answer = model.answers();
         for action in Action::ALL {
             let keyed = !model.deps.keys.keys(mode, *action).is_empty();
-            let answer = decide(*action, &model, &summary);
-            assert!(!keyed || answer == Answer::Applies, "{action:?}");
+            assert!(
+                !keyed || answer(*action) == Answer::Applies,
+                "{typed} {action:?}"
+            );
         }
     }
 }

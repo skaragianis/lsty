@@ -425,47 +425,44 @@ impl Panel {
     /// unfolds it when it is folded. Returns whether a node changed.
     pub(crate) fn flip_fold(&mut self, at: usize) -> bool {
         self.cursor = at;
-        let Some(entry) = self.entries.get(at) else {
-            return false;
-        };
-        if !entry.is_parent() {
-            return false;
-        }
-        if self.folded.contains(entry.name()) {
-            self.unfold()
-        } else {
-            self.fold()
-        }
+        self.entries.get(at).is_some_and(Entry::is_parent)
+            && (self.unfold() || self.fold())
     }
 
-    /// Folds the node under the cursor, or the parent of a leaf. Returns
-    /// whether a node changed.
+    /// The node `fold` would fold: the one under the cursor, or the parent
+    /// of a leaf, when it is not folded yet.
+    pub(crate) fn to_fold(&self) -> Option<&[u8]> {
+        let entry = self.entries.get(self.cursor)?;
+        let Kind::Node { name, parent } = &entry.kind else {
+            return None;
+        };
+        let target = if *parent { name } else { name_parent(name) };
+        (!target.is_empty() && !self.folded.contains(target)).then_some(target)
+    }
+
+    /// The node `unfold` would unfold: the one under the cursor, when it is
+    /// folded.
+    pub(crate) fn to_unfold(&self) -> Option<&[u8]> {
+        let entry = self.entries.get(self.cursor)?;
+        (entry.is_parent() && self.folded.contains(entry.name()))
+            .then(|| entry.name())
+    }
+
+    /// Folds what `to_fold` names. Returns whether a node changed.
     pub(crate) fn fold(&mut self) -> bool {
-        let Some(entry) = self.entries.get(self.cursor) else {
+        let Some(target) = self.to_fold().map(<[u8]>::to_vec) else {
             return false;
         };
-        let target = if entry.is_parent() {
-            entry.name().to_vec()
-        } else {
-            name_parent(entry.name()).to_vec()
-        };
-        if target.is_empty() {
-            return false;
-        }
         self.folded.insert(target.clone());
         self.settle(&target);
         true
     }
 
-    /// Unfolds the node under the cursor.
+    /// Unfolds what `to_unfold` names. Returns whether a node changed.
     pub(crate) fn unfold(&mut self) -> bool {
-        let Some(entry) = self.entries.get(self.cursor) else {
+        let Some(target) = self.to_unfold().map(<[u8]>::to_vec) else {
             return false;
         };
-        if !entry.is_parent() {
-            return false;
-        }
-        let target = entry.name().to_vec();
         self.folded.remove(&target);
         self.settle(&target);
         true

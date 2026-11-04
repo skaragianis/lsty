@@ -104,11 +104,9 @@ impl Model {
         }
     }
 
-    /// The tree that has the focus, when it has entries.
-    fn focused_tree(&mut self) -> Option<(&mut Panel, usize)> {
-        let i = self.focus.panel().filter(|&i| i != FILTERS)?;
-        let panel = self.panels.get_mut(i)?;
-        (!panel.entries.is_empty()).then_some((panel, i))
+    /// The panel that has the focus.
+    pub(crate) fn focused_panel(&self) -> Option<&Panel> {
+        self.panels.get(self.focus.panel()?)
     }
 
     /// `h`: folds the node under the cursor, or the parent of a leaf.
@@ -122,10 +120,10 @@ impl Model {
     }
 
     fn fold_with(&mut self, change: fn(&mut Panel) -> bool) {
-        let Some((panel, i)) = self.focused_tree() else {
+        let Some(i) = self.focus.panel() else {
             return;
         };
-        if change(panel) {
+        if change(&mut self.panels[i]) {
             let rows = self.panel_rows()[i];
             self.panels[i].scroll(rows);
             self.keep_folds();
