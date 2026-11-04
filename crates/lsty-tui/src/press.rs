@@ -5,7 +5,7 @@
 
 use lsty_core::{
     errs::Source,
-    keys::{Action, Matcher, Mode},
+    keys::{Action, Category, Matcher, Mode},
     list::{Snapshot, State},
 };
 
@@ -173,28 +173,17 @@ impl Model {
 /// Whether `action` writes on the lines it is about, or opens a field to.
 /// `o`, `O`, `p` and `P` take a line as a position only.
 pub(crate) const fn writes_line(action: Action) -> bool {
-    matches!(
-        action,
-        Action::ToggleStart
-            | Action::Stop
-            | Action::Wontdo
-            | Action::ToggleComplete
-            | Action::Delete
-            | Action::MoveTaskDown
-            | Action::MoveTaskUp
-            | Action::CyclePriority
-            | Action::CyclePriorityBack
-            | Action::SetDue
-            | Action::AddTag
-            | Action::RemoveTag
-            | Action::EditDescription
-            | Action::EditAppend
-            | Action::EditLineStart
-            | Action::ChangeDescription
-            | Action::InsertDependent
-            | Action::InsertPrerequisite
-            | Action::Repeat
-    )
+    matches!(action, Action::Repeat)
+        || matches!(action.category(), Category::Tasks | Category::Editing)
+            && !matches!(
+                action,
+                Action::Yank
+                    | Action::PasteBelow
+                    | Action::PasteAbove
+                    | Action::OpenLink
+                    | Action::InsertBelow
+                    | Action::InsertAbove
+            )
 }
 
 /// `x`: any open task, `lsty do`, which refuses a blocked one; all done,

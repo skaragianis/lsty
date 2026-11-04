@@ -248,11 +248,13 @@ fn a_delete_keeps_the_top_of_a_sorted_view() {
     }
 }
 
-/// The file drawn, the keys, the file they find, and what is being checked.
-type Refused = (&'static str, &'static str, &'static str, &'static str);
+/// The files drawn, the keys, the files they find, and one more: what is
+/// being checked, or the files they leave and perhaps ` says ` what is said.
+/// Files are the todo file, then the done file after a `|`.
+type Aimed = (&'static str, &'static str, &'static str, &'static str);
 
 const ALPHA_TAGGED: &str = "Alpha +outside\nB\n";
-const REFUSED: &[Refused] = &[
+const REFUSED: &[Aimed] = &[
     ("Alpha\nB\n", "x", ALPHA_TAGGED, "tagged"),
     ("Alpha\nB\n", "dd", ALPHA_TAGGED, "tagged"),
     (
@@ -278,10 +280,17 @@ const REFUSED: &[Refused] = &[
     ("A\nB\nC\n", "x", "C\nB\nA\n", "reordered"),
     ("A\nB\nC\n", "x", "A\nC\nB\n", "another pair reordered"),
     ("A\nB\n", "x", "A\nA\nB\n", "a twin came"),
+    ("A\nA\nB\n", "x", "A\nB\n", "a twin went"),
+    (
+        "|x 2026-09-01 Old\n",
+        "x",
+        "|x 2026-09-01 Old +k\n",
+        "archived, changed",
+    ),
 ];
 
-/// The file drawn, the keys, the file they find, and the file they leave.
-const WRITTEN: &[Refused] = &[
+const COPY: &str = "Copy\nA\nB\n";
+const WRITTEN: &[Aimed] = &[
     (
         "Call +a\nO\n",
         "x",
@@ -305,15 +314,61 @@ const WRITTEN: &[Refused] = &[
     ("A\nB\n", "x", "A\nB\nC\n", "{D}A\nB\nC\n"),
     ("A\nB\n", "J", "N\nA\nB\n", "N\nB\nA\n"),
     ("A\nB\n", "dd", "N\nA\nB\n", "N\n\nB\n"),
+    (
+        "x 2026-09-01 A\n",
+        ":do 1<CR>",
+        "N\nx 2026-09-01 A\n",
+        "N\nx 2026-09-01 A\n says 2 is already done",
+    ),
+    (COPY, "yyjp", "Copy\nA +k\nB\n", "Copy\nA +k\n{P}B\n"),
+    (COPY, "yyjp", "N\nCopy\nA\nB\n", "N\nCopy\nA\n{P}B\n"),
+    (COPY, "yyjp", "Copy\nB\n", "Copy\n{P}B\n"),
+    ("A\n  \nB\n", ":del 2<CR>", "N\nA\n  \nB\n", "N\nA\n\nB\n"),
+    (
+        "|x 2026-09-01 Old\n",
+        "x",
+        "|x 2026-09-02 New\nx 2026-09-01 Old\n",
+        "Old\n|x 2026-09-02 New\n\n",
+    ),
+    (
+        "A\n|Rec rec:1w\n",
+        ":set auto_archive<CR>:do 1 done:1<CR>",
+        "A\n|N\nRec rec:1w\n",
+        "{D}A\n2026-09-29 Rec rec:1w due:2026-10-06 id:t001\n\
+         |N\n{D}Rec rec:1w\n",
+    ),
 ];
 
-/// A model on the file `shown`, with `outside` written and not read.
+/// A model on the files `shown`, with `outside` written and not read.
 fn ahead(shown: &str, outside: &str) -> (tempfile::TempDir, Model) {
-    let dir = workdir(latin(shown));
-    let model = model_of(dir.path(), alone());
-    fs::write(dir.path().join("todo.txt"), latin(outside))
-        .unwrap_or_else(|e| panic!("{e}"));
+    let dir = workdir("");
+    let write = |files: &str| {
+        let (todo, done) = files.split_once('|').unwrap_or((files, ""));
+        for (name, text) in [("todo.txt", todo), ("done.txt", done)] {
+            fs::write(dir.path().join(name), latin(text))
+                .unwrap_or_else(|e| panic!("{e}"));
+        }
+    };
+    write(shown);
+    let config = Config {
+        hidden_tasks: vec![Hidden::Later],
+        ..alone()
+    };
+    let model = model_of(dir.path(), config);
+    write(outside);
     (dir, model)
+}
+
+/// The two files, as a case writes them.
+fn files_of(dir: &tempfile::TempDir) -> Vec<u8> {
+    let read = |name| fs::read(dir.path().join(name)).unwrap_or_default();
+    let mut files = read("todo.txt");
+    let done = read("done.txt");
+    if !done.is_empty() {
+        files.push(b'|');
+        files.extend(done);
+    }
+    files
 }
 
 // A key aims from the list shown, whatever the files have become under the
@@ -325,10 +380,9 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
     for (shown, typed, outside, name) in REFUSED {
         let (dir, mut model) = ahead(shown, outside);
         keys(&mut model, typed);
-        let file = fs::read(dir.path().join("todo.txt")).unwrap_or_default();
-        assert_eq!(file, latin(outside), "{name}");
-        assert_eq!(model.tone, Tone::Alert, "{name}");
-        assert_eq!(model.message.as_deref(), Some(LIST_CHANGED), "{name}");
+        assert_eq!(files_of(&dir), latin(outside), "{name}");
+        let said = (model.tone, model.message.as_deref());
+        assert_eq!(said, (Tone::Alert, Some(LIST_CHANGED)), "{name}");
         assert_eq!(model.hist.undo.len(), 0, "{name}");
         assert!(model.reload_owed().is_some(), "{name}: read again");
         let panel = typed.contains("<C-w>2");
@@ -337,10 +391,20 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
     for (shown, typed, outside, want) in WRITTEN {
         let (dir, mut model) = ahead(shown, outside);
         keys(&mut model, typed);
-        let file = fs::read(dir.path().join("todo.txt")).unwrap_or_default();
-        let want = latin(&want.replace("{D}", "x 2026-09-29 "));
-        assert_eq!(file, want, "{typed} {outside}");
+        let (want, says) = want.split_once(" says ").unwrap_or((want, ""));
+        let said = model.message.as_deref().unwrap_or_default();
+        assert!(said.contains(says), "{typed} {outside}: {said}");
+        assert_eq!(files_of(&dir), left(want), "{typed} {outside}");
     }
+}
+
+/// The bytes a row of the written table leaves.
+fn left(want: &str) -> Vec<u8> {
+    latin(
+        &want
+            .replace("{D}", "x 2026-09-29 ")
+            .replace("{P}", "2026-09-29 Copy id:t001\n"),
+    )
 }
 
 /// The bytes of `text`, each `char` one byte, as a file that is not UTF-8 has.
@@ -348,27 +412,6 @@ fn latin(text: &str) -> Vec<u8> {
     text.chars()
         .map(|c| u8::try_from(c as u32).unwrap_or(b'?'))
         .collect()
-}
-
-// A paste takes the task under the cursor as a position only, and goes
-// whatever that task has become.
-#[test]
-fn a_paste_goes_beside_a_line_that_changed() {
-    for (outside, want) in [
-        ("Copy\nA +k\nB\n", "Copy\nA +k\nNew\nB\n"),
-        ("N\nCopy\nA\nB\n", "N\nCopy\nA\nNew\nB\n"),
-        ("Copy\nB\n", "Copy\nNew\nB\n"),
-    ] {
-        let dir = workdir("Copy\nA\nB\n");
-        let path = dir.path().join("todo.txt");
-        let mut model = model_of(dir.path(), alone());
-        press(&mut model, "yyj");
-        fs::write(&path, outside).unwrap_or_else(|e| panic!("{e}"));
-        press(&mut model, "p");
-        let file = fs::read_to_string(&path).unwrap_or_default();
-        let pasted = "2026-09-29 Copy id:t001";
-        assert_eq!(file.replace(pasted, "New"), want);
-    }
 }
 
 #[test]

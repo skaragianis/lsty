@@ -15,16 +15,25 @@ where
     A: AsRef<[u8]>,
     B: AsRef<[u8]>,
 {
+    let (mut mapping, taken) = common(old, new);
+    follow_unique(old, new, &mut mapping, &taken);
+    mapping
+}
+
+/// The lines the two hold in common, in order: each line of `old` to its
+/// place in `new`, and which places of `new` are so taken.
+fn common<A, B>(old: &[A], new: &[B]) -> (Vec<Option<usize>>, Vec<bool>)
+where
+    A: AsRef<[u8]>,
+    B: AsRef<[u8]>,
+{
     let mut mapping = vec![None; old.len()];
     let mut taken = vec![false; new.len()];
-
     for (i, j) in common_pairs(old, new) {
         mapping[i] = Some(j);
         taken[j] = true;
     }
-
-    follow_unique(old, new, &mut mapping, &taken);
-    mapping
+    (mapping, taken)
 }
 
 /// Reports where line `i` of `old` is in `new`.
@@ -52,12 +61,7 @@ where
     A: AsRef<[u8]>,
     B: AsRef<[u8]>,
 {
-    let mut mapping = vec![None; old.len()];
-    let mut taken = vec![false; new.len()];
-    for (i, j) in common_pairs(old, new) {
-        mapping[i] = Some(j);
-        taken[j] = true;
-    }
+    let (mut mapping, taken) = common(old, new);
     let went: HashSet<&[u8]> = old
         .iter()
         .zip(&mapping)

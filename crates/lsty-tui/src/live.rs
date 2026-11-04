@@ -413,9 +413,13 @@ impl Model {
     /// The lines the keys typed so far are about, when any wait for more.
     fn typed_lines(&self) -> Option<Vec<Place>> {
         let matcher = self.matchers.get(&self.key_mode())?;
-        (self.edit.is_none() && matcher.waits()).then(|| {
-            places(&self.snap, &ids_of(self.rows_of(matcher.count())))
-        })
+        (self.edit.is_none() && matcher.waits())
+            .then(|| self.lines_under(matcher.count()))
+    }
+
+    /// The lines of the `count` rows from the cursor.
+    fn lines_under(&self, count: usize) -> Vec<Place> {
+        places(&self.snap, &ids_of(self.rows_of(count)))
     }
 
     /// Notes that the keys typed from `old` are no longer about the same
@@ -426,14 +430,12 @@ impl Model {
             return;
         };
         let landing = Landing::of(old, &self.snap);
-        let count = self.typed_count();
-        let now = places(&self.snap, &ids_of(self.rows_of(count)));
-        let same = typed.len() == now.len()
-            && typed.iter().zip(&now).all(|(was, is)| {
-                was.0 == is.0
-                    && landing.line(was.0, was.1.index()) == Some(is.1.index())
-            });
-        self.keys_lost |= !same;
+        let now = self.lines_under(self.typed_count());
+        let landed = typed.iter().map(|at| {
+            landing.line(at.0, at.1.index()).map(|index| (at.0, index))
+        });
+        let drawn = now.iter().map(|at| Some((at.0, at.1.index())));
+        self.keys_lost |= !landed.eq(drawn);
     }
 
     /// Where a write sends the cursor, when it takes it off its task. It
