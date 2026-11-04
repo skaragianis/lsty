@@ -63,11 +63,13 @@ fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
         config.no_config,
         &config.leader,
     );
+    let profile = Profile::detect(&text("TERM"), &text("COLORTERM"));
     let (theme, more) = theme::load(
         &config.theme,
         &paths.themes_dir,
         &process.cwd,
         config.no_config,
+        profile,
     );
     warnings.extend(more);
     let clipboard = Box::new(clipboard(&config));
@@ -76,7 +78,7 @@ fn inputs(args: TuiArgs, process: &Process) -> Result<(Start, Deps), Error> {
         config,
         keys: keymap,
         theme,
-        profile: Profile::detect(&text("TERM"), &text("COLORTERM")),
+        profile,
         ids: Box::new(OsIds),
         clipboard,
         now: clock(process)?,

@@ -28,9 +28,15 @@ pub use style::{Colour, Style};
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Theme {
     styles: [Style; Slot::ALL.len()],
+    from_file: bool,
 }
 
 impl Theme {
+    /// Whether a file in the themes folder sets it.
+    pub fn from_file(&self) -> bool {
+        self.from_file
+    }
+
     /// How `slot` looks.
     pub fn style(&self, slot: Slot) -> Style {
         self.styles[slot.index()]

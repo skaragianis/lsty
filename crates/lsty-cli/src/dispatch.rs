@@ -302,6 +302,7 @@ impl<'a> Session<'a> {
             &paths.themes_dir,
             &self.env.cwd,
             self.has(Opt::NoConfig),
+            self.profile(),
         )
     }
 

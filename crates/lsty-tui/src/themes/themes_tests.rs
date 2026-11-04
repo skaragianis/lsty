@@ -1,6 +1,9 @@
 use std::fs;
 
-use lsty_core::{config::Config, theme::Slot};
+use lsty_core::{
+    config::Config,
+    theme::{Profile, Slot},
+};
 use ratatui::{buffer::Buffer, layout::Rect};
 
 use super::{Unset, with_theme, write_theme};
@@ -195,7 +198,8 @@ fn a_cancelled_filter_goes_back_to_the_one_before() {
 fn loaded(model: &Model, name: &str) -> lsty_core::theme::Theme {
     let deps = &model.deps;
     let no_config = deps.config.no_config;
-    lsty_core::theme::load(name, &deps.themes, &deps.cwd, no_config).0
+    let profile = deps.profile;
+    lsty_core::theme::load(name, &deps.themes, &deps.cwd, no_config, profile).0
 }
 
 /// Opens the `:` line on `:theme ` and steps to the first name.
@@ -405,4 +409,69 @@ fn the_filter_keeps_the_selected_name_and_shows_a_range_only_when_cut() {
         foot,
         "│                └ /  8-12 of 14 ─────────┘                │"
     );
+}
+
+/// A model at `profile` with the theme file `mine`, 60 wide.
+fn with_mine(profile: Profile) -> (tempfile::TempDir, Model) {
+    let dir = workdir(SAMPLE);
+    let themes = dir.path().join("themes");
+    fs::create_dir(&themes).unwrap_or_else(|e| panic!("{e}"));
+    fs::write(themes.join("mine.toml"), "").unwrap_or_else(|e| panic!("{e}"));
+    let mut model = started(Deps {
+        profile,
+        ..deps(dir.path(), alone())
+    });
+    model.update(Msg::Resize(60, 24));
+    (dir, model)
+}
+
+/// The popup's top row.
+fn title(model: &Model) -> String {
+    let at = model.themes_box().map_or(0, |r| r.y);
+    screen(model, 60, 24)[usize::from(at)].clone()
+}
+
+const ALIKE_TITLE: &str = "┌ built-in themes look alike at 16 colours ┐";
+
+#[test]
+fn the_popup_says_at_16_colours_that_the_built_in_themes_look_alike() {
+    let (_dir, mut model) = with_mine(Profile::Ansi);
+    open(&mut model);
+    assert!(title(&model).contains(ALIKE_TITLE), "{}", title(&model));
+    keys(&mut model, "jkj/mine<CR>");
+    assert!(model.deps.theme.from_file());
+    assert!(title(&model).contains(ALIKE_TITLE), "{}", title(&model));
+}
+
+#[test]
+fn the_popup_keeps_its_title_above_16_colours() {
+    for profile in [Profile::Ansi256, Profile::TrueColor] {
+        let (_dir, mut model) = with_mine(profile);
+        open(&mut model);
+        assert!(title(&model).contains("┌ Theme ─"), "{}", title(&model));
+    }
+}
+
+#[test]
+fn the_title_is_cut_to_a_narrow_popup() {
+    let (_dir, mut model) = with_mine(Profile::Ansi);
+    model.update(Msg::Resize(30, 24));
+    open(&mut model);
+    let at = model.themes_box().map_or(0, |r| r.y);
+    let row = screen(&model, 30, 24)[usize::from(at)].clone();
+    assert_eq!(row, "┌ built-in themes look alike…┐");
+}
+
+#[test]
+fn naming_a_theme_at_16_colours_says_when_the_look_stays() {
+    let says = |profile, line: &str| {
+        let (_dir, mut model) = with_mine(profile);
+        press(&mut model, line);
+        keys(&mut model, "<CR>");
+        model.message.clone()
+    };
+    let alike = Some("built-in themes look alike at 16 colours".to_owned());
+    assert_eq!(says(Profile::Ansi, ":theme nord"), alike);
+    assert_eq!(says(Profile::Ansi, ":theme mine"), None);
+    assert_eq!(says(Profile::Ansi256, ":theme nord"), None);
 }

@@ -376,6 +376,17 @@ fn the_output_leaves_a_margin_and_the_help_a_wider_one() {
 }
 
 #[test]
+fn a_title_wider_than_the_output_is_cut_and_keeps_its_corner() {
+    let dir = workdir("A\n");
+    let mut model = started(deps(dir.path(), alone()));
+    model.update(Msg::Resize(20, 24));
+    model.open_output(&"x".repeat(40), &[b"line".to_vec()]);
+    let at = model.output_rect().map_or(0, |r| r.y);
+    let row = screen(&model, 20, 24)[usize::from(at)].clone();
+    assert!(row.contains("┌ xxxxxxxxxxxxxxxx…┐"), "{row}");
+}
+
+#[test]
 fn the_cursor_of_the_help_filter_is_in_the_prompt_of_the_popup() {
     let dir = workdir("A\n");
     let mut model = started(deps(dir.path(), alone()));

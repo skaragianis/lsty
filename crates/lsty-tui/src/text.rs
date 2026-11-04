@@ -207,18 +207,18 @@ pub(crate) fn width_of(text: &str) -> usize {
     width(&[Span::new(text, None)])
 }
 
-/// `left`, `title`, dashes up to `w` cells, `right`, in three spans: the
+/// `left`, `title` cut to what fits, dashes up to `w` cells, `right`: the
 /// title has its own slot, the corners and dashes have `line`.
-pub(crate) fn titled_spans(
-    (left, title, right): (&str, &str, &str),
+pub(crate) fn titled_spans<'a>(
+    (left, title, right): (&str, &'a str, &str),
     w: usize,
     (line, title_slot): (Option<Slot>, Option<Slot>),
-) -> Vec<Span<'static>> {
-    let used = width_of(left) + width_of(right) + width_of(title);
-    let rest = format!("{}{right}", RULE.repeat(w.saturating_sub(used)));
-    vec![
-        Span::new(left.to_owned(), line),
-        Span::new(title.to_owned(), title_slot),
-        Span::new(rest, line),
-    ]
+) -> Vec<Span<'a>> {
+    let room = w.saturating_sub(width_of(left) + width_of(right));
+    let title = fit(vec![Span::new(title, title_slot)], room);
+    let rest = RULE.repeat(room.saturating_sub(width(&title)));
+    let mut spans = vec![Span::new(left.to_owned(), line)];
+    spans.extend(title);
+    spans.push(Span::new(format!("{rest}{right}"), line));
+    spans
 }

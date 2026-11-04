@@ -1,6 +1,7 @@
 //! `:theme` without a name: a popup of the themes. The one selected is
 //! shown at once; the one chosen is saved to the config file, and
-//! closing the popup brings back the theme it opened over.
+//! closing the popup brings back the theme it opened over. At 16 colours
+//! the built-in themes look the same, and the popup's title says so.
 
 use std::{fs, io, path::Path};
 
@@ -8,7 +9,7 @@ use lsty_core::{
     case::lower,
     errs::lossy_path,
     keys::{Action, Fed, Mode, Outcome},
-    theme::{self, Slot, Theme},
+    theme::{self, Profile, Slot, Theme},
 };
 use ratatui::{buffer::Buffer, layout::Rect};
 use toml::de::{DeTable, DeValue};
@@ -28,6 +29,9 @@ use crate::{
 };
 
 const TITLE: &str = " Theme ";
+/// The title at 16 colours, so that nobody has to find out by trying, and
+/// what `:theme NAME` says there. Status line messages go with the next key.
+const ALIKE: &str = " built-in themes look alike at 16 colours ";
 /// How many themes show at once.
 const ROWS: usize = 5;
 /// The least width inside the borders.
@@ -169,11 +173,29 @@ impl Model {
     /// Shows theme `name` at once, with the first warning its file gave.
     pub(crate) fn show_theme(&mut self, name: &str) {
         let (themes, cwd) = (&self.deps.themes, &self.deps.cwd);
-        let no_config = self.deps.config.no_config;
-        let (theme, warnings) = theme::load(name, themes, cwd, no_config);
+        let (no_config, profile) =
+            (self.deps.config.no_config, self.deps.profile);
+        let (theme, warnings) =
+            theme::load(name, themes, cwd, no_config, profile);
         self.use_theme(theme);
         if let Some(w) = warnings.first() {
             self.message = Some(format!("{}: {}", w.source, w.message));
+        }
+    }
+
+    /// Says so when `:theme NAME` chose a built-in at 16 colours.
+    pub(crate) fn say_alike(&mut self) {
+        if self.deps.profile == Profile::Ansi && !self.deps.theme.from_file() {
+            self.message = Some(ALIKE.trim().to_owned());
+        }
+    }
+
+    /// The popup's title.
+    fn themes_title(&self) -> &'static str {
+        if self.deps.profile == Profile::Ansi {
+            ALIKE
+        } else {
+            TITLE
         }
     }
 
@@ -338,7 +360,8 @@ impl Model {
     fn themes_box(&self) -> Option<Rect> {
         let picker = self.choosing.as_ref()?;
         let pane = self.panes(self.dims()).list;
-        let w = cells(picker.inner() + BORDER).min(pane.width);
+        let inner = picker.inner().max(width_of(self.themes_title()));
+        let w = cells(inner + BORDER).min(pane.width);
         let h = cells(picker.wanted() + BORDER).min(pane.height);
         Some(Rect::new(
             pane.x + (pane.width - w) / 2,
@@ -369,7 +392,8 @@ impl Model {
             window(picker.top, picker.at, picker.shown.len(), rows.max(1));
         let slot = Some(self.edge(&[self.focus]));
         let text = Some(self.title_slot(self.focus));
-        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, text));
+        let title = self.themes_title();
+        let top = titled_spans(("┌", title, "┐"), w, (slot, text));
         self.put_at(buf, (at.x, at.y), w, &top);
         for i in 0..rows {
             let entry = first + i;
@@ -391,8 +415,7 @@ impl Model {
                 buf.set_style(cells, self.styles.fill(Slot::Selection));
             }
         }
-        let foot = fit(vec![Span::new(picker.foot(rows, first), None)], inner);
-        let foot: String = foot.iter().map(|s| s.text.as_ref()).collect();
+        let foot = picker.foot(rows, first);
         let bottom = titled_spans(("└", &foot, "┘"), w, (slot, text));
         let y = at.y + at.height.saturating_sub(1);
         self.put_at(buf, (at.x, y), w, &bottom);

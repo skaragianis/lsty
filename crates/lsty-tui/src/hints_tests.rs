@@ -3,11 +3,12 @@ use std::{collections::BTreeMap, fs};
 use lsty_core::{
     config::{Config, Hidden},
     keys::{Action, Mode},
-    theme::Slot,
+    theme::{self, Profile, Slot},
 };
 use ratatui::{
     buffer::{Buffer, Cell},
     layout::Rect,
+    style::{Color, Modifier},
 };
 use tempfile::TempDir;
 
@@ -178,6 +179,35 @@ fn shown_dim(model: &Model, width: u16) -> String {
     });
     let text: String = cells.collect();
     text.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+/// At 16 colours a lit hint and a dim one differ by attribute alone, in the
+/// terminal's own text colour, whatever the theme: on a done task `x` is
+/// lit, `T` dim.
+#[test]
+fn hints_at_16_colours_read_lit_and_dim_in_a_theme_that_lost_them() {
+    for name in [theme::DEFAULT_NAME, "tokyo-night-storm"] {
+        let dir = workdir("x 2026-09-01 A\n");
+        let mut with = deps(dir.path(), alone());
+        with.profile = Profile::Ansi;
+        let mut model = started(with);
+        model.show_theme(name);
+        let mut buf = Buffer::empty(Rect::new(0, 0, 80, 1));
+        model.draw_status(&mut buf, (80, 0));
+        let row: String = buf.content.iter().map(Cell::symbol).collect();
+        let cell = |text: &str, at: usize| {
+            let found = row.find(text).unwrap_or_else(|| panic!("{row}"));
+            let found = &buf.content[found + at];
+            (found.fg, found.bg, found.modifier)
+        };
+        let look = |modifier| (Color::Reset, Color::Reset, modifier);
+        let (lit, plain, dim) =
+            (Modifier::BOLD, Modifier::empty(), Modifier::DIM);
+        assert_eq!(cell(" x ", 1), look(lit), "{name} lit key: {row}");
+        assert_eq!(cell(" x ", 3), look(plain), "{name} lit word: {row}");
+        assert_eq!(cell(" T ", 1), look(dim), "{name} dim key: {row}");
+        assert_eq!(cell(" T ", 3), look(dim), "{name} dim word: {row}");
+    }
 }
 
 /// A model of `todo` and `done`, with `[hints]` of `mode` and `keys.toml`,

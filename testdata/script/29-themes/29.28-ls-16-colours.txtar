@@ -1,0 +1,16 @@
+# At 16 colours a built-in theme draws in the terminal's own colours.
+env TERM=xterm
+env COLORTERM=
+mkdir home/.config/lsty
+cp config.toml home/.config/lsty/config.toml
+mkdir .git
+exec lsty ls --color=always
+cmp stdout want
+
+-- config.toml --
+theme = "tokyo-night-storm"
+-- todo.txt --
+(A) Call +work @phone
+-- want --
+[2m1[m [1;91m(A)[m Call [35m+work[m [36m@phone[m
+[2m-- 1 of 1 shown[m
