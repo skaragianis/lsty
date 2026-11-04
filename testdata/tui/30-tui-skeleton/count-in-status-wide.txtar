@@ -32,4 +32,4 @@ Other
 │ [x] Done    ││ state  todo                                                                       │
 │ [ ] Later   ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL 23  todo.txt  manual  <Esc> cancel  <CR> link  <Tab> projects  x done  dd delete      9.9.9
+ NORMAL 23  todo.txt  manual  <Esc> cancel  x done  <CR> link  <Tab> projects  dd delete      9.9.9

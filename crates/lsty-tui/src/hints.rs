@@ -55,9 +55,9 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
             Action::FocusNext,
         ],
         Mode::Detail => &[
+            Action::ToggleComplete,
             Action::OpenLink,
             Action::NextLink,
-            Action::ToggleComplete,
             Action::Delete,
             Action::FocusList,
         ],
