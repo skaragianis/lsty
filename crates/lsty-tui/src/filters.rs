@@ -5,6 +5,7 @@ use std::time::Duration;
 use lsty_core::{
     config::{Config, Warning},
     errs::quote,
+    keys::Action,
     query::Query,
 };
 
@@ -118,9 +119,6 @@ impl Model {
         let Some(entry) = panel.entries.get(panel.cursor) else {
             return;
         };
-        if entry.is_rule() {
-            return;
-        }
         if let Some(what) = entry.toggles() {
             self.shows.flip(what);
         } else {
@@ -140,17 +138,15 @@ impl Model {
     /// `clear_filters`: deselects every selected project and context and
     /// the selected filter; the search and the switches stay.
     pub(crate) fn clear_filters(&mut self) {
-        let was = self.panels.iter().any(|p| !p.active.is_empty());
+        if self.refused(Action::ClearFilters, 1) {
+            return;
+        }
         self.taken = Default::default();
         for panel in &mut self.panels {
             panel.active.clear();
         }
-        self.message = Some(if was {
-            self.refresh();
-            "filters cleared".to_owned()
-        } else {
-            "no filters to clear".to_owned()
-        });
+        self.refresh();
+        self.message = Some("filters cleared".to_owned());
     }
 
     /// Lists the rows again for the panel steps that wait for it.

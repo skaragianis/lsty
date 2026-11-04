@@ -326,6 +326,17 @@ fn clearing_after_gc_takes_nothing_back() {
     assert_eq!(model.search, "");
     assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
     assert_eq!(model.panels[CONTEXTS].active, []);
+
+    // With no filter on, `gc` only says so: what the search moved comes back.
+    let (_dir, mut model) = home_and_phone();
+    model.panels[CONTEXTS].active.clear();
+    keys(&mut model, "/+work<CR>");
+    let moved = std::mem::take(&mut model.panels[PROJECTS].active);
+    keys(&mut model, "gc");
+    assert_eq!(model.message.as_deref(), Some("no filters to clear"));
+    model.panels[PROJECTS].active = moved;
+    keys(&mut model, "<Esc>");
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("home")]);
 }
 
 #[test]

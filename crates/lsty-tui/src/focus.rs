@@ -99,28 +99,40 @@ impl Model {
         match action {
             Action::FocusNext => self.ring_step(false),
             Action::FocusPrev => self.ring_step(true),
+            other => {
+                if let Some(to) = self.focus_after(other) {
+                    self.set_focus(to);
+                }
+            }
+        }
+    }
+
+    /// Where a focus action other than Tab's moves the focus, when it does.
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "only the focus actions get here"
+    )]
+    pub(crate) fn focus_after(&self, action: Action) -> Option<Focus> {
+        let to = match action {
             Action::FocusLeft
                 if self.focus == Focus::Detail && !self.detail_below() =>
             {
-                self.set_focus(Focus::List);
+                Focus::List
             }
-            Action::FocusLeft => self.set_focus(self.last),
+            Action::FocusLeft => self.last,
             Action::FocusRight if self.focus == Focus::List => {
-                if !self.detail_below() {
-                    self.set_focus(Focus::Detail);
-                }
+                (!self.detail_below()).then_some(Focus::Detail)?
             }
-            Action::FocusList | Action::FocusRight => {
-                self.set_focus(Focus::List);
-            }
-            Action::FocusDetail => self.set_focus(Focus::Detail),
-            Action::FocusDown => self.step_focus(true),
-            Action::FocusUp => self.step_focus(false),
-            Action::FocusProjects => self.set_focus(Focus::Projects),
-            Action::FocusContexts => self.set_focus(Focus::Contexts),
-            Action::FocusFilters => self.set_focus(Focus::Filters),
-            _ => {}
-        }
+            Action::FocusList | Action::FocusRight => Focus::List,
+            Action::FocusDetail => Focus::Detail,
+            Action::FocusDown => self.step_focus(true)?,
+            Action::FocusUp => self.step_focus(false)?,
+            Action::FocusProjects => Focus::Projects,
+            Action::FocusContexts => Focus::Contexts,
+            Action::FocusFilters => Focus::Filters,
+            _ => return None,
+        };
+        self.can_focus(to).then_some(to)
     }
 
     /// Moves to the next or previous place of the ring that Tab walks,
@@ -146,26 +158,28 @@ impl Model {
         self.geometry(self.dims()).below
     }
 
-    /// Moves to the next or previous panel of the sidebar, within it; between
-    /// the list and a detail panel under it.
-    fn step_focus(&mut self, down: bool) {
+    /// The next or previous panel of the sidebar, within it; between the
+    /// list and a detail panel under it.
+    fn step_focus(&self, down: bool) -> Option<Focus> {
         let Some(panel) = self.focus.panel() else {
             let to = if down { Focus::Detail } else { Focus::List };
-            if self.detail_below() {
-                self.set_focus(to);
-            }
-            return;
+            return self.detail_below().then_some(to);
         };
         let to = if down {
             (panel + 1).min(FILTERS)
         } else {
             panel.saturating_sub(1)
         };
-        self.set_focus(Focus::of_panel(to));
+        Some(Focus::of_panel(to))
+    }
+
+    /// Whether the focus can go to `to`: elsewhere, and where it shows.
+    fn can_focus(&self, to: Focus) -> bool {
+        to != self.focus && (to != Focus::Detail || self.detail_shown())
     }
 
     pub(crate) fn set_focus(&mut self, to: Focus) {
-        if to == self.focus || (to == Focus::Detail && !self.detail_shown()) {
+        if !self.can_focus(to) {
             return;
         }
         match to {
