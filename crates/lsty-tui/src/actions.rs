@@ -68,7 +68,7 @@ impl Model {
             Some(Ok(true)) => {
                 answer = decide(action, self, &self.summary(count));
                 if !dim(answer) || (had && self.rows.is_empty()) {
-                    self.message = Some(ops::LIST_CHANGED.to_owned());
+                    self.alert(ops::LIST_CHANGED.to_owned());
                     return false;
                 }
             }

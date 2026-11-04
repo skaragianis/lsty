@@ -7,7 +7,7 @@ pub const LIST_CHANGED: &str = "the list changed — look again";
 
 /// The lines of one reading as they stand in a later one, file by file.
 /// An unchanged file costs a comparison, and maps nothing.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Landing {
     todo: Option<Vec<Option<usize>>>,
     done: Option<Vec<Option<usize>>>,
