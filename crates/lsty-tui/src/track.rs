@@ -190,6 +190,18 @@ impl Remap {
         (!gone && (followed || free)).then_some(now)
     }
 
+    /// The place of `at` now when the reading can say it is the same line:
+    /// it was followed, or it is the first of the lines that changed where
+    /// it stood.
+    pub(crate) fn stays(&self, at: Place) -> Option<Place> {
+        let plain = &self.of(at.0).plain;
+        let first = at.1.index().checked_sub(1).is_none_or(|before| {
+            plain.get(before).is_some_and(Option::is_some)
+        });
+        self.track(at)
+            .filter(|_| first || self.followed(at).is_some())
+    }
+
     /// Where the line at `at` of the record's `pre` stood in the old
     /// reading, `None` when the reading did not have it.
     pub(crate) fn shown(&self, at: Place) -> Option<Place> {

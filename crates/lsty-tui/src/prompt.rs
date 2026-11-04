@@ -206,7 +206,7 @@ impl Model {
     }
 
     /// Follows the lines of the prompt's tasks to a new reading; those
-    /// that are gone are left out.
+    /// that are gone, or that it cannot tell, are left out.
     pub(crate) fn remap_prompt(&mut self, moved: &Remap) {
         if let Some(Line {
             kind: LineKind::Tasks(prompt),
@@ -216,7 +216,7 @@ impl Model {
             prompt.places = prompt
                 .places
                 .iter()
-                .filter_map(|at| moved.track(*at))
+                .filter_map(|at| moved.stays(*at))
                 .collect();
         }
     }
