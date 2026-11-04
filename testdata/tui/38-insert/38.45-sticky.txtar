@@ -1,6 +1,7 @@
 size 100 10
 start
 keys <Tab> j x <CR>
+tick 50ms
 keys c c
 type Sell
 keys <End> <C-w>

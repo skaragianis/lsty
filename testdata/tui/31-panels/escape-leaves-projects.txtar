@@ -3,6 +3,7 @@ start
 keys <C-w>3 j j x
 frame in-panel
 keys <Esc>
+tick 50ms
 frame in-list
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29

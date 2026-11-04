@@ -1,7 +1,9 @@
 size 100 10
 start
 keys <Tab> j x <CR>
+tick 50ms
 keys <Tab> <Tab> j x <CR>
+tick 50ms
 frame a-frame
 keys o
 frame b-frame

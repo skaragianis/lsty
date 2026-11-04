@@ -1,6 +1,7 @@
 size 130 30
 start
 click 3 2
+tick 50ms
 keys j
 frame frame
 bg frame-bg

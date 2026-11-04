@@ -216,7 +216,7 @@ enum Step {
     Stop,
 }
 
-fn event_loop(
+pub(crate) fn event_loop(
     model: &mut Model,
     screen: &mut impl Screen,
     tx: &Sender<Event>,
@@ -232,8 +232,14 @@ fn event_loop(
             return Ok(());
         }
         // Input that arrived together (a focus report and the click after
-        // it) is all handled before the screen shows any of it.
-        let step = if let Ok(event) = rx.try_recv() {
+        // it) is all handled before the screen shows any of it. A list that
+        // changed by itself is shown before input can read it.
+        let queued = if model.unseen {
+            None
+        } else {
+            rx.try_recv().ok()
+        };
+        let step = if let Some(event) = queued {
             handle(model, event)?
         } else {
             screen.draw(model)?;

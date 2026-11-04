@@ -90,6 +90,8 @@ pub(crate) struct Model {
     said: u64,
     /// The list that a panel key changed and that is not yet refiltered.
     pub(crate) refilter: Refilter,
+    /// The list changed by itself and the screen has not shown it yet.
+    pub(crate) unseen: bool,
     /// What the writes of this session did, oldest first.
     pub(crate) hist: History,
     /// The last change, for `.`.
@@ -207,6 +209,7 @@ impl Model {
             message: None,
             said: 0,
             refilter: Refilter::default(),
+            unseen: false,
             tone: Tone::Notice,
             hist: History::default(),
             again: None,
@@ -265,10 +268,8 @@ impl Model {
             Msg::Key(_) | Msg::Mouse(_) | Msg::Paste(_) | Msg::Edited(_)
         );
         let (said, before) = (self.said, self.message.clone());
-        if input {
-            self.catch_up_day();
-            self.sticky.age();
-        }
+        let typing = input && self.before_input();
+        self.unseen = msg.changes_the_list();
         if matches!(msg, Msg::Key(_)) {
             self.pointer.let_go();
             self.leave_sticky(self.cursor_place());
@@ -276,8 +277,8 @@ impl Model {
         let step = self.refilter.serial;
         let mut cmds = self.dispatch(msg);
         cmds.extend(self.refilter.timer(step));
-        if input && !self.pointer.pressed() {
-            self.leave_sticky(None);
+        if input {
+            self.after_input(typing);
         }
         self.drop_peek();
         if self.message.is_some()
@@ -289,6 +290,28 @@ impl Model {
             }
         }
         cmds
+    }
+
+    /// What comes before a key or a gesture acts. What is typed into a field
+    /// or a line reads the new day; a key on the list reads the rows as drawn,
+    /// and the new day follows it. Tells which it was.
+    fn before_input(&mut self) -> bool {
+        let typing = self.edit.is_some() || self.line.is_some();
+        if typing {
+            self.catch_up_day();
+        }
+        self.sticky.age();
+        typing
+    }
+
+    /// What follows a key or a gesture, once it has acted.
+    fn after_input(&mut self, typing: bool) {
+        if !typing {
+            self.catch_up_day();
+        }
+        if !self.pointer.pressed() {
+            self.leave_sticky(None);
+        }
     }
 
     /// Clears the message line before a key or a gesture acts.
@@ -404,15 +427,6 @@ impl Model {
                     }
             )
         });
-        if !matches!(
-            fed.outcome,
-            Outcome::Matched {
-                action: Action::ToggleEntry,
-                ..
-            }
-        ) {
-            self.flush_refilter();
-        }
         let on_view = matches!(fed.outcome, Outcome::Matched { action, .. }
             if Step::of(action, 0, 0).is_some_and(Step::works_on_view));
         if !on_view {
@@ -647,6 +661,8 @@ impl Model {
         let (found, todo, done) = old.into_files();
         self.snap = Snapshot::build(found, todo, done, &params);
         self.clock = clock;
+        let keep = self.under_way();
+        self.sticky.hold_too(&keep);
         self.rebuild();
     }
 

@@ -1,18 +1,24 @@
+use std::{cell::Cell, rc::Rc};
+
 use lsty_core::{
     config::{Config, Filter, Hidden},
     keys::{Action, Mods, Named, Stroke},
 };
+use ratatui::layout::Position;
+use tempfile::TempDir;
 
 use crate::{
     connective::{Conn, Term},
     field::Field,
     filters::catalog,
+    hit::Kind,
     model::Model,
-    msg::Msg,
+    msg::{Button, Gesture, Mouse, Msg},
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
     test_util::{
-        alone, deps, keys, plain, press, refiltering, reload, screen, settled,
-        started, workdir, workdir_model,
+        NOW, alone, cursor_text, deps, instant, keys, plain, press,
+        refiltering, reload, screen, settled, started, todo_of, workdir,
+        workdir_model,
     },
 };
 
@@ -272,7 +278,7 @@ fn a_recalled_search_moves_its_names_again() {
 }
 
 /// A list where the projects hold `+home` and the contexts `@phone`.
-fn home_and_phone() -> (tempfile::TempDir, Model) {
+fn home_and_phone() -> (TempDir, Model) {
     let (dir, mut model) = workdir_model(LIST, alone());
     model.panels[PROJECTS].active = vec![Term::and("home")];
     model.panels[CONTEXTS].active = vec![Term::and("phone")];
@@ -681,16 +687,145 @@ fn the_list_follows_the_last_of_several_panel_steps() {
     assert!(!model.refilter.owed);
 }
 
+// Any other key leaves the rows as drawn for the timer.
 #[test]
-fn any_other_key_refilters_first() {
-    let (_dir, mut model) = workdir_model(SPREAD, plain());
-    keys(&mut model, "<C-w>4x");
-    assert_eq!(nrs(&model), [1, 2, 3, 4, 5]);
-    keys(&mut model, "<CR>");
-    assert_eq!(nrs(&model), [1, 3]);
-    keys(&mut model, "<C-w>4x");
-    keys(&mut model, "/");
-    assert_eq!(nrs(&model), [2, 4, 5]);
+fn only_the_timer_refilters() {
+    for key in ["<CR>", "/", "j", "2", "d"] {
+        let (_dir, mut model) = workdir_model(SPREAD, plain());
+        let step = keys(&mut model, "<C-w>4x");
+        keys(&mut model, key);
+        assert_eq!(nrs(&model), [1, 2, 3, 4, 5], "{key}");
+        model.update(refiltering(&step).unwrap_or_else(|| panic!("no timer")));
+        assert_eq!(nrs(&model).len(), 2, "{key}");
+    }
+}
+
+const HIDING: &str = "Alpha +keep\nBravo +gone dep:z\nFree +keep\n\
+    Charlie +gone\nDelta +keep\nEcho +keep\nZed +gone id:z\n";
+
+/// The cursor goes by `to`, a click on the `+keep` entry leaves it to show,
+/// and `gap` comes before its timer, `then` after it.
+fn across_a_refilter(to: &str, gap: &str, then: &str) -> (TempDir, Model) {
+    let config = Config {
+        show_sidebar: true,
+        ..plain()
+    };
+    let (dir, mut model) = workdir_model(HIDING, config);
+    model.update(Msg::Resize(100, 30));
+    let some = |model: &mut Model, notation: &str| {
+        if !notation.is_empty() {
+            keys(model, notation);
+        }
+    };
+    some(&mut model, to);
+    let at = (0..30)
+        .map(|y| Position::new(3, y))
+        .filter(|&at| model.hit(at).kind == Kind::Entry)
+        .nth(1)
+        .unwrap_or_default();
+    let mut click = |gesture| {
+        model.update(Msg::Mouse(Mouse {
+            gesture,
+            at,
+            shift: false,
+        }))
+    };
+    click(Gesture::Down(Button::Left));
+    let timer = refiltering(&click(Gesture::Up));
+    some(&mut model, gap);
+    model.update(timer.unwrap_or_else(|| panic!("no timer")));
+    some(&mut model, then);
+    (dir, model)
+}
+
+// A key acts on the task drawn under the cursor when it was pressed: each
+// case names the tasks whose line the keys changed. What goes on past the
+// timer stays with the row it started from.
+#[test]
+fn a_key_before_the_refilter_acts_on_the_rows_as_drawn() {
+    for (to, gap, then, want) in [
+        ("j", "x", "", ""),
+        ("jjj", "x", "", "Charlie"),
+        ("jjj", "dd", "", "Charlie"),
+        ("jjj", "t", "", "Charlie"),
+        ("jjj", "T", "", "Charlie"),
+        ("jjj", "+", "", "Charlie"),
+        ("jjj", "-", "", "Charlie"),
+        ("jjj", "gd", "fri<CR>", "Charlie"),
+        ("jjj", "a", "Z<CR>", "Charlie"),
+        ("jjj", "2x", "", "Charlie Delta"),
+        ("jjj", "2dd", "", "Charlie Delta"),
+        ("tjjj", ".", "", "Alpha Charlie"),
+        ("jjjv", "jx", "", "Charlie Delta"),
+        ("vjjj", "T", "", "Alpha Bravo Free Charlie"),
+        ("jjj", "d", "d", "Charlie"),
+        ("jjj", "2", "x", "Charlie Delta"),
+        ("jjj", "a", "Z<CR>", "Charlie"),
+        ("jjjv", "", "x", "Charlie"),
+        ("vjjj", "", "T", "Alpha Free Charlie"),
+    ] {
+        let (dir, _model) = across_a_refilter(to, gap, then);
+        let file = todo_of(dir.path());
+        let kept: Vec<&str> = file.lines().collect();
+        let changed = HIDING
+            .lines()
+            .filter(|line| !kept.contains(line))
+            .filter_map(|line| line.split(' ').next())
+            .collect::<Vec<_>>()
+            .join(" ");
+        assert_eq!(changed, want, "{to} {gap} {then}: {file}");
+    }
+}
+
+// A task moves past the row drawn beside it.
+#[test]
+fn a_move_before_the_refilter_goes_by_the_rows_as_drawn() {
+    for (key, want) in [
+        ("J", "Delta +keep\nCharlie +gone\n"),
+        ("K", "Charlie +gone\nFree +keep\n"),
+    ] {
+        let (dir, _model) = across_a_refilter("jjj", key, "");
+        assert!(todo_of(dir.path()).contains(want), "{key}");
+    }
+}
+
+// A motion counts from the row drawn, and the timer settles on the first
+// row at or after where it ended.
+#[test]
+fn a_motion_before_the_refilter_skips_no_task() {
+    for (to, key, want) in [
+        ("", "j", "Free +keep"),
+        ("j", "j", "Free +keep"),
+        ("jjj", "j", "Delta +keep"),
+        ("jjj", "k", "Free +keep"),
+        ("jjj", "2j", "Echo +keep"),
+    ] {
+        let (_dir, model) = across_a_refilter(to, key, "");
+        assert_eq!(cursor_text(&model), want, "{to} {key}");
+    }
+}
+
+// The first key after the day changed acts on the rows as drawn, and the
+// new day shows after it.
+#[test]
+fn a_key_on_a_new_day_acts_on_the_rows_as_drawn() {
+    for key in ["x", "dd"] {
+        let dir = workdir("Pay due:2026-09-29\nRent due:2026-09-30\n");
+        let now = Rc::new(Cell::new(instant(NOW)));
+        let mut d = deps(dir.path(), plain());
+        let clock = Rc::clone(&now);
+        d.now = Box::new(move || clock.get());
+        let mut model = started(d);
+        settled(&mut model, "<C-w>5jjjjx");
+        keys(&mut model, "<CR>");
+        assert_eq!(nrs(&model), [1]);
+        now.set(instant("2026-09-30T09:00:00Z"));
+        keys(&mut model, key);
+        let file = todo_of(dir.path());
+        assert!(!file.contains("\nPay"), "{key}: {file}");
+        assert!(!file.starts_with("Pay"), "{key}: {file}");
+        assert!(file.contains("Rent due:2026-09-30\n"), "{key}: {file}");
+    }
 }
 
 #[test]

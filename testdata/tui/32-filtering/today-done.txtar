@@ -3,6 +3,7 @@ start
 keys <C-w>5
 keys jjjj
 keys x <CR>
+tick 50ms
 frame shown
 keys <C-w>5
 keys kkkk

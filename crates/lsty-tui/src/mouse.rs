@@ -49,6 +49,11 @@ pub(crate) struct Pointer {
 }
 
 impl Pointer {
+    /// The row the button went down on.
+    pub(crate) fn anchor(&self) -> Option<Place> {
+        self.held.as_ref().and_then(|held| held.anchor)
+    }
+
     /// Whether a button is down: the rows stay until it is up.
     pub(crate) fn pressed(&self) -> bool {
         self.held.is_some()
@@ -71,13 +76,6 @@ impl Model {
         }
         if matches!(event.gesture, Gesture::Down(_)) {
             self.hist.stopped = None;
-        }
-        let click =
-            matches!(event.gesture, Gesture::Down(Button::Left) | Gesture::Up);
-        if !(click
-            && matches!(self.hit(event.at).kind, Kind::Entry | Kind::Toggle))
-        {
-            self.flush_refilter();
         }
         match event.gesture {
             Gesture::Wheel { up } => self.mouse_wheel(event, up),

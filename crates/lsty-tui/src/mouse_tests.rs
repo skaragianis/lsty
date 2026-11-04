@@ -510,9 +510,9 @@ fn a_click_on_a_name_steps_it_like_x() {
     assert_eq!(chips(&m), ["@email"]);
 }
 
-// A gesture on the list acts on the list of the last panel step.
+// A gesture on the list acts on the list as drawn, and the timer refilters.
 #[test]
-fn a_gesture_outside_the_entries_refilters_first() {
+fn a_gesture_leaves_the_rows_for_the_refilter_timer() {
     let config = Config {
         show_sidebar: true,
         show_detail: false,
@@ -535,8 +535,42 @@ fn a_gesture_outside_the_entries_refilters_first() {
             at,
             shift: false,
         }));
-        assert_eq!((m.rows.len(), m.refilter.owed), (2, false), "{gesture:?}");
+        assert_eq!((m.rows.len(), m.refilter.owed), (3, true), "{gesture:?}");
     }
+    // A press from before the timer is still a click on its row.
+    let (_dir, mut m) = workdir_model("A @a\nB @b\nC @a\n", config.clone());
+    m.update(Msg::Resize(100, 30));
+    keys(&mut m, "<C-w>4x<C-w>1");
+    send(&mut m, Gesture::Down(Button::Left), 2);
+    m.flush_refilter();
+    send(&mut m, Gesture::Up, 2);
+    assert_eq!(cursor_text(&m), "C @a");
+    // A click on an entry leaves a sticky row as drawn too.
+    let (_dir, mut m) = workdir_model("A @a\nB @b\nC @a\n", config);
+    m.update(Msg::Resize(100, 30));
+    keys(&mut m, "<C-w>4x<C-w>1");
+    m.flush_refilter();
+    keys(&mut m, "a<C-w><CR>");
+    assert_eq!(m.rows.iter().filter(|r| r.sticky).count(), 1);
+    let entry =
+        (0..30).find(|&y| m.hit(Position::new(3, y)).kind == Kind::Entry);
+    click(&mut m, 3, entry.unwrap_or_default());
+    assert_eq!((m.rows.len(), m.refilter.owed), (2, true));
+    // Keys under way on an archived row stay on it across the timer.
+    let archiving = Config {
+        auto_archive: true,
+        ..m.deps.config.clone()
+    };
+    let (dir, mut m) = workdir_model("A @a\nC @a\nD @b\n", archiving);
+    m.update(Msg::Resize(100, 30));
+    keys(&mut m, "<C-w>4x<C-w>1");
+    m.flush_refilter();
+    keys(&mut m, "jx");
+    click(&mut m, 3, entry.unwrap_or_default());
+    keys(&mut m, "d");
+    m.flush_refilter();
+    keys(&mut m, "d");
+    assert_eq!(todo_of(dir.path()), "A @a\n\nD @b\n");
 }
 
 /// The cursor line after the button went down at row `y`, the file was

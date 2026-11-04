@@ -23,8 +23,10 @@ use crate::{
     focus::Focus,
     model::Model,
     msg::{Button, Gesture, Mouse, Msg},
-    run::{Feed, Input, Screen, Timers, report, run_with},
-    test_util::{SAMPLE, deps, held_lock, start, workdir},
+    run::{Event, Feed, Input, Screen, Timers, event_loop, report, run_with},
+    test_util::{
+        SAMPLE, alone, deps, held_lock, start, workdir, workdir_model,
+    },
 };
 
 /// A terminal that plays the inputs it is given, then stops.
@@ -340,6 +342,20 @@ impl Screen for Refocus {
         self.feed = Some(feed);
         Ok(())
     }
+}
+
+// A key queued behind a list that changed by itself finds it drawn.
+#[test]
+fn a_list_that_changed_by_itself_is_drawn_before_queued_keys() {
+    let (dir, mut model) = workdir_model(SAMPLE, alone());
+    let (tx, rx) = channel();
+    for event in [Event::Msg(Msg::Minute), Event::Input(key('j'))] {
+        tx.send(event).unwrap();
+    }
+    let mut screen = Script::new([]);
+    event_loop(&mut model, &mut screen, &tx, &rx).unwrap();
+    assert_eq!(screen.drawn.load(Ordering::Relaxed), 1);
+    drop(dir);
 }
 
 #[test]

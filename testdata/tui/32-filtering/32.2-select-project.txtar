@@ -1,6 +1,7 @@
 size 130 30
 start
 keys <C-w>3 j j x <CR>
+tick 50ms
 frame selected
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
