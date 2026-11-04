@@ -133,7 +133,9 @@ fn already_done(
 /// run then completes todo tasks in place.
 fn spawns_from_done(tx: &Tx, targets: &[Target], wontdo: bool) -> bool {
     targets.iter().any(|target| {
-        let Ok(Some(task)) = find(tx.snapshot(), target) else {
+        let found = tx.landed(target);
+        let Ok(Some(task)) = found.and_then(|t| find(tx.snapshot(), &t))
+        else {
             return false;
         };
         let line = tx.snapshot().line(task);

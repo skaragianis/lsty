@@ -3,7 +3,7 @@
 use super::{
     follow,
     fuzzing::{Lcg, lines as bytes, remap_property},
-    remap,
+    kept, remap,
 };
 use crate::todotxt::File;
 
@@ -112,6 +112,28 @@ fn follow_table() {
     ];
     for (name, old, new, i, want) in rows {
         assert_eq!(follow(&lines(old), &lines(new), i), want, "{name}");
+    }
+}
+
+#[test]
+fn kept_table() {
+    let (a, b, c) = (Some(0), Some(1), Some(2));
+    let d = Some(3);
+    let rows = [
+        ("same", "a b", "a b", vec![a, b]),
+        ("added above", "a b", "x a b", vec![b, c]),
+        ("removed above", "x a b", "a b", vec![N, a, b]),
+        ("changed", "a b", "a B", vec![a, N]),
+        ("gone", "a b", "a", vec![a, N]),
+        ("two swapped", "a b c", "a c b", vec![N, N, N]),
+        ("moved far", "a b c", "c a b", vec![N, N, N]),
+        ("a twin came", "a b", "a a b", vec![N, c]),
+        ("a twin went", "a a b", "a b", vec![N, N, b]),
+        ("twins shift", "a a b", "x a a b", vec![b, c, d]),
+        ("a blank moved", "_ a b", "a _ b", vec![N, a, c]),
+    ];
+    for (name, old, new, want) in rows {
+        assert_eq!(kept(&lines(old), &lines(new)), want, "{name}");
     }
 }
 

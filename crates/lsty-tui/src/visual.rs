@@ -31,6 +31,7 @@ impl Model {
     /// Drops the keys typed so far in every mode, but an open text line
     /// keeps its own.
     pub(crate) fn reset_keys(&mut self) {
+        self.keys_lost = false;
         for mode in [
             Mode::Normal,
             Mode::Visual,

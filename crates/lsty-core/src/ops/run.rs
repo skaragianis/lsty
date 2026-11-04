@@ -1,6 +1,8 @@
 //! The steps of an operation: lock, read, plan, check, write, report.
 
-use super::{env::Env, result::Outcome, staged::SealedFile, tx::Tx};
+use super::{
+    env::Env, landing::Landing, result::Outcome, staged::SealedFile, tx::Tx,
+};
 use crate::{
     errs::{Code, Error, Result, Source},
     fsio,
@@ -105,7 +107,10 @@ fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
     let (done, _) = read_file(&env.found.done)?;
     clean(env, done_mode)?;
     let snap = Snapshot::build(env.found.clone(), todo, done, &env.params());
-    Ok(Tx::new(snap, !todo_exists))
+    let landing = env.aim.map(|from| Landing::of(from, &snap));
+    let mut tx = Tx::new(snap, !todo_exists);
+    tx.landing = landing;
+    Ok(tx)
 }
 
 /// The file, and whether it exists; a missing file is an empty one.

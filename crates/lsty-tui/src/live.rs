@@ -12,11 +12,13 @@ use lsty_core::{
     errs::{self, Code},
     list::{self, Params, Snapshot},
     lock::Cancel,
-    ops::Change,
+    ops::{Change, Landing},
     todotxt::File,
 };
 
 use crate::{
+    actions::places,
+    counts::ids_of,
     deps::Now,
     model::Model,
     motion::View,
@@ -362,6 +364,7 @@ impl Model {
         let place = self.cursor_place();
         let offset = self.view_offset();
         let selected = self.selected_places();
+        let typed = self.typed_lines();
         let old = std::mem::replace(&mut self.snap, snap);
         let mut follow = selected.clone();
         follow.extend(place);
@@ -399,18 +402,38 @@ impl Model {
             None => (aim, offset, matches!(offset, View::Cursor(_))),
         };
         self.follow(aim, offset);
-        // Keys typed go no further when the cursor is not on the line they
-        // were typed on, or the reading cannot tell it is.
-        if self.edit.is_none()
-            && place.and_then(|at| moved.stays(at)) != self.cursor_place()
-        {
-            self.reset_keys();
-        }
         self.resume(&moved, &selected);
+        self.check_typed(typed, &old);
         if reveal {
             self.scroll();
         }
         chose
+    }
+
+    /// The lines the keys typed so far are about, when any wait for more.
+    fn typed_lines(&self) -> Option<Vec<Place>> {
+        let matcher = self.matchers.get(&self.key_mode())?;
+        (self.edit.is_none() && matcher.waits()).then(|| {
+            places(&self.snap, &ids_of(self.rows_of(matcher.count())))
+        })
+    }
+
+    /// Notes that the keys typed from `old` are no longer about the same
+    /// lines. They stay typed, for a motion to go on; the last of them
+    /// refuses if it would write (see [`crate::press::writes_line`]).
+    fn check_typed(&mut self, typed: Option<Vec<Place>>, old: &Snapshot) {
+        let Some(typed) = typed else {
+            return;
+        };
+        let landing = Landing::of(old, &self.snap);
+        let count = self.typed_count();
+        let now = places(&self.snap, &ids_of(self.rows_of(count)));
+        let same = typed.len() == now.len()
+            && typed.iter().zip(&now).all(|(was, is)| {
+                was.0 == is.0
+                    && landing.line(was.0, was.1.index()) == Some(is.1.index())
+            });
+        self.keys_lost |= !same;
     }
 
     /// Where a write sends the cursor, when it takes it off its task. It

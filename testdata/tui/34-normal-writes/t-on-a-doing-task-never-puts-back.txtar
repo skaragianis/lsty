@@ -6,7 +6,7 @@ keys <CR>
 file todo.txt tagged
 write todo.txt plain
 keys t
-frame nothing-to-stop
+frame task-changed-not-seen
 file todo.txt plain
 write todo.txt tagged
 keys t
@@ -23,14 +23,14 @@ Call
 Call started:2026-09-29T0800Z owner:agent1 +x
 -- tagged-stopped --
 Call +x
--- nothing-to-stop --
+-- task-changed-not-seen --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▶ Call +x                                                                                  1h │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 is not underway  x done  t stop  T wont  o new     9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  the list changed — look again  x done  t stop        9.9.9
 -- an-ordinary-stop --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Call +x                                                                                     │

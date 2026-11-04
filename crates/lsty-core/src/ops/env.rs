@@ -117,6 +117,10 @@ pub struct Env<'a> {
     pub hooks: &'a dyn Hooks,
     /// Where generated ids come from.
     pub ids: &'a dyn IdSource,
+    /// The reading the person's action is aimed from: a line number is one
+    /// of its lines, and what it finds under the lock must still be that
+    /// line. `None` takes a number as one of the file as it is.
+    pub aim: Option<&'a Snapshot>,
 }
 
 impl<'a> Env<'a> {
@@ -152,6 +156,7 @@ impl<'a> Env<'a> {
             cancel: Cancel::new(),
             hooks: &OsHooks,
             ids: &OsIds,
+            aim: None,
         }
     }
 }

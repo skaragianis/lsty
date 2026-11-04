@@ -4,6 +4,7 @@ use std::{collections::HashSet, path::PathBuf, sync::Arc};
 
 use super::{
     env::Env,
+    landing::Landing,
     refs::{Target, find, no_task},
     staged::{LineRef, Path, Row, StagedFile},
 };
@@ -29,6 +30,8 @@ pub(super) enum Picked {
 #[derive(Debug)]
 pub(super) struct Tx {
     pub(super) snap: Snapshot,
+    /// How the reading the action was aimed from stands in `snap`.
+    pub(super) landing: Option<Landing>,
     pub(super) todo: StagedFile,
     pub(super) done: StagedFile,
     /// The file the operation moves lines into; it is written first.
@@ -101,6 +104,7 @@ impl Tx {
             todo: StagedFile::new(Source::Todo, &snap, create),
             done: StagedFile::new(Source::Done, &snap, false),
             snap,
+            landing: None,
             dest: None,
             primary: Vec::new(),
             own: None,
@@ -188,10 +192,18 @@ impl Tx {
         self.file(task.source()).rows().get(task.nr().index())
     }
 
+    /// The target as the action aimed it, at its line now.
+    pub(super) fn landed(&self, target: &Target) -> Result<Target> {
+        self.landing
+            .as_ref()
+            .map_or_else(|| Ok(target.clone()), |l| target.landed(l))
+    }
+
     /// Finds the task `target` names. A blank line is gone; a line that
     /// is not in the file is `no_task`; a task of the done file is
     /// refused unless the target accepts it.
     pub(super) fn target(&mut self, target: &Target) -> Result<Picked> {
+        let target = &self.landed(target)?;
         let handle = target.handle();
         let Some(task) = find(&self.snap, target)? else {
             let word = if matches!(target.line(), Some((Source::Done, _))) {
@@ -319,7 +331,9 @@ impl Tx {
     /// Empties the todo-file line `target` names when it holds only
     /// spaces and tabs. It stays a blank line, so it is not a task.
     pub(super) fn clear_spaces(&mut self, target: &Target) {
-        let Some((Source::Todo, nr)) = target.line() else {
+        let Some((Source::Todo, nr)) =
+            self.landed(target).ok().and_then(|t| t.line())
+        else {
             return;
         };
         let row = usize::try_from(nr - 1)
