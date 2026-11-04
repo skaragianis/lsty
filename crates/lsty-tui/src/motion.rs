@@ -162,9 +162,13 @@ impl Model {
     /// Moves the cursor row; a count on `gg` or `G` names a task.
     fn list_motion(&mut self, action: Action, count: usize) {
         let rows = self.pane_rows();
-        let step =
-            Step::of(action, count, rows).filter(|_| !self.rows.is_empty());
-        let Some(step) = step else {
+        let step = Step::of(action, count, rows);
+        // An end of the list or a task's number does not depend on the rows
+        // drawn, so it is looked for in the list about to show.
+        if matches!(step, Some(Step::Jump(..))) {
+            self.flush_refilter();
+        }
+        let Some(step) = step.filter(|_| !self.rows.is_empty()) else {
             return;
         };
         let step = match step {

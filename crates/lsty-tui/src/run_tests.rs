@@ -348,8 +348,10 @@ impl Screen for Refocus {
 #[test]
 fn a_list_that_changed_by_itself_is_drawn_before_queued_keys() {
     let (dir, mut model) = workdir_model(SAMPLE, alone());
+    model.update(Msg::Minute);
+    model.update(Msg::Reload);
     let (tx, rx) = channel();
-    for event in [Event::Msg(Msg::Minute), Event::Input(key('j'))] {
+    for event in [Event::Input(key('j')), Event::Input(key('k'))] {
         tx.send(event).unwrap();
     }
     let mut screen = Script::new([]);

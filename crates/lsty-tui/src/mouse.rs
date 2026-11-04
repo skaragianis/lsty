@@ -216,6 +216,7 @@ impl Model {
             if self.visual.is_none() {
                 self.enter_visual();
             }
+            self.reset_keys();
             self.cursor_to_row(i);
             return;
         }

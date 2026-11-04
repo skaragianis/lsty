@@ -1,7 +1,6 @@
 size 130 30
 start
 keys <C-w>3 j j x <CR>
-tick 50ms
 keys <C-w> h k k x x <CR>
 tick 50ms
 frame home

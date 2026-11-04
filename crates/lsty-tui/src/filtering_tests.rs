@@ -697,8 +697,14 @@ fn only_the_timer_refilters() {
         assert_eq!(nrs(&model), [1, 2, 3, 4, 5], "{key}");
         model.update(refiltering(&step).unwrap_or_else(|| panic!("no timer")));
         assert_eq!(nrs(&model).len(), 2, "{key}");
+        assert!(model.unseen, "{key}");
     }
 }
+
+/// The list shows `+gone` alone, and the click brings in the rest.
+const BY_GONE: &str = "<C-w>3x|<C-w>1";
+/// The list shows `+keep` alone, and the click brings in the rest.
+const BY_KEEP: &str = "<C-w>3jx|<C-w>1";
 
 const HIDING: &str = "Alpha +keep\nBravo +gone dep:z\nFree +keep\n\
     Charlie +gone\nDelta +keep\nEcho +keep\nZed +gone id:z\n";
@@ -717,7 +723,9 @@ fn across_a_refilter(to: &str, gap: &str, then: &str) -> (TempDir, Model) {
             keys(model, notation);
         }
     };
-    some(&mut model, to);
+    for part in to.split('|').filter(|part| !part.is_empty()) {
+        settled(&mut model, part);
+    }
     let at = (0..30)
         .map(|y| Position::new(3, y))
         .filter(|&at| model.hit(at).kind == Kind::Entry)
@@ -760,8 +768,9 @@ fn a_key_before_the_refilter_acts_on_the_rows_as_drawn() {
         ("vjjj", "T", "", "Alpha Bravo Free Charlie"),
         ("jjj", "d", "d", "Charlie"),
         ("jjj", "2", "x", "Charlie Delta"),
-        ("jjj", "a", "Z<CR>", "Charlie"),
         ("jjjv", "", "x", "Charlie"),
+        ("jjjv", "G", "x", "Charlie Delta Echo"),
+        ("jjjjv", "gg", "x", "Alpha Free Delta"),
         ("vjjj", "", "T", "Alpha Free Charlie"),
     ] {
         let (dir, _model) = across_a_refilter(to, gap, then);
@@ -790,15 +799,23 @@ fn a_move_before_the_refilter_goes_by_the_rows_as_drawn() {
 }
 
 // A motion counts from the row drawn, and the timer settles on the first
-// row at or after where it ended.
+// row at or after where it ended. `gg`, `G` and a task's number mean the same
+// whatever is drawn, so they go by the list about to show.
 #[test]
-fn a_motion_before_the_refilter_skips_no_task() {
+fn a_motion_before_the_refilter_skips_no_row_drawn() {
     for (to, key, want) in [
         ("", "j", "Free +keep"),
         ("j", "j", "Free +keep"),
         ("jjj", "j", "Delta +keep"),
         ("jjj", "k", "Free +keep"),
         ("jjj", "2j", "Echo +keep"),
+        ("jjj", "L", "Echo +keep"),
+        (BY_GONE, "H", "Bravo +gone dep:z"),
+        (BY_GONE, "<C-f>", "Zed +gone id:z"),
+        (BY_GONE, "gg", "Alpha +keep"),
+        (BY_GONE, "5G", "Delta +keep"),
+        (BY_KEEP, "G", "Zed +gone id:z"),
+        (BY_KEEP, "2gg", "Bravo +gone dep:z"),
     ] {
         let (_dir, model) = across_a_refilter(to, key, "");
         assert_eq!(cursor_text(&model), want, "{to} {key}");

@@ -290,6 +290,12 @@ fn the_wheel_moves_three_rows_and_leaves_the_cursor_on_its_task() {
     }
     assert_eq!(model.top, model.rows.len() - model.pane_rows());
     assert_eq!(model.cursor, 0);
+    // A refilter that comes after it keeps the view.
+    let (_dir, mut model) = workdir_model(&long_list(100), alone());
+    model.refilter.owed = true;
+    wheel(&mut model, false, 10, 5);
+    model.flush_refilter();
+    assert_eq!((model.top, model.cursor), (3, 0));
 }
 
 #[test]
@@ -703,21 +709,33 @@ fn a_row_held_in_view_stays_wrapped() {
     assert!(lines[4].contains('B'), "{lines:?}");
 }
 
-// A drag that starts a selection drops the keys typed before it.
+// A gesture that takes the cursor to another row drops the keys typed before
+// it.
 #[test]
-fn a_drag_forgets_the_keys_typed_before_it() {
-    let (dir, mut m) = workdir_model("A\nB\nC\n", alone());
-    m.update(Msg::Resize(100, 12));
-    keys(&mut m, "vg");
-    for (gesture, y) in [
-        (Gesture::Down(Button::Left), 1),
-        (Gesture::Drag(Button::Left), 2),
-        (Gesture::Up, 2),
-    ] {
-        send(&mut m, gesture, y);
+fn a_gesture_moving_the_cursor_forgets_the_keys_typed_before_it() {
+    let (down, drag) =
+        (Gesture::Down(Button::Left), Gesture::Drag(Button::Left));
+    let cases = [
+        (
+            "vg",
+            "p",
+            false,
+            &[(down, 1), (drag, 2), (Gesture::Up, 2)][..],
+        ),
+        ("d", "d", false, &[(down, 2), (Gesture::Up, 2)][..]),
+        ("vg", "p", true, &[(down, 2), (Gesture::Up, 2)][..]),
+    ];
+    for (before, after, shift, gestures) in cases {
+        let (dir, mut m) = workdir_model("A\nB\nC\n", alone());
+        m.update(Msg::Resize(100, 12));
+        keys(&mut m, before);
+        for &(gesture, y) in gestures {
+            let at = Position::new(20, y);
+            m.update(Msg::Mouse(Mouse { gesture, at, shift }));
+        }
+        keys(&mut m, after);
+        assert_eq!(todo_of(dir.path()), "A\nB\nC\n", "{before}");
     }
-    keys(&mut m, "p");
-    assert_eq!(todo_of(dir.path()), "A\nB\nC\n");
 }
 
 #[test]

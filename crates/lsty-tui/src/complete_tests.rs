@@ -765,8 +765,9 @@ fn a_new_day_changes_the_due_dates_of_the_candidates() {
     let mut model = started(d);
     press(&mut model, "Ga dep:");
     assert_eq!(labels(&model), ["1  Pay  tomorrow"]);
+    keys(&mut model, "<BS>");
     now.set(instant("2026-10-01T09:00:00Z"));
-    keys(&mut model, "<BS>:");
+    keys(&mut model, ":");
     assert_eq!(labels(&model), ["1  Pay  1d late"]);
 }
 
