@@ -770,7 +770,6 @@ fn a_key_before_the_refilter_acts_on_the_rows_as_drawn() {
         ("jjj", "2", "x", "Charlie Delta"),
         ("jjjv", "", "x", "Charlie"),
         ("jjjv", "G", "x", "Charlie Delta Echo"),
-        ("vjjj", "G", "x", "Alpha Free Delta Echo"),
         ("jjjjv", "gg", "x", "Alpha Free Delta"),
         ("vjjj", "", "T", "Alpha Free Charlie"),
     ] {

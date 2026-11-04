@@ -31,9 +31,6 @@ use crate::{
 /// What the status line says after a draft was thrown away.
 const DISCARDED: &str = "edit discarded — u restores";
 
-/// What the status line says when the line being edited changed on disk.
-const CHANGED: &str = "this task changed on disk";
-
 /// What a draft is the line of.
 #[derive(Debug)]
 enum Subject {
@@ -592,7 +589,7 @@ impl Model {
         };
         draft.pin = Some(next);
         if changed {
-            self.message = Some(CHANGED.to_owned());
+            self.message = Some(messages::CHANGED.to_owned());
         }
     }
 

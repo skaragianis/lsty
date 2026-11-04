@@ -15,6 +15,10 @@ pub(crate) enum Tone {
 /// What the status line says when every task of a prompt is gone.
 pub(crate) const GONE: &str = "the task is gone";
 
+/// What the status line says when a line being edited, or a task of a
+/// prompt, changed on disk.
+pub(crate) const CHANGED: &str = "this task changed on disk";
+
 /// What the status line says when the task a draft gives an id to is
 /// gone.
 pub(crate) const PREREQUISITE_GONE: &str = "the task it waits for is gone";
