@@ -28,12 +28,12 @@ keys j
 status x done  <Esc> exit  T wont\b
 frame some-archived
 keys <Esc>
-status x restore  T wont\b
+status x reopen  T wont\b
 keys v j
-status x restore  <Esc> exit  T wont\b
+status x reopen  <Esc> exit  T wont\b
 frame all-archived
 keys <Esc> j
-status x restore  T wont\b
+status x reopen  T wont\b
 keys g g v G
 status x done  <Esc> exit  t start  T wont\b
 -- config.toml --
@@ -136,4 +136,4 @@ x 2026-09-01 Old skip wontdo:true
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  x restore  <Esc> exit  T wont  d delete  y yank                        9.9.9
+ VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  x reopen  <Esc> exit  T wont  d delete  y yank                         9.9.9

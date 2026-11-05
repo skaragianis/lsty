@@ -187,7 +187,6 @@ pub(crate) fn label(
         ) => return None,
         (_, Action::Wontdo, Answer::Resolved(Command::Reopen)) => "will",
         (_, _, Answer::Resolved(Command::Reopen)) => "reopen",
-        (_, _, Answer::Resolved(Command::Restore)) => "restore",
         (_, _, Answer::Resolved(Command::Stop)) => "stop",
         _ => action.hint(),
     })

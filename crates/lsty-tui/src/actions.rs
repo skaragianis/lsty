@@ -48,10 +48,7 @@ impl Chosen {
                     || matches!(self.claim, Claim::Agent)
             }
             Command::Stop => matches!(self.state, State::Doing),
-            Command::Reopen
-            | Command::Restore
-            | Command::Delete
-            | Command::Step { .. } => true,
+            Command::Reopen | Command::Delete | Command::Step { .. } => true,
         }
     }
 }
@@ -234,8 +231,10 @@ impl Model {
             }
             Command::Start => ops::start(env, &targets, StartOpts::default()),
             Command::Stop => ops::stop(env, &targets, claim),
+            Command::Reopen if tasks[0].source == Source::Done => {
+                ops::restore(env, &targets, claim)
+            }
             Command::Reopen => ops::reopen(env, &targets, claim),
-            Command::Restore => ops::restore(env, &targets, claim),
             Command::Delete => ops::del(env, &targets, claim),
             Command::Step { forward } => {
                 let last = self.deps.config.priority_range;
