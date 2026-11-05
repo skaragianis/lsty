@@ -255,6 +255,7 @@ const FILTERED: &str = "<C-w>5Gx<C-w>3";
 const NESTED: &str = "A +a.b @x.y\n";
 const NO_FOLD: &str = "h fold l unfold";
 const EMPTY: &str = "x filter h fold l unfold";
+const BEFORE: &str = "<C-w> del word <C-u> del to start";
 
 /// Each state of the default hints: the files, what is typed on them, and
 /// the hints that are dim.
@@ -358,6 +359,17 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
         ("/+, no project", "A\n", "", "/+", "<Tab> next"),
         ("field, one candidate", "A +p\n", "", "o+", "<C-n> next"),
         ("field, two candidates", "A +p\nB +q\n", "", "o+", ""),
+        ("empty field", "A\n", "", "o", BEFORE),
+        ("typed in a field", "A\n", "", "ob", ""),
+        ("typed, moved to the start", "A\n", "", "ob<Home>", BEFORE),
+        ("typed, deleted", "A\n", "", "ob<C-u>", BEFORE),
+        ("i on a task", "Abc\n", "", "i", BEFORE),
+        ("a on a task", "Abc\n", "", "a", ""),
+        ("a, deleted", "Abc\n", "", "a<C-u>", BEFORE),
+        ("I before a priority", "(A) Abc\n", "", "I", BEFORE),
+        ("i after a priority, which can go", "(A) Abc\n", "", "i", ""),
+        ("I on a done task", DONE, "", "I", BEFORE),
+        ("o on a project", "A +p\n", "", "o", BEFORE),
     ];
     for (name, todo, done, typed, want) in rows {
         let (_dir, model) = hinted((todo, done), None, "", typed);
@@ -400,7 +412,7 @@ fn the_configured_hints_are_dim_by_the_same_rule() {
 }
 
 /// The keys that write no task, listed in `[hints]`, dim by the same rule in
-/// the three modes.
+/// every mode that has them.
 #[test]
 #[expect(clippy::too_many_lines, reason = "a table")]
 fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
@@ -436,6 +448,35 @@ fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
         "focus_filters",
     ];
     const NONE: &str = "u undo <C-r> redo . repeat";
+    const TEXT: &[&str] = &[
+        "delete_word_back",
+        "delete_to_start",
+        "delete_char",
+        "delete_word_forward",
+        "delete_to_end",
+    ];
+    const AFTER: &str = "<C-d> del char <A-d> del word after <C-k> del to end";
+    let fields = [
+        ("empty :", "command", ":", format!("{BEFORE} {AFTER}")),
+        ("end of :", "command", ":ab", AFTER.to_owned()),
+        ("start of /", "command", "/ab<Home>", BEFORE.to_owned()),
+        ("inside a prompt", "command", "gdab<Left>", String::new()),
+        ("help filter", "command", "?/ab<Home>", BEFORE.to_owned()),
+        (
+            "theme filter",
+            "command",
+            ":theme<CR>/ab<Home>",
+            BEFORE.to_owned(),
+        ),
+        ("a space that must stay", "insert", "a", AFTER.to_owned()),
+        ("up to an id", "insert", "a<Right>", AFTER.to_owned()),
+        ("inside a field", "insert", "oab<Left>", String::new()),
+    ];
+    for (name, mode, typed, want) in fields {
+        let hints = Some((mode, TEXT));
+        let (_dir, model) = hinted(("A id:x\n", ""), hints, "", typed);
+        assert_eq!(shown_dim(&model, 200), want, "{name}");
+    }
     let rows = [
         (
             "todo alone",
@@ -807,7 +848,7 @@ fn a_selection_overrides_a_count_over_the_hints() {
 }
 
 /// No other mode dims by the rule: help and a picker move whatever lies
-/// behind, and it refuses no key of a field.
+/// behind, and it refuses no key of a field with text on both sides.
 #[test]
 fn other_modes_never_dim() {
     let opened = [
@@ -815,8 +856,8 @@ fn other_modes_never_dim() {
         ("", "<C-w>3:theme<CR>", Mode::Picker),
         ("", "?", Mode::Help),
         ("", ":theme<CR>", Mode::Picker),
-        ("", "o", Mode::Insert),
-        ("", ":", Mode::Command),
+        ("", "oab<Left>", Mode::Insert),
+        ("", ":so<Left>", Mode::Command),
         ("A +p\nB +q\n", "o+", Mode::Completion),
     ];
     for (todo, typed, mode) in opened {

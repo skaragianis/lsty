@@ -10,8 +10,8 @@ use lsty_core::{
 };
 
 use crate::{
-    focus::Focus, history::Again, messages, model::Model, panel::Panel,
-    rows::Row,
+    field::Field, focus::Focus, history::Again, messages, model::Model,
+    panel::Panel, rows::Row,
 };
 
 /// The `lsty` command a key resolves to.
@@ -149,6 +149,16 @@ impl Model {
         self.matchers
             .get(&self.key_mode())
             .map_or(0, Matcher::count)
+    }
+
+    /// The field that takes the keys now, in the order of `key_mode`.
+    fn open_field(&self) -> Option<&Field> {
+        let line = self.line.as_ref().map(|l| &l.field);
+        let draft = self.edit.as_ref().map(|d| &d.field);
+        self.theme_field()
+            .or_else(|| self.help_field())
+            .or(line)
+            .or(draft)
     }
 
     /// What the hints ask of the rule, with the count typed so far. A second
@@ -402,6 +412,14 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             return lit_if(lit, Refusal::Says("nothing to redo"));
         }
         Action::Repeat => return repeat(m),
+        Action::DeleteChar
+        | Action::DeleteWordBack
+        | Action::DeleteWordForward
+        | Action::DeleteToStart
+        | Action::DeleteToEnd => {
+            let lit = m.open_field().is_none_or(|f| f.acts(action));
+            return lit_if(lit, Refusal::Quiet);
+        }
         Action::CompleteNext | Action::CompletePrev => {
             let lit = m.line.as_ref().is_none_or(|l| !l.no_candidates);
             return lit_if(lit, Refusal::Quiet);
@@ -456,11 +474,6 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::WordForward
         | Action::LineStart
         | Action::LineEnd
-        | Action::DeleteChar
-        | Action::DeleteWordBack
-        | Action::DeleteWordForward
-        | Action::DeleteToStart
-        | Action::DeleteToEnd
         | Action::Accept
         | Action::Close
         | Action::NextLink
