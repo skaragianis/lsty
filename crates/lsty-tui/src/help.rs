@@ -217,10 +217,12 @@ impl Model {
 
     /// Whether the filter of the help is being typed.
     pub(crate) fn typing_help(&self) -> bool {
-        self.output
-            .as_ref()
-            .and_then(|o| o.help.as_ref())
-            .is_some_and(|h| h.field.is_some())
+        self.help_field().is_some()
+    }
+
+    /// The filter of the help, while it is being typed.
+    pub(crate) fn help_field(&self) -> Option<&Field> {
+        self.output.as_ref()?.help.as_ref()?.field.as_ref()
     }
 
     /// `search` in the popup: starts typing the filter, if it is the

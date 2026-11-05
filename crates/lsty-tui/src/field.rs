@@ -374,6 +374,13 @@ impl Field {
         }
     }
 
+    /// Whether `action` would change the text or move the cursor.
+    pub(crate) fn acts(&self, action: Action) -> bool {
+        let mut after = self.clone();
+        after.act(action);
+        after.text != self.text || after.cursor != self.cursor
+    }
+
     /// The characters of the word under the cursor, as a range of
     /// positions: from where the word starts to where it ends.
     pub(crate) fn word_span(&self) -> (usize, usize) {

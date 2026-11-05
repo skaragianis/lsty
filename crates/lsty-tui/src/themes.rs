@@ -167,7 +167,12 @@ impl Model {
 
     /// Whether the filter of the theme picker is being typed.
     pub(crate) fn typing_theme(&self) -> bool {
-        self.choosing.as_ref().is_some_and(|p| p.field.is_some())
+        self.theme_field().is_some()
+    }
+
+    /// The filter of the theme picker, while it is being typed.
+    pub(crate) fn theme_field(&self) -> Option<&Field> {
+        self.choosing.as_ref()?.field.as_ref()
     }
 
     /// Shows theme `name` at once, with the first warning its file gave.
