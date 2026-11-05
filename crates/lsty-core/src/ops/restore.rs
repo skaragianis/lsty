@@ -104,7 +104,7 @@ fn move_back(
     tx.say(
         [
             handle.as_bytes(),
-            b" restored as ",
+            b" reopened as ",
             nr.to_string().as_bytes(),
             &suffix,
         ]

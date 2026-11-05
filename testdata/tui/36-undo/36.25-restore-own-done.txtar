@@ -24,7 +24,7 @@ Q
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: done:1 restored as 2          9.9.9
+ NORMAL  todo.txt  manual  undid: done:1 reopened as 2          9.9.9
 -- after-todo --
 Buy
 -- after-done --

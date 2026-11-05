@@ -41,7 +41,7 @@ stdout 'Blocked'
 exec lsty wontdo done:1 --human --no-config
 stdout '^done:1 is already won''t do$'
 exec lsty restore done:1 --human --no-config
-stdout '^done:1 restored as 5$'
+stdout '^done:1 reopened as 5$'
 exec lsty show 5 --json --no-config
 stdout '"raw":"2026-09-01 Blocked dep:a id:b"'
 
