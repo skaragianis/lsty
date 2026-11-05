@@ -169,8 +169,8 @@ pub(crate) fn cancelling<'a>(
 
 /// What the hint of `action` says in `mode`: `accept` for a picker's
 /// choice and the Enter of the text line, and for the task keys the command
-/// `answer` resolves to. `None` when the key does nothing there: `t` on a
-/// done task.
+/// `answer` resolves to. `None` when the key does nothing there: `t` or `T`
+/// on a done task.
 pub(crate) fn label(
     mode: Mode,
     action: Action,
@@ -182,10 +182,9 @@ pub(crate) fn label(
         | (Mode::Command, Action::Execute, _) => accept,
         (
             _,
-            Action::ToggleStart,
+            Action::ToggleStart | Action::Wontdo,
             Answer::Refused(Refusal::AllDone | Refusal::Closed),
         ) => return None,
-        (_, Action::Wontdo, Answer::Resolved(Command::Reopen)) => "will",
         (_, _, Answer::Resolved(Command::Reopen))
         | (_, Action::ToggleComplete, Answer::Refused(Refusal::Closed)) => {
             "reopen"

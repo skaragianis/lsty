@@ -59,7 +59,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done; 1 already done  x reopen  T wont  o new  a append          9.9.9
+ NORMAL  todo.txt  manual  1 done; 1 already done  x reopen  o new  a append  dd delete       9.9.9
 -- c-file --
 A
 x 2026-09-29 B

@@ -4,14 +4,8 @@ keys v j T
 frame open-tasks
 file todo.txt open-file
 keys g g v j T
-frame reopened
-file todo.txt reopened-file
-keys j j j v j T
-frame plain-done-refused
-file todo.txt refused-file
-keys <Esc> v j T
-frame all-wontdo-reopened
-file todo.txt all-wontdo-file
+frame finished-refused
+file todo.txt open-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -40,57 +34,14 @@ C started:2026-09-29T0800Z
 x 2026-09-01 D
 x 2026-09-01 E wontdo:true
 x 2026-09-01 F wontdo:true
--- reopened --
+-- finished-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   A                                                                                           │
-│  1   B                                                                                           │
-│  2 ▷ C                                                                                        1h │
-│  3 ✓ D                                                                               28d ago     │
-│  4 ✗ E wontdo:true                                                                   28d ago     │
-│  5 ✗ F wontdo:true                                                                   28d ago     │
+│  1 ✗ A wontdo:true                                                                               │
+│  2 ✗ B wontdo:true                                                                               │
+│  1 ▷ C                                                                                        1h │
+│  2 ✓ D                                                                               28d ago     │
+│  3 ✗ E wontdo:true                                                                   28d ago     │
+│  4 ✗ F wontdo:true                                                                   28d ago     │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 reopened; 2 reopened  x done  t start  T wont      9.9.9
--- reopened-file --
-A
-B
-C started:2026-09-29T0800Z
-x 2026-09-01 D
-x 2026-09-01 E wontdo:true
-x 2026-09-01 F wontdo:true
--- plain-done-refused --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  4   A                                                                                           │
-│  3   B                                                                                           │
-│  2 ▷ C                                                                                        1h │
-│  1 ✓ D                                                                               28d ago     │
-│  5 ✗ E wontdo:true                                                                   28d ago     │
-│  1 ✗ F wontdo:true                                                                   28d ago     │
-│                                                                                                  │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  some are done, not won't do — nothing changed
--- refused-file --
-A
-B
-C started:2026-09-29T0800Z
-x 2026-09-01 D
-x 2026-09-01 E wontdo:true
-x 2026-09-01 F wontdo:true
--- all-wontdo-reopened --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  4   A                                                                                           │
-│  3   B                                                                                           │
-│  2 ▷ C                                                                                        1h │
-│  1 ✓ D                                                                               28d ago     │
-│  5   E                                                                                           │
-│  1   F                                                                                           │
-│                                                                                                  │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  5 reopened; 6 reopened  x done  t start  T wont      9.9.9
--- all-wontdo-file --
-A
-B
-C started:2026-09-29T0800Z
-x 2026-09-01 D
-E
-F
+ VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  all are done — x reopens them  x reopen  9.9.9

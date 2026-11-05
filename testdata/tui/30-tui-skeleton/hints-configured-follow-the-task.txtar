@@ -2,7 +2,7 @@ size 80 8
 start
 status  t start  T wont  x done
 keys j
-status manual  T will  x reopen
+status manual  x reopen\s+9
 -- config.toml --
 show_sidebar = false
 show_detail = false

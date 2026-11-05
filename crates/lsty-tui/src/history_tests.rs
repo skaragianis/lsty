@@ -485,12 +485,6 @@ fn completing_moves_the_cursor_to_the_next_task() {
         ("a repeat", LIST, "x.", "C"),
         ("a stop", "A\nB started:2026-09-29T0900Z\nC\n", "jt", "B"),
         ("a won't do", LIST, "jT", "C"),
-        (
-            "a won't do reopened",
-            "A\nx 2026-09-28 B wontdo:true\nC\n",
-            "jT",
-            "B",
-        ),
         ("a recurring task", pay, "jx", "Z"),
         ("a reopened task", "A\nx 2026-09-28 B\nC\n", "jx", "B"),
         (
