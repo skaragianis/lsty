@@ -22,6 +22,9 @@ pub struct Relink {
     /// The number of its line in the todo file; `None` when the line is
     /// known to be gone.
     pub nr: Option<Nr>,
+    /// An outside edit moved the line or made it a twin: it is not to be
+    /// written on, whatever it reads.
+    pub lost: bool,
     /// The line before the delete took `dep:` from it.
     pub before: Vec<u8>,
     /// The line as the delete left it.
@@ -98,19 +101,29 @@ impl Tx {
         let Some(nr) = relink.nr else {
             return gone(&text);
         };
-        let index = nr.index();
+        let changed = |nr: Nr| {
+            let why = format!("{nr} changed since; dep:{text} not restored");
+            Err(why.into_bytes())
+        };
+        let landed = self.landing.as_ref().map_or_else(
+            || Some(nr.index()),
+            |landing| landing.line(Source::Todo, nr.index()),
+        );
+        let Some(index) = landed else {
+            return changed(nr);
+        };
         let Some(row) = self.todo.rows().get(index) else {
             return gone(&text);
         };
         if Line::is_blank_text(&row.orig) {
             return gone(&text);
         }
+        let nr = Nr::from_index(index).unwrap_or(nr);
         if *row.raw == *relink.before {
             return Ok(nr);
         }
-        if *row.orig != *relink.after {
-            let why = format!("{nr} changed since; dep:{text} not restored");
-            return Err(why.into_bytes());
+        if relink.lost || *row.orig != *relink.after {
+            return changed(nr);
         }
         let dependent = id_text(&relink.before);
         let graph = graph.get_or_insert_with(|| graph_of(self));

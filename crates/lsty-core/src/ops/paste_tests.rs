@@ -23,6 +23,7 @@ fn foreign(raw: &str) -> PasteLine {
 fn relink(nr: u32, before: &str, after: &str) -> Relink {
     Relink {
         nr: Nr::new(nr),
+        lost: false,
         before: before.as_bytes().to_vec(),
         after: after.as_bytes().to_vec(),
     }
