@@ -160,9 +160,20 @@ impl Model {
         let count = self.typed_count();
         let typed = self.summary(count);
         let one = (count > 1).then(|| self.summary(1));
+        let idle: &[Action] = if self.line.as_ref().is_some_and(|l| l.nothing)
+        {
+            &[Action::CompleteNext, Action::CompletePrev]
+        } else if self.popup().is_some_and(|p| p.cands.len() == 1) {
+            &[Action::Next, Action::Prev]
+        } else {
+            &[]
+        };
         move |action| {
             if !ruled {
                 return Answer::Applies;
+            }
+            if idle.contains(&action) {
+                return Answer::Refused(Refusal::Quiet);
             }
             let cursor = one.as_ref().filter(|_| !action.reads_count());
             decide(action, self, cursor.unwrap_or(&typed))

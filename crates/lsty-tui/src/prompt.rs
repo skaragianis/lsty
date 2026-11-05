@@ -344,6 +344,15 @@ impl Model {
         self.preview_completed();
     }
 
+    /// Notes for the hint of `<Tab>` whether the key would start anything.
+    pub(crate) fn note_candidates(&mut self) {
+        let idle = self.line.as_ref().is_some_and(|l| l.comp.is_none());
+        let nothing = idle && self.start_completion().is_none();
+        if let Some(line) = &mut self.line {
+            line.nothing = nothing;
+        }
+    }
+
     /// Starts the candidates for the word under the cursor; in a filter
     /// term, for the alternative of the term under the cursor.
     fn start_completion(&mut self) -> Option<Completion> {

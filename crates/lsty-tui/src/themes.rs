@@ -233,6 +233,7 @@ impl Model {
             field,
             comp,
             kind: LineKind::Command,
+            ..
         }) = &self.line
         else {
             return None;
