@@ -444,6 +444,8 @@ impl Model {
         {
             return vec![Cmd::Quit];
         }
+        let lost = !matches!(fed.outcome, Outcome::Pending)
+            && std::mem::take(&mut self.keys_lost);
         if self.opening.is_some() {
             return self.picker_keys(stroke, &fed);
         }
@@ -458,10 +460,6 @@ impl Model {
         if self.line.is_some() {
             return self.prompt_keys(fed);
         }
-        if matches!(fed.outcome, Outcome::Pending) {
-            return Vec::new();
-        }
-        let lost = std::mem::take(&mut self.keys_lost);
         match fed.outcome {
             Outcome::Matched { action, .. } if lost && writes_line(action) => {
                 self.alert(ops::LIST_CHANGED.to_owned());
