@@ -3,13 +3,11 @@ use std::{fs, path::Path, time::SystemTime};
 use lsty_core::{
     config::{Config, Filter, Hidden},
     errs::Source,
-    keys::Action,
     list::SortField,
     theme::Slot,
 };
 
 use crate::{
-    hints::dim,
     messages::{self, Tone},
     model::Model,
     test_util::{
@@ -316,10 +314,10 @@ fn a_completed_task_stays_until_what_the_next_key_starts_is_over() {
 #[test]
 fn a_press_over_a_done_row_is_the_same_with_auto_archive() {
     let rows = [
-        (Action::ToggleComplete, "x", "1 done; 1 already done"),
-        (Action::Wontdo, "T", "1 won't do; 1 already done"),
+        ("x", "1 done; 1 already done"),
+        ("T", "1 won't do; 1 already done"),
     ];
-    for (action, key, said) in rows {
+    for (key, said) in rows {
         for auto_archive in [true, false] {
             let name = format!("{key} {auto_archive}");
             let dir = workdir("A\nB\nC\n");
@@ -329,7 +327,6 @@ fn a_press_over_a_done_row_is_the_same_with_auto_archive() {
             };
             let mut model = model_of(dir.path(), config);
             press(&mut model, "Gxvk");
-            assert!(!dim(model.answers()(action)), "{name}");
             press(&mut model, key);
             assert_eq!(model.message.as_deref(), Some(said), "{name}");
         }
