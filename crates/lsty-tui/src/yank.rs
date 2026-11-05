@@ -107,24 +107,12 @@ impl Yank {
     }
 
     /// Follows the kept dependents to their lines in a new reading. `outside`
-    /// is `old`, the reading before, when no write of this session made it:
-    /// what that moved or twinned is not written on any more.
-    fn follow(
-        &mut self,
-        moved: &Remap,
-        now: &Snapshot,
-        outside: Option<&Snapshot>,
-    ) {
-        let mut links =
-            self.lines.iter_mut().flat_map(|l| &mut l.links).peekable();
-        if links.peek().is_none() {
-            return;
-        }
-        let landing = outside.map(|old| Landing::of(old, now));
-        for link in links {
+    /// compares it with the one before, when no write of this session made
+    /// it: what that moved or twinned is not written on any more.
+    fn follow(&mut self, moved: &Remap, outside: Option<&Landing>) {
+        for link in self.lines.iter_mut().flat_map(|l| &mut l.links) {
             let at = link.nr.map(|nr| (Source::Todo, nr));
-            link.lost |= landing
-                .as_ref()
+            link.lost |= outside
                 .zip(at)
                 .is_some_and(|(l, at)| landed_at(l, at).is_none());
             link.nr = at.and_then(|at| moved.track(at)).map(|(_, nr)| nr);
@@ -228,10 +216,10 @@ impl Model {
     pub(crate) fn remap_clip(
         &mut self,
         moved: &Remap,
-        outside: Option<&Snapshot>,
+        outside: Option<&Landing>,
     ) {
         if let Some(yank) = &mut self.clip {
-            yank.follow(moved, &self.snap, outside);
+            yank.follow(moved, outside);
         }
     }
 

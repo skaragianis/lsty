@@ -407,12 +407,12 @@ impl Model {
         self.live.serial += 1;
         self.clock = clock;
         self.hist.follow(&moved);
-        self.remap_clip(&moved, wrote.is_none().then_some(&old));
+        self.remap_clip(&moved, landing.as_ref());
         self.sticky.remap(&moved);
         self.remap_peek(&moved);
         self.remap_pointer(&moved);
         self.land_prompt(&old);
-        self.remap_drafts(&moved, &old, wrote.is_some());
+        self.remap_drafts(&moved, &old, landing.as_ref());
         if let Some(w) = wrote {
             self.stick(&moved, w.touched);
         }
