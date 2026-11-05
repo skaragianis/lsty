@@ -23,7 +23,7 @@ Write parser +spec01 id:parser
 │ [ ] Later   ││ state     todo                                                                    │
 │ [x] Blocked ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9
+ NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
 -- in-list --
 ┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
 │ +spec01  1/1││  1   (A) Call client +work @phone                                         today   │

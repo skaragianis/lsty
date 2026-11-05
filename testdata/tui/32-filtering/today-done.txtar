@@ -62,4 +62,4 @@ x 2026-09-29 Archived job
 │ Overdue     ││ state  todo                                                                       │
 │ Upcoming    ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9
+ NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
