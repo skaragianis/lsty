@@ -73,6 +73,9 @@ const KEYS: [Key; 7] = [
     (Action::Stop, "<F9>", "gg", CLAIMS),
 ];
 
+/// The keys of a selection, over an archived task, that no other row presses.
+const OVER_ARCHIVED: [&str; 6] = ["d", "J", "K", "gd", "gt", "gT"];
+
 /// A folder with `todo` and the key bindings `toml`.
 fn bound(todo: &str, toml: &str) -> TempDir {
     let dir = workdir(todo);
@@ -86,6 +89,19 @@ fn opened(shown: &str, first: &str) -> (TempDir, Model) {
     let dir = bound(shown, STOP_BOUND);
     let mut model = started(deps(dir.path(), alone()));
     before_the_key(&mut model, first);
+    (dir, model)
+}
+
+/// A list of `shown` with an archived task as its last row.
+fn with_archived(shown: &str) -> (TempDir, Model) {
+    let dir = bound(shown, STOP_BOUND);
+    fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    let config = Config {
+        hidden_tasks: Vec::new(),
+        ..alone()
+    };
+    let model = started(deps(dir.path(), config));
     (dir, model)
 }
 
@@ -132,6 +148,42 @@ fn stale_against_fresh(
 fn looks_again(model: &Model, action: Action, name: &str) {
     assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN), "{name}");
     assert!(!dim(model.answers()(action)), "{name}: lit now");
+}
+
+/// A dim key does nothing, whichever it is: after it the selection is as it
+/// was, and `next` repeats `real` just as if the key had not been pressed.
+#[test]
+fn a_dim_press_leaves_the_selection_and_the_repeat_alone() {
+    let check = |list: &str, real: &str, (first, key): (&str, &str), next| {
+        let name = format!("{real}, {first}, {key} on {list:?}");
+        let (dir, mut model) = with_archived(list);
+        let (twin_dir, mut twin) = with_archived(list);
+        keys(&mut model, real);
+        keys(&mut twin, real);
+        before_the_key(&mut model, first);
+        let (mode, selected) = (model.key_mode(), model.selected_rows());
+        let before = files(dir.path());
+        keys(&mut model, key);
+        assert_eq!(files(dir.path()), before, "{name}");
+        assert_eq!(model.tone, Tone::Alert, "{name}");
+        assert_eq!(model.key_mode(), mode, "{name}");
+        assert_eq!(model.selected_rows(), selected, "{name}");
+        keys(&mut model, next);
+        keys(&mut twin, next);
+        assert_ne!(files(dir.path()), before, "{name}: repeated nothing");
+        assert_eq!(files(dir.path()), files(twin_dir.path()), "{name}");
+    };
+    for (_, key, first, (shown, ..)) in KEYS {
+        let selection = format!("gg{first}Vj");
+        let list = format!("{shown}Mine\n");
+        check(&list, "Gk-", (&selection, key), "<Esc>Gk.");
+    }
+    for key in OVER_ARCHIVED {
+        check("A\nMine\n", "gg-", ("jVj", key), "<Esc>gg.");
+    }
+    for real in ["gg-", "ggVjJ<Esc>", "gggd2030-01-01<CR>"] {
+        check("A\nB\nC\nD\n", real, ("G", "3."), "ggj.");
+    }
 }
 
 /// Each way of pressing a key: alone, over a selection, with a count.

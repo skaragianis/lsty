@@ -138,7 +138,8 @@ impl Model {
                 outcome.messages().iter().map(|m| errs::lossy(m)).collect()
             },
         );
-        if !self.settle(result) {
+        if !self.settle(result) || !passes {
+            self.tone = Tone::Alert;
             self.cursor = cursor;
             return false;
         }
