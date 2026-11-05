@@ -184,7 +184,7 @@ fn an_archived_task_cannot_be_edited() {
     assert!(model.cursor_at().is_none());
     assert_eq!(
         model.message.as_deref(),
-        Some("Old is archived — x restores it")
+        Some("Old is archived — x reopens it")
     );
 }
 
@@ -495,7 +495,7 @@ fn a_dependent_task_of_an_archived_task_follows_dep() {
     assert_eq!(field_of(&model), None);
     assert_eq!(
         model.message.as_deref(),
-        Some("Old is archived and has no id — x restores it first")
+        Some("Old is archived and has no id — x reopens it first")
     );
     assert_eq!(todo_of(dir.path()), "Open\n");
 }
@@ -508,7 +508,7 @@ fn a_prerequisite_task_of_an_archived_task_is_refused() {
     assert_eq!(field_of(&model), None);
     assert_eq!(
         model.message.as_deref(),
-        Some("Old is archived — x restores it")
+        Some("Old is archived — x reopens it")
     );
     assert_eq!(todo_of(dir.path()), "Open\n");
 }
@@ -538,15 +538,13 @@ fn an_archived_task_of_only_labels_is_named_by_its_line() {
     keys(&mut model, "gO");
     assert_eq!(
         model.message.as_deref(),
-        Some("x 2026-09-01 +p id:o1d2 is archived — x restores it")
+        Some("x 2026-09-01 +p id:o1d2 is archived — x reopens it")
     );
     let (_dir, mut model) = with_archive("Open\n", "x 2026-09-01 +p\n", "j");
     keys(&mut model, "go");
     assert_eq!(
         model.message.as_deref(),
-        Some(
-            "x 2026-09-01 +p is archived and has no id — x restores it first"
-        )
+        Some("x 2026-09-01 +p is archived and has no id — x reopens it first")
     );
 }
 

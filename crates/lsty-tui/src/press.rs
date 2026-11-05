@@ -22,7 +22,6 @@ pub(crate) enum Command {
     Start,
     Stop,
     Reopen,
-    Restore,
     Delete,
     /// `cycle_priority` and its way back: `pri`, each task from its own.
     Step {
@@ -39,10 +38,7 @@ impl Command {
             Self::Wontdo => Some(("won't do", "already done")),
             Self::Start => Some(("started", "already underway")),
             Self::Stop => Some(("stopped", "not underway")),
-            Self::Reopen
-            | Self::Restore
-            | Self::Delete
-            | Self::Step { .. } => None,
+            Self::Reopen | Self::Delete | Self::Step { .. } => None,
         }
     }
 }
@@ -489,7 +485,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
     } else if open {
         Answer::Refused(Refusal::Archived)
     } else if s.archived == s.total && x {
-        Answer::Resolved(Command::Restore)
+        Answer::Resolved(Command::Reopen)
     } else {
         Answer::Refused(Refusal::Closed)
     }

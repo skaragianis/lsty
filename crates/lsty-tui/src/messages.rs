@@ -58,7 +58,7 @@ pub(crate) fn name_of(line: &Line) -> String {
 
 /// The refusal of the one archived task named `name`.
 pub(crate) fn archived_task(name: &str) -> String {
-    format!("{name} is archived — x restores it")
+    format!("{name} is archived — x reopens it")
 }
 
 /// The refusal of `T` on the one done task named `name`.
@@ -82,7 +82,7 @@ pub(crate) const PUT_BACK: &str = "put back as it was";
 /// The refusal of a new task that waits for the archived task named
 /// `name`, which has no id.
 pub(crate) fn archived_no_id(name: &str) -> String {
-    format!("{name} is archived and has no id — x restores it first")
+    format!("{name} is archived and has no id — x reopens it first")
 }
 
 /// What the status line says after the human's own action made a task

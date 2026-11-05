@@ -36,7 +36,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Old task is archived — x restores it  x restore  T wont  o new     9.9.9
+ NORMAL  todo.txt  manual  Old task is archived — x reopens it  x reopen  T wont  o new       9.9.9
 -- b-file --
 A
 B

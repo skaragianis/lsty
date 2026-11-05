@@ -60,7 +60,7 @@ fn the_priority_cycle() {
 fn the_archived_messages() {
     assert_eq!(
         messages::archived_task("Old task"),
-        "Old task is archived — x restores it"
+        "Old task is archived — x reopens it"
     );
     assert_eq!(
         messages::busy("todo.txt"),

@@ -7,7 +7,7 @@ use std::{cell::Cell, fs, path::Path, rc::Rc, time::Duration};
 use lsty_core::{
     config::{Config, Hidden},
     dates::Clock,
-    errs::{self, Code},
+    errs::{self, Code, Source},
     keys::{Action, Mode},
     ops::{self, ClaimOpts, DoOpts, Outcome, PriPair, StartOpts, Target},
 };
@@ -89,8 +89,12 @@ fn named(model: &Model, command: Command, tasks: &[Chosen]) -> Ran {
         Command::Wontdo => ops::finish(env, &targets, wontdo),
         Command::Start => ops::start(env, &targets, StartOpts::default()),
         Command::Stop => ops::stop(env, &targets, claim),
+        Command::Reopen
+            if matches!(targets[0].line(), Some((Source::Done, _))) =>
+        {
+            ops::restore(env, &targets, claim)
+        }
         Command::Reopen => ops::reopen(env, &targets, claim),
-        Command::Restore => ops::restore(env, &targets, claim),
         Command::Delete => ops::del(env, &targets, claim),
         Command::Step { forward } => {
             let last = model.deps.config.priority_range;
@@ -803,8 +807,8 @@ fn a_repeat_of_a_paste_is_always_lit() {
 /// they ask the rule, a refusal must still reach the status line as before.
 #[test]
 fn a_refused_key_says_what_it_always_said() {
-    const ONE: &str = "Old is archived — x restores it";
-    const NO_ID: &str = "Old is archived and has no id — x restores it first";
+    const ONE: &str = "Old is archived — x reopens it";
+    const NO_ID: &str = "Old is archived and has no id — x reopens it first";
     const SOME: &str = "some are archived — nothing changed";
     const THREE: &str = "A\nB\nC\n";
     const SORTED: &str = "sorted by priority — press s for manual order";
@@ -881,7 +885,7 @@ fn the_rule() {
         (X, &[1, 7], Answer::Resolved(Command::Do)),
         (X, &[1, 3], Answer::Resolved(Command::Do)),
         (X, &[7, 8], Answer::Resolved(Command::Reopen)),
-        (X, &[9, 10], Answer::Resolved(Command::Restore)),
+        (X, &[9, 10], Answer::Resolved(Command::Reopen)),
         (X, &[1, 9], Answer::Resolved(Command::Do)),
         (X, &[3, 9], Answer::Resolved(Command::Do)),
         (X, &[7, 9], Answer::Refused(Refusal::Closed)),
