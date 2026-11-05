@@ -12,11 +12,10 @@ pub(crate) enum Tone {
     Alert,
 }
 
-/// What the status line says when every task of a prompt is gone.
+/// What the status line says when the task of a line being edited is gone.
 pub(crate) const GONE: &str = "the task is gone";
 
-/// What the status line says when a line being edited, or a task of a
-/// prompt, changed on disk.
+/// What the status line says when a line being edited changed on disk.
 pub(crate) const CHANGED: &str = "this task changed on disk";
 
 /// What the status line says when the task a draft gives an id to is

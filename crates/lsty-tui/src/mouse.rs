@@ -300,8 +300,8 @@ impl Model {
     fn drag_to(&mut self, press: &mut Press, i: usize) {
         if !press.dragging {
             press.dragging = true;
+            self.exit_visual();
             self.visual = press.anchor;
-            self.reset_keys();
         }
         self.cursor_to_row(i);
     }

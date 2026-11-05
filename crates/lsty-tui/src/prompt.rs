@@ -3,10 +3,10 @@
 
 use lsty_core::{
     case::lower,
-    errs,
+    errs::{self, Code},
     keys::Action,
-    list::{Task, TaskId},
-    ops::{self, Env, Outcome, Target},
+    list::{Snapshot, Task, TaskId},
+    ops::{self, Env, Landing, Outcome, Target},
     query::Query,
     theme::Slot,
     todotxt::{Kind as TokenKind, SEPARATORS},
@@ -26,7 +26,7 @@ use crate::{
     press::{Answer, Summary, decide},
     search::alternative,
     text::{Span, fit, pad, put, width, width_of},
-    track::{Place, Remap},
+    track::{Place, landed_at},
 };
 
 /// The keys a tag may have that completion offers.
@@ -160,10 +160,8 @@ pub(crate) struct Prompt {
     kind: Kind,
     /// The count the prompt was opened with.
     count: usize,
-    /// The lines of the tasks, followed across reloads.
+    /// The lines of the tasks, as they stand in the reading drawn.
     places: Vec<Place>,
-    /// A reading could not tell whether one of the tasks is still its line.
-    changed: bool,
 }
 
 impl LineKind {
@@ -203,32 +201,29 @@ impl Model {
             kind,
             count,
             places,
-            changed: false,
         };
         self.line = Some(Line::new(LineKind::Tasks(prompt), ""));
     }
 
-    /// Follows the lines of the prompt's tasks to a new reading; those
-    /// that are gone are left out, and one it cannot tell keeps the prompt
-    /// from writing at all.
-    pub(crate) fn remap_prompt(&mut self, moved: &Remap) {
+    /// Takes the lines of the prompt's tasks to a new reading. If any of
+    /// them changed, the prompt has no tasks left to write on.
+    pub(crate) fn land_prompt(&mut self, old: &Snapshot) {
         if let Some(Line {
             kind: LineKind::Tasks(prompt),
             ..
         }) = &mut self.line
         {
-            prompt.changed |= prompt.places.iter().any(|at| {
-                moved.track(*at).is_some() && moved.stays(*at).is_none()
-            });
+            let landing = Landing::of(old, &self.snap);
             prompt.places = prompt
                 .places
                 .iter()
-                .filter_map(|at| moved.stays(*at))
-                .collect();
+                .map(|at| landed_at(&landing, *at))
+                .collect::<Option<_>>()
+                .unwrap_or_default();
         }
     }
 
-    /// The tasks of the prompt that are still in the files.
+    /// The tasks of the prompt.
     fn prompt_tasks(&self) -> Vec<TaskId> {
         let Some(Line {
             kind: LineKind::Tasks(prompt),
@@ -246,7 +241,7 @@ impl Model {
     }
 
     /// `execute`: one operation over the tasks. On an error the prompt
-    /// stays open with its text.
+    /// stays open with its text, unless the list changed.
     pub(crate) fn execute_prompt(&mut self) {
         let Some(Line {
             kind: LineKind::Tasks(prompt),
@@ -256,18 +251,12 @@ impl Model {
         else {
             return;
         };
-        let (kind, count, changed) =
-            (prompt.kind, prompt.count, prompt.changed);
+        let (kind, count) = (prompt.kind, prompt.count);
         let text = field.text().trim_matches(is_sep).to_owned();
         let tasks = self.prompt_tasks();
-        if changed || tasks.is_empty() {
+        if tasks.is_empty() {
             self.close_input();
-            let why = if changed {
-                messages::CHANGED
-            } else {
-                messages::GONE
-            };
-            self.alert(why.to_owned());
+            self.say_changed();
             return;
         }
         if text.is_empty() && kind.needs_text() {
@@ -277,10 +266,12 @@ impl Model {
         let chosen = self.chosen(&tasks);
         let ran = self.ending(&tasks, |m| {
             let result = m.attempt(|env| write(env, kind, &chosen, &text));
-            if let Err(e) = result {
-                return m.settle(Err(e));
+            if !result
+                .as_ref()
+                .is_err_and(|e| e.code() != Code::ExpectMismatch)
+            {
+                m.close_input();
             }
-            m.close_input();
             m.settle(result)
         });
         if ran {

@@ -24,7 +24,7 @@ use crate::{
     motion::View,
     msg::{Cmd, Msg},
     rows::Row,
-    track::{Place, Remap, Wrote},
+    track::{Place, Remap, Wrote, landed_at},
     watch::{Notice, Sink, Watch, Watcher},
 };
 
@@ -363,13 +363,12 @@ impl Model {
     ) -> bool {
         let place = self.cursor_place();
         let offset = self.view_offset();
-        let selected = self.selected_places();
-        let typed = self.typed_lines();
+        let ends = self.selection_ends();
+        let typed = self.typed_lines().filter(|_| wrote.is_none());
         let old = std::mem::replace(&mut self.snap, snap);
-        let mut follow = selected.clone();
-        follow.extend(place);
-        let moved =
-            Remap::new(&old, &self.snap, wrote.map(|w| w.record), &follow);
+        let record = wrote.map(|w| w.record);
+        let moved = Remap::new(&old, &self.snap, record, place.as_slice());
+        let landing = typed.as_ref().map(|_| Landing::of(&old, &self.snap));
         self.live.shown.deleted = !self.file_exists()
             && (old.found().state == FileState::Exists
                 || self.live.shown.deleted);
@@ -380,7 +379,7 @@ impl Model {
         self.sticky.remap(&moved);
         self.remap_peek(&moved);
         self.remap_pointer(&moved);
-        self.remap_prompt(&moved);
+        self.land_prompt(&old);
         self.remap_drafts(&moved, &old, wrote.is_some());
         if let Some(w) = wrote {
             self.stick(&moved, w.touched);
@@ -402,8 +401,11 @@ impl Model {
             None => (aim, offset, matches!(offset, View::Cursor(_))),
         };
         self.follow(aim, offset);
-        self.resume(&moved, &selected);
-        self.check_typed(typed, &old);
+        self.resume(ends, &old_rows, |at| match &landing {
+            Some(landing) => landed_at(landing, at),
+            None => moved.track(at),
+        });
+        self.check_typed(typed, landing.as_ref());
         if reveal {
             self.scroll();
         }
@@ -413,7 +415,8 @@ impl Model {
     /// The lines the keys typed so far are about, when any wait for more.
     fn typed_lines(&self) -> Option<Vec<Place>> {
         let matcher = self.matchers.get(&self.key_mode())?;
-        matcher.waits().then(|| self.lines_under(matcher.count()))
+        (matcher.waits() || self.visual.is_some())
+            .then(|| self.lines_under(matcher.count()))
     }
 
     /// The lines of the `count` rows from the cursor.
@@ -421,20 +424,23 @@ impl Model {
         places(&self.snap, &ids_of(self.rows_of(count)))
     }
 
-    /// Notes that the keys typed from `old` are no longer about the same
-    /// lines. They stay typed, for a motion to go on; the last of them
-    /// refuses if it would write (see [`crate::press::writes_line`]).
-    fn check_typed(&mut self, typed: Option<Vec<Place>>, old: &Snapshot) {
-        let Some(typed) = typed else {
+    /// Notes that the keys typed, or the selection, are no longer about
+    /// the same lines. They stay, for a motion to go on; the first key that
+    /// would write refuses (see [`crate::press::writes_line`]).
+    fn check_typed(
+        &mut self,
+        typed: Option<Vec<Place>>,
+        landing: Option<&Landing>,
+    ) {
+        let (Some(typed), Some(landing)) = (typed, landing) else {
             return;
         };
-        let landing = Landing::of(old, &self.snap);
         let now = self.lines_under(self.typed_count());
-        let landed = typed.iter().map(|at| {
-            landing.line(at.0, at.1.index()).map(|index| (at.0, index))
-        });
-        let drawn = now.iter().map(|at| Some((at.0, at.1.index())));
-        self.keys_lost |= !landed.eq(drawn);
+        let same = typed
+            .iter()
+            .map(|at| landed_at(landing, *at))
+            .eq(now.into_iter().map(Some));
+        self.keys_lost |= !same;
     }
 
     /// Where a write sends the cursor, when it takes it off its task. It

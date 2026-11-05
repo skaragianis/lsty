@@ -737,15 +737,37 @@ fn a_gesture_moving_the_cursor_forgets_the_keys_typed_before_it() {
         assert_eq!(todo_of(dir.path()), "A\nB\nC\n", "{before} {shift}");
     }
     // So does one on keys a reading took the line from: no refusal is owed.
-    let (dir, mut m) = workdir_model("A\nB\nC\n", alone());
-    m.update(Msg::Resize(100, 12));
-    keys(&mut m, "d");
-    fs::write(dir.path().join("todo.txt"), "A +k\nB\nC\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut m);
-    click(&mut m, 3, 3);
-    keys(&mut m, "x");
-    assert_eq!(todo_of(dir.path()), "A +k\nB\nx 2026-09-29 C\n");
+    let cases = [
+        (
+            false,
+            &[(down, 3), (Gesture::Up, 3)][..],
+            "A +k\nB\nx 2026-09-29 C\n",
+        ),
+        (
+            false,
+            &[(down, 1), (drag, 2), (Gesture::Up, 2)][..],
+            "x 2026-09-29 A +k\nx 2026-09-29 B\nC\n",
+        ),
+        (
+            true,
+            &[(down, 2), (Gesture::Up, 2)][..],
+            "x 2026-09-29 A +k\nx 2026-09-29 B\nC\n",
+        ),
+    ];
+    for (shift, gestures, written) in cases {
+        let (dir, mut m) = workdir_model("A\nB\nC\n", alone());
+        m.update(Msg::Resize(100, 12));
+        keys(&mut m, "d");
+        fs::write(dir.path().join("todo.txt"), "A +k\nB\nC\n")
+            .unwrap_or_else(|e| panic!("{e}"));
+        reload(&mut m);
+        for &(gesture, y) in gestures {
+            let at = Position::new(20, y);
+            m.update(Msg::Mouse(Mouse { gesture, at, shift }));
+        }
+        keys(&mut m, "x");
+        assert_eq!(todo_of(dir.path()), written);
+    }
 }
 
 #[test]

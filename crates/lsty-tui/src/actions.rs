@@ -67,6 +67,10 @@ impl Model {
         match dim(answer).then(|| self.moved_on(refused)) {
             Some(Ok(true)) => {
                 answer = decide(action, self, &self.summary(count));
+                if self.keys_lost {
+                    self.say_changed();
+                    return false;
+                }
                 if !dim(answer) || (had && self.rows.is_empty()) {
                     self.alert(ops::LIST_CHANGED.to_owned());
                     return false;
@@ -331,6 +335,7 @@ impl Model {
             Code::LockTimeout => messages::busy(&self.base_name()),
             Code::ExpectMismatch => {
                 self.owe_reload();
+                self.exit_visual();
                 e.message().to_owned()
             }
             Code::Usage

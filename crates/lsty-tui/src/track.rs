@@ -6,7 +6,7 @@ use lsty_core::{
     errs::{Nr, Source},
     lineid,
     list::{Snapshot, Task},
-    ops::{ChangeKind, FileRecord, UndoRecord},
+    ops::{ChangeKind, FileRecord, Landing, UndoRecord},
     todotxt::{File, Line},
 };
 
@@ -16,6 +16,13 @@ pub(crate) type Place = (Source, Nr);
 /// Where a task's line stands in its file.
 pub(crate) fn place_of(task: &Task) -> Place {
     (task.source(), task.nr())
+}
+
+/// Where the line at `at` stands in a later reading; `None` when an action
+/// aimed at it writes nothing.
+pub(crate) fn landed_at(landing: &Landing, at: Place) -> Option<Place> {
+    let index = landing.line(at.0, at.1.index())?;
+    Some((at.0, Nr::from_index(index)?))
 }
 
 /// A line a write was about.
@@ -190,18 +197,6 @@ impl Remap {
         (!gone && (followed || free)).then_some(now)
     }
 
-    /// The place of `at` now, unless the reading gives no ground to take a
-    /// line there for it: it was followed, or it is the first of the lines
-    /// that changed where it stood, which is taken for it.
-    pub(crate) fn stays(&self, at: Place) -> Option<Place> {
-        let plain = &self.of(at.0).plain;
-        let first = at.1.index().checked_sub(1).is_none_or(|before| {
-            plain.get(before).is_some_and(Option::is_some)
-        });
-        self.track(at)
-            .filter(|_| first || self.followed(at).is_some())
-    }
-
     /// Where the line at `at` of the record's `pre` stood in the old
     /// reading, `None` when the reading did not have it.
     pub(crate) fn shown(&self, at: Place) -> Option<Place> {
@@ -215,13 +210,6 @@ impl Remap {
     /// Where each line of the old todo file went, as a diff pairs them.
     pub(crate) fn todo_map(&self) -> &[Option<usize>] {
         &self.of(Source::Todo).plain
-    }
-
-    /// The place the line at `at` was followed to, when it was.
-    pub(crate) fn followed(&self, at: Place) -> Option<Place> {
-        let (source, nr) = at;
-        let to = (*self.of(source).plain.get(nr.index())?)?;
-        Some((source, Nr::from_index(to)?))
     }
 
     /// Where lines that stood at `at` in the old reading are in the new
