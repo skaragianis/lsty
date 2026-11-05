@@ -413,8 +413,7 @@ impl Model {
     /// The lines the keys typed so far are about, when any wait for more.
     fn typed_lines(&self) -> Option<Vec<Place>> {
         let matcher = self.matchers.get(&self.key_mode())?;
-        (self.edit.is_none() && matcher.waits())
-            .then(|| self.lines_under(matcher.count()))
+        matcher.waits().then(|| self.lines_under(matcher.count()))
     }
 
     /// The lines of the `count` rows from the cursor.
