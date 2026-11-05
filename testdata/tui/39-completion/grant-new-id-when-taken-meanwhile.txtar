@@ -17,13 +17,14 @@ Call client
 -- other --
 Write parser +spec01 id:parser
 Write docs +spec01
-Call client id:t001
+Call client
+Another id:t001
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Write parser +spec01                                                                 parser │
 │  1   Write docs +spec01                                                                   t002   │
-│  3 ⧗ Call client dep:t002                                                                 t001   │
-│                                                                                                  │
+│  3 ⧗ Call client dep:t002                                                                        │
+│  1   Another                                                                              t001   │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -32,8 +33,9 @@ Call client id:t001
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 Call client id:t001 dep:t002; 2 is id:t002  x done  t start      9.9.9
+ NORMAL  todo.txt  manual  3 Call client dep:t002; 2 is id:t002  x done  t start  T wont      9.9.9
 -- result --
 Write parser +spec01 id:parser
 Write docs +spec01 id:t002
-Call client id:t001 dep:t002
+Call client dep:t002
+Another id:t001

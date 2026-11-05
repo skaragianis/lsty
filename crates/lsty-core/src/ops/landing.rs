@@ -1,9 +1,19 @@
 //! Where the lines of the reading an action was aimed from stand now.
 
-use crate::{errs::Source, lineid, list::Snapshot, todotxt::Line};
+use crate::{
+    errs::{Code, Error, Source},
+    lineid,
+    list::Snapshot,
+    todotxt::Line,
+};
 
 /// What an action says when a line it was aimed at is not there to write.
 pub const LIST_CHANGED: &str = "the list changed — look again";
+
+/// The refusal of an action aimed at a line that is not there to write.
+pub(super) fn list_changed() -> Error {
+    Error::new(Code::ExpectMismatch, LIST_CHANGED)
+}
 
 /// The lines of one reading as they stand in a later one, file by file.
 /// An unchanged file costs a comparison, and maps nothing.

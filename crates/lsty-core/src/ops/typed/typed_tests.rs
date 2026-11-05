@@ -271,10 +271,6 @@ const ROWS: &[Row] = &[
     ),
 ];
 
-fn base_of(todo: &str, nr: u32) -> &str {
-    todo.lines().nth(nr as usize - 1).unwrap_or_default()
-}
-
 fn check(dir: &Dir, row: &Row, got: crate::errs::Result<Outcome>) {
     let (name, _, _, _, file, want) = row;
     match (got, want) {
@@ -310,20 +306,9 @@ fn a_typed_line_is_written_with_warnings() {
         let (_, todo, nr, draft, _, _) = row;
         let dir = folder(todo, None);
         let at = Nr::new(*nr).unwrap();
-        let base = base_of(todo, *nr);
-        let got = typed(&dir, at, base.as_bytes(), draft.as_bytes(), &[]);
+        let got = typed(&dir, at, draft.as_bytes(), &[]);
         check(&dir, row, got);
     }
-}
-
-#[test]
-fn a_changed_base_is_a_conflict() {
-    let dir = folder("Phone client\n", None);
-    let at = Nr::new(1).unwrap();
-    let err =
-        typed(&dir, at, b"Call client", b"Ring client", &[]).unwrap_err();
-    assert_eq!(err.code(), Code::EditConflict);
-    assert_eq!(dir.todo(), "Phone client\n");
 }
 
 #[test]
@@ -331,7 +316,7 @@ fn an_edit_keeps_the_record_for_undo() {
     let dir = folder(format!("{E}\n"), None);
     let at = Nr::new(1).unwrap();
     let draft = format!("{E} more");
-    let out = typed(&dir, at, E.as_bytes(), draft.as_bytes(), &[]).unwrap();
+    let out = typed(&dir, at, draft.as_bytes(), &[]).unwrap();
     assert!(out.undo().is_some());
 }
 

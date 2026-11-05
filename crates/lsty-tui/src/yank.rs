@@ -8,10 +8,7 @@ use lsty_core::{
     errs::Source,
     keys::Action,
     list::{Snapshot, TaskId},
-    ops::{
-        self, Change, ChangeKind, PasteLine, Pin, Place, Relink, Seen, Settle,
-        Tracked,
-    },
+    ops::{self, Change, ChangeKind, PasteLine, Place, Relink, Seen},
     todotxt::{Line, trim},
 };
 
@@ -257,12 +254,9 @@ impl Model {
         let Some(task) = task else {
             return Place::End;
         };
-        let raw = self.snap.line(task).raw().to_vec();
         Place::Beside {
-            anchor: Tracked::new(
-                Pin::new(task.nr(), raw, Settle::Line),
-                Seen::of(&self.snap),
-            ),
+            seen: Seen::of(&self.snap),
+            at: task.nr().index(),
             below: action != Action::PasteAbove,
         }
     }

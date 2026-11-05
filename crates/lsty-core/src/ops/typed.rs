@@ -6,14 +6,21 @@
 use std::io::Write as _;
 
 use super::{
+    claim::{ClaimMode, Guard},
     env::Env,
+    grant::{Grant, grant_ids},
+    lifecycle::ClaimOpts,
+    newline::invalid_text,
+    refs::Target,
+    result::Outcome,
     rules::SETTABLE_KEYS,
+    run::{Rules, run_with},
     staged::Path,
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
     dates::{self, Date},
-    errs::{Code, Error, Result, lossy},
+    errs::{Error, Result, lossy},
     list::{Snapshot, Task, TaskId},
     todotxt::{Kind, Line, Rec, TokenView, is_gap},
 };
@@ -21,23 +28,47 @@ use crate::{
 /// The warning that goes with each text the rules let through.
 type Warnings = Vec<Vec<u8>>;
 
+/// Writes `draft` over the line `target` names. Each grant gives its id to
+/// the task it names, in the same write.
+///
+/// # Errors
+///
+/// `expect_mismatch` for a line that is not the one aimed at,
+/// `invalid_value` for a line break, `wrong_state` for an empty task and a
+/// text that changes a stamp, and what the rules refuse: a second `id:`, a
+/// taken id, a typed `started:` on a blocked task and a claim of another.
+pub fn edit_typed(
+    env: &Env<'_>,
+    target: &Target,
+    draft: &[u8],
+    grants: &[Grant],
+) -> Result<Outcome> {
+    if draft.iter().any(|b| matches!(b, b'\r' | b'\n')) {
+        return Err(invalid_text("a task is one line", ""));
+    }
+    run_with(env, "edit", false, Rules::WarnCycles, |tx| {
+        let id = tx.anchor(target)?;
+        tx.mark_primary(id)?;
+        let guard = Guard {
+            actor: &env.actor,
+            mode: ClaimMode::Guarded,
+            opts: ClaimOpts::default(),
+        };
+        tx.guarded(guard, id, |tx| stage_typed(tx, env, id, draft))?;
+        grant_ids(tx, env, grants)
+    })
+}
+
 /// Stages the typed line over the task, and says what was done.
-pub(super) fn stage_typed(
+fn stage_typed(
     tx: &mut Tx,
     env: &Env<'_>,
     id: TaskId,
-    base: &[u8],
     draft: &[u8],
 ) -> Result<()> {
     let task = tx.task(id).ok_or_else(gone)?;
     let old = tx.snapshot().line(task);
     let handle = tx.handle(id);
-    if old.raw() != base {
-        return Err(Error::new(
-            Code::EditConflict,
-            format!("{handle} changed while it was being edited"),
-        ));
-    }
     if !Line::parse(draft).has_text() {
         return Err(empty_task(tx.snapshot(), task));
     }
@@ -71,7 +102,7 @@ fn empty_task(snap: &Snapshot, task: &Task) -> Error {
 }
 
 /// `text` without the spaces and tabs at its end.
-pub(super) fn trim_end(text: &[u8]) -> &[u8] {
+fn trim_end(text: &[u8]) -> &[u8] {
     let keep = text
         .iter()
         .rposition(|b| !is_gap(*b))

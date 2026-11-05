@@ -121,8 +121,6 @@ mod open_tests;
 #[cfg(test)]
 mod panels_tests;
 #[cfg(test)]
-mod pinned_tests;
-#[cfg(test)]
 mod press_tests;
 #[cfg(test)]
 mod prompt_tests;
@@ -146,6 +144,8 @@ mod test_util;
 mod text_tests;
 #[cfg(test)]
 mod track_tests;
+#[cfg(test)]
+mod under_tests;
 #[cfg(test)]
 mod visual_tests;
 #[cfg(test)]

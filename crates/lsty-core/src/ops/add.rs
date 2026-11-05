@@ -10,18 +10,18 @@ use super::{
     ids::Taken,
     ifabsent::{How, Placed},
     newline::{NEEDS_TEXT, clean_text},
-    pin::{Spot, Tracked},
     refs::{Target, invalid_id},
     result::Outcome,
     rules::{blocked_error, check_rec, expand_first},
     run::run,
+    seen::Seen,
     staged::Path,
     tokens::{ENDED_HINT, is_claim_tag},
     tx::{Tx, gone},
 };
 use crate::{
     errs::{Code, Error, Field, Result, Source, lossy},
-    list::{Snapshot, Task, TaskId},
+    list::{Snapshot, Task},
     todotxt::{Id, Line, Parts, Priority, build},
 };
 
@@ -37,11 +37,13 @@ pub enum Place {
     After(Target),
     /// Directly above the task.
     Before(Target),
-    /// Next to a line followed to where it stands now; once the line is
+    /// Next to a line of a reading, where it stands now; once the line is
     /// gone, directly after the nearest earlier line that still is.
     Beside {
-        /// The line.
-        anchor: Tracked,
+        /// The reading.
+        seen: Seen,
+        /// The index of the line in the reading.
+        at: usize,
         /// Below the line, not above it.
         below: bool,
     },
@@ -58,15 +60,6 @@ pub enum IdChoice {
     Random,
     /// The one task gets this id.
     Chosen(String),
-}
-
-/// The task a new task is a prerequisite of.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub enum Blocks {
-    /// The task a reference names.
-    Task(Target),
-    /// A line followed to where it stands now.
-    Line(Tracked),
 }
 
 /// The tasks to add.
@@ -88,7 +81,7 @@ pub struct AddParams {
     pub grants: Vec<Grant>,
     /// The task that waits for the new task, in the same write. The new
     /// task gets an id; with this, only one text and not `if_absent`.
-    pub blocks: Option<Blocks>,
+    pub blocks: Option<Target>,
 }
 
 /// What a new line needs after its text is composed.
@@ -296,7 +289,7 @@ fn stage(
     lines: &[NewLine],
 ) -> Result<()> {
     grant_ids(tx, env, &p.grants)?;
-    let waiting = p.blocks.as_ref().map(|b| b.task(tx)).transpose()?;
+    let waiting = p.blocks.as_ref().map(|t| tx.anchor(t)).transpose()?;
     let after = insert_point(tx, &p.place)?;
     let typed = lines.iter().filter_map(|l| l.typed.as_deref());
     let held = tx.edited_ids().into_iter().chain(typed.map(<[u8]>::to_vec));
@@ -327,23 +320,6 @@ fn stage(
     }
     announce(tx, env, &placed)?;
     Ok(())
-}
-
-impl Blocks {
-    /// The task that waits.
-    fn task(&self, tx: &mut Tx) -> Result<TaskId> {
-        let target = match self {
-            Self::Task(target) => target.clone(),
-            Self::Line(tracked) => {
-                let pin = tracked.follow(&tx.snapshot().todo().lines);
-                let Spot::Live(at) = pin.spot() else {
-                    return Err(gone());
-                };
-                Target::todo_index(at)
-            }
-        };
-        tx.anchor(&target)
-    }
 }
 
 /// The line, with the id it is to get appended.
@@ -402,13 +378,8 @@ pub(super) fn insert_point(tx: &mut Tx, place: &Place) -> Result<usize> {
         Place::End => Ok(tx.snapshot().todo().lines.len()),
         Place::After(anchor) => anchor_index(tx, anchor).map(|i| i + 1),
         Place::Before(anchor) => anchor_index(tx, anchor),
-        Place::Beside { anchor, below } => {
-            let pin = anchor.follow(&tx.snapshot().todo().lines);
-            Ok(match pin.spot() {
-                Spot::Live(at) if !below => at,
-                Spot::Live(at) | Spot::Blank(at) => at + 1,
-                Spot::After(after) => after.map_or(0, |at| at + 1),
-            })
+        Place::Beside { seen, at, below } => {
+            Ok(seen.beside(&tx.snapshot().todo().lines, *at, *below))
         }
     }
 }

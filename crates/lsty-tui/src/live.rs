@@ -12,7 +12,7 @@ use lsty_core::{
     errs::{self, Code},
     list::{self, Params, Snapshot},
     lock::Cancel,
-    ops::{Change, Landing},
+    ops::{self, Change, Landing},
     todotxt::File,
 };
 
@@ -20,6 +20,7 @@ use crate::{
     actions::places,
     counts::ids_of,
     deps::Now,
+    insert::Draft,
     model::Model,
     motion::View,
     msg::{Cmd, Msg},
@@ -337,6 +338,36 @@ impl Model {
         Ok(moved)
     }
 
+    /// Reads the files before a key that writes on the line under the
+    /// cursor opens a field. Whether that line is not there to write, said
+    /// when so.
+    pub(crate) fn row_changed(&mut self) -> bool {
+        let read = self.clock_now().and_then(|clock| {
+            let snap = fetch(
+                self.snap.found(),
+                &self.deps.config,
+                &clock,
+                &self.cancel,
+            )?;
+            Ok((snap, clock))
+        });
+        let (snap, clock) = match read {
+            Ok(read) => read,
+            Err(e) => {
+                self.fail(&e);
+                return true;
+            }
+        };
+        let landing = Landing::of(&self.snap, &snap);
+        let at = self.cursor_place();
+        let changed = at.is_some_and(|at| landed_at(&landing, at).is_none());
+        self.accept(snap, clock);
+        if changed {
+            self.alert(ops::LIST_CHANGED.to_owned());
+        }
+        changed
+    }
+
     /// Owes a reload: the files are not what the list shows.
     pub(crate) fn owe_reload(&mut self) {
         self.live.debt.owed = true;
@@ -384,10 +415,11 @@ impl Model {
         if let Some(w) = wrote {
             self.stick(&moved, w.touched);
         }
-        // An open field aims at its pin. The pin is in the coordinates
-        // of the reading before a write, which is right because the line
-        // the write adds takes the index of the pin.
-        let aim = self.pin_spot().or_else(|| place.map(|at| moved.place(at)));
+        // An open field aims at its place. That is in the coordinates of
+        // the reading before a write, which is right because the line the
+        // write adds takes that index.
+        let spot = self.edit.as_ref().and_then(Draft::spot);
+        let aim = spot.or_else(|| place.map(|at| moved.place(at)));
         let old_rows = std::mem::take(&mut self.rows);
         self.rebuild_rows();
         self.rebuild_panels();

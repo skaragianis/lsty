@@ -207,11 +207,6 @@ impl Remap {
         Some((source, Nr::from_index(to)?))
     }
 
-    /// Where each line of the old todo file went, as a diff pairs them.
-    pub(crate) fn todo_map(&self) -> &[Option<usize>] {
-        &self.of(Source::Todo).plain
-    }
-
     /// Where lines that stood at `at` in the old reading are in the new
     /// one.
     pub(crate) fn compose(

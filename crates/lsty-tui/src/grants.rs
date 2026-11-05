@@ -3,12 +3,12 @@
 
 use lsty_core::{
     errs::{self, Code},
-    list::{Snapshot, TaskId},
+    list::TaskId,
     ops::{self, Grant},
     todotxt::{Id, Line},
 };
 
-use crate::{insert::Draft, messages, model::Model, track::Remap};
+use crate::{insert::Draft, messages, model::Model};
 
 /// The key whose value names a task the text waits for.
 pub(crate) const DEP: &str = "dep:";
@@ -29,30 +29,6 @@ impl Draft {
             .filter(|g| tags.deps.contains(&g.id().as_str().as_bytes()))
             .cloned()
             .collect()
-    }
-
-    /// Answers a refusal that names the id another writer gave a
-    /// prerequisite: the draft waits for that id now.
-    pub(crate) fn take_id(&mut self, e: &errs::Error) {
-        let (Some(id), Some(chosen)) = (e.text("id"), e.text("chosen")) else {
-            return;
-        };
-        self.field
-            .swap_token(&format!("{DEP}{chosen}"), &format!("{DEP}{id}"));
-        self.comp.grants.retain(|g| g.id().as_str() != chosen);
-    }
-
-    /// Follows the task of each grant to its new line. A grant whose
-    /// line is gone stays, so that the commit says so.
-    pub(crate) fn follow_grants(&mut self, moved: &Remap, snap: &Snapshot) {
-        for g in &mut self.comp.grants {
-            let at = (errs::Source::Todo, g.nr());
-            if let Some((source, nr)) = moved.track(at)
-                && snap.at(source, nr).is_some()
-            {
-                g.moved_to(nr);
-            }
-        }
     }
 }
 
@@ -89,14 +65,13 @@ impl Model {
     /// Makes the id that `task` gets when the draft is written, and
     /// returns the word that waits for it.
     pub(crate) fn give_id(&mut self, task: TaskId) -> errs::Result<String> {
-        let seen = self.seen_lines();
         let Some(draft) = &mut self.edit else {
             return Ok(String::new());
         };
         let id =
             ops::fresh_id(&self.snap, &draft.held(), self.deps.ids.as_ref())?;
         let word = format!("{DEP}{id}");
-        let grant = Grant::new(&self.snap, &seen, task, id)
+        let grant = Grant::new(&self.snap, task, id)
             .ok_or_else(|| errs::Error::new(Code::NoTask, messages::GONE))?;
         draft.comp.grants.push(grant);
         Ok(word)

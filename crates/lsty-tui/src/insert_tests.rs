@@ -4,7 +4,10 @@ use std::{
     time::{Duration, SystemTime},
 };
 
-use lsty_core::config::{Config, Filter, LineNumbers};
+use lsty_core::{
+    config::{Config, Filter, LineNumbers},
+    ops::LIST_CHANGED,
+};
 
 use crate::{
     model::Model,
@@ -161,7 +164,7 @@ fn a_kept_draft_of_a_deleted_task_says_so() {
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
     reload(&mut model);
     press(&mut model, "u");
-    assert_eq!(model.message.as_deref(), Some("the task is gone"));
+    assert_eq!(model.message.as_deref(), Some(LIST_CHANGED));
     press(&mut model, "u");
     assert_eq!(model.message.as_deref(), Some("nothing to undo"));
 }

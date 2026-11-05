@@ -43,13 +43,6 @@ doc = false
 bench = false
 
 [[bin]]
-name = "merge"
-path = "fuzz_targets/merge.rs"
-test = false
-doc = false
-bench = false
-
-[[bin]]
 name = "quote_bytes"
 path = "fuzz_targets/quote_bytes.rs"
 test = false

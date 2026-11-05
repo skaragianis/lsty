@@ -382,7 +382,7 @@ fn done_and_blank_lines_have_tags() {
 
 #[test]
 fn a_claim_key_is_a_single_valued_key() {
-    for key in super::CLAIM_KEYS {
+    for key in super::tags::CLAIM_KEYS {
         assert!(super::is_claim_key(key.as_bytes()), "{key}");
         assert!(super::is_single_valued(key.as_bytes()), "{key}");
     }

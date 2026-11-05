@@ -61,7 +61,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the task it waits for is gone — delete its dep: to go on           9.9.9
+ INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit  <CR> commit  9.9.9
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser
