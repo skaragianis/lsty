@@ -61,7 +61,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the list changed — look again; delete the dep: to save, <Esc> drops your
+ INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit, or delete the dep:
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

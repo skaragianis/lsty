@@ -22,8 +22,8 @@ const LINE_TWIN: &str = "Top\n(A) 2026-09-20 Call client +work id:c1\nEnd\n\
                          (A) 2026-09-20 Call client +work id:c1\n";
 const REFUSED: &str =
     "the list changed \u{2014} look again; <Esc> drops your edit";
-const DEP_REFUSED: &str = "the list changed \u{2014} look again; delete the \
-                           dep: to save, <Esc> drops your edit";
+const DEP_REFUSED: &str = "the list changed \u{2014} look again; <Esc> drops \
+                           your edit, or delete the dep:";
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
