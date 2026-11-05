@@ -343,6 +343,21 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
         ("context child", NESTED, "", "<C-w>4j", "l unfold"),
         ("a switch", NESTED, "", "<C-w>5", NO_FOLD),
         ("a filter", NESTED, "", "<C-w>5G", NO_FOLD),
+        (": all commands", "A\n", "", ":", ""),
+        (": a command", "A\n", "", ":so", ""),
+        (": in the text", "A\n", "", ":so<Tab>", ""),
+        (": no command", "A\n", "", ":zzz", "<Tab> next"),
+        (": typed back", "A\n", "", ":zzz<BS><BS><BS>", ""),
+        ("due prompt", "A\n", "", "gd", "<Tab> next"),
+        ("tag prompt", "A\n", "", "gt", ""),
+        ("untag, a tag", "A +p\n", "", "gT", ""),
+        ("untag, no tag", "A\n", "", "gT", "<Tab> next"),
+        ("/", "A\n", "", "/", "<Tab> next"),
+        ("/zzz", "A\n", "", "/zzz", "<Tab> next"),
+        ("/+, a project", "A +p\n", "", "/+", ""),
+        ("/+, no project", "A\n", "", "/+", "<Tab> next"),
+        ("field, one candidate", "A +p\n", "", "o+", "<C-n> next"),
+        ("field, two candidates", "A +p\nB +q\n", "", "o+", ""),
     ];
     for (name, todo, done, typed, want) in rows {
         let (_dir, model) = hinted((todo, done), None, "", typed);
@@ -791,8 +806,8 @@ fn a_selection_overrides_a_count_over_the_hints() {
     assert!(!shown_dim(&model, 200).contains("x done"));
 }
 
-/// No other mode dims: help and a picker move whatever lies behind, and the
-/// rule refuses no key of a field.
+/// No other mode dims by the rule: help and a picker move whatever lies
+/// behind, and it refuses no key of a field.
 #[test]
 fn other_modes_never_dim() {
     let opened = [
@@ -802,7 +817,7 @@ fn other_modes_never_dim() {
         ("", ":theme<CR>", Mode::Picker),
         ("", "o", Mode::Insert),
         ("", ":", Mode::Command),
-        ("A +p\n", "o+", Mode::Completion),
+        ("A +p\nB +q\n", "o+", Mode::Completion),
     ];
     for (todo, typed, mode) in opened {
         let (_dir, model) = hinted((todo, ""), None, "", typed);
