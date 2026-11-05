@@ -396,7 +396,8 @@ fn a_redo_after_such_an_undo_archives_again() {
 
 #[test]
 fn undoing_and_redoing_a_block_move_puts_every_line_back() {
-    let rows: Vec<String> = (1..=300).map(|i| format!("L{i}")).collect();
+    let mut rows: Vec<String> = (1..=300).map(|i| format!("L{i}")).collect();
+    rows[149].clear();
     let base = lines(&rows.iter().map(String::as_str).collect::<Vec<_>>());
     let dir = folder(&base, None);
     let refs: Vec<String> = (1..=100).map(|i| i.to_string()).collect();

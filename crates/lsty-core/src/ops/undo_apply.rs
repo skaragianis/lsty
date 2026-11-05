@@ -162,8 +162,11 @@ impl<'a> Plan<'a> {
         let Some(lines) = self.crossed().filter(|_| !gone) else {
             return gone;
         };
-        let rows: Option<Vec<usize>> =
-            self.tasks_of(lines).into_iter().map(held).collect();
+        let post = self.rec.post();
+        let rows: Option<Vec<usize>> = lines
+            .filter(|&i| post.get(i).is_some_and(|l| !Line::is_blank_text(l)))
+            .map(held)
+            .collect();
         let Some(rows) = rows else {
             return true;
         };
@@ -187,23 +190,13 @@ impl<'a> Plan<'a> {
         Some(ends.clone().min()?..=ends.max()?)
     }
 
-    /// Those of `lines` of the record that are tasks.
-    fn tasks_of(&self, lines: RangeInclusive<usize>) -> Vec<usize> {
-        let post = self.rec.post();
-        lines
-            .filter(|&i| post.get(i).is_some_and(|l| !Line::is_blank_text(l)))
-            .collect()
-    }
-
     /// Puts the lines a move crossed back in their old order, in the places
-    /// they stand in: the blank lines between them stay.
+    /// they stand in. A blank line put among them from outside stays.
     fn order_moved(&self, order: &mut [usize]) {
         let Some(lines) = self.crossed() else {
             return;
         };
-        let rows: HashSet<usize> = self
-            .tasks_of(lines)
-            .into_iter()
+        let rows: HashSet<usize> = lines
             .filter_map(|line| self.at.get(line).copied().flatten())
             .collect();
         let slots: Vec<usize> = (0..order.len())
@@ -378,10 +371,7 @@ impl Places {
 }
 
 const fn must_hold(kind: ChangeKind) -> bool {
-    matches!(
-        kind,
-        ChangeKind::Changed | ChangeKind::Added | ChangeKind::Moved
-    )
+    matches!(kind, ChangeKind::Changed | ChangeKind::Added)
 }
 
 fn set_text(row: &mut Row, text: &[u8]) {
