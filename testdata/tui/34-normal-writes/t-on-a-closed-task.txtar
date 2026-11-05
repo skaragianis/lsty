@@ -33,7 +33,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Plain is done — x reopens it  x reopen  T wont  o new  a append    9.9.9
+ NORMAL  todo.txt  manual  Plain is done — x reopens it  x reopen  o new  a append            9.9.9
 -- wontdo-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Open                                                                                        │
@@ -44,7 +44,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Decided is done — x reopens it  x reopen  T will  o new  a append  9.9.9
+ NORMAL  todo.txt  manual  Decided is done — x reopens it  x reopen  o new  a append          9.9.9
 -- count-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open                                                                                        │
@@ -55,7 +55,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  all are done — x reopens them  x reopen  T wont  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  all are done — x reopens them  x reopen  o new  a append           9.9.9
 -- selection-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Open                                                                                        │
@@ -92,7 +92,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  nothing to undo  x reopen  T wont  o new  a append  dd delete      9.9.9
+ NORMAL  todo.txt  manual  nothing to undo  x reopen  o new  a append  dd delete  u undo      9.9.9
 -- repeat-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▷ Open                                                                                     0m │
@@ -103,7 +103,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  Plain is done — x reopens it  x reopen  T wont       9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  Plain is done — x reopens it  x reopen  o new        9.9.9
 -- started-file --
 Open started:2026-09-29T0900Z
 x 2026-09-01 Plain

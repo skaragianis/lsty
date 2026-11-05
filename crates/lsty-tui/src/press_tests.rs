@@ -880,7 +880,7 @@ fn the_rule() {
         ToggleStart as Toggle, Wontdo, Yank,
     };
     const STEP: Command = Command::Step { forward: true };
-    let rows: [Rule; 42] = [
+    let rows: [Rule; 40] = [
         (X, &[1], Answer::Resolved(Command::Do)),
         (X, &[1, 7], Answer::Resolved(Command::Do)),
         (X, &[1, 3], Answer::Resolved(Command::Do)),
@@ -906,9 +906,7 @@ fn the_rule() {
         (Wontdo, &[1], Answer::Resolved(Command::Wontdo)),
         (Wontdo, &[2], Answer::Resolved(Command::Wontdo)),
         (Wontdo, &[1, 7], Answer::Resolved(Command::Wontdo)),
-        (Wontdo, &[8], Answer::Resolved(Command::Reopen)),
-        (Wontdo, &[7], Answer::Refused(Refusal::NotWontdo)),
-        (Wontdo, &[8, 7], Answer::Refused(Refusal::NotWontdo)),
+        (Wontdo, &[8], Answer::Refused(Refusal::AllDone)),
         (Wontdo, &[10], Answer::Refused(Refusal::Closed)),
         (Wontdo, &[8, 10], Answer::Refused(Refusal::Closed)),
         (Wontdo, &[1, 10], Answer::Resolved(Command::Wontdo)),

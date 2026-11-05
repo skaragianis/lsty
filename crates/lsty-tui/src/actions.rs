@@ -310,9 +310,6 @@ impl Model {
                 named(tasks, messages::closed_task, messages::CLOSED_TASKS)
             }
             Refusal::SomeDone => messages::SOME_DONE.to_owned(),
-            Refusal::NotWontdo => {
-                named(tasks, messages::done_task, messages::DONE_TASKS)
-            }
         };
         if matches!(why, Refusal::Sorted | Refusal::Says(_)) {
             self.message = Some(text);

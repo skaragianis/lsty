@@ -61,15 +61,8 @@ pub(crate) fn archived_task(name: &str) -> String {
     format!("{name} is archived — x reopens it")
 }
 
-/// The refusal of `T` on the one done task named `name`.
-pub(crate) fn done_task(name: &str) -> String {
-    format!("{name} is done, not won't do — x reopens it")
-}
-
-pub(crate) const DONE_TASKS: &str =
-    "some are done, not won't do — nothing changed";
-
-/// The refusal of `t` on the one done task named `name`, won't do or not.
+/// The refusal of `t` and `T` on the one done task named `name`, won't do or
+/// not.
 pub(crate) fn closed_task(name: &str) -> String {
     format!("{name} is done — x reopens it")
 }

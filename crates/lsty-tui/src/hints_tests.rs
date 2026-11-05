@@ -187,7 +187,7 @@ fn shown_dim(model: &Model, width: u16) -> String {
 
 /// At 16 colours a lit hint and a dim one differ by attribute alone, in the
 /// terminal's own text colour, whatever the theme: on a done task `x` is
-/// lit, `T` dim.
+/// lit, `u` dim.
 #[test]
 fn hints_at_16_colours_read_lit_and_dim_in_a_theme_that_lost_them() {
     for name in [theme::DEFAULT_NAME, "tokyo-night-storm"] {
@@ -209,8 +209,8 @@ fn hints_at_16_colours_read_lit_and_dim_in_a_theme_that_lost_them() {
             (Modifier::BOLD, Modifier::empty(), Modifier::DIM);
         assert_eq!(cell(" x ", 1), look(lit), "{name} lit key: {row}");
         assert_eq!(cell(" x ", 3), look(plain), "{name} lit word: {row}");
-        assert_eq!(cell(" T ", 1), look(dim), "{name} dim key: {row}");
-        assert_eq!(cell(" T ", 3), look(dim), "{name} dim word: {row}");
+        assert_eq!(cell(" u ", 1), look(dim), "{name} dim key: {row}");
+        assert_eq!(cell(" u ", 3), look(dim), "{name} dim word: {row}");
     }
 }
 
@@ -278,14 +278,14 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
             "x done t start T wont a append dd delete u undo",
         ),
         ("todo", "A\n", "", "", "u undo"),
-        ("after a write", "A\n", "", "x", "T wont"),
+        ("after a write", "A\n", "", "x", ""),
         ("after an undo", "A\n", "", "xu", "u undo"),
         ("doing", "A started:2026-09-29T0800Z\n", "", "", "u undo"),
         ("blocked", STUCK, "", "j", "x done t start u undo"),
         ("blocked doing", STUCK_DOING, "", "j", "x done u undo"),
-        ("done", DONE, "", "", "T wont u undo"),
+        ("done", DONE, "", "", "u undo"),
         ("won't do", SKIP, "", "", "u undo"),
-        ("archived", "", OLD, "", "T wont a append dd delete u undo"),
+        ("archived", "", OLD, "", "a append dd delete u undo"),
         ("visual todo", "A\nB\n", "", "vj", ""),
         ("visual blocked", STUCK, "", "vj", "x done t start"),
         (
@@ -300,9 +300,9 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
             "x 2026-09-01 A\nx 2026-09-01 B\n",
             "",
             "vj",
-            "T wont",
+            "",
         ),
-        ("visual archived", "", OLD, "v", "T wont d delete"),
+        ("visual archived", "", OLD, "v", "d delete"),
         (
             "visual open and archived",
             "A\n",

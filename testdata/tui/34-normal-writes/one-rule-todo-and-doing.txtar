@@ -28,7 +28,7 @@ Mine started:2026-09-29T0800Z
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Open; 2 done: Mine  x reopen  T wont  o new  a append      9.9.9
+ NORMAL  todo.txt  manual  1 done: Open; 2 done: Mine  x reopen  o new  a append  dd delete   9.9.9
 -- x-file --
 x 2026-09-29 Open
 x 2026-09-29 Mine started:2026-09-29T0800Z ended:2026-09-29T0900Z

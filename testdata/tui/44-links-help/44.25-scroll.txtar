@@ -54,7 +54,7 @@ Done task
 │ │    gO  Add a task above that this one waits for                          │ │
 │ │  Tasks                                                                   │ │
 │ │    t  Start or stop a task                                               │ │
-│ │    T  Mark a task won't do, or reopen it                                 │ │
+│ │    T  Mark a task won't do                                               │ │
 │ │    x , <Space>  Complete or reopen a task                                │ │
 │ │    dd , <Del>  Delete a task                                             │ │
 │ │    yy  Copy a task                                                       │ │

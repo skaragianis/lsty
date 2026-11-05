@@ -451,7 +451,7 @@ fn a_dim_press_that_cannot_read_says_the_file_is_busy() {
 /// true of the list still shown. Once the lock is free, the next press reads.
 #[test]
 fn a_refused_press_does_not_wait_for_a_held_lock() {
-    let done = Some("A is done, not won't do — x reopens it");
+    let done = Some("A is done — x reopens it");
     for (shown, first, to, key, says) in [
         (CLOSED, "gg", REOPENED, "T", done),
         ("", "", "New\n", "x", None),

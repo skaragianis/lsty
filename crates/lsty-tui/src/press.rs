@@ -50,12 +50,10 @@ pub(crate) enum Refusal {
     Closed,
     /// Some archived, some open, but for `x` and `T`; or any, for `J` and `K`.
     Archived,
-    /// `t` on tasks that are all done.
+    /// `t` and `T` on tasks that are all done.
     AllDone,
     /// `t` on todo and done tasks.
     SomeDone,
-    /// `T` on done tasks of which some are not won't do.
-    NotWontdo,
     /// The key has nothing to work on, and says nothing.
     Quiet,
     /// `J` and `K` in a view that is not in file order.
@@ -94,8 +92,6 @@ pub(crate) struct Summary {
     done: usize,
     blocked_todo: usize,
     blocked_doing: usize,
-    /// A done task that is not won't do, read only while no task is open.
-    plain: bool,
 }
 
 impl Summary {
@@ -119,11 +115,7 @@ impl Summary {
                     s.doing += 1;
                     s.blocked_doing += blocked;
                 }
-                State::Done => {
-                    s.done += 1;
-                    s.plain = s.plain
-                        || (s.todo + s.doing == 0 && !snap.is_wontdo(task));
-                }
+                State::Done => s.done += 1,
             }
         }
         s
@@ -235,14 +227,12 @@ const fn stop(s: &Summary) -> Answer {
     }
 }
 
-/// `T`: any open task, `lsty do --wontdo`; all won't do, `lsty reopen`.
+/// `T`: any open task, `lsty do --wontdo`.
 const fn wontdo(s: &Summary) -> Answer {
     if s.todo + s.doing > 0 {
         Answer::Resolved(Command::Wontdo)
-    } else if s.plain {
-        Answer::Refused(Refusal::NotWontdo)
     } else {
-        Answer::Resolved(Command::Reopen)
+        Answer::Refused(Refusal::AllDone)
     }
 }
 
