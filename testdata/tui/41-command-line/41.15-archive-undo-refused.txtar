@@ -41,7 +41,7 @@ x 2026-09-28 C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't undo: "x 2026-09-28 A" was changed since  x done  t start    9.9.9
+ NORMAL  todo.txt  manual  can't undo: the list changed — look again  x done  t start         9.9.9
 -- b-todo --
 B
 D

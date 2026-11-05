@@ -6,6 +6,8 @@ event
 tick 50ms
 keys t
 frame task-changed-and-seen
+file todo.txt task-changed
+keys t
 file todo.txt task-changed-then-started
 write todo.txt todo.txt
 event
@@ -47,12 +49,12 @@ Call started:2026-09-29T0800Z owner:agent1
 Other
 -- task-changed-and-seen --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▷ Call +outside                                                                            0m │
+│  1   Call +outside                                                                               │
 │  1   Other                                                                                       │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  the list changed — look again  x done  t start  T wont  o new      9.9.9
 -- task-changed-not-seen --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Call                                                                                        │

@@ -81,7 +81,7 @@ pub use tag::{tag, untag};
 pub use text::{append, del_term, prepend, replace};
 pub use typed::edit_typed;
 pub use undo::{Change, FileRecord, UndoRecord};
-pub use undo_apply::{Followed, redo, undo};
+pub use undo_apply::{redo, undo};
 
 #[cfg(test)]
 mod add_tests;

@@ -15,6 +15,16 @@ pub(super) fn list_changed() -> Error {
     Error::new(Code::ExpectMismatch, LIST_CHANGED)
 }
 
+/// The lines `old` as they stand in `new`, for an action aimed at them:
+/// nothing when the two are the same lines, which costs a comparison.
+pub(super) fn kept_in<A: AsRef<[u8]>>(
+    old: &[A],
+    new: &[Line],
+) -> Option<Vec<Option<usize>>> {
+    let same = old.iter().map(AsRef::as_ref).eq(new.iter().map(Line::raw));
+    (!same).then(|| lineid::kept(old, new))
+}
+
 /// The lines of one reading as they stand in a later one, file by file.
 /// An unchanged file costs a comparison, and maps nothing.
 #[derive(Debug)]
@@ -27,10 +37,7 @@ impl Landing {
     /// Compares the reading `from` with the reading `now`.
     pub fn of(from: &Snapshot, now: &Snapshot) -> Self {
         let map = |source| {
-            let (old, new) =
-                (&from.file(source).lines, &now.file(source).lines);
-            let same = old.iter().map(Line::raw).eq(new.iter().map(Line::raw));
-            (!same).then(|| lineid::kept(old, new))
+            kept_in(&from.file(source).lines, &now.file(source).lines)
         };
         Self {
             todo: map(Source::Todo),

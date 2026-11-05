@@ -26,7 +26,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't undo: "Buy +x" was changed since  x done  t start  T wont    9.9.9
+ NORMAL  todo.txt  manual  can't undo: the list changed — look again  x done  t start         9.9.9
 -- a-file --
 Buy +x +y
 B

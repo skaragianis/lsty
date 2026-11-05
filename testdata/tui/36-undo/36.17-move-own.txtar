@@ -24,7 +24,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't undo: "A" was changed since    9.9.9
+ NORMAL  todo.txt  manual  can't undo: the list changed — look again
 -- refused-todo --
 B
 A +t

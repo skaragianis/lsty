@@ -1,14 +1,20 @@
 //! Undo and redo: put back what a record says an operation wrote, but
-//! only when every line it wrote still reads as it left it.
+//! only when every line it wrote still stands as it left it.
 //!
-//! The check is by content and covers both files: one line that has
-//! changed since refuses the whole undo, and nothing is written. The
+//! The check takes the file as the operation left it for the reading an
+//! action is aimed from, and covers both files: one line that changed,
+//! moved or went refuses the whole undo, and nothing is written. A line
+//! that was taken away is put back whatever became of its neighbours. The
 //! rule layer does not run, since an undo restores what was there.
 
-use std::collections::{BTreeMap, HashMap};
+use std::{
+    collections::{BTreeMap, HashMap, HashSet},
+    ops::RangeInclusive,
+};
 
 use super::{
     env::Env,
+    landing::{LIST_CHANGED, kept_in},
     result::Outcome,
     run::{Rules, run_with},
     staged::{ChangeKind, LineRef, Path, Row, StagedFile},
@@ -16,34 +22,19 @@ use super::{
     undo::{Change, FileRecord, UndoRecord},
 };
 use crate::{
-    errs::{self, Code, Error, Nr, Result, Source},
+    errs::{Code, Error, Nr, Result, Source},
     lineid,
-    todotxt::{File, share},
+    todotxt::{Line, share},
 };
 
-/// The lines a record wrote, followed to a later reading of one file.
-#[derive(Clone, Copy, Debug)]
-pub struct Followed<'a> {
-    /// The file as it was last seen.
-    pub seen: &'a File,
-    /// For each line the record wrote (its `post` lines), the line of
-    /// `seen` it is, or `None` when it is gone.
-    pub at: &'a [Option<usize>],
-}
-
-/// Reverts `rec`, or refuses when a line it wrote has changed. `tracked`
-/// holds one entry for each file of `rec`, in the same order.
+/// Reverts `rec`, or refuses when a line it wrote no longer stands.
 ///
 /// # Errors
 ///
-/// `expect_mismatch` naming the line when one has changed since, and
-/// whatever locking, reading or writing the files fails with.
-pub fn undo(
-    env: &Env<'_>,
-    rec: &UndoRecord,
-    tracked: &[Followed<'_>],
-) -> Result<Outcome> {
-    apply(env, rec, tracked, "undo")
+/// `expect_mismatch` when one no longer stands, and whatever locking,
+/// reading or writing the files fails with.
+pub fn undo(env: &Env<'_>, rec: &UndoRecord) -> Result<Outcome> {
+    apply(env, rec, "undo")
 }
 
 /// Reverts `rec`, the record of an undo, the same way.
@@ -51,12 +42,8 @@ pub fn undo(
 /// # Errors
 ///
 /// As for [`undo`], with `can't redo` in the message.
-pub fn redo(
-    env: &Env<'_>,
-    rec: &UndoRecord,
-    tracked: &[Followed<'_>],
-) -> Result<Outcome> {
-    apply(env, rec, tracked, "redo")
+pub fn redo(env: &Env<'_>, rec: &UndoRecord) -> Result<Outcome> {
+    apply(env, rec, "redo")
 }
 
 impl FileRecord {
@@ -80,21 +67,16 @@ impl FileRecord {
 fn apply(
     env: &Env<'_>,
     rec: &UndoRecord,
-    tracked: &[Followed<'_>],
     verb: &'static str,
 ) -> Result<Outcome> {
     run_with(env, &rec.action, true, Rules::Skip, |tx| {
-        debug_assert_eq!(rec.files.len(), tracked.len());
-        let plans: Vec<Plan<'_>> = rec
-            .files
-            .iter()
-            .zip(tracked)
-            .map(|(f, followed)| Plan::new(tx, f, *followed))
-            .collect();
-        for plan in &plans {
-            if let Some(change) = plan.stale(tx.file(plan.rec.source)) {
-                return Err(changed_since(verb, change));
-            }
+        let plans: Vec<Plan<'_>> =
+            rec.files.iter().map(|f| Plan::new(tx, f)).collect();
+        if plans.iter().any(|plan| plan.stale(tx)) {
+            return Err(Error::new(
+                Code::ExpectMismatch,
+                format!("can't {verb}: {LIST_CHANGED}"),
+            ));
         }
         let mut own = Vec::new();
         for plan in &plans {
@@ -110,16 +92,6 @@ fn apply(
     })
 }
 
-fn changed_since(verb: &'static str, change: &Change) -> Error {
-    Error::new(
-        Code::ExpectMismatch,
-        format!(
-            "can't {verb}: {} was changed since",
-            errs::quote(&change.after)
-        ),
-    )
-}
-
 /// The file that lines were put back into: the first with a line that
 /// was empty and is not any more. The todo file when there is none.
 fn returned_to(tx: &Tx) -> Source {
@@ -133,24 +105,28 @@ fn returned_to(tx: &Tx) -> Source {
         .unwrap_or(Source::Todo)
 }
 
-/// A line to put back, and the line it is put back into, if any.
-struct PutBack<'a> {
-    change: &'a Change,
-    row: Option<usize>,
-}
-
 /// The revert of one file of a record.
 struct Plan<'a> {
     rec: &'a FileRecord,
-    /// For each line the record wrote, its row now.
+    /// For each line the record wrote, its row now, for a line that is
+    /// only a position: the row of a line that moved, too.
     at: Vec<Option<usize>>,
+    /// For each line the record wrote, its row now for an action aimed at
+    /// it. `None` when the file is as the record left it.
+    kept: Option<Vec<Option<usize>>>,
     /// For a row, the line of the record's `pre` it is.
     pre_of: HashMap<usize, usize>,
 }
 
 impl<'a> Plan<'a> {
-    fn new(tx: &Tx, rec: &'a FileRecord, followed: Followed<'_>) -> Self {
-        let at = place(followed, tx.snap.file(rec.source));
+    fn new(tx: &Tx, rec: &'a FileRecord) -> Self {
+        let now = &tx.snap.file(rec.source).lines;
+        let kept = kept_in(rec.post(), now);
+        let at = if kept.is_some() {
+            lineid::remap(rec.post(), now)
+        } else {
+            (0..now.len()).map(Some).collect()
+        };
         let mut pre_of = HashMap::new();
         for (pre, post) in rec.pre_to_post().into_iter().enumerate() {
             let row = post.and_then(|p| at.get(p).copied().flatten());
@@ -158,7 +134,12 @@ impl<'a> Plan<'a> {
                 pre_of.insert(row, pre);
             }
         }
-        Self { rec, at, pre_of }
+        Self {
+            rec,
+            at,
+            kept,
+            pre_of,
+        }
     }
 
     /// The row the change wrote, or `None` when it is gone.
@@ -167,15 +148,72 @@ impl<'a> Plan<'a> {
         self.at.get(line).copied().flatten()
     }
 
-    /// The first change whose line no longer reads as it left it.
-    fn stale(&self, file: &StagedFile) -> Option<&'a Change> {
-        self.rec.changes.iter().find(|c| {
+    /// Whether a line this undo writes on no longer stands as the record
+    /// left it, or the lines a move crossed no longer stand side by side.
+    fn stale(&self, tx: &Tx) -> bool {
+        let Some(kept) = &self.kept else {
+            return false;
+        };
+        let held = |line: usize| kept.get(line).copied().flatten();
+        let gone = self.rec.changes.iter().any(|c| {
             must_hold(c.kind)
-                && self
-                    .row_index(c)
-                    .and_then(|i| file.rows().get(i))
-                    .is_none_or(|row| *row.raw != *c.after)
-        })
+                && c.nr_after.and_then(|nr| held(nr.index())).is_none()
+        });
+        let Some(lines) = self.crossed().filter(|_| !gone) else {
+            return gone;
+        };
+        let rows: Option<Vec<usize>> =
+            self.tasks_of(lines).into_iter().map(held).collect();
+        let Some(rows) = rows else {
+            return true;
+        };
+        let Some((&from, &to)) = rows.first().zip(rows.last()) else {
+            return false;
+        };
+        let now = &tx.snap.file(self.rec.source).lines;
+        let tasks = now[from..=to].iter();
+        tasks.filter(|l| !Line::is_blank_text(l.raw())).count() != rows.len()
+    }
+
+    /// The lines of the record from the first to the last that a move left
+    /// or took. They must all go back, so none can have gone.
+    fn crossed(&self) -> Option<RangeInclusive<usize>> {
+        let moved = self.rec.changes.iter();
+        let ends = moved
+            .filter(|c| c.kind == ChangeKind::Moved)
+            .flat_map(|c| [c.nr_before, c.nr_after])
+            .flatten()
+            .map(Nr::index);
+        Some(ends.clone().min()?..=ends.max()?)
+    }
+
+    /// Those of `lines` of the record that are tasks.
+    fn tasks_of(&self, lines: RangeInclusive<usize>) -> Vec<usize> {
+        let post = self.rec.post();
+        lines
+            .filter(|&i| post.get(i).is_some_and(|l| !Line::is_blank_text(l)))
+            .collect()
+    }
+
+    /// Puts the lines a move crossed back in their old order, in the places
+    /// they stand in: the blank lines between them stay.
+    fn order_moved(&self, order: &mut [usize]) {
+        let Some(lines) = self.crossed() else {
+            return;
+        };
+        let rows: HashSet<usize> = self
+            .tasks_of(lines)
+            .into_iter()
+            .filter_map(|line| self.at.get(line).copied().flatten())
+            .collect();
+        let slots: Vec<usize> = (0..order.len())
+            .filter(|&s| rows.contains(&order[s]))
+            .collect();
+        let mut back: Vec<usize> = slots.iter().map(|&s| order[s]).collect();
+        back.sort_by_key(|row| self.pre_of.get(row));
+        for (slot, row) in slots.into_iter().zip(back) {
+            order[slot] = row;
+        }
     }
 
     /// Reverts the file. Gives the rows of the changes that were the
@@ -186,20 +224,24 @@ impl<'a> Plan<'a> {
             let row = self.revert_change(file, change, &mut back);
             own.extend(row.filter(|_| change.own));
         }
-        back.sort_by_key(|b| b.change.nr_before.map(Nr::get));
+        back.sort_by_key(|c| c.nr_before.map(Nr::get));
         // The rows the changes took out leave the order in one pass.
-        let kept: Vec<usize> = file
+        let mut kept: Vec<usize> = file
             .order()
             .iter()
             .copied()
-            .filter(|&i| !(file.rows()[i].removed || file.rows()[i].moved))
+            .filter(|&i| !file.rows()[i].removed)
             .collect();
+        self.order_moved(&mut kept);
         let mut places = Places::new(&kept, &self.pre_of);
-        for put in back {
-            if let Some(done) = Self::put_back(file, &put) {
-                places.put(&done);
-                own.extend(put.change.own.then_some(done.row));
-            }
+        for change in back {
+            let Some(line) = change.nr_before.map(Nr::index) else {
+                continue;
+            };
+            let text = share(&change.before);
+            let row = file.push_row(Row::added(text, Path::Action, None));
+            places.put(row, line);
+            own.extend(change.own.then_some(row));
         }
         let mut order = places.order(&kept);
         let last = self.rec.pre().len().checked_sub(1);
@@ -239,13 +281,13 @@ impl<'a> Plan<'a> {
         }
     }
 
-    /// Reverts one change, or notes the line it has to put back. Gives
-    /// the row it took back.
+    /// Reverts one change, or notes the line it has to put back, which has
+    /// no blank line left to go into. Gives the row it took back.
     fn revert_change<'c>(
         &self,
         file: &mut StagedFile,
         change: &'c Change,
-        back: &mut Vec<PutBack<'c>>,
+        back: &mut Vec<&'c Change>,
     ) -> Option<usize> {
         let row = self.row_index(change);
         match (change.kind, row) {
@@ -257,51 +299,28 @@ impl<'a> Plan<'a> {
                 unadd(file, i);
                 return Some(i);
             }
-            (ChangeKind::Moved, _) => {
-                if let Some(i) = row {
-                    file.rows_mut()[i].moved = true;
-                }
-                back.push(PutBack { change, row });
+            (ChangeKind::Moved, Some(i)) => {
+                file.rows_mut()[i].moved = true;
+                return Some(i);
             }
             (ChangeKind::Blanked | ChangeKind::Removed, _) => {
                 let row = row.filter(|&i| file.rows()[i].raw.is_empty());
-                if !change.before.is_empty() {
-                    back.push(PutBack { change, row });
+                if change.before.is_empty() {
+                    return None;
                 }
+                if let Some(i) = row {
+                    set_text(&mut file.rows_mut()[i], &change.before);
+                    return Some(i);
+                }
+                back.push(change);
             }
-            (ChangeKind::Changed | ChangeKind::Added, None) => {}
+            (
+                ChangeKind::Changed | ChangeKind::Added | ChangeKind::Moved,
+                None,
+            ) => {}
         }
         None
     }
-
-    /// Puts the text of a line back. Says which row it is and which
-    /// line of the record, and whether the row has to go into the order
-    /// again (a blanked line is still in it).
-    fn put_back(file: &mut StagedFile, put: &PutBack<'_>) -> Option<Back> {
-        let line = put.change.nr_before.map(Nr::index)?;
-        let before = &put.change.before;
-        let (row, enter) = match (put.row, put.change.kind) {
-            (Some(i), ChangeKind::Blanked) => {
-                set_text(&mut file.rows_mut()[i], before);
-                (i, false)
-            }
-            (Some(i), _) => (i, true),
-            (None, _) => {
-                let row = Row::added(share(before), Path::Action, None);
-                (file.push_row(row), true)
-            }
-        };
-        Some(Back { row, line, enter })
-    }
-}
-
-/// A line put back.
-struct Back {
-    row: usize,
-    /// The line of the record it is.
-    line: usize,
-    /// Whether the row goes into the order again.
-    enter: bool,
 }
 
 /// Where the lines put back go: each after the nearest line that stood
@@ -328,16 +347,14 @@ impl Places {
         }
     }
 
-    fn put(&mut self, back: &Back) {
-        if back.enter {
-            match self.known.range(..back.line).next_back() {
-                Some((_, &anchor)) => {
-                    self.after.entry(anchor).or_default().push(back.row);
-                }
-                None => self.top.push(back.row),
+    fn put(&mut self, row: usize, line: usize) {
+        match self.known.range(..line).next_back() {
+            Some((_, &anchor)) => {
+                self.after.entry(anchor).or_default().push(row);
             }
+            None => self.top.push(row),
         }
-        self.known.insert(back.line, back.row);
+        self.known.insert(line, row);
     }
 
     /// The order with every row put back in its place. A row put later
@@ -365,19 +382,6 @@ const fn must_hold(kind: ChangeKind) -> bool {
         kind,
         ChangeKind::Changed | ChangeKind::Added | ChangeKind::Moved
     )
-}
-
-/// Where each followed line is in the lines read now.
-fn place(followed: Followed<'_>, now: &File) -> Vec<Option<usize>> {
-    if followed.seen == now {
-        return followed.at.to_vec();
-    }
-    let to = lineid::remap(&followed.seen.lines, &now.lines);
-    followed
-        .at
-        .iter()
-        .map(|seen| seen.and_then(|s| to.get(s).copied().flatten()))
-        .collect()
 }
 
 fn set_text(row: &mut Row, text: &[u8]) {

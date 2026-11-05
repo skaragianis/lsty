@@ -52,8 +52,6 @@ pub(crate) struct Remap {
 struct FileMap {
     /// Where each old line went, as a diff pairs them.
     plain: Vec<Option<usize>>,
-    /// The same for the lines of a write, followed as it moved them.
-    exact: Option<Vec<Option<usize>>>,
     /// Which lines of the file an operation took out of the list.
     gone: Vec<bool>,
     /// Where each line of the record's `pre` stood in the old reading,
@@ -70,7 +68,6 @@ impl FileMap {
     fn plain(plain: Vec<Option<usize>>) -> Self {
         let mut map = Self {
             plain,
-            exact: None,
             shown: None,
             gone: Vec::new(),
             taken: Vec::new(),
@@ -109,7 +106,6 @@ impl FileMap {
         }
         let mut map = Self::plain(plain);
         map.gone = followed.gone;
-        map.exact = Some(followed.lines);
         map.shown = followed.shown;
         map
     }
@@ -128,10 +124,6 @@ impl FileMap {
             }
         }
         self.nearest.push(last);
-    }
-
-    fn exact(&self) -> &[Option<usize>] {
-        self.exact.as_deref().unwrap_or(&self.plain)
     }
 
     /// The 0-based index of the line with 0-based `index` now: its own
@@ -156,8 +148,7 @@ impl Remap {
     /// the operation of `record`, if there was one. Places follow a
     /// diff, except that a line the operation moved or changed is followed
     /// to where it went, which a diff cannot tell when the line has a twin.
-    /// Tracked lines of a history follow the operation exactly. A line of
-    /// `follow` that has a twin is paired as the full diff pairs it.
+    /// A line of `follow` that has a twin is paired as the full diff pairs it.
     pub(crate) fn new(
         old: &Snapshot,
         new: &Snapshot,
@@ -205,19 +196,6 @@ impl Remap {
         let Some(map) = map else { return Some(at) };
         let to = (*map.get(nr.index())?)?;
         Some((source, Nr::from_index(to)?))
-    }
-
-    /// Where lines that stood at `at` in the old reading are in the new
-    /// one.
-    pub(crate) fn compose(
-        &self,
-        source: Source,
-        at: &[Option<usize>],
-    ) -> Vec<Option<usize>> {
-        let to = self.of(source).exact();
-        at.iter()
-            .map(|i| i.and_then(|i| to.get(i).copied().flatten()))
-            .collect()
     }
 
     /// The place of `at` now: its own when the line was followed, and

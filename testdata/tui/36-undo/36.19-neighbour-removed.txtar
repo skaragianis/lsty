@@ -19,14 +19,14 @@ C
 A
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1   A                                                             │
-│  1   B                                                             │
+│  3   B                                                             │
 │  2   C                                                             │
-│                                                                    │
+│  1   D                                                             │
+│  4   A                                                             │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 moved to 4  x done          9.9.9
+ NORMAL  todo.txt  manual  can't undo: the list changed — look again
 -- after-todo --
-A
 B
 C
+A

@@ -118,8 +118,8 @@ impl Model {
             Answer::CoreRefuses(command) => (command, false),
             Answer::Resolved(command) => (command, true),
         };
-        if let Some(ran) = back.then(|| self.put_back()).flatten() {
-            return ran;
+        if back {
+            return self.put_back();
         }
         let changing: Vec<&Chosen> = tasks
             .iter()

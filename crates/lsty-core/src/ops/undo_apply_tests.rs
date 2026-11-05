@@ -2,15 +2,15 @@ use std::{cell::RefCell, fs, io, path::Path as FsPath};
 
 use super::{
     AddParams, Change, ChangeKind, ClaimOpts, DoOpts, Env, FileRecord,
-    Followed, Outcome, PriPair, Target, UndoRecord, add, archive, del, down,
-    finish, parse_refs, pri, redo, restore,
+    Outcome, PriPair, Target, UndoRecord, add, archive, del, down, finish,
+    parse_refs, pri, redo, restore,
     test_util::{Dir, folder, shared},
     undo, up,
 };
 use crate::{
     errs::{Code, Nr, Result, Source},
     fsio::Hooks,
-    todotxt::{File, Priority},
+    todotxt::Priority,
 };
 
 fn lines(rows: &[&str]) -> String {
@@ -19,38 +19,8 @@ fn lines(rows: &[&str]) -> String {
     out
 }
 
-/// The lines of a record as it left them, each followed to itself.
-struct Held {
-    files: Vec<Side>,
-}
-
-/// One file of a record: which, as left, and where its lines are.
-type Side = (File, Vec<Option<usize>>);
-
-impl Held {
-    fn of(rec: &UndoRecord) -> Self {
-        let files = rec
-            .files
-            .iter()
-            .map(|f| {
-                let at = (0..f.post().len()).map(Some).collect();
-                (File::parse(&f.data), at)
-            })
-            .collect();
-        Self { files }
-    }
-
-    fn tracking(&self) -> Vec<Followed<'_>> {
-        self.files
-            .iter()
-            .map(|(seen, at)| Followed { seen, at })
-            .collect()
-    }
-}
-
 fn undo_it(env: &Env<'_>, rec: &UndoRecord) -> Result<()> {
-    let held = Held::of(rec);
-    undo(env, rec, &held.tracking()).map(drop)
+    undo(env, rec).map(drop)
 }
 
 /// A list where an archive compacted two blank lines.
@@ -128,10 +98,7 @@ fn a_changed_done_line_refuses_the_undo_of_an_archive() {
     let (todo, done) = (dir.todo(), dir.done());
     let err = undo_it(&dir.env(), &rec).expect_err("36.28 refused");
     assert_eq!(err.code(), Code::ExpectMismatch);
-    assert_eq!(
-        err.message(),
-        "can't undo: \"x 2026-09-01 D1\" was changed since"
-    );
+    assert_eq!(err.message(), "can't undo: the list changed — look again");
     assert_eq!((dir.todo(), dir.done()), (todo, done), "36.28 wrote");
 }
 
@@ -199,12 +166,10 @@ fn a_redo_does_the_action_again() {
     };
     let mut done = pri(&dir.env(), &[pair]).expect("pri");
     let rec = done.take_undo().expect("record");
-    let held = Held::of(&rec);
-    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    let mut undone = undo(&dir.env(), &rec).expect("undo");
     assert_eq!(dir.todo(), "A\nB\n");
     let back = undone.take_undo().expect("record");
-    let held = Held::of(&back);
-    redo(&dir.env(), &back, &held.tracking()).expect("redo");
+    redo(&dir.env(), &back).expect("redo");
     assert_eq!(dir.todo(), "A\n(A) B\n");
 }
 
@@ -217,13 +182,11 @@ fn a_redo_says_so_when_it_is_refused() {
     };
     let mut done = pri(&dir.env(), &[pair]).expect("pri");
     let rec = done.take_undo().expect("record");
-    let held = Held::of(&rec);
-    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    let mut undone = undo(&dir.env(), &rec).expect("undo");
     outside(&dir, "A +t\n", "");
     let back = undone.take_undo().expect("record");
-    let held = Held::of(&back);
-    let err = redo(&dir.env(), &back, &held.tracking()).expect_err("refused");
-    assert_eq!(err.message(), "can't redo: \"A\" was changed since");
+    let err = redo(&dir.env(), &back).expect_err("refused");
+    assert_eq!(err.message(), "can't redo: the list changed — look again");
 }
 
 #[test]
@@ -372,8 +335,7 @@ fn undone(todo: &str, done: &str, appended: &str) -> (Dir, UndoRecord) {
     let mut bytes = fs::read(&dir.found.done).expect("read done");
     bytes.extend_from_slice(appended.as_bytes());
     fs::write(&dir.found.done, bytes).expect("write done");
-    let held = Held::of(&rec);
-    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    let mut undone = undo(&dir.env(), &rec).expect("undo");
     let back = undone.take_undo().expect("record");
     (dir, back)
 }
@@ -427,7 +389,7 @@ fn a_duplicate_of_the_old_last_line_appended_later_keeps_its_newline() {
 fn a_redo_after_such_an_undo_archives_again() {
     let (dir, back) = undone("A\nx 2026-09-01 D1\n", "x 2026-08-01 Old", "");
     assert_eq!(dir.done(), "x 2026-08-01 Old");
-    redo(&dir.env(), &back, &Held::of(&back).tracking()).expect("redo");
+    redo(&dir.env(), &back).expect("redo");
     assert_eq!(dir.done(), "x 2026-08-01 Old\nx 2026-09-01 D1\n");
     assert_eq!(dir.todo(), "A\n");
 }
@@ -445,11 +407,10 @@ fn undoing_and_redoing_a_block_move_puts_every_line_back() {
     let rec = moved.take_undo().expect("record");
     let changed = dir.todo();
     assert_ne!(changed, base);
-    let mut undone =
-        undo(&dir.env(), &rec, &Held::of(&rec).tracking()).expect("undo");
+    let mut undone = undo(&dir.env(), &rec).expect("undo");
     assert_eq!(dir.todo(), base);
     let back = undone.take_undo().expect("record");
-    redo(&dir.env(), &back, &Held::of(&back).tracking()).expect("redo");
+    redo(&dir.env(), &back).expect("redo");
     assert_eq!(dir.todo(), changed);
 }
 
@@ -504,11 +465,10 @@ fn a_record_marks_the_changes_the_action_made_itself() {
     assert_eq!(side, 1, "the id given to A");
     let mut at = rec;
     for step in ["undo", "redo", "undo"] {
-        let held = Held::of(&at);
         let mut next = if step == "redo" {
-            redo(&dir.env(), &at, &held.tracking())
+            redo(&dir.env(), &at)
         } else {
-            undo(&dir.env(), &at, &held.tracking())
+            undo(&dir.env(), &at)
         }
         .expect(step);
         at = next.take_undo().expect("record");
@@ -528,8 +488,7 @@ fn a_move_to_the_done_file_is_the_actions_own_and_the_spawn_is_not() {
     let (own, side) = owned(&rec);
     assert_eq!(own.len(), 2, "{own:?}");
     assert_eq!(side, 1, "the next occurrence");
-    let held = Held::of(&rec);
-    let mut undone = undo(&dir.env(), &rec, &held.tracking()).expect("undo");
+    let mut undone = undo(&dir.env(), &rec).expect("undo");
     let (own, side) = owned(&undone.take_undo().expect("record"));
     assert_eq!((own.len(), side), (2, 1), "{own:?}");
 }
