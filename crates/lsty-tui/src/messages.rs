@@ -42,12 +42,8 @@ pub(crate) fn busy(name: &str) -> String {
 /// The refusal of `t` over todo and done tasks.
 pub(crate) const SOME_DONE: &str = "some are done — nothing changed";
 
-/// The refusal of a count of which some tasks are archived.
+/// The refusal of a press over several tasks of which some are archived.
 pub(crate) const SOME_ARCHIVED: &str = "some are archived — nothing changed";
-
-/// The refusal of a selection of which some tasks are archived.
-pub(crate) const ARCHIVED_TASKS: &str =
-    "the selection has archived tasks — nothing changed";
 
 /// How a message names a task: its text, or its line as written when
 /// it has no text, only tags.

@@ -805,7 +805,6 @@ fn a_repeat_of_a_paste_is_always_lit() {
 fn a_refused_key_says_what_it_always_said() {
     const ONE: &str = "Old is archived — x restores it";
     const NO_ID: &str = "Old is archived and has no id — x restores it first";
-    const MANY: &str = "the selection has archived tasks — nothing changed";
     const SOME: &str = "some are archived — nothing changed";
     const THREE: &str = "A\nB\nC\n";
     const SORTED: &str = "sorted by priority — press s for manual order";
@@ -819,10 +818,10 @@ fn a_refused_key_says_what_it_always_said() {
         ("", OLD, "", "K", ONE, true),
         ("", OLD, "v", "J", ONE, true),
         ("", OLD, "", "go", NO_ID, true),
-        (TODO, OLD, "vj", "J", MANY, true),
-        (TODO, OLD, "vj", "K", MANY, true),
-        (TODO, OLD, "vj", "d", MANY, true),
-        (TODO, OLD, "vj", "gd", MANY, true),
+        (TODO, OLD, "vj", "J", SOME, true),
+        (TODO, OLD, "vj", "K", SOME, true),
+        (TODO, OLD, "vj", "d", SOME, true),
+        (TODO, OLD, "vj", "gd", SOME, true),
         (TODO, OLD, "", "2dd", SOME, true),
         (TODO, OLD, "-", "2.", SOME, true),
         (TODO, OLD, "gtk:v<CR>", "2.", SOME, true),
