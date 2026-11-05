@@ -286,7 +286,7 @@ impl Model {
         &mut self,
         kind: Kind,
         count: usize,
-        text: &str,
+        text: String,
     ) {
         let rows = self.picked_rows(count);
         let s = Summary::of(&self.snap, self.cursor, rows);
@@ -296,8 +296,9 @@ impl Model {
             self.refuse(why, &chosen);
             return;
         }
-        let result = self.attempt(|env| write(env, kind, &chosen, text));
+        let result = self.attempt(|env| write(env, kind, &chosen, &text));
         if self.settle(result) {
+            self.again = Some(Again::Prompt { kind, count, text });
             self.summarize(chosen.len());
         }
     }

@@ -286,22 +286,21 @@ impl Model {
     }
 
     /// `repeat`: the last change again, on the task under the cursor.
-    /// A count replaces the one it had.
-    pub(crate) fn repeat(&mut self, count: usize) -> Vec<Cmd> {
-        let Some(again) = &mut self.again else {
+    /// A count replaces the one it had, once the press writes.
+    pub(crate) fn repeat(&mut self, typed: usize) -> Vec<Cmd> {
+        let Some(again) = self.again.clone() else {
             return Vec::new();
         };
-        let (Again::Task { count: stored, .. }
-        | Again::Block { count: stored, .. }
-        | Again::Prompt { count: stored, .. }) = again;
-        if count > 0 {
-            *stored = count;
-        }
-        match again.clone() {
-            Again::Task { action, count } => return self.run(action, count),
-            Again::Block { action, count } => self.repeat_block(action, count),
+        let or_typed = |had| if typed > 0 { typed } else { had };
+        match again {
+            Again::Task { action, count } => {
+                return self.run(action, or_typed(count));
+            }
+            Again::Block { action, count } => {
+                self.repeat_block(action, or_typed(count));
+            }
             Again::Prompt { kind, count, text } => {
-                self.repeat_prompt(kind, count, &text);
+                self.repeat_prompt(kind, or_typed(count), text);
             }
         }
         Vec::new()

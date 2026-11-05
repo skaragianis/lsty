@@ -186,6 +186,12 @@ impl Pressed<'_> {
         assert_eq!(self.after, self.before, "{name}: refused, yet it wrote");
         assert_eq!(self.model.tone, Tone::Alert, "{name}");
         assert_eq!(self.model.hist.undo.len(), 0, "{name}");
+        assert_eq!(self.model.again, None, "{name}: took the repeat");
+        let mode = match self.way {
+            Way::Selection => Mode::Visual,
+            Way::Count => Mode::Normal,
+        };
+        assert_eq!(self.model.key_mode(), mode, "{name}");
     }
 
     fn refused_by(&self, command: Command) {
@@ -257,9 +263,8 @@ fn check(key: (Action, &str, &str), way: Way, kinds: &[usize]) {
     };
     match answer {
         Answer::Applies => panic!("{}: a key must decide", pressed.name),
-        Answer::Refused(_) => pressed.refused(),
-        Answer::CoreRefuses(Command::Stop) => {
-            assert_eq!(pressed.after, pressed.before, "{}", pressed.name);
+        Answer::Refused(_) | Answer::CoreRefuses(Command::Stop) => {
+            pressed.refused();
         }
         Answer::CoreRefuses(command) => pressed.refused_by(command),
         Answer::Resolved(command) => pressed.resolved(command),
