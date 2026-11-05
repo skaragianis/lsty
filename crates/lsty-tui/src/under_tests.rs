@@ -42,77 +42,64 @@ fn typing(dir: &Path) -> Model {
     model
 }
 
-// 40.17, 40.19: reloads that miss the line say nothing; the draft is
-// written where the line is now.
-#[test]
-fn a_reload_that_misses_the_line_says_nothing() {
-    let dir = workdir(LIST);
-    let mut model = typing(dir.path());
-    outside(&mut model, dir.path(), &format!("N1\nN2\n{LIST}"));
-    assert_eq!(model.message, None);
-    keys(&mut model, "<CR>");
-    let want =
-        "N1\nN2\nTop\n(A) 2026-09-20 Call client +work more id:c1\nEnd\n";
-    assert_eq!(todo_of(dir.path()), want);
-}
-
-// What can become of a line under a field. The third is whether a reading
-// showed it before the key, and the keys are the first and the next.
-type Under = (&'static str, &'static str, bool, &'static str, &'static str);
-const UNDER: &[Under] = &[
-    ("changed", LINE_CHANGED, true, "<CR>", "<Esc>"),
-    ("gone", "Top\nEnd\n", true, "<CR>", "<Esc>"),
-    ("blank", "Top\n\nEnd\n", true, "<CR>", "<Esc>"),
-    ("moved", LINE_MOVED, true, "<CR>", "<Esc>"),
-    ("twin", LINE_TWIN, true, "<CR>", "<Esc>"),
-    ("first Esc", LINE_CHANGED, true, "<Esc>", "<Esc>"),
-    ("first C-c", LINE_CHANGED, true, "<C-c>", "<C-c>"),
-    ("not read", LINE_CHANGED, false, "<CR>", "<Esc>"),
-    ("not read Esc", LINE_CHANGED, false, "<Esc>", "<C-c>"),
-];
-
 fn stays_open(model: &Model, text: &str, name: &str) {
     assert!(field_text(model).contains(text), "{name}");
     assert_eq!(model.message.as_deref(), Some(REFUSED), "{name}");
 }
 
+// What can become of a line under a field, on a task and on `gO`, whose link
+// is not in the text. The third is whether a reading showed it before the
+// key, and the keys are the first and the next.
 #[test]
 fn a_field_whose_line_changed_refuses_then_drops_on_esc() {
-    for &(name, disk, read, first, next) in UNDER {
-        let dir = workdir(LIST);
-        let mut model = typing(dir.path());
-        if read {
-            outside(&mut model, dir.path(), disk);
-            assert_eq!(model.message.as_deref(), Some(LIST_CHANGED), "{name}");
-        } else {
-            fs::write(dir.path().join("todo.txt"), disk).unwrap();
+    for start in ["jA more", "jgOmore"] {
+        for (name, disk, read, first, next) in [
+            ("changed", LINE_CHANGED, true, "<CR>", "<Esc>"),
+            ("gone", "Top\nEnd\n", true, "<CR>", "<Esc>"),
+            ("blank", "Top\n\nEnd\n", true, "<CR>", "<Esc>"),
+            ("moved", LINE_MOVED, true, "<CR>", "<Esc>"),
+            ("twin", LINE_TWIN, true, "<CR>", "<Esc>"),
+            ("first Esc", LINE_CHANGED, true, "<Esc>", "<Esc>"),
+            ("first C-c", LINE_CHANGED, true, "<C-c>", "<C-c>"),
+            ("cancel", LINE_CHANGED, true, "<C-x>", "<C-x>"),
+            (
+                "popup",
+                LINE_CHANGED,
+                true,
+                "<CR> dep:To<Esc><C-w><BS>",
+                "<Esc>",
+            ),
+            ("not read", LINE_CHANGED, false, "<CR>", "<Esc>"),
+            ("not read Esc", LINE_CHANGED, false, "<Esc>", "<C-c>"),
+        ] {
+            let name = format!("{start} {name}");
+            let (dir, mut model) = workdir_cancelling(LIST, alone());
+            keys(&mut model, start);
+            if read {
+                outside(&mut model, dir.path(), disk);
+                assert_eq!(
+                    model.message.as_deref(),
+                    Some(LIST_CHANGED),
+                    "{name}"
+                );
+            } else {
+                fs::write(dir.path().join("todo.txt"), disk).unwrap();
+            }
+            keys(&mut model, first);
+            reload(&mut model);
+            assert_eq!(todo_of(dir.path()), disk, "{name}");
+            stays_open(&model, "more", &name);
+            keys(&mut model, "<CR>x");
+            stays_open(&model, "morex", &name);
+            let disk = format!("N\n{disk}");
+            outside(&mut model, dir.path(), &disk);
+            stays_open(&model, "morex", &name);
+            keys(&mut model, next);
+            assert!(model.edit.is_none(), "{name}");
+            assert!(model.kept.is_none(), "{name}");
+            assert_eq!(todo_of(dir.path()), disk, "{name}");
         }
-        keys(&mut model, first);
-        reload(&mut model);
-        assert_eq!(todo_of(dir.path()), disk, "{name}");
-        stays_open(&model, "more", name);
-        keys(&mut model, "<CR>x");
-        stays_open(&model, "morex", name);
-        let disk = format!("N\n{disk}");
-        outside(&mut model, dir.path(), &disk);
-        stays_open(&model, "morex", name);
-        keys(&mut model, next);
-        assert!(model.edit.is_none(), "{name}");
-        assert!(model.kept.is_none(), "{name}");
-        assert_eq!(todo_of(dir.path()), disk, "{name}");
     }
-}
-
-#[test]
-fn esc_closes_the_popup_of_a_refused_field_before_the_field() {
-    let dir = workdir(LIST);
-    let mut model = typing(dir.path());
-    outside(&mut model, dir.path(), LINE_CHANGED);
-    keys(&mut model, "<CR> dep:To");
-    assert!(model.popup().is_some());
-    keys(&mut model, "<Esc>");
-    assert!(model.popup().is_none());
-    assert!(model.edit.is_some());
 }
 
 // 40.33: a draft equal to the base writes nothing, whatever changed.
@@ -129,7 +116,7 @@ fn a_draft_that_equals_the_base_writes_nothing() {
 }
 
 // `u` gives a cancelled draft back through a shift, and refuses when the line
-// changed. A cancel of a line that already changed refuses like a commit.
+// changed.
 #[test]
 fn a_cancelled_draft_comes_back_only_to_its_own_line() {
     let (dir, mut model) = workdir_cancelling(LIST, alone());
@@ -146,14 +133,6 @@ fn a_cancelled_draft_comes_back_only_to_its_own_line() {
     assert!(model.edit.is_none());
     assert_eq!(model.message.as_deref(), Some(LIST_CHANGED));
     assert_eq!(todo_of(dir.path()), LINE_CHANGED);
-
-    let (dir, mut model) = workdir_cancelling(LIST, alone());
-    keys(&mut model, "jA more");
-    outside(&mut model, dir.path(), LINE_CHANGED);
-    keys(&mut model, "<C-x>");
-    assert_eq!(model.message.as_deref(), Some(REFUSED));
-    keys(&mut model, "<C-x>");
-    assert!(model.edit.is_none() && model.kept.is_none());
 }
 
 fn field_text(model: &Model) -> String {
@@ -198,64 +177,56 @@ fn the_ids_a_draft_holds_are_not_given_twice() {
     assert_eq!(todo_of(dir.path()), want);
 }
 
+const HAS_ID: &str = "Alpha id:a1\nBravo\n";
+
 // A field that waits for a task whose line changed stays open and says the
 // way out; taking the `dep:` out of the text lets it write.
-const HAS_ID: &str = "Alpha id:a1\nBravo\n";
-type DeadDep = (
-    &'static str,
-    &'static str,
-    &'static str,
-    &'static str,
-    &'static str,
-);
-const DEAD_DEPS: &[DeadDep] = &[
-    (
-        "new task",
-        "Alpha\nBravo\n",
-        "gonew<End>",
-        "Alpha again\n",
-        "Alpha again\n2026-09-29 new id:t002\n",
-    ),
-    (
-        "task's own line",
-        "Alpha\nBravo\n",
-        "jccnew dep:Alp<Tab>",
-        "Alpha again\nBravo\n",
-        "Alpha again\nnew\n",
-    ),
-    (
-        "go, its id on a changed line",
-        HAS_ID,
-        "gonew<End>",
-        "Alpha again id:a1\nBravo\n",
-        "Alpha again id:a1\n2026-09-29 new id:t001\nBravo\n",
-    ),
-    (
-        "go, its id on a moved line",
-        HAS_ID,
-        "gonew<End>",
-        "Bravo\nAlpha id:a1\n",
-        "Bravo\nAlpha id:a1\n2026-09-29 new id:t001\n",
-    ),
-    (
-        "go, its id gone",
-        HAS_ID,
-        "gonew<End>",
-        "Bravo\n",
-        "2026-09-29 new id:t001\nBravo\n",
-    ),
-    (
-        "picked, its id gone",
-        HAS_ID,
-        "jccnew dep:Alp<Tab>",
-        "Bravo\n",
-        "new\n",
-    ),
-];
-
 #[test]
 fn a_refused_grant_goes_once_its_dep_is_taken_out() {
-    for &(name, list, start, disk, want) in DEAD_DEPS {
+    for (name, list, start, disk, want) in [
+        (
+            "new task",
+            "Alpha\nBravo\n",
+            "gonew<End>",
+            "Alpha again\n",
+            "Alpha again\n2026-09-29 new id:t002\n",
+        ),
+        (
+            "task's own line",
+            "Alpha\nBravo\n",
+            "jccnew dep:Alp<Tab>",
+            "Alpha again\nBravo\n",
+            "Alpha again\nnew\n",
+        ),
+        (
+            "go, its id on a changed line",
+            HAS_ID,
+            "gonew<End>",
+            "Alpha again id:a1\nBravo\n",
+            "Alpha again id:a1\n2026-09-29 new id:t001\nBravo\n",
+        ),
+        (
+            "go, its id on a moved line",
+            HAS_ID,
+            "gonew<End>",
+            "Bravo\nAlpha id:a1\n",
+            "Bravo\nAlpha id:a1\n2026-09-29 new id:t001\n",
+        ),
+        (
+            "go, its id gone",
+            HAS_ID,
+            "gonew<End>",
+            "Bravo\n",
+            "2026-09-29 new id:t001\nBravo\n",
+        ),
+        (
+            "picked, its id gone",
+            HAS_ID,
+            "jccnew dep:Alp<Tab>",
+            "Bravo\n",
+            "new\n",
+        ),
+    ] {
         let dir = workdir(list);
         let mut model = model_of(dir.path());
         keys(&mut model, start);
@@ -359,22 +330,6 @@ fn go_on_a_changed_row_opens_no_field() {
     }
 }
 
-// `gO` cannot write its link once the line changed, whatever is typed.
-#[test]
-fn a_prerequisite_field_whose_line_changed_refuses_then_drops() {
-    let dir = workdir(LIST);
-    let mut model = model_of(dir.path());
-    keys(&mut model, "jgOnew");
-    outside(&mut model, dir.path(), LINE_CHANGED);
-    assert_eq!(model.message.as_deref(), Some(LIST_CHANGED));
-    keys(&mut model, "<CR>");
-    assert_eq!(model.message.as_deref(), Some(REFUSED));
-    assert_eq!(todo_of(dir.path()), LINE_CHANGED);
-    keys(&mut model, "<Esc>");
-    assert!(model.edit.is_none());
-    assert_eq!(todo_of(dir.path()), LINE_CHANGED);
-}
-
 #[test]
 fn a_grant_follows_its_task_through_an_outside_change() {
     let dir = workdir(WAITS);
@@ -400,32 +355,47 @@ fn a_field_of_a_deleted_line_is_not_in_the_place_of_a_row() {
 }
 
 // `o` and `O` always write: beside the line when it is there, changed or
-// not, and about where it was when it is gone, and say nothing of it.
+// not, and about where it was when it is gone. A task field writes where its
+// line now stands when it only shifted. None says anything of it.
 #[test]
-fn a_new_task_writes_beside_its_line_or_about_where_it_was() {
+fn a_field_writes_beside_its_line_or_about_where_it_was() {
     const NEW: &str = "2026-09-29 new +work id:t001";
     let call = "(A) 2026-09-20 Call client +home id:c1";
-    for (key, disk, want) in [
+    for (start, disk, want) in [
         (
-            "o",
+            "jA more",
+            format!("N1\nN2\n{LIST}"),
+            "N1\nN2\nTop\n(A) 2026-09-20 Call client +work more id:c1\nEnd\n"
+                .to_owned(),
+        ),
+        (
+            "jonew",
             format!("Top\n{call}\nEnd\n"),
             format!("Top\n{call}\n{NEW}\nEnd\n"),
         ),
         (
-            "O",
+            "jOnew",
             format!("Top\n{call}\nEnd\n"),
             format!("Top\n{NEW}\n{call}\nEnd\n"),
         ),
-        ("o", "Top\nEnd\n".to_owned(), format!("Top\n{NEW}\nEnd\n")),
-        ("O", "Top\nEnd\n".to_owned(), format!("Top\n{NEW}\nEnd\n")),
+        (
+            "jonew",
+            "Top\nEnd\n".to_owned(),
+            format!("Top\n{NEW}\nEnd\n"),
+        ),
+        (
+            "jOnew",
+            "Top\nEnd\n".to_owned(),
+            format!("Top\n{NEW}\nEnd\n"),
+        ),
     ] {
         let dir = workdir(LIST);
         let mut model = model_of(dir.path());
-        keys(&mut model, &format!("j{key}new"));
+        keys(&mut model, start);
         outside(&mut model, dir.path(), &disk);
-        assert_eq!(model.message, None, "{key} {disk}");
+        assert_eq!(model.message, None, "{start} {disk}");
         keys(&mut model, "<CR>");
-        assert_eq!(todo_of(dir.path()), want, "{key} {disk}");
+        assert_eq!(todo_of(dir.path()), want, "{start} {disk}");
     }
 }
 
