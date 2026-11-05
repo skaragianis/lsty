@@ -406,6 +406,9 @@ impl Model {
             None => moved.track(at),
         });
         self.check_typed(typed, landing.as_ref());
+        if ends.is_some() && self.visual.is_none() {
+            self.reset_keys();
+        }
         if reveal {
             self.scroll();
         }

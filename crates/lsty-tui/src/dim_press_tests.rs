@@ -115,8 +115,6 @@ fn stale_against_fresh(
     outside(fresh_dir.path(), from, to);
     let moved_on = files(stale_dir.path());
     reload(&mut fresh);
-    // A selection that lost its lines refuses either way.
-    let writes = writes && !fresh.keys_lost;
     keys(&mut fresh, key);
     assert_eq!(files(fresh_dir.path()) != moved_on, writes, "{name}");
     keys(&mut stale, key);
@@ -143,7 +141,9 @@ fn a_dim_press_on_a_list_that_moved_on_never_writes() {
         let selected = format!("{first}Vj");
         let counted = format!("2{key}");
         for way in [(key, first), (key, &selected), (&counted, first)] {
-            for (to, writes) in [(freed, true), (other, false)] {
+            // A selection refuses unless its lines only shifted.
+            let writes = way.1 != selected || freed == NO_BLOCKER;
+            for (to, writes) in [(freed, writes), (other, false)] {
                 stale_against_fresh(
                     (action, way.0, way.1),
                     (shown, shown, to),
