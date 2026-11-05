@@ -2,16 +2,10 @@
 
 use std::io;
 
-use super::fuzzing::merge_property;
 use crate::{
     errs::fuzzing::quote_property, query::fuzzing::query_property,
     todotxt::invariant_tests::holds,
 };
-
-#[test]
-fn merge_seeds_hold() -> io::Result<()> {
-    holds("merge", 18, merge_property)
-}
 
 #[test]
 fn quote_seeds_round_trip() -> io::Result<()> {

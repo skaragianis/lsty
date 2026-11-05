@@ -6,6 +6,11 @@ write todo.txt disk
 tick 1s
 frame a-frame
 cursor a-cursor
+keys <CR>
+frame b-frame
+keys <Esc>
+frame c-frame
+file todo.txt c-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -15,7 +20,32 @@ show_detail = false
 (A) 2026-09-20 Call client +work id:c1 @phone
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 (A) 2026-09-20 Call client +work ! id:c1                                                      │
+│    (A) 2026-09-20 Call client +work ! id:c1                                                      │
+│  1   (A) Call client +work @phone                                                             c1 │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  the list changed — look again  <CR> commit  <C-w> del word         9.9.9
+-- a-cursor --
+│    (A) 2026-09-20 Call client +work ! id:c1                                                      │
+                                       ^
+-- b-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│    (A) 2026-09-20 Call client +work ! id:c1                                                      │
+│  1   (A) Call client +work @phone                                                             c1 │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit  <CR> commit  9.9.9
+-- c-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Call client +work @phone                                                             c1 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -23,7 +53,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  this task changed on disk  <CR> commit  <C-w> del word             9.9.9
--- a-cursor --
-│  1 (A) 2026-09-20 Call client +work ! id:c1                                                      │
-                                       ^
+ NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9
+-- c-file --
+(A) 2026-09-20 Call client +work id:c1 @phone

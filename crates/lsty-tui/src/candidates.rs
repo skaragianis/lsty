@@ -2,15 +2,12 @@
 //! `dep:` and the files for `file:`. The names and the open tasks are
 //! collected once for each reading of the files, not for each key.
 
-use std::{
-    borrow::Cow, cell::OnceCell, fs, os::unix::ffi::OsStrExt, path::Path,
-};
+use std::{borrow::Cow, fs, os::unix::ffi::OsStrExt, path::Path};
 
 use lsty_core::{
     case::lower,
     errs::{self, Nr, Source},
     list::{Snapshot, Task, TaskId},
-    ops::Seen,
     query::is_upper,
     todotxt::{FileLink, Kind, Line},
 };
@@ -48,9 +45,6 @@ pub(crate) struct Sources {
     projects: Vec<String>,
     contexts: Vec<String>,
     open: Vec<Open>,
-    /// The lines of the todo file, copied when a grant first needs
-    /// them and shared by every grant of the reading.
-    seen: OnceCell<Seen>,
 }
 
 impl Sources {
@@ -71,7 +65,6 @@ impl Sources {
             projects: names(projects),
             contexts: names(contexts),
             open,
-            seen: OnceCell::new(),
         }
     }
 }
@@ -130,17 +123,6 @@ impl Model {
             let today = self.context().today;
             self.sources = Some(Sources::of(&self.snap, today));
         }
-    }
-
-    /// The lines of the todo file of the reading shown: one copy for
-    /// all the grants made on it.
-    pub(crate) fn seen_lines(&mut self) -> Seen {
-        self.refresh_sources();
-        let snap = &self.snap;
-        self.sources.as_ref().map_or_else(
-            || Seen::of(snap),
-            |s| s.seen.get_or_init(|| Seen::of(snap)).clone(),
-        )
     }
 
     /// The candidates for the word that ends at the cursor.
@@ -211,9 +193,8 @@ impl Model {
                     return None;
                 }
                 let id = o.given.clone().or_else(|| {
-                    let raw = self.snap.line(self.snap.task(o.id)?).raw();
                     let grant =
-                        draft.comp.grants.iter().find(|g| g.is_of(o.nr, raw));
+                        draft.comp.grants.iter().find(|g| g.is_of(o.nr));
                     grant.map(|g| g.id().to_string())
                 });
                 if id

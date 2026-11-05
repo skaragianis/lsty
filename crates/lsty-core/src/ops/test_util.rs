@@ -4,10 +4,7 @@ use std::{fs, path::PathBuf, sync::Arc};
 
 use tempfile::TempDir;
 
-use super::{
-    Edited, Env, Grant, Outcome, Pin, PriPair, Seen, Settle, Target, Tracked,
-    edit_pinned,
-};
+use super::{Env, Grant, Outcome, PriPair, Target, edit_typed};
 use crate::{
     config::Config,
     dates::Clock,
@@ -167,22 +164,15 @@ pub(super) fn snapshot(dir: &Dir, todo: &[u8], done: &[u8]) -> Snapshot {
     )
 }
 
-/// Writes `draft` over line `nr`, which read `base` in the file as it
-/// is. A conflict is an error.
+/// Writes `draft` over line `nr` of the file as it is.
 pub(super) fn typed(
     dir: &Dir,
     nr: Nr,
-    base: &[u8],
     draft: &[u8],
     grants: &[Grant],
 ) -> Result<Outcome> {
-    let pin = Pin::new(nr, base, Settle::LineOrBlank);
-    let seen = Seen::of(&snapshot(dir, dir.todo().as_bytes(), b""));
-    let tracked = Tracked::new(pin, seen);
-    match edit_pinned(&dir.env(), &tracked, draft, grants)? {
-        Edited::Written(out) => Ok(*out),
-        Edited::Conflict(c) => Err(c.error()),
-    }
+    let target = Target::todo(i64::from(nr.get()));
+    edit_typed(&dir.env(), &target, draft, grants)
 }
 
 /// Owned copies of string literals.

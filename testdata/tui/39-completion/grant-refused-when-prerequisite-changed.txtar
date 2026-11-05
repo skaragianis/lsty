@@ -47,9 +47,9 @@ Call client
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  4   Write parser +spec01                                                                                                                                                                     parser │
 │  3 ⧗ Add CLI ls +spec01 dep:parser                                                                                                                                                                   │
-│  2   Write docs +spec01 for the site                                                                                                                                                          t001   │
+│  2   Write docs +spec01 for the site                                                                                                                                                                 │
 │  1   Write docs +spec02                                                                                                                                                                  fri         │
-│  5 ⧗ Call client dep:t001                                                                                                                                                                            │
+│  5 Call client dep:t001                                                                                                                                                                              │
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
@@ -57,10 +57,10 @@ Call client
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  5 Call client dep:t001; 3 changed meanwhile and got id:t001  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help                             9.9.9
+ INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit  <CR> commit  <C-w> del word  <C-u> del to start                                                                  9.9.9
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser
-Write docs +spec01 for the site id:t001
+Write docs +spec01 for the site
 Write docs +spec02 due:2026-10-02
-Call client dep:t001
+Call client

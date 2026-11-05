@@ -3,7 +3,7 @@
 
 use super::{
     expect::{self, Expect},
-    landing::{LIST_CHANGED, Landing},
+    landing::{Landing, list_changed},
 };
 use crate::{
     errs::{Code, Error, Field, HELP_HINT, Nr, Result, Source, quote},
@@ -32,9 +32,6 @@ pub struct Target {
     given: Option<String>,
     /// Whether a task of the done file is accepted.
     pub(super) archived: bool,
-    /// Whether the number is of the file under the lock, found there,
-    /// and not one read off an earlier reading.
-    current: bool,
 }
 
 impl Target {
@@ -45,10 +42,7 @@ impl Target {
 
     /// The todo line at row `index` (counting from zero).
     pub(super) fn todo_index(index: usize) -> Self {
-        let mut target =
-            Self::todo(i64::try_from(index + 1).unwrap_or(i64::MAX));
-        target.current = true;
-        target
+        Self::todo(i64::try_from(index + 1).unwrap_or(i64::MAX))
     }
 
     /// The task that carries `id`, in whichever file it is.
@@ -70,7 +64,6 @@ impl Target {
             key,
             given: None,
             archived: false,
-            current: false,
         }
     }
 
@@ -119,14 +112,10 @@ impl Target {
         let Key::Line { source, nr, .. } = &mut target.key else {
             return Ok(target);
         };
-        let Some(index) =
-            usize::try_from(*nr - 1).ok().filter(|_| !self.current)
-        else {
+        let Ok(index) = usize::try_from(*nr - 1) else {
             return Ok(target);
         };
-        let to = landing
-            .line(*source, index)
-            .ok_or_else(|| Error::new(Code::ExpectMismatch, LIST_CHANGED))?;
+        let to = landing.line(*source, index).ok_or_else(list_changed)?;
         if to != index {
             *nr = i64::try_from(to + 1).unwrap_or(i64::MAX);
             target.given = None;

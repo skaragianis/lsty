@@ -40,12 +40,9 @@ impl Model {
                 .and_then(|at| self.row_at(at))
                 .unwrap_or(self.cursor);
         }
-        if let Some((_, nr)) = self.pin_spot().filter(|_| !draft.pin_is_live())
-        {
-            return self.row_beyond(Some(nr));
-        }
-        match draft.place().and_then(|at| self.row_at(at)) {
-            None => self.row_beyond(None),
+        let spot = draft.spot();
+        match spot.and_then(|at| self.row_at(at)) {
+            None => self.row_beyond(spot.map(|(_, nr)| nr)),
             Some(i) if draft.below() => i + 1,
             Some(i) => i,
         }

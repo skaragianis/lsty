@@ -157,6 +157,9 @@ impl Model {
 
     /// Takes a key press while the field is open.
     pub(crate) fn edit_press(&mut self, stroke: Stroke) {
+        if self.escapes_refused(stroke) {
+            return self.end_edit();
+        }
         let fed = self.edit_fed(stroke);
         let own = matches!(
             fed.outcome,
@@ -183,6 +186,7 @@ impl Model {
                     len != self.edit.as_ref().map(|d| d.field.text.len());
                 self.follow_word(changed, typed);
             }
+            self.keep_refusal();
             self.scroll();
         }
     }

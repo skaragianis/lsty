@@ -15,8 +15,6 @@ mod edit;
 mod env;
 mod expect;
 mod finish;
-#[cfg(any(test, feature = "fuzzing"))]
-pub mod fuzzing;
 mod grant;
 mod id;
 mod idrules;
@@ -24,14 +22,11 @@ mod ids;
 mod ifabsent;
 mod landing;
 mod lifecycle;
-mod merge;
 mod moves;
 mod newline;
 mod next;
 mod order;
 mod paste;
-mod pin;
-mod pinned;
 mod pri;
 mod refs;
 mod relink;
@@ -41,6 +36,7 @@ mod restore;
 mod result;
 mod rules;
 mod run;
+mod seen;
 mod spawn;
 mod staged;
 mod stamps;
@@ -54,7 +50,7 @@ mod typed;
 mod undo;
 mod undo_apply;
 
-pub use add::{AddParams, Blocks, IdChoice, Place, add};
+pub use add::{AddParams, IdChoice, Place, add};
 pub use archive::archive;
 pub use del::del;
 pub use dep::{dep, undep};
@@ -70,8 +66,6 @@ pub use lifecycle::{ClaimOpts, DoOpts, StartOpts};
 pub use next::{NextParams, Reading, Started, Survey, next_read, next_start};
 pub use order::{Placement, deduplicate, down, reorder, up};
 pub use paste::{PasteLine, paste};
-pub use pin::{Pin, Seen, Settle, Spot, Tracked};
-pub use pinned::{Conflict, Edited, edit_pinned};
 pub use pri::{PriPair, depri, parse_letter, pri};
 pub use refs::{Target, parse_one, parse_refs, resolve};
 pub use relink::Relink;
@@ -79,11 +73,13 @@ pub use reopen::reopen;
 pub use report::report;
 pub use restore::restore;
 pub use result::Outcome;
+pub use seen::Seen;
 pub use staged::ChangeKind;
 pub use start::start;
 pub use stop::stop;
 pub use tag::{tag, untag};
 pub use text::{append, del_term, prepend, replace};
+pub use typed::edit_typed;
 pub use undo::{Change, FileRecord, UndoRecord};
 pub use undo_apply::{Followed, redo, undo};
 
@@ -108,8 +104,6 @@ mod invariant_tests;
 #[cfg(test)]
 mod lifecycle_tests;
 #[cfg(test)]
-mod merge_tests;
-#[cfg(test)]
 mod moves_tests;
 #[cfg(test)]
 mod next_tests;
@@ -117,8 +111,6 @@ mod next_tests;
 mod order_tests;
 #[cfg(test)]
 mod paste_tests;
-#[cfg(test)]
-mod pinned_tests;
 #[cfg(test)]
 mod pri_tests;
 #[cfg(test)]

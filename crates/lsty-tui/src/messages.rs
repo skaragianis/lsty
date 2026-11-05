@@ -15,15 +15,8 @@ pub(crate) enum Tone {
 /// What the status line says when the task of a line being edited is gone.
 pub(crate) const GONE: &str = "the task is gone";
 
-/// What the status line says when a line being edited changed on disk.
-pub(crate) const CHANGED: &str = "this task changed on disk";
-
-/// What the status line says when the task a draft gives an id to is
-/// gone.
-pub(crate) const PREREQUISITE_GONE: &str = "the task it waits for is gone";
-
-/// What it ends with when that task is gone.
-pub(crate) const DELETE_DEP: &str = " — delete its dep: to go on";
+/// What a field adds to the refusal of a line that changed under it.
+pub(crate) const ESC_DROPS: &str = "; <Esc> drops your edit";
 
 /// The message of `e`, followed by its hint when it has one.
 pub(crate) fn hinted(e: &errs::Error) -> String {

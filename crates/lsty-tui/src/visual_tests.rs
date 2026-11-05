@@ -278,7 +278,7 @@ fn a_reload_keeps_the_keys_typed_on_an_open_line_or_in_a_field() {
         .unwrap_or_else(|e| panic!("{e}"));
         let mut model = model_of(dir.path());
         press(&mut model, typed);
-        fs::write(dir.path().join("todo.txt"), "A\nC\nD\nE\n")
+        fs::write(dir.path().join("todo.txt"), format!("{LIST}F\n"))
             .unwrap_or_else(|e| panic!("{e}"));
         reload(&mut model);
         press(&mut model, "k");
