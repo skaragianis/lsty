@@ -405,7 +405,7 @@ impl Model {
         self.live.serial += 1;
         self.clock = clock;
         self.hist.follow(&moved);
-        self.remap_clip(&moved);
+        self.remap_clip(&moved, wrote.is_none().then_some(&old));
         self.sticky.remap(&moved);
         self.remap_peek(&moved);
         self.remap_pointer(&moved);

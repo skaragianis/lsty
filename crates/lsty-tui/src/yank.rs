@@ -8,7 +8,7 @@ use lsty_core::{
     errs::Source,
     keys::Action,
     list::{Snapshot, TaskId},
-    ops::{self, Change, ChangeKind, PasteLine, Place, Relink, Seen},
+    ops::{self, Change, ChangeKind, Landing, PasteLine, Place, Relink, Seen},
     todotxt::{Line, trim},
 };
 
@@ -20,7 +20,7 @@ use crate::{
     model::Model,
     msg::Cmd,
     press::{Refusal, decide},
-    track::Remap,
+    track::{Remap, landed_at},
 };
 
 /// A line of the last yank, and the dependents a delete of it unlinked.
@@ -106,12 +106,28 @@ impl Yank {
         }
     }
 
-    /// Follows the kept dependents to their lines in a new reading.
-    fn follow(&mut self, moved: &Remap) {
-        for link in self.lines.iter_mut().flat_map(|l| &mut l.links) {
-            link.nr = link.nr.and_then(|nr| {
-                moved.track((Source::Todo, nr)).map(|(_, nr)| nr)
-            });
+    /// Follows the kept dependents to their lines in a new reading. `outside`
+    /// is `old`, the reading before, when no write of this session made it:
+    /// what that moved or twinned is not written on any more.
+    fn follow(
+        &mut self,
+        moved: &Remap,
+        now: &Snapshot,
+        outside: Option<&Snapshot>,
+    ) {
+        let mut links =
+            self.lines.iter_mut().flat_map(|l| &mut l.links).peekable();
+        if links.peek().is_none() {
+            return;
+        }
+        let landing = outside.map(|old| Landing::of(old, now));
+        for link in links {
+            let at = link.nr.map(|nr| (Source::Todo, nr));
+            link.lost |= landing
+                .as_ref()
+                .zip(at)
+                .is_some_and(|(l, at)| landed_at(l, at).is_none());
+            link.nr = at.and_then(|at| moved.track(at)).map(|(_, nr)| nr);
         }
     }
 }
@@ -136,6 +152,7 @@ fn unlinked_by_id(changes: &[Change]) -> HashMap<Vec<u8>, Vec<Relink>> {
         {
             by_id.entry(id.to_vec()).or_default().push(Relink {
                 nr: change.nr_after,
+                lost: false,
                 before: change.before.clone(),
                 after: change.after.clone(),
             });
@@ -208,9 +225,13 @@ impl Model {
     }
 
     /// Follows the kept dependents to their lines in a new reading.
-    pub(crate) fn remap_clip(&mut self, moved: &Remap) {
+    pub(crate) fn remap_clip(
+        &mut self,
+        moved: &Remap,
+        outside: Option<&Snapshot>,
+    ) {
         if let Some(yank) = &mut self.clip {
-            yank.follow(moved);
+            yank.follow(moved, &self.snap, outside);
         }
     }
 

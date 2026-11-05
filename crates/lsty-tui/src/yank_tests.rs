@@ -149,22 +149,76 @@ fn an_unreadable_clipboard_pastes_the_last_yank() {
     );
 }
 
-// 43.37: the dependent is followed to its new line
+/// The file an outside edit leaves, whether a reading drew it, the file after
+/// the paste, and what the paste says about the dependent.
+type OutsideEdit = (&'static str, bool, &'static str, &'static str);
+
+const OUTSIDE_EDITS: &[OutsideEdit] = &[
+    (
+        "X\nY\n\nB\nC\n",
+        true,
+        "X\nY\n\nB dep:a\nC\nA id:a\n",
+        "relinked 4",
+    ),
+    (
+        "X\nY\n\nB\nC\n",
+        false,
+        "X\nY\n\nB dep:a\nC\nA id:a\n",
+        "relinked 4",
+    ),
+    (
+        "\nC\nB\n",
+        true,
+        "\nC\nB\nA id:a\n",
+        "3 changed since; dep:a not restored",
+    ),
+    (
+        "\nC\nB\n",
+        false,
+        "\nC\nA id:a\nB\n",
+        "2 changed since; dep:a not restored",
+    ),
+    (
+        "\nB\nB\nC\n",
+        true,
+        "\nB\nB\nC\nA id:a\n",
+        "2 changed since; dep:a not restored",
+    ),
+    (
+        "\nB\nB\nC\n",
+        false,
+        "\nB\nB\nC\nA id:a\n",
+        "2 changed since; dep:a not restored",
+    ),
+    ("\nC\n", true, "\nC\nA id:a\n", "a dependent of a is gone"),
+    (
+        "\nC\n",
+        false,
+        "\nC\nA id:a\n",
+        "2 changed since; dep:a not restored",
+    ),
+];
+
+// 43.37: the dependent is relinked where it stands when it only shifted, and
+// otherwise left out and named, whether the reading has drawn the edit or not.
 #[test]
-fn a_kept_dependent_follows_its_line_through_an_outside_change() {
-    let dir = workdir("A id:a\nB dep:a\nC\n");
-    let board = Board::default();
-    let mut model = model_with(dir.path(), &board);
-    board.take(&press(&mut model, "dd"));
-    fs::write(dir.path().join("todo.txt"), "X\nY\n\nB\nC\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut model);
-    keys(&mut model, "Gp");
-    assert_eq!(todo_of(dir.path()), "X\nY\n\nB dep:a\nC\nA id:a\n");
-    assert_eq!(
-        model.message.as_deref(),
-        Some("pasted 1 task (1 moved); relinked 4")
-    );
+fn a_kept_dependent_through_an_outside_change() {
+    for (edit, read, want, said) in OUTSIDE_EDITS {
+        let name = format!("{edit:?}, read {read}");
+        let dir = workdir("A id:a\nB dep:a\nC\n");
+        let board = Board::default();
+        let mut model = model_with(dir.path(), &board);
+        board.take(&press(&mut model, "dd"));
+        fs::write(dir.path().join("todo.txt"), edit)
+            .unwrap_or_else(|e| panic!("{e}"));
+        if *read {
+            reload(&mut model);
+        }
+        keys(&mut model, "Gp");
+        assert_eq!(todo_of(dir.path()), *want, "{name}");
+        let message = format!("pasted 1 task (1 moved); {said}");
+        assert_eq!(model.message.as_deref(), Some(message.as_str()), "{name}");
+    }
 }
 
 // A refused delete reads with the last yank in its place, which follows it.
