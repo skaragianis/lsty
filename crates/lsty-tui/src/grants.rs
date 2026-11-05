@@ -62,6 +62,25 @@ impl Model {
         Ok(true)
     }
 
+    /// Makes the draft refuse once `task`, which has `id`, is not the line it
+    /// waits for. An archived task is not written on: it holds the id or not.
+    pub(crate) fn link_id(&mut self, task: TaskId, id: &str) {
+        let Some(id) = Id::new(id) else { return };
+        let grant = Grant::new(&self.snap, task, id.clone())
+            .unwrap_or_else(|| Grant::held(id));
+        if let Some(draft) = &mut self.edit {
+            draft.comp.grants.push(grant);
+        }
+    }
+
+    /// Makes the draft refuse once no line holds `id`, picked from the popup.
+    pub(crate) fn hold_id(&mut self, id: &str) {
+        let Some(draft) = &mut self.edit else { return };
+        if let Some(id) = Id::new(id).filter(|i| !draft.held().contains(i)) {
+            draft.comp.grants.push(Grant::held(id));
+        }
+    }
+
     /// Makes the id that `task` gets when the draft is written, and
     /// returns the word that waits for it.
     pub(crate) fn give_id(&mut self, task: TaskId) -> errs::Result<String> {

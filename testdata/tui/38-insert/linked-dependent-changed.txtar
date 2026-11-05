@@ -27,7 +27,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit  <CR> commit  9.9.9
+ INSERT  todo.txt  manual  the list changed — look again; delete the dep: to save, <Esc> drops your
 -- a-file --
 One id:aaaa
 Two more

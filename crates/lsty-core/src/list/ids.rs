@@ -120,7 +120,7 @@ pub(super) fn warnings_for(warned: &[Warned], ids: &[&[u8]]) -> Vec<String> {
 
 impl Snapshot {
     /// The indices of the tasks that carry `id`, in file order.
-    fn with_id(&self, id: &[u8]) -> &[usize] {
+    pub(crate) fn with_id(&self, id: &[u8]) -> &[usize] {
         run(&self.by_id, id, |i| self.id_at(i))
     }
 

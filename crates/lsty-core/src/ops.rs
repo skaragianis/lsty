@@ -58,7 +58,7 @@ pub use due::due;
 pub use edit::{EditPlan, edit, joined_lines, prepare_edit};
 pub use env::{Actor, Env, Owner, Toggle};
 pub use finish::finish;
-pub use grant::Grant;
+pub use grant::{DEAD_DEP, Grant};
 pub use id::id;
 pub use ids::{IdSource, OsIds, fresh_id};
 pub use landing::{LIST_CHANGED, Landing};

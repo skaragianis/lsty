@@ -40,11 +40,6 @@ impl Target {
         Self::at(Source::Todo, nr)
     }
 
-    /// The todo line at row `index` (counting from zero).
-    pub(super) fn todo_index(index: usize) -> Self {
-        Self::todo(i64::try_from(index + 1).unwrap_or(i64::MAX))
-    }
-
     /// The task that carries `id`, in whichever file it is.
     pub(crate) const fn by_id(id: Id) -> Self {
         Self::new(Key::Id(id))
