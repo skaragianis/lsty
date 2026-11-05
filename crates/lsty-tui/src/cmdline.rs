@@ -263,9 +263,13 @@ impl Model {
         }
     }
 
-    /// Shows an error above the prompt, which stays open with its text.
+    /// Shows an error above the prompt, which stays open with its text
+    /// unless the list it was aimed at changed.
     fn fail_line(&mut self, e: &Error) {
         self.fail(e);
+        if e.code() == Code::ExpectMismatch {
+            self.close_input();
+        }
         let kept =
             matches!(e.code(), Code::LockTimeout | Code::ExpectMismatch);
         if !kept && e.hint().is_some() {
@@ -274,15 +278,18 @@ impl Model {
     }
 
     /// `:undo` and `:redo`: the keys' own steps. A step that is refused
-    /// leaves the line open with its text.
+    /// leaves the line open with its text, unless the step was dropped: a
+    /// second `<CR>` would reach another.
     fn rewind_line(&mut self, undo: bool, text: &str) {
         self.close_input();
+        let steps = self.hist.undo.len() + self.hist.redo.len();
         if undo {
             self.undo_last();
         } else {
             self.redo_last();
         }
-        if self.tone == Tone::Alert {
+        let kept = self.hist.undo.len() + self.hist.redo.len() == steps;
+        if self.tone == Tone::Alert && kept {
             self.start_line(text);
         }
     }
