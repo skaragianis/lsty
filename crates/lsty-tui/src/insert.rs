@@ -4,11 +4,11 @@
 
 use lsty_core::{
     dates::Clock,
-    errs::{self, Code, Nr, Source},
+    errs::{self, Code, Source},
     keys::{Action, Mods, Named, Stroke},
     list::{Snapshot, Task},
     ops::{self, AddParams, Landing, Outcome, Place as Where, Seen, Target},
-    todotxt::{Kind, Line},
+    todotxt::Kind,
 };
 
 use crate::{
@@ -55,10 +55,11 @@ pub(crate) struct Draft {
     /// The line of the task, or of the anchor of a new task, in the
     /// reading shown; once `lost`, about where it was.
     pub(crate) at: Option<Place>,
-    /// The line is not the one the field opened on: a write on it refuses.
-    lost: bool,
-    /// A commit was refused, so `<Esc>` drops the text now: what the message
-    /// says about that.
+    /// The line is not the one the field opened on, so a write on it
+    /// refuses: the last reading it stood in, and where.
+    lost: Option<(Snapshot, Place)>,
+    /// A commit was refused, so `<Esc>` drops the text now: what the status
+    /// line says.
     refused: Option<&'static str>,
     /// The first row of a field taller than the list that is shown.
     pub(crate) window: usize,
@@ -72,7 +73,7 @@ impl Draft {
             field,
             subject,
             at,
-            lost: false,
+            lost: None,
             refused: None,
             window: 0,
             comp: Completion::default(),
@@ -92,18 +93,18 @@ impl Draft {
     /// The line of the task being edited, or of the anchor of a new
     /// task, while it is the line the field opened on.
     pub(crate) fn place(&self) -> Option<Place> {
-        self.at.filter(|_| !self.lost)
+        self.at.filter(|_| self.lost.is_none())
     }
 
     /// Whether the field stands in the row of its task.
     pub(crate) const fn replacing(&self) -> bool {
-        self.is_task() && !self.lost
+        self.is_task() && self.lost.is_none()
     }
 
     /// Whether a commit has to refuse: it would write on a line that
     /// changed.
     pub(crate) const fn refuses(&self) -> bool {
-        self.lost && (self.is_task() || self.blocks())
+        self.lost.is_some() && (self.is_task() || self.blocks())
     }
 
     /// Whether the anchor of a new task is to wait for it.
@@ -133,28 +134,9 @@ impl Draft {
         text.trim().is_empty() || words(&text).eq(words(prefill))
     }
 
-    /// The only line of `now` that is again the one a lost field opened on,
-    /// and was not there in `old`: a line that only moved does not come back.
-    fn came_back(
-        &self,
-        source: Source,
-        old: &Snapshot,
-        now: &Snapshot,
-    ) -> Option<Place> {
-        let Subject::Task { raw } = &self.subject else {
-            return None;
-        };
-        let holds = |line: &Line| line.raw() == raw.as_slice();
-        let lines = &now.file(source).lines;
-        let mut found = lines.iter().enumerate().filter(|(_, l)| holds(l));
-        let (index, _) = found.next().filter(|_| self.lost)?;
-        let there = old.file(source).lines.iter().any(holds);
-        (!there && found.next().is_none())
-            .then(|| Nr::from_index(index).map(|nr| (source, nr)))?
-    }
-
     /// Takes the draft to a later reading. A line that is not kept is lost
-    /// until it comes back; a new task goes about where its anchor was.
+    /// until the rule keeps it again from the last reading it stood in; a new
+    /// task goes about where its anchor was.
     fn follow(
         &mut self,
         moved: &Remap,
@@ -168,10 +150,18 @@ impl Draft {
         let Some(at) = self.at else {
             return;
         };
-        let kept = self.place().and_then(|at| landed_at(landing, at));
-        let kept = kept.or_else(|| self.came_back(at.0, old, now));
-        self.refused = self.refused.filter(|_| !self.lost || kept.is_none());
-        self.lost = kept.is_none();
+        let kept = match &self.lost {
+            Some((known, was)) => landed_at(&Landing::of(known, now), *was),
+            None => landed_at(landing, at),
+        };
+        match (kept, &self.lost) {
+            (Some(_), Some(_)) => {
+                self.lost = None;
+                self.refused = None;
+            }
+            (None, None) => self.lost = Some((old.clone(), at)),
+            _ => {}
+        }
         if moved.track(at).is_none()
             && let Subject::New { below, .. } = &mut self.subject
         {
@@ -390,7 +380,7 @@ impl Model {
             return;
         };
         let Some((source, nr)) = draft.place() else {
-            return self.refuse_field(messages::ESC_DROPS);
+            return self.refuse_field(messages::REFUSED);
         };
         let target = Target::at(source, i64::from(nr.get()));
         let grants = draft.live_grants(text);
@@ -405,7 +395,7 @@ impl Model {
             return;
         };
         if draft.refuses() {
-            return self.refuse_field(messages::ESC_DROPS);
+            return self.refuse_field(messages::REFUSED);
         }
         let place = draft.at.map_or(Where::End, |(_, nr)| Where::Beside {
             seen: Seen::of(&self.snap),
@@ -435,18 +425,18 @@ impl Model {
 
     /// Refuses a commit of a field whose line changed: says why the field
     /// stays open and how to leave it, and from now on `<Esc>` drops the text.
-    fn refuse_field(&mut self, drops: &'static str) {
+    fn refuse_field(&mut self, said: &'static str) {
         if let Some(draft) = &mut self.edit {
-            draft.refused = Some(drops);
+            draft.refused = Some(said);
         }
-        self.alert(format!("{}{drops}", ops::LIST_CHANGED));
+        self.alert(said.to_owned());
     }
 
     /// Keeps the refusal on the status line while the field stays open.
     pub(crate) fn keep_refusal(&mut self) {
         let refused = self.edit.as_ref().and_then(|d| d.refused);
-        if let Some(drops) = refused.filter(|_| self.message.is_none()) {
-            self.refuse_field(drops);
+        if let Some(said) = refused.filter(|_| self.message.is_none()) {
+            self.refuse_field(said);
         }
     }
 
@@ -477,13 +467,13 @@ impl Model {
                 };
                 self.fail_edit(&e);
                 let dep = e.text(ops::DEAD_DEP).is_some();
-                let drops = if dep {
-                    messages::DEP_DROPS
+                let said = if dep {
+                    messages::DEP_REFUSED
                 } else {
-                    messages::ESC_DROPS
+                    messages::REFUSED
                 };
                 if e.code() == Code::ExpectMismatch {
-                    self.refuse_field(drops);
+                    self.refuse_field(said);
                 }
                 None
             }
@@ -519,7 +509,7 @@ impl Model {
                 return self.end_edit();
             }
             if draft.refuses() {
-                return self.refuse_field(messages::ESC_DROPS);
+                return self.refuse_field(messages::REFUSED);
             }
             draft.comp.popup = None;
             draft.comp.under = None;

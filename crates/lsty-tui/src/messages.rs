@@ -15,12 +15,13 @@ pub(crate) enum Tone {
 /// What the status line says when the task of a line being edited is gone.
 pub(crate) const GONE: &str = "the task is gone";
 
-/// What a field adds to the refusal of a line that changed under it.
-pub(crate) const ESC_DROPS: &str = "; <Esc> drops your edit";
+/// What a field says when a commit on a line that changed is refused.
+pub(crate) const REFUSED: &str =
+    "the list changed — look again; <Esc> drops your edit";
 
 /// The same, when what refuses is a `dep:` in the text.
-pub(crate) const DEP_DROPS: &str =
-    "; <Esc> drops your edit, or delete the dep:";
+pub(crate) const DEP_REFUSED: &str =
+    "the list changed — <Esc> drops it, or delete the dep:";
 
 /// The message of `e`, followed by its hint when it has one.
 pub(crate) fn hinted(e: &errs::Error) -> String {

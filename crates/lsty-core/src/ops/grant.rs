@@ -65,6 +65,11 @@ impl Grant {
         self.nr == Some(nr)
     }
 
+    /// Whether it still stands on the line that was picked.
+    pub const fn has_line(&self) -> bool {
+        self.nr.is_some()
+    }
+
     /// Takes the grant to a later reading.
     pub fn land(&mut self, landing: &Landing) {
         self.nr = self.nr.and_then(|nr| {

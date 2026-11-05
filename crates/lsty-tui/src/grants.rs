@@ -76,6 +76,10 @@ impl Model {
     /// Makes the draft refuse once no line holds `id`, picked from the popup.
     pub(crate) fn hold_id(&mut self, id: &str) {
         let Some(draft) = &mut self.edit else { return };
+        draft
+            .comp
+            .grants
+            .retain(|g| g.has_line() || g.id().as_str() != id);
         if let Some(id) = Id::new(id).filter(|i| !draft.held().contains(i)) {
             draft.comp.grants.push(Grant::held(id));
         }

@@ -289,15 +289,8 @@ impl Model {
             draft.window = window;
         }
         let at = self.field_at();
-        let look = self.edit.as_ref().is_some_and(Draft::refuses);
-        self.top = self.sized(|size| {
-            let below = look && at + 1 < size.len;
-            let top = if below {
-                size.window(self.top, at + 1)
-            } else {
-                self.top
-            };
-            size.window(top, at)
-        });
+        let look = usize::from(self.edit.as_ref().is_some_and(Draft::refuses));
+        self.top = self
+            .sized(|size| size.window(size.window(self.top, at + look), at));
     }
 }

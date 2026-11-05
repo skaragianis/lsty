@@ -73,7 +73,7 @@ Open
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit, or delete the dep:
+ INSERT  todo.txt  manual  the list changed — <Esc> drops it, or delete the dep:              9.9.9
 -- no-holder-file --
 Open
 2026-09-29 New dep:o1d2 id:t001

@@ -22,8 +22,8 @@ const LINE_TWIN: &str = "Top\n(A) 2026-09-20 Call client +work id:c1\nEnd\n\
                          (A) 2026-09-20 Call client +work id:c1\n";
 const REFUSED: &str =
     "the list changed \u{2014} look again; <Esc> drops your edit";
-const DEP_REFUSED: &str = "the list changed \u{2014} look again; <Esc> drops \
-                           your edit, or delete the dep:";
+const DEP_REFUSED: &str =
+    "the list changed \u{2014} <Esc> drops it, or delete the dep:";
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
@@ -280,6 +280,27 @@ fn a_picked_id_goes_while_a_line_holds_it() {
         .unwrap();
     keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "Alpha again id:a1\nnew dep:a1\n");
+
+    // The same id picked after a dead `go`: the dead grant goes with its word.
+    let dir = workdir(HAS_ID);
+    let mut model = model_of(dir.path());
+    keys(&mut model, "gonew<End>");
+    outside(&mut model, dir.path(), "Alpha again id:a1\nBravo\n");
+    keys(&mut model, "<CR>");
+    assert_eq!(model.message.as_deref(), Some(DEP_REFUSED));
+    keys(&mut model, "<C-w>dep:Alp<Tab><CR>");
+    let want = "Alpha again id:a1\n2026-09-29 new dep:a1 id:t001\nBravo\n";
+    assert_eq!(todo_of(dir.path()), want);
+
+    // Another task picked: the dead `dep:` is still in the text.
+    let disk = "Alpha again id:a1\nBravo id:b1\n";
+    let dir = workdir("Alpha id:a1\nBravo id:b1\n");
+    let mut model = model_of(dir.path());
+    keys(&mut model, "gonew<End>");
+    outside(&mut model, dir.path(), disk);
+    keys(&mut model, " dep:Bra<Tab><CR>");
+    assert_eq!(todo_of(dir.path()), disk);
+    assert_eq!(model.message.as_deref(), Some(DEP_REFUSED));
 }
 
 // A line that reads as the field opened on it again differs in nothing, even
@@ -290,6 +311,7 @@ fn a_line_that_comes_back_lets_the_field_write() {
     for (name, between, back) in [
         ("changed back", LINE_CHANGED, LIST),
         ("truncated", "", shifted.as_str()),
+        ("moved back", LINE_MOVED, LIST),
     ] {
         let dir = workdir(LIST);
         let mut model = typing(dir.path());
@@ -303,14 +325,20 @@ fn a_line_that_comes_back_lets_the_field_write() {
         let want = back.replace("+work", "+work more");
         assert_eq!(todo_of(dir.path()), want, "{name}");
     }
-    // Two lines that read like it: the field cannot tell which it was on.
-    let dir = workdir(LIST);
-    let mut model = typing(dir.path());
-    outside(&mut model, dir.path(), "");
-    outside(&mut model, dir.path(), LINE_TWIN);
-    keys(&mut model, "<CR>");
-    assert_eq!(todo_of(dir.path()), LINE_TWIN);
-    assert_eq!(model.message.as_deref(), Some(REFUSED));
+    // The bytes alone do not bring it back: the rule asks from where it stood.
+    for (between, end) in [
+        ("", LINE_TWIN),
+        ("Top\nEnd\n", LINE_MOVED),
+        ("", LINE_MOVED),
+    ] {
+        let dir = workdir(LIST);
+        let mut model = typing(dir.path());
+        outside(&mut model, dir.path(), between);
+        outside(&mut model, dir.path(), end);
+        keys(&mut model, "<CR>");
+        assert_eq!(todo_of(dir.path()), end);
+        assert_eq!(model.message.as_deref(), Some(REFUSED));
+    }
 }
 
 // `go` and `gO` write a link on the line: on a changed row they open nothing.
