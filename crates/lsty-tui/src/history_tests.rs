@@ -51,13 +51,24 @@ fn repeat_runs_the_last_change_on_the_task_under_the_cursor() {
     assert_eq!(kept(&model).0, 3, "each repeat is an action to undo");
 }
 
-// 36.36: the count it had.
+// 36.36: the count it had, or the one a repeat that wrote typed over it.
 #[test]
 fn repeat_keeps_the_count_of_the_change() {
-    let dir = workdir(LIST);
-    let mut model = model_of(dir.path());
-    press(&mut model, "2ddj.");
-    assert_eq!(todo_of(dir.path()), "\n\nC\n\n\n");
+    let due = " due:2026-10-02";
+    let dated = format!("A{due}\nB{due}\nC{due}\nD{due}\nE\n");
+    let rows = [
+        ("2ddj.", "\n\nC\n\n\n"),
+        ("-j2.jj.", "(A) A\n(A) B\n(A) C\n(A) D\n(A) E\n"),
+        ("J2.gg.", "C\nD\nB\nA\nE\n"),
+        ("VjJ<Esc>gg3.gg.", "B\nD\nC\nA\nE\n"),
+        ("gd2026-10-02<CR>j2.j.", &dated),
+    ];
+    for (typed, want) in rows {
+        let dir = workdir(LIST);
+        let mut model = model_of(dir.path());
+        keys(&mut model, typed);
+        assert_eq!(todo_of(dir.path()), want, "{typed}");
+    }
 }
 
 // 36.37: the text of a prompt, without opening it.
