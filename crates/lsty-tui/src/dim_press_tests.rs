@@ -184,12 +184,12 @@ fn a_dim_repeat_on_a_list_that_moved_on_never_writes() {
 #[test]
 fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
     let rows = [
-        // It moved down.
+        // It changed: the row stays, on the task now there.
         (
             "j",
             "New\nBlocker id:b\nA\nB dep:b\n",
-            "A",
-            "New\nBlocker id:b\nx 2026-09-29 A\nB dep:b\n",
+            "Blocker id:b",
+            "New\nx 2026-09-29 Blocker id:b\nA\nB dep:b\n",
         ),
         // It stayed where it was.
         ("j", FREED, "A", "Blocker id:b\nx 2026-09-29 A\nB\n"),

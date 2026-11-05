@@ -383,7 +383,9 @@ impl Model {
         }
     }
 
-    /// Makes `snap` the state shown, keeping the cursor on its task.
+    /// Makes `snap` the state shown. After a write the cursor stays on its
+    /// task. After an outside edit it stays on a line that did not change
+    /// and is still shown, and otherwise on its screen row.
     /// Tells whether the write chose the row the cursor went to.
     pub(crate) fn install(
         &mut self,
@@ -394,11 +396,11 @@ impl Model {
         let place = self.cursor_place();
         let offset = self.view_offset();
         let ends = self.selection_ends();
-        let typed = self.typed_lines().filter(|_| wrote.is_none());
+        let typed = self.typed_lines();
         let old = std::mem::replace(&mut self.snap, snap);
         let record = wrote.map(|w| w.record);
         let moved = Remap::new(&old, &self.snap, record, place.as_slice());
-        let landing = typed.as_ref().map(|_| Landing::of(&old, &self.snap));
+        let landing = wrote.is_none().then(|| Landing::of(&old, &self.snap));
         self.live.shown.deleted = !self.file_exists()
             && (old.found().state == FileState::Exists
                 || self.live.shown.deleted);
@@ -418,10 +420,15 @@ impl Model {
         // the reading before a write, which is right because the line the
         // write adds takes that index.
         let spot = self.edit.as_ref().and_then(|d| d.at);
-        let aim = spot.or_else(|| place.map(|at| moved.place(at)));
         let old_rows = std::mem::take(&mut self.rows);
         self.rebuild_rows();
         self.rebuild_panels();
+        let aim = spot.or_else(|| match &landing {
+            Some(landing) => place
+                .and_then(|at| landed_at(landing, at))
+                .filter(|at| self.row_at(*at).is_some()),
+            None => place.map(|at| moved.place(at)),
+        });
         let landed =
             wrote.and_then(|w| self.landing(&old_rows, &moved, w, place));
         let chose = landed.is_some();
@@ -431,7 +438,10 @@ impl Model {
             Some(at) => (Some(at), View::Top(self.top), true),
             None => (aim, offset, matches!(offset, View::Cursor(_))),
         };
-        self.follow(aim, offset);
+        match aim {
+            Some(_) => self.follow(aim, offset),
+            None => self.stay_on_row(),
+        }
         self.resume(ends, &old_rows, |at| match &landing {
             Some(landing) => landed_at(landing, at),
             None => moved.track(at),
