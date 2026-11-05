@@ -148,7 +148,8 @@ impl Model {
             // Taking a claim over has one line, which the count would lose.
             let plain =
                 !changing.iter().any(|t| matches!(t.claim, Claim::Agent));
-            let head = if plain && said.len() == change {
+            let lines = said.iter().filter(|l| !l.starts_with("archived to "));
+            let head = if plain && lines.count() == change {
                 format!("{change} {did}")
             } else {
                 all.clone()

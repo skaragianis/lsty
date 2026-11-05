@@ -3,11 +3,13 @@ use std::{fs, path::Path, time::SystemTime};
 use lsty_core::{
     config::{Config, Filter, Hidden},
     errs::Source,
+    keys::Action,
     list::SortField,
     theme::Slot,
 };
 
 use crate::{
+    hints::dim,
     messages::{self, Tone},
     model::Model,
     test_util::{
@@ -308,6 +310,30 @@ fn a_completed_task_stays_until_what_the_next_key_starts_is_over() {
     reload(&mut model);
     assert_eq!(rows_of(&model)[..3].join("|"), HELD);
     assert_eq!(model.selected_rows(), Some((1, 2)));
+}
+
+// A done row looks the same in either file: the press does too.
+#[test]
+fn a_press_over_a_done_row_is_the_same_with_auto_archive() {
+    let rows = [
+        (Action::ToggleComplete, "x", "1 done; 1 already done"),
+        (Action::Wontdo, "T", "1 won't do; 1 already done"),
+    ];
+    for (action, key, said) in rows {
+        for auto_archive in [true, false] {
+            let name = format!("{key} {auto_archive}");
+            let dir = workdir("A\nB\nC\n");
+            let config = Config {
+                auto_archive,
+                ..config(&[Hidden::Later])
+            };
+            let mut model = model_of(dir.path(), config);
+            press(&mut model, "Gxvk");
+            assert!(!dim(model.answers()(action)), "{name}");
+            press(&mut model, key);
+            assert_eq!(model.message.as_deref(), Some(said), "{name}");
+        }
+    }
 }
 
 // A held row keeps its id, muted like the rest of it.

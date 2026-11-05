@@ -1,10 +1,13 @@
 size 100 12
 start
-keys j v j x
+keys j v j t
 frame a-frame
 keys d
 frame b-frame
 file todo.txt a-file
+keys x
+frame c-frame
+file todo.txt c-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -44,3 +47,19 @@ x 2026-09-02 Old two
 -- a-file --
 A
 B
+-- c-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  3   A                                                                                           │
+│  2 ✓ B                                                                                           │
+│    ✓ Old one                                                                             28d ago │
+│    ✓ Old two                                                                             27d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  1 done; 1 already done  x restore  T wont  o new  a append         9.9.9
+-- c-file --
+A
+x 2026-09-29 B

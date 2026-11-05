@@ -308,7 +308,7 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
             "A\n",
             OLD,
             "vj",
-            "x done t start T wont d delete",
+            "t start d delete",
         ),
         ("detail todo", "A\n", "", "<C-w>2", "<CR> link"),
         ("detail link", "A https://x.org\n", "", "<C-w>2", ""),

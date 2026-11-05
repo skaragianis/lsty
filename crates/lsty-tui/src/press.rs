@@ -52,7 +52,7 @@ impl Command {
 pub(crate) enum Refusal {
     /// No task is open, and some are archived.
     Closed,
-    /// Some of the tasks are archived, and some open; or any, for `J` and `K`.
+    /// Some archived, some open, but for `x` and `T`; or any, for `J` and `K`.
     Archived,
     /// `t` on tasks that are all done.
     AllDone,
@@ -480,14 +480,15 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::HistoryPrev
         | Action::HistoryNext => return Answer::Applies,
     };
+    let open = s.todo + s.doing > 0;
+    let x = action == Action::ToggleComplete;
     if s.total == 0 {
         lit_if(action == Action::InsertPrerequisite, Refusal::Quiet)
-    } else if s.archived == 0 {
+    } else if s.archived == 0 || (open && (x || action == Action::Wontdo)) {
         rule(s)
-    } else if s.todo + s.doing > 0 {
+    } else if open {
         Answer::Refused(Refusal::Archived)
-    } else if s.archived == s.total && matches!(action, Action::ToggleComplete)
-    {
+    } else if s.archived == s.total && x {
         Answer::Resolved(Command::Restore)
     } else {
         Answer::Refused(Refusal::Closed)
