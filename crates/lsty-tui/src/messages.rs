@@ -20,7 +20,7 @@ pub(crate) const ESC_DROPS: &str = "; <Esc> drops your edit";
 
 /// The same, when what refuses is a `dep:` in the text.
 pub(crate) const DEP_DROPS: &str =
-    "; delete the dep: to save, <Esc> drops your edit";
+    "; <Esc> drops your edit, or delete the dep:";
 
 /// The message of `e`, followed by its hint when it has one.
 pub(crate) fn hinted(e: &errs::Error) -> String {
