@@ -545,19 +545,18 @@ impl Model {
         &mut self,
         moved: &Remap,
         old: &Snapshot,
-        wrote: bool,
+        outside: Option<&Landing>,
     ) {
-        if wrote {
+        let Some(landing) = outside else {
             self.kept = None;
             return;
-        }
+        };
         if self.edit.is_none() && self.kept.is_none() {
             return;
         }
         let warned = self.edit.as_ref().is_some_and(Draft::refuses);
-        let landing = Landing::of(old, &self.snap);
         for draft in self.edit.iter_mut().chain(self.kept.iter_mut()) {
-            draft.follow(moved, &landing, old, &self.snap);
+            draft.follow(moved, landing, old, &self.snap);
         }
         let refuses = self.edit.as_ref().is_some_and(Draft::refuses);
         let armed = self.edit.as_ref().is_some_and(|d| d.refused.is_some());
