@@ -1,6 +1,11 @@
 use std::{fs, path::Path};
 
-use lsty_core::{errs::Source, keys::Mode, ops::LIST_CHANGED};
+use lsty_core::{
+    config::{Config, Hidden},
+    errs::Source,
+    keys::Mode,
+    ops::LIST_CHANGED,
+};
 
 use crate::{
     messages,
@@ -285,9 +290,12 @@ fn a_reload_keeps_the_keys_typed_on_an_open_line_or_in_a_field() {
 const ABC: &str = "A\nB\nC\n";
 const ABCD: &str = "A\nB\nC\nD\n";
 const LOOK: Option<&str> = Some(LIST_CHANGED);
+const SAME: &str = "A\nB +k\nC\n";
+const LINKED: &str = "A https://a.test +k\nB\n";
 
-/// The file, keys to where they are typed, those typed before the reading,
-/// what it reads, those typed after, the file left, and the word said.
+/// The file, the done file after a `|`, keys to where they are typed, those
+/// typed before the reading, what it reads, each reading after a `|`, those
+/// typed after, the file left, and the word said.
 type Under = (
     &'static str,
     &'static str,
@@ -321,6 +329,54 @@ const UNDER_WAY: &[Under] = &[
         LOOK,
     ),
     (ABC, "j", "2", "A\nB\n", "x", "A\nB\n", LOOK),
+    (
+        "(A) B\n|x 2026-09-01 Done\n",
+        "s",
+        "2",
+        "(B) N\n(A) B\n",
+        "x",
+        "(B) N\n(A) B\n",
+        LOOK,
+    ),
+    (
+        ABC,
+        "j",
+        "d",
+        "A\nB +k\nC\n|N\nA\nB +k\nC\n",
+        "d",
+        "N\nA\nB +k\nC\n",
+        LOOK,
+    ),
+    (ABC, "j", "2", SAME, "o", SAME, None),
+    (ABC, "j", "2", SAME, "O", SAME, None),
+    (ABC, "j", "2", SAME, "yy", SAME, None),
+    (
+        ABC,
+        "yyj",
+        "2",
+        SAME,
+        "p",
+        "A\nB +k\n2026-09-29 A id:t001\nC\n",
+        None,
+    ),
+    (
+        ABC,
+        "yyj",
+        "2",
+        SAME,
+        "P",
+        "A\n2026-09-29 A id:t001\nB +k\nC\n",
+        None,
+    ),
+    (
+        "A https://a.test\nB\n",
+        "gg",
+        "g",
+        LINKED,
+        "x",
+        LINKED,
+        None,
+    ),
     (ABC, "j", "d", "A\nB +k\nC\n", "<Esc>dd", "A\nC\n", None),
     (ABC, "j", "d", "Z\nA\nB\nC\n", "d", "Z\nA\nC\n", None),
     (ABC, "j", "d", "B\nC\n", "d", "C\n", None),
@@ -371,13 +427,22 @@ const UNDER_WAY: &[Under] = &[
 #[test]
 fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
     for &(todo, to, typed, outside, then, want, says) in UNDER_WAY {
+        let (todo, done) = todo.split_once('|').unwrap_or((todo, ""));
         let dir = workdir(todo);
-        let mut model = model_of(dir.path());
+        fs::write(dir.path().join("done.txt"), done)
+            .unwrap_or_else(|e| panic!("{e}"));
+        let config = Config {
+            hidden_tasks: vec![Hidden::Later],
+            ..alone()
+        };
+        let mut model = started(deps(dir.path(), config));
         to.split('|').for_each(|part| settled(&mut model, part));
         keys(&mut model, typed);
-        fs::write(dir.path().join("todo.txt"), outside)
-            .unwrap_or_else(|e| panic!("{e}"));
-        reload(&mut model);
+        for reading in outside.split('|') {
+            fs::write(dir.path().join("todo.txt"), reading)
+                .unwrap_or_else(|e| panic!("{e}"));
+            reload(&mut model);
+        }
         keys(&mut model, then);
         let file = todo_of(dir.path());
         let lines: Vec<&str> =

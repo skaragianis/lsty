@@ -320,9 +320,24 @@ const WRITTEN: &[Aimed] = &[
         "N\nx 2026-09-01 A\n",
         "N\nx 2026-09-01 A\n says 2 is already done",
     ),
-    (COPY, "yyjp", "Copy\nA +k\nB\n", "Copy\nA +k\n{P}B\n"),
-    (COPY, "yyjp", "N\nCopy\nA\nB\n", "N\nCopy\nA\n{P}B\n"),
-    (COPY, "yyjp", "Copy\nB\n", "Copy\n{P}B\n"),
+    (
+        COPY,
+        "yyjp",
+        "Copy\nA +k\nB\n",
+        "Copy\nA +k\n2026-09-29 Copy id:t001\nB\n",
+    ),
+    (
+        COPY,
+        "yyjp",
+        "N\nCopy\nA\nB\n",
+        "N\nCopy\nA\n2026-09-29 Copy id:t001\nB\n",
+    ),
+    (
+        COPY,
+        "yyjp",
+        "Copy\nB\n",
+        "Copy\n2026-09-29 Copy id:t001\nB\n",
+    ),
     ("A\n  \nB\n", ":del 2<CR>", "N\nA\n  \nB\n", "N\nA\n\nB\n"),
     (
         "|x 2026-09-01 Old\n",
@@ -394,17 +409,9 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
         let (want, says) = want.split_once(" says ").unwrap_or((want, ""));
         let said = model.message.as_deref().unwrap_or_default();
         assert!(said.contains(says), "{typed} {outside}: {said}");
-        assert_eq!(files_of(&dir), left(want), "{typed} {outside}");
+        let want = latin(&want.replace("{D}", "x 2026-09-29 "));
+        assert_eq!(files_of(&dir), want, "{typed} {outside}");
     }
-}
-
-/// The bytes a row of the written table leaves.
-fn left(want: &str) -> Vec<u8> {
-    latin(
-        &want
-            .replace("{D}", "x 2026-09-29 ")
-            .replace("{P}", "2026-09-29 Copy id:t001\n"),
-    )
 }
 
 /// The bytes of `text`, each `char` one byte, as a file that is not UTF-8 has.
