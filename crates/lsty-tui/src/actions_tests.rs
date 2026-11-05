@@ -407,8 +407,7 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
         assert!(model.reload_owed().is_some(), "{name}: read again");
         let panel = typed.contains("<C-w>2");
         assert_eq!(model.focus == Focus::Detail, panel, "{name}");
-        let closed = model.line.is_none() || typed.starts_with(':');
-        assert!(closed, "{name}: a prompt closes");
+        assert!(model.line.is_none(), "{name}: a prompt closes");
         assert!(model.visual.is_none(), "{name}: a selection ends");
         let stays = !typed.starts_with('v') || model.cursor == 1;
         assert!(stays, "{name}: the cursor stays");
