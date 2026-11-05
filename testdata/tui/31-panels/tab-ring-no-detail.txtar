@@ -22,7 +22,7 @@ Read +home @desk
 │ [x] Blocked ││                                                                                                                 │
 │ [ ] Archive ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                                                9.9.9
+ NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                                                9.9.9
 -- back-to-list --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   Read +home @desk                                                                                           │

@@ -47,7 +47,7 @@ show_detail = false
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  h fold      9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  <Tab> next  9.9.9
 -- cursor --
 ................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

@@ -109,4 +109,4 @@ show_detail = false
 │ No project  ││ 26   Task +proj26                                                                 │
 │ Won't do    ││ 27   Task +proj27                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                  9.9.9
+ NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9

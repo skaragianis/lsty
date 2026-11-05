@@ -50,7 +50,7 @@ x 2026-09-01 Old decided wontdo:true
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                                                9.9.9
+ NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                                                9.9.9
 -- filter_shows_only_wontdo --
 ┌[3]─Projects─┐┌ [1]─Won't do ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  4 ✗ Decided against wontdo:true                                  1d ago ││ Decided against wontdo:true         │
@@ -112,7 +112,7 @@ x 2026-09-01 Old decided wontdo:true
 │ No project  ││                                                                          ││                                     │
 │>Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  h fold  l unfold  <Tab> next                                                9.9.9
+ NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                                                9.9.9
 -- filter_off_again --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  1   Open task                                                           ││ Tagged but open wontdo:true         │
