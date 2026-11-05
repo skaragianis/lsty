@@ -153,12 +153,10 @@ impl Model {
 
     /// The field that takes the keys now, in the order of `key_mode`.
     fn open_field(&self) -> Option<&Field> {
-        let line = self.line.as_ref().map(|l| &l.field);
-        let draft = self.edit.as_ref().map(|d| &d.field);
         self.theme_field()
             .or_else(|| self.help_field())
-            .or(line)
-            .or(draft)
+            .or_else(|| self.line.as_ref().map(|l| &l.field))
+            .or_else(|| self.edit.as_ref().map(|d| &d.field))
     }
 
     /// What the hints ask of the rule, with the count typed so far. A second
