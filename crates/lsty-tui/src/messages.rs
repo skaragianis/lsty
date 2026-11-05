@@ -18,6 +18,10 @@ pub(crate) const GONE: &str = "the task is gone";
 /// What a field adds to the refusal of a line that changed under it.
 pub(crate) const ESC_DROPS: &str = "; <Esc> drops your edit";
 
+/// The same, when what refuses is a `dep:` in the text.
+pub(crate) const DEP_DROPS: &str =
+    "; delete the dep: to save, <Esc> drops your edit";
+
 /// The message of `e`, followed by its hint when it has one.
 pub(crate) fn hinted(e: &errs::Error) -> String {
     e.hint().map_or_else(

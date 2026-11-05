@@ -3,7 +3,8 @@
 use lsty_core::{errs::Source, keys::Action};
 
 use crate::{
-    focus::Focus, model::Model, rows::Row, sizes::Sizes, track::Place,
+    focus::Focus, insert::Draft, model::Model, rows::Row, sizes::Sizes,
+    track::Place,
 };
 
 /// What a view keeps when the rows are listed again.
@@ -280,13 +281,23 @@ impl Model {
     /// Moves the view the least amount that shows the cursor row.
     ///
     /// With a field open, the field is what has to be shown, and the
-    /// rows it takes count against the room.
+    /// rows it takes count against the room. A field that refuses shows the
+    /// line below it too, which is the one to look at.
     pub(crate) fn scroll(&mut self) {
         let window = self.follow_window();
         if let Some(draft) = &mut self.edit {
             draft.window = window;
         }
         let at = self.field_at();
-        self.top = self.sized(|size| size.window(self.top, at));
+        let look = self.edit.as_ref().is_some_and(Draft::refuses);
+        self.top = self.sized(|size| {
+            let below = look && at + 1 < size.len;
+            let top = if below {
+                size.window(self.top, at + 1)
+            } else {
+                self.top
+            };
+            size.window(top, at)
+        });
     }
 }

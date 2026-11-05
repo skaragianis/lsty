@@ -9,6 +9,11 @@ keys go
 frame with-id
 keys New<CR>
 file todo.txt with-id-file
+keys j go
+write done.txt no-holder
+keys Next<CR>
+frame no-holder-frame
+file todo.txt no-holder-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -17,6 +22,8 @@ hidden_tasks = []
 Open
 -- done.txt --
 x 2026-09-01 Old id:o1d2
+x 2026-09-02 Bare
+-- no-holder --
 x 2026-09-02 Bare
 -- no-id --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
@@ -54,5 +61,19 @@ Open
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- with-id-file --
+Open
+2026-09-29 New dep:o1d2 id:t001
+-- no-holder-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  2   Open                                                                                        │
+│  1   New dep:o1d2                                                                           t001 │
+│    Next dep:o1d2                                                                                 │
+│    ✓ Old                                                                           28d ago  o1d2 │
+│    ✓ Bare                                                                          27d ago       │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ INSERT  todo.txt  manual  the list changed — look again; delete the dep: to save, <Esc> drops your
+-- no-holder-file --
 Open
 2026-09-29 New dep:o1d2 id:t001

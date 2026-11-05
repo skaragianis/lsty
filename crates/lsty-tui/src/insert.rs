@@ -4,11 +4,11 @@
 
 use lsty_core::{
     dates::Clock,
-    errs::{self, Code, Source},
+    errs::{self, Code, Nr, Source},
     keys::{Action, Mods, Named, Stroke},
     list::{Snapshot, Task},
     ops::{self, AddParams, Landing, Outcome, Place as Where, Seen, Target},
-    todotxt::Kind,
+    todotxt::{Kind, Line},
 };
 
 use crate::{
@@ -54,11 +54,12 @@ pub(crate) struct Draft {
     subject: Subject,
     /// The line of the task, or of the anchor of a new task, in the
     /// reading shown; once `lost`, about where it was.
-    at: Option<Place>,
+    pub(crate) at: Option<Place>,
     /// The line is not the one the field opened on: a write on it refuses.
     lost: bool,
-    /// A commit was refused for that, so `<Esc>` drops the text now.
-    refused: bool,
+    /// A commit was refused, so `<Esc>` drops the text now: what the message
+    /// says about that.
+    refused: Option<&'static str>,
     /// The first row of a field taller than the list that is shown.
     pub(crate) window: usize,
     /// The popup and the ids the text waits to give.
@@ -72,7 +73,7 @@ impl Draft {
             subject,
             at,
             lost: false,
-            refused: false,
+            refused: None,
             window: 0,
             comp: Completion::default(),
         }
@@ -92,11 +93,6 @@ impl Draft {
     /// task, while it is the line the field opened on.
     pub(crate) fn place(&self) -> Option<Place> {
         self.at.filter(|_| !self.lost)
-    }
-
-    /// Where the field goes among the rows.
-    pub(crate) const fn spot(&self) -> Option<Place> {
-        self.at
     }
 
     /// Whether the field stands in the row of its task.
@@ -137,9 +133,35 @@ impl Draft {
         text.trim().is_empty() || words(&text).eq(words(prefill))
     }
 
-    /// Takes the draft to a later reading. A line that is not kept is
-    /// lost for good; a new task goes about where its anchor was.
-    fn follow(&mut self, moved: &Remap, landing: &Landing) {
+    /// The only line of `now` that is again the one a lost field opened on,
+    /// and was not there in `old`: a line that only moved does not come back.
+    fn came_back(
+        &self,
+        source: Source,
+        old: &Snapshot,
+        now: &Snapshot,
+    ) -> Option<Place> {
+        let Subject::Task { raw } = &self.subject else {
+            return None;
+        };
+        let holds = |line: &Line| line.raw() == raw.as_slice();
+        let lines = &now.file(source).lines;
+        let mut found = lines.iter().enumerate().filter(|(_, l)| holds(l));
+        let (index, _) = found.next().filter(|_| self.lost)?;
+        let there = old.file(source).lines.iter().any(holds);
+        (!there && found.next().is_none())
+            .then(|| Nr::from_index(index).map(|nr| (source, nr)))?
+    }
+
+    /// Takes the draft to a later reading. A line that is not kept is lost
+    /// until it comes back; a new task goes about where its anchor was.
+    fn follow(
+        &mut self,
+        moved: &Remap,
+        landing: &Landing,
+        old: &Snapshot,
+        now: &Snapshot,
+    ) {
         for grant in &mut self.comp.grants {
             grant.land(landing);
         }
@@ -147,6 +169,8 @@ impl Draft {
             return;
         };
         let kept = self.place().and_then(|at| landed_at(landing, at));
+        let kept = kept.or_else(|| self.came_back(at.0, old, now));
+        self.refused = self.refused.filter(|_| !self.lost || kept.is_none());
         self.lost = kept.is_none();
         if moved.track(at).is_none()
             && let Subject::New { below, .. } = &mut self.subject
@@ -215,7 +239,10 @@ impl Model {
         let id = self.snap.id_of(task).map(errs::lossy);
         self.open_new(true);
         let word = match id {
-            Some(id) => Ok(format!("{DEP}{id}")),
+            Some(id) => {
+                self.link_id(task_id, &id);
+                Ok(format!("{DEP}{id}"))
+            }
             None => self.give_id(task_id),
         };
         match word {
@@ -363,7 +390,7 @@ impl Model {
             return;
         };
         let Some((source, nr)) = draft.place() else {
-            return self.refuse_field();
+            return self.refuse_field(messages::ESC_DROPS);
         };
         let target = Target::at(source, i64::from(nr.get()));
         let grants = draft.live_grants(text);
@@ -378,7 +405,7 @@ impl Model {
             return;
         };
         if draft.refuses() {
-            return self.refuse_field();
+            return self.refuse_field(messages::ESC_DROPS);
         }
         let place = draft.at.map_or(Where::End, |(_, nr)| Where::Beside {
             seen: Seen::of(&self.snap),
@@ -406,33 +433,26 @@ impl Model {
         }
     }
 
-    /// Refuses a commit of a field whose line changed: from now on `<Esc>`
-    /// drops the text.
-    fn refuse_field(&mut self) {
+    /// Refuses a commit of a field whose line changed: says why the field
+    /// stays open and how to leave it, and from now on `<Esc>` drops the text.
+    fn refuse_field(&mut self, drops: &'static str) {
         if let Some(draft) = &mut self.edit {
-            draft.refused = true;
+            draft.refused = Some(drops);
         }
-        self.say_refused();
-    }
-
-    /// Says why the field stays open and how to leave it.
-    fn say_refused(&mut self) {
-        let drops = messages::ESC_DROPS;
         self.alert(format!("{}{drops}", ops::LIST_CHANGED));
     }
 
     /// Keeps the refusal on the status line while the field stays open.
     pub(crate) fn keep_refusal(&mut self) {
-        if self.message.is_none()
-            && self.edit.as_ref().is_some_and(|d| d.refused)
-        {
-            self.say_refused();
+        let refused = self.edit.as_ref().and_then(|d| d.refused);
+        if let Some(drops) = refused.filter(|_| self.message.is_none()) {
+            self.refuse_field(drops);
         }
     }
 
     /// Whether `stroke` is a way out of a field that was refused.
     pub(crate) fn escapes_refused(&self, stroke: Stroke) -> bool {
-        self.edit.as_ref().is_some_and(|d| d.refused)
+        self.edit.as_ref().is_some_and(|d| d.refused.is_some())
             && self.popup().is_none()
             && (stroke == Stroke::named(Named::Esc)
                 || stroke == Stroke::char('c').with_mods(Mods::CTRL))
@@ -456,8 +476,14 @@ impl Model {
                     Err(other) => other,
                 };
                 self.fail_edit(&e);
+                let dep = e.text(ops::DEAD_DEP).is_some();
+                let drops = if dep {
+                    messages::DEP_DROPS
+                } else {
+                    messages::ESC_DROPS
+                };
                 if e.code() == Code::ExpectMismatch {
-                    self.refuse_field();
+                    self.refuse_field(drops);
                 }
                 None
             }
@@ -488,15 +514,13 @@ impl Model {
     /// for `u`. A draft that `u` could not give back goes the way of a
     /// refused commit.
     fn cancel(&mut self) {
-        if let Some(draft) = &self.edit {
-            if draft.refused {
+        if let Some(draft) = &mut self.edit {
+            if draft.refused.is_some() {
                 return self.end_edit();
             }
             if draft.refuses() {
-                return self.refuse_field();
+                return self.refuse_field(messages::ESC_DROPS);
             }
-        }
-        if let Some(draft) = &mut self.edit {
             draft.comp.popup = None;
             draft.comp.under = None;
         }
@@ -543,11 +567,14 @@ impl Model {
         let warned = self.edit.as_ref().is_some_and(Draft::refuses);
         let landing = Landing::of(old, &self.snap);
         for draft in self.edit.iter_mut().chain(self.kept.iter_mut()) {
-            draft.follow(moved, &landing);
+            draft.follow(moved, &landing, old, &self.snap);
         }
-        let news = |d: &Draft| d.refuses() && !d.refused;
-        if !warned && self.edit.as_ref().is_some_and(news) {
+        let refuses = self.edit.as_ref().is_some_and(Draft::refuses);
+        let armed = self.edit.as_ref().is_some_and(|d| d.refused.is_some());
+        if refuses && !warned && !armed {
             self.alert(ops::LIST_CHANGED.to_owned());
+        } else if warned && !refuses {
+            self.message = None;
         }
         self.refresh_popup();
     }

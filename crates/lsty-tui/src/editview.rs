@@ -40,7 +40,7 @@ impl Model {
                 .and_then(|at| self.row_at(at))
                 .unwrap_or(self.cursor);
         }
-        let spot = draft.spot();
+        let spot = draft.at;
         match spot.and_then(|at| self.row_at(at)) {
             None => self.row_beyond(spot.map(|(_, nr)| nr)),
             Some(i) if draft.below() => i + 1,

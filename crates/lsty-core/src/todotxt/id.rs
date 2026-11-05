@@ -28,7 +28,7 @@ impl Id {
     }
 
     /// The id for `s`, or `None` when lsty may not write it.
-    pub(crate) fn new(s: impl AsRef<[u8]>) -> Option<Self> {
+    pub fn new(s: impl AsRef<[u8]>) -> Option<Self> {
         let bytes = s.as_ref();
         if Self::is_valid(bytes) {
             String::from_utf8(bytes.to_vec()).ok().map(Self)

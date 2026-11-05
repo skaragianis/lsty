@@ -20,7 +20,6 @@ use crate::{
     actions::places,
     counts::ids_of,
     deps::Now,
-    insert::Draft,
     model::Model,
     motion::View,
     msg::{Cmd, Msg},
@@ -418,7 +417,7 @@ impl Model {
         // An open field aims at its place. That is in the coordinates of
         // the reading before a write, which is right because the line the
         // write adds takes that index.
-        let spot = self.edit.as_ref().and_then(Draft::spot);
+        let spot = self.edit.as_ref().and_then(|d| d.at);
         let aim = spot.or_else(|| place.map(|at| moved.place(at)));
         let old_rows = std::mem::take(&mut self.rows);
         self.rebuild_rows();

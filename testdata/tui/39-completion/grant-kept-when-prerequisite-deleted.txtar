@@ -61,7 +61,7 @@ Call client
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit  <CR> commit  9.9.9
+ INSERT  todo.txt  manual  the list changed — look again; delete the dep: to save, <Esc> drops your
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

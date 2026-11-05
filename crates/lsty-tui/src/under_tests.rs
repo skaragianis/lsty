@@ -22,6 +22,8 @@ const LINE_TWIN: &str = "Top\n(A) 2026-09-20 Call client +work id:c1\nEnd\n\
                          (A) 2026-09-20 Call client +work id:c1\n";
 const REFUSED: &str =
     "the list changed \u{2014} look again; <Esc> drops your edit";
+const DEP_REFUSED: &str = "the list changed \u{2014} look again; delete the \
+                           dep: to save, <Esc> drops your edit";
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
@@ -91,6 +93,9 @@ fn a_field_whose_line_changed_refuses_then_drops_on_esc() {
         stays_open(&model, "more", name);
         keys(&mut model, "<CR>x");
         stays_open(&model, "morex", name);
+        let disk = format!("N\n{disk}");
+        outside(&mut model, dir.path(), &disk);
+        stays_open(&model, "morex", name);
         keys(&mut model, next);
         assert!(model.edit.is_none(), "{name}");
         assert!(model.kept.is_none(), "{name}");
@@ -120,6 +125,7 @@ fn a_draft_that_equals_the_base_writes_nothing() {
     outside(&mut model, dir.path(), &disk);
     keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), disk);
+    assert!(model.edit.is_none());
 }
 
 // `u` gives a cancelled draft back through a shift, and refuses when the line
@@ -186,40 +192,125 @@ fn the_ids_a_draft_holds_are_not_given_twice() {
     let dir = workdir(WAITS);
     let mut model = waiting(dir.path(), &["aaaa", "aaaa", "bbbb"]);
     assert_eq!(field_text(&model), "Mine dep:aaaa dep:bbbb");
-    keys(&mut model, "<CR>");
+    // Picked again, the id is the same and is still given.
+    keys(&mut model, "<C-w>dep:Cha<Tab><CR>");
     let want = "Alpha id:aaaa\nMine dep:aaaa dep:bbbb\nCharlie id:bbbb\n";
     assert_eq!(todo_of(dir.path()), want);
 }
 
-// A field that gives an id to a task that changed stays open; taking the
-// `dep:` out of the text lets it write.
+// A field that waits for a task whose line changed stays open and says the
+// way out; taking the `dep:` out of the text lets it write.
+const HAS_ID: &str = "Alpha id:a1\nBravo\n";
+type DeadDep = (
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+);
+const DEAD_DEPS: &[DeadDep] = &[
+    (
+        "new task",
+        "Alpha\nBravo\n",
+        "gonew<End>",
+        "Alpha again\n",
+        "Alpha again\n2026-09-29 new id:t002\n",
+    ),
+    (
+        "task's own line",
+        "Alpha\nBravo\n",
+        "jccnew dep:Alp<Tab>",
+        "Alpha again\nBravo\n",
+        "Alpha again\nnew\n",
+    ),
+    (
+        "go, its id on a changed line",
+        HAS_ID,
+        "gonew<End>",
+        "Alpha again id:a1\nBravo\n",
+        "Alpha again id:a1\n2026-09-29 new id:t001\nBravo\n",
+    ),
+    (
+        "go, its id on a moved line",
+        HAS_ID,
+        "gonew<End>",
+        "Bravo\nAlpha id:a1\n",
+        "Bravo\nAlpha id:a1\n2026-09-29 new id:t001\n",
+    ),
+    (
+        "go, its id gone",
+        HAS_ID,
+        "gonew<End>",
+        "Bravo\n",
+        "2026-09-29 new id:t001\nBravo\n",
+    ),
+    (
+        "picked, its id gone",
+        HAS_ID,
+        "jccnew dep:Alp<Tab>",
+        "Bravo\n",
+        "new\n",
+    ),
+];
+
 #[test]
 fn a_refused_grant_goes_once_its_dep_is_taken_out() {
-    for (name, start, disk, want) in [
-        (
-            "new task",
-            "gonew<End>",
-            "Alpha again\n",
-            "Alpha again\n2026-09-29 new id:t002\n",
-        ),
-        (
-            "task's own line",
-            "jccnew dep:Alp<Tab>",
-            "Alpha again\nBravo\n",
-            "Alpha again\nnew\n",
-        ),
-    ] {
-        let dir = workdir("Alpha\nBravo\n");
+    for &(name, list, start, disk, want) in DEAD_DEPS {
+        let dir = workdir(list);
         let mut model = model_of(dir.path());
         keys(&mut model, start);
         fs::write(dir.path().join("todo.txt"), disk).unwrap();
         keys(&mut model, "<CR>");
         assert_eq!(todo_of(dir.path()), disk, "{name}");
-        assert_eq!(model.message.as_deref(), Some(REFUSED), "{name}");
+        assert_eq!(model.message.as_deref(), Some(DEP_REFUSED), "{name}");
         assert!(!field_text(&model).is_empty(), "{name}");
         keys(&mut model, "<C-w><CR>");
         assert_eq!(todo_of(dir.path()), want, "{name}");
     }
+}
+
+// An id picked from the popup is not written on its line, which may change
+// as long as it holds the id.
+#[test]
+fn a_picked_id_goes_while_a_line_holds_it() {
+    let dir = workdir(HAS_ID);
+    let mut model = model_of(dir.path());
+    keys(&mut model, "jccnew dep:Alp<Tab>");
+    fs::write(dir.path().join("todo.txt"), "Alpha again id:a1\nBravo\n")
+        .unwrap();
+    keys(&mut model, "<CR>");
+    assert_eq!(todo_of(dir.path()), "Alpha again id:a1\nnew dep:a1\n");
+}
+
+// A line that reads as the field opened on it again differs in nothing, even
+// after a truncate: the field is on it again and the refusal is over.
+#[test]
+fn a_line_that_comes_back_lets_the_field_write() {
+    let shifted = format!("N\n{LIST}");
+    for (name, between, back) in [
+        ("changed back", LINE_CHANGED, LIST),
+        ("truncated", "", shifted.as_str()),
+    ] {
+        let dir = workdir(LIST);
+        let mut model = typing(dir.path());
+        outside(&mut model, dir.path(), between);
+        keys(&mut model, "<CR>");
+        assert_eq!(model.message.as_deref(), Some(REFUSED), "{name}");
+        outside(&mut model, dir.path(), back);
+        assert_eq!(model.message, None, "{name}");
+        keys(&mut model, "<Esc>");
+        assert!(model.edit.is_none(), "{name}");
+        let want = back.replace("+work", "+work more");
+        assert_eq!(todo_of(dir.path()), want, "{name}");
+    }
+    // Two lines that read like it: the field cannot tell which it was on.
+    let dir = workdir(LIST);
+    let mut model = typing(dir.path());
+    outside(&mut model, dir.path(), "");
+    outside(&mut model, dir.path(), LINE_TWIN);
+    keys(&mut model, "<CR>");
+    assert_eq!(todo_of(dir.path()), LINE_TWIN);
+    assert_eq!(model.message.as_deref(), Some(REFUSED));
 }
 
 // `go` and `gO` write a link on the line: on a changed row they open nothing.

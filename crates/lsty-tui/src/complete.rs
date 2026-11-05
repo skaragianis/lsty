@@ -3,7 +3,7 @@
 
 use lsty_core::keys::{Action, Fed, Mode, Outcome as Pressed, Stroke};
 
-use crate::{field::is_sep, model::Model};
+use crate::{field::is_sep, grants::DEP, model::Model};
 
 /// How many candidates the popup shows at once.
 pub(crate) const POPUP_ROWS: usize = 8;
@@ -315,7 +315,12 @@ impl Model {
             return;
         };
         let text = match &cand.put {
-            Put::Text(text) => text.clone(),
+            Put::Text(text) => {
+                if let Some(id) = text.strip_prefix(DEP) {
+                    self.hold_id(id);
+                }
+                text.clone()
+            }
             Put::NeedsId(task) => match self.give_id(*task) {
                 Ok(text) => text,
                 Err(e) => {
