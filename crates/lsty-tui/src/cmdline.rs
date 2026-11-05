@@ -6,13 +6,13 @@ use lsty_core::{
     case::lower,
     errs::{self, Code, Error, Nr, Source, quote},
     list::SortField,
-    theme,
+    ops, theme,
 };
 
 use crate::{
     focus::Focus,
     line::{Line, LineKind},
-    messages::{self, Tone},
+    messages,
     model::Model,
     msg::Cmd,
     words::split_words,
@@ -267,7 +267,7 @@ impl Model {
     /// unless the list it was aimed at changed.
     fn fail_line(&mut self, e: &Error) {
         self.fail(e);
-        if e.code() == Code::ExpectMismatch {
+        if e.message() == ops::LIST_CHANGED {
             self.close_input();
         }
         let kept =
@@ -277,19 +277,16 @@ impl Model {
         }
     }
 
-    /// `:undo` and `:redo`: the keys' own steps. A step that is refused
-    /// leaves the line open with its text, unless the step was dropped: a
-    /// second `<CR>` would reach another.
+    /// `:undo` and `:redo`: the keys' own steps. A step that met a busy
+    /// lock leaves the line open with its text, to try it again.
     fn rewind_line(&mut self, undo: bool, text: &str) {
         self.close_input();
-        let steps = self.hist.undo.len() + self.hist.redo.len();
         if undo {
             self.undo_last();
         } else {
             self.redo_last();
         }
-        let kept = self.hist.undo.len() + self.hist.redo.len() == steps;
-        if self.tone == Tone::Alert && kept {
+        if self.message == Some(messages::busy(&self.base_name())) {
             self.start_line(text);
         }
     }

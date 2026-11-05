@@ -163,8 +163,9 @@ fn a_kept_draft_of_a_deleted_task_says_so() {
     keys(&mut model, "izzz<C-x>");
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
     reload(&mut model);
-    press(&mut model, "u");
+    keys(&mut model, ":undo<CR>");
     assert_eq!(model.message.as_deref(), Some(LIST_CHANGED));
+    assert!(model.line.is_none());
     press(&mut model, "u");
     assert_eq!(model.message.as_deref(), Some("nothing to undo"));
 }
