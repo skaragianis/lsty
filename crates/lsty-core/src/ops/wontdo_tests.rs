@@ -363,7 +363,7 @@ const REOPENING: &[Case] = &[
         refs: "done:1",
         want: "A\n",
         want_done: "\n",
-        msgs: &["done:1 restored as 1"],
+        msgs: &["done:1 reopened as 1"],
         ..BASE
     },
     Case {
@@ -373,7 +373,7 @@ const REOPENING: &[Case] = &[
         refs: "done:1",
         want: "A\n",
         want_done: "\n",
-        msgs: &["done:1 restored as 1"],
+        msgs: &["done:1 reopened as 1"],
         ..BASE
     },
     Case {
@@ -600,7 +600,7 @@ const AGENTS: &[Case] = &[
         refs: "id:a",
         want: "A id:a\n",
         want_done: "\n",
-        msgs: &["a restored as 1"],
+        msgs: &["a reopened as 1"],
         ..BASE
     },
     agent_row(
@@ -618,7 +618,7 @@ const AGENTS: &[Case] = &[
         refs: "id:a",
         want: "A id:a\n",
         want_done: "\n",
-        msgs: &["a restored as 1"],
+        msgs: &["a reopened as 1"],
         ..BASE
     },
     agent_row(
@@ -654,7 +654,7 @@ const AGENTS: &[Case] = &[
         refs: "id:a",
         want: "A id:a\n",
         want_done: "\n",
-        msgs: &["a restored as 1"],
+        msgs: &["a reopened as 1"],
         ..BASE
     },
 ];

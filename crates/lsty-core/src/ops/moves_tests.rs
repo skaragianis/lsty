@@ -397,7 +397,7 @@ const RESTORE_ROWS: &[Case] = &[
         refs: "done:2",
         want_todo: "A\n(B) 2026-09-20 Fix\n",
         want_done: Some("x 2026-09-01 Z\n\n"),
-        msgs: &["done:2 restored as 2"],
+        msgs: &["done:2 reopened as 2"],
         op: Op::Restore(false),
         ..BASE
     },
@@ -423,7 +423,7 @@ const RESTORE_ROWS: &[Case] = &[
         refs: "id:k",
         want_todo: "Fix id:k started:2026-09-29T0800Z owner:agent1\n",
         want_done: Some("\n"),
-        msgs: &["k restored as 1; back to agent1"],
+        msgs: &["k reopened as 1; back to agent1"],
         op: Op::Restore(false),
         ..BASE
     },
@@ -436,7 +436,7 @@ const RESTORE_ROWS: &[Case] = &[
         refs: "id:k",
         want_todo: "Fix id:k started:2026-09-29T0900Z owner:agent2\n",
         want_done: Some("\n"),
-        msgs: &["k restored as 1; now yours"],
+        msgs: &["k reopened as 1; now yours"],
         op: Op::Restore(true),
         ..BASE
     },
@@ -468,7 +468,7 @@ const RESTORE_ROWS: &[Case] = &[
         refs: "done:1,done:2",
         want_todo: "A\nB\nC\n",
         want_done: Some("\n\n"),
-        msgs: &["done:1 restored as 2", "done:2 restored as 3"],
+        msgs: &["done:1 reopened as 2", "done:2 reopened as 3"],
         op: Op::Restore(false),
         ..BASE
     },
@@ -479,7 +479,7 @@ const RESTORE_ROWS: &[Case] = &[
         refs: "done:1",
         want_todo: "A\nOther id:o\n",
         want_done: Some("\n"),
-        msgs: &["done:1 restored as 2"],
+        msgs: &["done:1 reopened as 2"],
         op: Op::Restore(false),
         ..BASE
     },

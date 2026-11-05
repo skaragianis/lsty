@@ -8,7 +8,7 @@ A
 -- done.txt --
 B pri:C ended:2026-09-28T1000Z
 -- want-out --
-done:1 restored as 2
+done:1 reopened as 2
 -- want-todo --
 A
 (C) B
