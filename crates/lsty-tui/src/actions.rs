@@ -298,11 +298,7 @@ impl Model {
     /// Says why a press over `tasks` writes nothing: in the error style when
     /// a task stands in the way, else as a plain message.
     pub(crate) fn refuse(&mut self, why: Refusal, tasks: &[Chosen]) {
-        let archived = if self.visual.is_some() {
-            messages::ARCHIVED_TASKS
-        } else {
-            messages::SOME_ARCHIVED
-        };
+        let archived = messages::SOME_ARCHIVED;
         let text = match why {
             Refusal::Quiet => return,
             Refusal::Sorted => messages::sorted(self.sort.name()),
