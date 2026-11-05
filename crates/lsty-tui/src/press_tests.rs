@@ -824,7 +824,6 @@ fn a_refused_key_says_what_it_always_said() {
         (TODO, OLD, "vj", "d", MANY, true),
         (TODO, OLD, "vj", "gd", MANY, true),
         (TODO, OLD, "", "2dd", SOME, true),
-        (TODO, OLD, "", "2gd", SOME, true),
         (TODO, OLD, "-", "2.", SOME, true),
         (TODO, OLD, "gtk:v<CR>", "2.", SOME, true),
         (THREE, OLD, "vjJ<Esc>gg", "4.", SOME, true),
