@@ -134,7 +134,7 @@ fn a_selection_with_an_archived_task_opens_no_prompt() {
     assert!(model.line.is_none(), "{lines:?}");
     assert_eq!(
         model.message.as_deref(),
-        Some("the selection has archived tasks — nothing changed")
+        Some("some are archived — nothing changed")
     );
 }
 

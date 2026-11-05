@@ -806,6 +806,8 @@ fn a_refused_key_says_what_it_always_said() {
     const ONE: &str = "Old is archived — x restores it";
     const NO_ID: &str = "Old is archived and has no id — x restores it first";
     const MANY: &str = "the selection has archived tasks — nothing changed";
+    const SOME: &str = "some are archived — nothing changed";
+    const THREE: &str = "A\nB\nC\n";
     const SORTED: &str = "sorted by priority — press s for manual order";
     let rows = [
         ("", OLD, "", "a", ONE, true),
@@ -819,6 +821,13 @@ fn a_refused_key_says_what_it_always_said() {
         ("", OLD, "", "go", NO_ID, true),
         (TODO, OLD, "vj", "J", MANY, true),
         (TODO, OLD, "vj", "K", MANY, true),
+        (TODO, OLD, "vj", "d", MANY, true),
+        (TODO, OLD, "vj", "gd", MANY, true),
+        (TODO, OLD, "", "2dd", SOME, true),
+        (TODO, OLD, "", "2gd", SOME, true),
+        (TODO, OLD, "-", "2.", SOME, true),
+        (TODO, OLD, "gtk:v<CR>", "2.", SOME, true),
+        (THREE, OLD, "vjJ<Esc>gg", "4.", SOME, true),
         (TWO, "", "s", "J", SORTED, false),
         ("", OLD, "s", "K", SORTED, false),
         (TODO, "", "", "u", "nothing to undo", false),
