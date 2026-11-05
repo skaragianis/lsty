@@ -422,7 +422,7 @@ impl Model {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
-        self.hist.stopped = self.hist.stopped.filter(|_| {
+        self.hist.stopped = self.hist.stopped.take().filter(|_| {
             matches!(
                 fed.outcome,
                 Outcome::Pending

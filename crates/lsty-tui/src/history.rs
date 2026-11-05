@@ -8,10 +8,9 @@ use std::{
 
 use jiff::Timestamp;
 use lsty_core::{
-    errs::{Code, Nr, Source},
+    errs::{Code, Error, Source},
     keys::Action,
-    list::Snapshot,
-    ops::{self, FileRecord, Followed, UndoRecord},
+    ops::{self, FileRecord, UndoRecord},
 };
 
 use crate::{
@@ -23,9 +22,6 @@ use crate::{
     track::{Place, Remap, Touched, Wrote},
 };
 
-/// The place of each tracked line in a reading of a file.
-type Lines = Vec<Option<usize>>;
-
 /// A todo line and the done line it moved to or came from.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Pair {
@@ -33,24 +29,16 @@ pub(crate) struct Pair {
     done: Vec<u8>,
 }
 
-/// One recorded action, and where its lines are in the files.
+/// One recorded action.
 #[derive(Debug)]
 pub(crate) struct Step {
     pub(crate) rec: UndoRecord,
     message: String,
-    /// For each file the record wrote, where each of its lines is in the
-    /// last reading, or `None` when the line is gone.
-    at: Vec<Lines>,
     pairs: Vec<Pair>,
 }
 
 impl Step {
     fn new(rec: UndoRecord, message: String, pairs: Vec<Pair>) -> Self {
-        let at = rec
-            .files
-            .iter()
-            .map(|f| (0..f.post().len()).map(Some).collect())
-            .collect();
         let message = if message.is_empty() {
             rec.action.clone()
         } else {
@@ -59,43 +47,18 @@ impl Step {
         Self {
             rec,
             message,
-            at,
             pairs,
         }
     }
+}
 
-    /// Moves every tracked line to its place in the next reading.
-    fn follow(&mut self, moved: &Remap) {
-        for (f, at) in self.rec.files.iter().zip(&mut self.at) {
-            *at = moved.compose(f.source, at);
-        }
-    }
-
-    /// Where the lines the record was about stand in the last reading.
-    fn own_places(&self) -> Vec<Place> {
-        let files = self.rec.files.iter().zip(&self.at);
-        files
-            .flat_map(|(f, at)| {
-                f.changes.iter().filter(|c| c.own).filter_map(move |c| {
-                    let line = at.get(c.nr_after?.index()).copied()??;
-                    Some((f.source, Nr::from_index(line)?))
-                })
-            })
-            .collect()
-    }
-
-    /// The lines of the record in the files as `snap` has them.
-    fn tracking<'a>(&'a self, snap: &'a Snapshot) -> Vec<Followed<'a>> {
-        self.rec
-            .files
-            .iter()
-            .zip(&self.at)
-            .map(|(f, at)| Followed {
-                seen: snap.file(f.source),
-                at,
-            })
-            .collect()
-    }
+/// The window in which a second `t` puts back what the step on top of the
+/// undo stack stopped.
+#[derive(Debug)]
+pub(crate) struct Stopped {
+    until: Timestamp,
+    /// Where the tasks it stopped stand in the last reading.
+    at: Vec<Place>,
 }
 
 /// The undo and redo stacks of the session. Neither is stored.
@@ -103,10 +66,9 @@ impl Step {
 pub(crate) struct History {
     pub(crate) undo: Vec<Step>,
     pub(crate) redo: Vec<Step>,
-    /// When the window ends in which a second `t` puts back what the step
-    /// on top of the undo stack stopped. Any other key, or a mouse press,
-    /// ends it; a message neither ends nor extends it.
-    pub(crate) stopped: Option<Timestamp>,
+    /// Any other key, or a mouse press, ends it; a message neither ends nor
+    /// extends it.
+    pub(crate) stopped: Option<Stopped>,
 }
 
 impl History {
@@ -121,11 +83,10 @@ impl History {
         self.redo.clear();
     }
 
-    /// Follows the lines of every record to the next reading.
+    /// Follows the tasks of the window to the next reading.
     pub(crate) fn follow(&mut self, moved: &Remap) {
-        for step in self.undo.iter_mut().chain(&mut self.redo) {
-            step.follow(moved);
-        }
+        let at = self.stopped.iter_mut().flat_map(|s| &mut s.at);
+        at.for_each(|at| *at = moved.place(*at));
     }
 
     const fn stack(&mut self, way: Way) -> &mut Vec<Step> {
@@ -220,10 +181,9 @@ impl Model {
         let Some(top) = stack.last() else {
             return;
         };
-        let held = top.tracking(&self.snap);
         let result = self.attempt(|env| match way {
-            Way::Undo => ops::undo(env, &top.rec, &held),
-            Way::Redo => ops::redo(env, &top.rec, &held),
+            Way::Undo => ops::undo(env, &top.rec),
+            Way::Redo => ops::redo(env, &top.rec),
         });
         match result {
             Ok((outcome, clock)) => {
@@ -271,50 +231,58 @@ impl Model {
     /// Opens the window of the `t` that just stopped tasks.
     pub(crate) fn remember_stop(&mut self) {
         let now = self.clock_now().map(|c| c.now());
+        let until = now.ok().and_then(|t| t.checked_add(MESSAGE_LIFE).ok());
+        let at = self.hist.undo.last().map(|top| touched_by(&top.rec));
         self.hist.stopped =
-            now.ok().and_then(|t| t.checked_add(MESSAGE_LIFE).ok());
+            until.zip(at).map(|(until, at)| Stopped { until, at });
     }
 
     /// Whether the window is still open, when `rows` are exactly the tasks
     /// it is about.
     pub(crate) fn stopped_over(&self, rows: &[Row]) -> Option<bool> {
-        let until = self.hist.stopped?;
+        let stopped = self.hist.stopped.as_ref()?;
         let mut asked: Vec<Place> = rows.iter().map(Row::place).collect();
-        let mut own = self.hist.undo.last()?.own_places();
+        let mut own = stopped.at.clone();
         asked.sort_unstable();
         own.sort_unstable();
-        (asked == own).then(|| self.clock_now().is_ok_and(|c| c.now() < until))
+        (asked == own)
+            .then(|| self.clock_now().is_ok_and(|c| c.now() < stopped.until))
     }
 
     /// Tells whether the window is open over the tasks of `count`, and ends
     /// it if they are the tasks.
     pub(crate) fn just_stopped(&mut self, count: usize) -> bool {
         let over = self.stopped_over(self.rows_of(count));
-        self.hist.stopped = self.hist.stopped.filter(|_| over.is_none());
+        if over.is_some() {
+            self.hist.stopped = None;
+        }
         over == Some(true)
     }
 
     /// Puts back the lines of the step on top of the undo stack, as a
-    /// write of its own. Tells whether it ran, or nothing if one of the
-    /// lines has changed, when the press is an ordinary one.
-    pub(crate) fn put_back(&mut self) -> Option<bool> {
-        let top = self.hist.undo.last()?;
-        let held = top.tracking(&self.snap);
-        let result = self.attempt(|env| ops::undo(env, &top.rec, &held));
+    /// write of its own, or refuses when one no longer stands: the press
+    /// was aimed at the line as it was, and the next is a new one. Tells
+    /// whether it ran.
+    pub(crate) fn put_back(&mut self) -> bool {
+        let Some(top) = self.hist.undo.last() else {
+            return false;
+        };
+        let result = self.attempt(|env| ops::undo(env, &top.rec));
         if result
             .as_ref()
             .is_err_and(|e| e.code() == Code::ExpectMismatch)
         {
-            return None;
+            self.fail(&Error::new(Code::ExpectMismatch, ops::LIST_CHANGED));
+            return false;
         }
         if !self.settle(result) {
-            return Some(false);
+            return false;
         }
         self.message = Some(messages::PUT_BACK.to_owned());
         if let Some(step) = self.hist.undo.last_mut() {
             messages::PUT_BACK.clone_into(&mut step.message);
         }
-        Some(true)
+        true
     }
 
     /// `repeat`: the last change again, on the task under the cursor.

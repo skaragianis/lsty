@@ -122,21 +122,138 @@ fn a_busy_lock_keeps_the_record_and_a_changed_line_drops_it() {
     assert_eq!(kept(&model), (0, 0));
     assert_eq!(
         model.message.as_deref(),
-        Some("can't undo: \"x 2026-09-29 A\" was changed since")
+        Some("can't undo: the list changed — look again")
     );
 }
 
-// 36.19: lines are followed across a reload that shifts them.
+/// A name, the keys before, the file an outside edit leaves, the key, and
+/// the file after it: `None` when it refuses and writes nothing.
+type OutsideEdit = (
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    Option<&'static str>,
+);
+
+const OUTSIDE_EDITS: &[OutsideEdit] = &[
+    (
+        "x shift",
+        "x",
+        "Z\nx 2026-09-29 A\nB\nC\n",
+        "u",
+        Some("Z\nA\nB\nC\n"),
+    ),
+    (
+        "x other line",
+        "x",
+        "x 2026-09-29 A\nB +t\nC\n",
+        "u",
+        Some("A\nB +t\nC\n"),
+    ),
+    ("x changed", "x", "x 2026-09-29 A +t\nB\nC\n", "u", None),
+    ("x moved", "x", "B\nx 2026-09-29 A\nC\n", "u", None),
+    (
+        "x reordered elsewhere",
+        "x",
+        "x 2026-09-29 A\nC\nB\n",
+        "u",
+        None,
+    ),
+    ("x gone", "x", "B\nC\n", "u", None),
+    (
+        "x twin",
+        "x",
+        "x 2026-09-29 A\nx 2026-09-29 A\nB\nC\n",
+        "u",
+        None,
+    ),
+    (
+        "2x one changed",
+        "2x",
+        "x 2026-09-29 A\nx 2026-09-29 B +t\nC\n",
+        "u",
+        None,
+    ),
+    ("J shift", "J", "Z\nB\nA\nC\n", "u", Some("Z\nA\nB\nC\n")),
+    (
+        "J line above changed",
+        "jJ",
+        "A +t\nC\nB\n",
+        "u",
+        Some("A +t\nB\nC\n"),
+    ),
+    (
+        "J blank between",
+        "J",
+        "B\n\nA\nC\n",
+        "u",
+        Some("A\n\nB\nC\n"),
+    ),
+    ("J crossed line changed", "J", "B +t\nA\nC\n", "u", None),
+    ("J crossed line gone", "J", "A\nC\n", "u", None),
+    ("J line between", "J", "B\nN\nA\nC\n", "u", None),
+    ("J reordered", "J", "A\nB\nC\n", "u", None),
+    (
+        "redo J crossed line changed",
+        "Ju",
+        "A\nB +t\nC\n",
+        "<C-r>",
+        None,
+    ),
+    (
+        "dd neighbour changed",
+        "dd",
+        "\nB +t\nC\n",
+        "u",
+        Some("A\nB +t\nC\n"),
+    ),
+    ("dd slot gone", "dd", "B\nC\n", "u", Some("A\nB\nC\n")),
+    ("dd reordered", "jdd", "C\n\nA\n", "u", Some("C\nB\nA\n")),
+    ("dd neighbour gone", "jdd", "C\n", "u", Some("B\nC\n")),
+    ("redo dd changed", "ddu", "A +t\nB\nC\n", "<C-r>", None),
+    ("redo dd reordered", "ddu", "B\nA\nC\n", "<C-r>", None),
+    (
+        "redo p neighbour gone",
+        "yypu",
+        "B\nC\n",
+        "<C-r>",
+        Some("2026-09-29 A id:t001\nB\nC\n"),
+    ),
+    (
+        "undo p changed",
+        "yyp",
+        "A\n2026-09-29 A id:t001 +t\nB\nC\n",
+        "u",
+        None,
+    ),
+];
+
+// An undo or redo that writes on a line goes through a shift and refuses
+// anything else, whether the reading has drawn it or not. One that puts a line
+// back always writes, its neighbours only saying where.
 #[test]
-fn the_lines_of_a_record_are_followed_across_a_reload() {
-    let dir = workdir("A\nB\nC\n");
-    let mut model = model_of(dir.path());
-    press(&mut model, "jx");
-    fs::write(dir.path().join("todo.txt"), "Z\nA\nx 2026-09-29 B\nC\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut model);
-    press(&mut model, "u");
-    assert_eq!(todo_of(dir.path()), "Z\nA\nB\nC\n");
+fn an_outside_edit_under_an_undo_or_redo() {
+    for (name, first, edit, key, want) in OUTSIDE_EDITS {
+        for read in [false, true] {
+            let name = format!("{name}, read {read}");
+            let dir = workdir("A\nB\nC\n");
+            let mut model = model_of(dir.path());
+            keys(&mut model, first);
+            fs::write(dir.path().join("todo.txt"), edit)
+                .unwrap_or_else(|e| panic!("{e}"));
+            if read {
+                reload(&mut model);
+            }
+            keys(&mut model, key);
+            assert_eq!(todo_of(dir.path()), want.unwrap_or(edit), "{name}");
+            let verb = if *key == "u" { "undo" } else { "redo" };
+            let refusal =
+                format!("can't {verb}: the list changed — look again");
+            let said = model.message.as_deref().unwrap_or_default();
+            assert_eq!(said == refusal, want.is_none(), "{name}: {said}");
+        }
+    }
 }
 
 // An undo on a big file is a check and one write.

@@ -25,7 +25,7 @@ Old task started:2026-09-29T0900Z owner:agent1
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't undo: "Old task" was changed since
+ NORMAL  todo.txt  manual  can't undo: the list changed — look again
 -- refused-todo --
 Buy
 Old task started:2026-09-29T0900Z owner:agent1
