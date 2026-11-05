@@ -59,9 +59,9 @@ Task 015 +p
  VISUAL  6 selected  todo.txt  manual
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  3   Task 018 +p                     │
-│  2   Task 019 +p                     │
-│  1   Task 020 +p                     │
-│ 15   Task 011 +p                     │
+│ 10   Task 016 +p                     │
+│  1   Task 017 +p                     │
+│  2   Task 018 +p                     │
+│  3   Task 019 +p                     │
 └──────────────────────────────────────┘
- VISUAL  5 selected  todo.txt  manual
+ VISUAL  6 selected  todo.txt  manual

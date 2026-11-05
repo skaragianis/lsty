@@ -255,6 +255,15 @@ type Aimed = (&'static str, &'static str, &'static str, &'static str);
 
 const ALPHA_TAGGED: &str = "Alpha +outside\nB\n";
 const REFUSED: &[Aimed] = &[
+    ("A\nB\nC\n", "gdfri<CR>", "A2\nB\nC\n", "a prompt"),
+    ("A\nB\nC\n", "vjx", "A\nB2\nC\n", "a selection"),
+    ("A\nB\nC\n", "vjJ", "A\nB2\nC\n", "a block"),
+    (
+        "A\nB\nC\n",
+        "vjgdfri<CR>",
+        "A\nB2\nC\n",
+        "a prompt on a selection",
+    ),
     ("Alpha\nB\n", "x", ALPHA_TAGGED, "tagged"),
     ("Alpha\nB\n", "dd", ALPHA_TAGGED, "tagged"),
     (
@@ -402,7 +411,16 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
         assert!(model.reload_owed().is_some(), "{name}: read again");
         let panel = typed.contains("<C-w>2");
         assert_eq!(model.focus == Focus::Detail, panel, "{name}");
+        let closed = model.line.is_none() || typed.starts_with(':');
+        assert!(closed, "{name}: a prompt closes");
+        assert!(model.visual.is_none(), "{name}: a selection ends");
+        let stays = !typed.starts_with('v') || model.cursor == 1;
+        assert!(stays, "{name}: the cursor stays");
     }
+}
+
+#[test]
+fn a_key_on_a_line_that_only_shifted_writes_where_it_stands() {
     for (shown, typed, outside, want) in WRITTEN {
         let (dir, mut model) = ahead(shown, outside);
         keys(&mut model, typed);

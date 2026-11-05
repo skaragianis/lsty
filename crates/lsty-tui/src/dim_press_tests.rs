@@ -115,6 +115,8 @@ fn stale_against_fresh(
     outside(fresh_dir.path(), from, to);
     let moved_on = files(stale_dir.path());
     reload(&mut fresh);
+    // A selection that lost its lines refuses either way.
+    let writes = writes && !fresh.keys_lost;
     keys(&mut fresh, key);
     assert_eq!(files(fresh_dir.path()) != moved_on, writes, "{name}");
     keys(&mut stale, key);
@@ -198,8 +200,8 @@ fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
             "B",
             "Blocker id:b\nx 2026-09-29 B\n",
         ),
-        // The lines of the selection changed.
-        ("jVj", FREED, "A", "Blocker id:b\nx 2026-09-29 A\nB\n"),
+        // The lines of the selection changed: it ended, the cursor stayed.
+        ("jVj", FREED, "B", "Blocker id:b\nA\nx 2026-09-29 B\n"),
         // They stayed, and the outside took away what blocked them.
         (
             "jVj",

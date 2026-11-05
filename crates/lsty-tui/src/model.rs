@@ -10,7 +10,6 @@ use lsty_core::{
     keys::{Action, Category, Matcher, Mode, Outcome, Stroke},
     list::{Params, Snapshot, SortField},
     lock::Cancel,
-    ops,
     theme::Theme,
     todotxt::File,
 };
@@ -81,7 +80,8 @@ pub(crate) struct Model {
     pub(crate) cursor: usize,
     /// The line the selection started on, in VISUAL mode.
     pub(crate) visual: Option<Place>,
-    /// A reading took the lines from under the keys typed so far.
+    /// A reading took the lines from under the keys typed so far, or the
+    /// selection.
     pub(crate) keys_lost: bool,
     pub(crate) top: usize,
     pub(crate) width: u16,
@@ -446,6 +446,7 @@ impl Model {
         }
         let lost = !matches!(fed.outcome, Outcome::Pending)
             && std::mem::take(&mut self.keys_lost);
+        self.keys_lost |= lost && self.visual.is_some();
         if self.opening.is_some() {
             return self.picker_keys(stroke, &fed);
         }
@@ -462,7 +463,7 @@ impl Model {
         }
         match fed.outcome {
             Outcome::Matched { action, .. } if lost && writes_line(action) => {
-                self.alert(ops::LIST_CHANGED.to_owned());
+                self.say_changed();
                 Vec::new()
             }
             Outcome::Matched { action, count } => self.run(action, count),

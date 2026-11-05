@@ -2,7 +2,6 @@ use std::{fs, path::Path};
 
 use lsty_core::{
     config::{Config, Hidden},
-    errs::Source,
     keys::Mode,
     ops::LIST_CHANGED,
 };
@@ -11,8 +10,8 @@ use crate::{
     messages,
     model::Model,
     test_util::{
-        alone, at, deps, keys, press, reload, screen, settled, started,
-        todo_of, workdir,
+        alone, deps, keys, press, reload, screen, settled, started, todo_of,
+        workdir,
     },
 };
 
@@ -184,11 +183,11 @@ fn dot_after_a_selection_repeats_over_as_many_tasks() {
 }
 
 #[test]
-fn a_reload_that_removes_the_only_row_ends_the_selection() {
+fn a_reload_that_empties_the_list_ends_the_selection() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "jv");
-    fs::write(dir.path().join("todo.txt"), "A\nC\nD\nE\n")
+    fs::write(dir.path().join("todo.txt"), "")
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
     assert_eq!(model.mode(), Mode::Normal);
@@ -196,26 +195,20 @@ fn a_reload_that_removes_the_only_row_ends_the_selection() {
 }
 
 #[test]
-fn a_reload_keeps_the_rows_that_are_left_selected() {
-    let dir = workdir(LIST);
-    let mut model = model_of(dir.path());
-    press(&mut model, "jvjj");
-    fs::write(dir.path().join("todo.txt"), "A\nB\nD\nE\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut model);
-    assert_eq!(model.selected_rows(), Some((1, 2)));
-}
-
-#[test]
-fn a_reload_without_the_anchor_moves_it_to_the_next_selected_row() {
-    let dir = workdir(LIST);
-    let mut model = model_of(dir.path());
-    press(&mut model, "jvj");
-    fs::write(dir.path().join("todo.txt"), "A\nC\nD\nE\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut model);
-    assert_eq!(model.selected_rows(), Some((1, 1)));
-    assert_eq!(model.visual, Some(at(Source::Todo, 2)));
+fn a_reload_that_swaps_selected_lines_keeps_the_rows_lit() {
+    let cases = [
+        ("jvj", "A\nE\nC\nD\nB\n", (1, 2)),
+        ("Gvkk", "A\nB\nC\nD\n", (2, 3)),
+    ];
+    for (typed, now, lit) in cases {
+        let dir = workdir(LIST);
+        let mut model = model_of(dir.path());
+        press(&mut model, typed);
+        fs::write(dir.path().join("todo.txt"), now)
+            .unwrap_or_else(|e| panic!("{e}"));
+        reload(&mut model);
+        assert_eq!(model.selected_rows(), Some(lit), "{typed}");
+    }
 }
 
 #[test]
@@ -280,9 +273,7 @@ fn a_reload_keeps_the_keys_typed_on_an_open_line_or_in_a_field() {
             .unwrap_or_else(|e| panic!("{e}"));
         reload(&mut model);
         press(&mut model, "k");
-        let closed = model.line.is_none()
-            && model.visual.is_none()
-            && model.edit.is_none();
+        let closed = model.line.is_none() && model.edit.is_none();
         assert!(closed, "{mode}: j then k closes it");
     }
 }
@@ -408,17 +399,47 @@ const UNDER_WAY: &[Under] = &[
         "A2\nB2\nC\n",
         "fri<CR>",
         "A2\nB2\nC\n",
-        Some(messages::CHANGED),
+        LOOK,
+    ),
+    (ABC, "j", "gd", SAME, "fri<CR>", SAME, LOOK),
+    (ABC, "j", "gd", "C\nB\nA\n", "fri<CR>", "C\nB\nA\n", LOOK),
+    (ABC, "gg", "2gd", "B\nC\n", "fri<CR>", "B\nC\n", LOOK),
+    ("A\nA\n", "gg", "gd", "A\n", "fri<CR>", "A\n", LOOK),
+    (
+        ABC,
+        "gg",
+        "vjgd",
+        "A\nB2\nC\n",
+        "fri<CR>",
+        "A\nB2\nC\n",
+        LOOK,
+    ),
+    (ABC, "gg", "vj", "A\nB2\nC\n", "x", "A\nB2\nC\n", LOOK),
+    (ABC, "gg", "vj", "A\nC\n", "x", "A\nC\n", LOOK),
+    (ABC, "gg", "vj", "A\nN\nB\nC\n", "x", "A\nN\nB\nC\n", LOOK),
+    (ABC, "gg", "vj", "A2\nB\nC\n", "jd", "A2\nB\nC\n", LOOK),
+    (ABC, "gg", "vj", "A\nB2\nC\n", "gd", "A\nB2\nC\n", LOOK),
+    (ABC, "gg", "vjgd", SAME, "<Esc>x", SAME, LOOK),
+    (
+        "A\nB\nC\nD\nE\n",
+        "j",
+        "vj",
+        "A\nE\nC\nD\nB\n",
+        "d",
+        "A\nE\nC\nD\nB\n",
+        LOOK,
     ),
     (
         ABC,
+        "gg",
         "vj",
-        "gd",
-        "A2\nB2\nC\n",
-        "fri<CR>",
-        "A2\nB2\nC\n",
-        Some(messages::CHANGED),
+        "A\nB2\nC\n",
+        "<Esc>x",
+        "A\nx 2026-09-29 B2\nC\n",
+        None,
     ),
+    (ABC, "gg", "vj", "Z\nA\nB\nC\n", "d", "Z\nC\n", None),
+    (ABC, "gg", "vj", "A\nB\nC2\n", "d", "C2\n", None),
     (
         "A +k\nB +k\nC +k\n",
         "<C-w>3x|<C-w>1j",
@@ -461,6 +482,8 @@ fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
         let said = model.message.as_deref();
         if says.is_some() {
             assert_eq!(said, says, "{name}");
+            let open = model.line.is_some() || model.visual.is_some();
+            assert!(!open, "{name}: it ends");
         } else {
             assert_ne!(said, LOOK, "{name}");
         }

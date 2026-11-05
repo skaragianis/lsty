@@ -5,6 +5,9 @@ write todo.txt next
 tick 50ms
 frame a-frame
 bg a-bg
+keys x
+frame b-frame
+file todo.txt b-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -46,3 +49,22 @@ E
 ....................................................................................................
 ....................................................................................................
 GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
+-- b-frame --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  3   A                                                                                           │
+│  2   B                                                                                           │
+│  1   C                                                                                           │
+│  4   D edited                                                                                    │
+│  1   E                                                                                           │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  the list changed — look again  x done  t start  T wont  o new      9.9.9
+-- b-file --
+A
+B
+C
+D edited
+E

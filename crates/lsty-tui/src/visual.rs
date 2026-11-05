@@ -1,16 +1,9 @@
 //! VISUAL mode: a selection of whole shown rows, from the anchor to the
 //! cursor, that an action takes as its tasks.
 
-use std::collections::HashMap;
+use lsty_core::{keys::Mode, list::TaskId, ops};
 
-use lsty_core::{keys::Mode, list::TaskId};
-
-use crate::{
-    counts::ids_of,
-    model::Model,
-    rows::Row,
-    track::{Place, Remap},
-};
+use crate::{counts::ids_of, model::Model, rows::Row, track::Place};
 
 impl Model {
     /// `enter_visual`: starts a selection at the cursor's row.
@@ -18,8 +11,8 @@ impl Model {
         let Some(at) = self.cursor_place() else {
             return;
         };
-        self.visual = Some(at);
         self.reset_keys();
+        self.visual = Some(at);
     }
 
     /// `exit_visual`: ends the selection; the cursor stays.
@@ -28,10 +21,17 @@ impl Model {
         self.reset_keys();
     }
 
+    /// Says that the list changed under what was under way, which ends a
+    /// selection; the cursor stays.
+    pub(crate) fn say_changed(&mut self) {
+        self.exit_visual();
+        self.alert(ops::LIST_CHANGED.to_owned());
+    }
+
     /// Drops the keys typed so far in every mode, but an open text line
-    /// keeps its own.
+    /// keeps its own and a selection what it knows of its lines.
     pub(crate) fn reset_keys(&mut self) {
-        self.keys_lost = false;
+        self.keys_lost &= self.visual.is_some();
         for mode in [
             Mode::Normal,
             Mode::Visual,
@@ -48,12 +48,17 @@ impl Model {
         }
     }
 
-    /// The rows of the selection, first and last, when there is one:
-    /// from the anchor, or the cursor when the anchor is not shown, to
-    /// the cursor.
-    pub(crate) fn selected_rows(&self) -> Option<(usize, usize)> {
+    /// The rows of the selection's ends, when there is one: the anchor, or
+    /// the cursor when the anchor is not shown, and the cursor.
+    pub(crate) fn selection_ends(&self) -> Option<(usize, usize)> {
         let at = self.row_at(self.visual?).unwrap_or(self.cursor);
-        Some((at.min(self.cursor), at.max(self.cursor)))
+        Some((at, self.cursor))
+    }
+
+    /// The rows of the selection, first and last, when there is one.
+    pub(crate) fn selected_rows(&self) -> Option<(usize, usize)> {
+        let (at, cursor) = self.selection_ends()?;
+        Some((at.min(cursor), at.max(cursor)))
     }
 
     /// The row of the task `id`.
@@ -83,7 +88,8 @@ impl Model {
 
     /// Runs a write over `tasks`. In VISUAL mode the selection ends
     /// first, with the cursor on the first task, and comes back when
-    /// the write is refused. Tells whether the write ran.
+    /// the write is refused for anything but a changed list. Tells whether
+    /// the write ran.
     pub(crate) fn ending(
         &mut self,
         tasks: &[TaskId],
@@ -100,67 +106,35 @@ impl Model {
         if run(self) {
             return true;
         }
-        self.visual = Some(anchor);
+        if self.message.as_deref() != Some(ops::LIST_CHANGED) {
+            self.visual = Some(anchor);
+        }
         self.cursor = cursor;
         self.reset_keys();
         self.scroll();
         false
     }
 
-    /// The lines of the selected rows, the anchor's first.
-    pub(crate) fn selected_places(&self) -> Vec<Place> {
-        let Some((lo, hi)) = self.selected_rows() else {
-            return Vec::new();
-        };
-        let mut out: Vec<Place> = self
-            .rows
-            .get(lo..=hi)
-            .unwrap_or_default()
-            .iter()
-            .map(Row::place)
-            .collect();
-        if self.cursor < hi {
-            out.reverse();
-        }
-        out
-    }
-
-    /// Puts the anchor and the cursor on the rows of the selected lines
-    /// that are left after a reading, and ends the selection when none
-    /// is.
-    pub(crate) fn resume(&mut self, moved: &Remap, selected: &[Place]) {
-        let (Some(_), Some(last)) = (self.visual, selected.last()) else {
+    /// Puts the ends of a selection, lit on the rows `ends` of `old`, back
+    /// after a reading: on the lines that `line` finds, else on the same
+    /// rows. Only an empty list ends it.
+    pub(crate) fn resume(
+        &mut self,
+        ends: Option<(usize, usize)>,
+        old: &[Row],
+        line: impl Fn(Place) -> Option<Place>,
+    ) {
+        let Some((anchor, cursor)) = ends else {
             return;
         };
-        let index = self.row_index();
-        let Some(anchor) = survivor(moved, selected.iter(), &index) else {
-            self.exit_visual();
-            return;
+        let last = self.rows.len().saturating_sub(1);
+        let row = |i: usize| {
+            let at = line(old.get(i)?.place())?;
+            self.row_at(at)
         };
-        self.visual = self.rows.get(anchor).map(Row::place);
-        let tracked = moved.track(*last).and_then(|at| index.get(&at));
-        self.cursor = tracked.copied().unwrap_or_else(|| {
-            survivor(moved, selected.iter().rev(), &index).unwrap_or(anchor)
-        });
+        let (anchor, cursor) =
+            row(anchor).zip(row(cursor)).unwrap_or((anchor, cursor));
+        self.visual = self.rows.get(anchor.min(last)).map(Row::place);
+        self.cursor = cursor.min(last);
     }
-
-    /// The row of every line that is shown.
-    fn row_index(&self) -> HashMap<Place, usize> {
-        self.rows
-            .iter()
-            .enumerate()
-            .map(|(i, r)| (r.place(), i))
-            .collect()
-    }
-}
-
-/// The row of the first of `places` that its line was followed to.
-fn survivor<'a>(
-    moved: &Remap,
-    places: impl Iterator<Item = &'a Place>,
-    index: &HashMap<Place, usize>,
-) -> Option<usize> {
-    places
-        .filter_map(|at| moved.followed(*at))
-        .find_map(|at| index.get(&at).copied())
 }
