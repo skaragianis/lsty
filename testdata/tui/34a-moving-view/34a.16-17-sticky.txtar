@@ -57,7 +57,7 @@ NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  t start  T wont  d delete  y yank  <Esc> exit  9.9.9
+ VISUAL  2 selected  todo.txt  manual  x done  <Esc> exit  t start  T wont  d delete  y yank  9.9.9
 -- d-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2 ✓ C                                                                                  filtered │
@@ -66,4 +66,4 @@ NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  1 selected  todo.txt  manual  3 moved to 2  x reopen  T wont  d delete  y yank       9.9.9
+ VISUAL  1 selected  todo.txt  manual  3 moved to 2  x reopen  <Esc> exit  T wont  d delete   9.9.9

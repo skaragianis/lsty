@@ -31,11 +31,11 @@ pub(crate) fn defaults(mode: Mode) -> &'static [Action] {
         ],
         Mode::Visual => &[
             Action::ToggleComplete,
+            Action::ExitVisual,
             Action::ToggleStart,
             Action::Wontdo,
             Action::Delete,
             Action::Yank,
-            Action::ExitVisual,
         ],
         Mode::Insert => &[
             Action::Commit,

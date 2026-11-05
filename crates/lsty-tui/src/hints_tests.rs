@@ -712,7 +712,7 @@ fn a_pending_key_says_esc_cancels() {
     }
     let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", "vj");
     keys(&mut model, "g");
-    assert!(says(&model, "y yank  <Esc> cancel"), "where it stands");
+    assert!(says(&model, "x done  <Esc> cancel"), "where it stands");
     assert!(!says(&model, "<Esc> exit"));
     keys(&mut model, "<Esc>");
     assert_eq!(model.mode(), Mode::Visual);

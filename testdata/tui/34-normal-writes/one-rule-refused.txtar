@@ -1,7 +1,7 @@
 size 120 10
 start
 keys v j t
-status some are done — nothing changed  x done  t start  T wont\b
+status some are done — nothing changed  x done  <Esc> exit  t start  T wont\b
 frame todo-and-done
 keys <Esc> j v j t
 status task 3 is blocked by 5
@@ -30,7 +30,7 @@ Blocker id:w
 │                                                                                                                      │
 │                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  some are done — nothing changed  x done  t start  T wont  d delete         9.9.9
+ VISUAL  2 selected  todo.txt  manual  some are done — nothing changed  x done  <Esc> exit  t start  T wont       9.9.9
 -- blocked-and-unblocked --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  3   Open                                                                                                            │
@@ -41,7 +41,7 @@ Blocker id:w
 │                                                                                                                      │
 │                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  task 3 is blocked by 5 (Blocker)  x done  t start  T wont  d delete        9.9.9
+ VISUAL  2 selected  todo.txt  manual  task 3 is blocked by 5 (Blocker)  x done  <Esc> exit  t start  T wont      9.9.9
 -- t-file --
 Open
 x 2026-09-01 Closed
