@@ -345,11 +345,13 @@ impl Model {
     }
 
     /// Notes for the hint of `<Tab>` whether the key would start anything.
+    /// With candidates open the key moves through them, whatever a new start
+    /// would find.
     pub(crate) fn note_candidates(&mut self) {
         let idle = self.line.as_ref().is_some_and(|l| l.comp.is_none());
-        let nothing = idle && self.start_completion().is_none();
+        let none = idle && self.start_completion().is_none();
         if let Some(line) = &mut self.line {
-            line.nothing = nothing;
+            line.no_candidates = none;
         }
     }
 

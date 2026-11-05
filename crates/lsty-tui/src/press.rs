@@ -160,20 +160,9 @@ impl Model {
         let count = self.typed_count();
         let typed = self.summary(count);
         let one = (count > 1).then(|| self.summary(1));
-        let idle: &[Action] = if self.line.as_ref().is_some_and(|l| l.nothing)
-        {
-            &[Action::CompleteNext, Action::CompletePrev]
-        } else if self.popup().is_some_and(|p| p.cands.len() == 1) {
-            &[Action::Next, Action::Prev]
-        } else {
-            &[]
-        };
         move |action| {
             if !ruled {
                 return Answer::Applies;
-            }
-            if idle.contains(&action) {
-                return Answer::Refused(Refusal::Quiet);
             }
             let cursor = one.as_ref().filter(|_| !action.reads_count());
             decide(action, self, cursor.unwrap_or(&typed))
@@ -413,6 +402,14 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             return lit_if(lit, Refusal::Says("nothing to redo"));
         }
         Action::Repeat => return repeat(m),
+        Action::CompleteNext | Action::CompletePrev => {
+            let lit = m.line.as_ref().is_none_or(|l| !l.no_candidates);
+            return lit_if(lit, Refusal::Quiet);
+        }
+        Action::Next | Action::Prev => {
+            let lit = m.popup().is_none_or(|p| p.cands.len() > 1);
+            return lit_if(lit, Refusal::Quiet);
+        }
         // These always apply.
         Action::CursorDown
         | Action::CursorUp
@@ -468,11 +465,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::Close
         | Action::NextLink
         | Action::PrevLink
-        | Action::Next
-        | Action::Prev
         | Action::Execute
-        | Action::CompleteNext
-        | Action::CompletePrev
         | Action::HistoryPrev
         | Action::HistoryNext => return Answer::Applies,
     };
