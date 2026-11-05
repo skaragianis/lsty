@@ -14,7 +14,7 @@ pub(crate) struct Line {
     /// The candidates offered now; a search never has any.
     pub(crate) comp: Option<Completion>,
     /// Whether `<Tab>` has nothing to complete, for its hint.
-    pub(crate) nothing: bool,
+    pub(crate) no_candidates: bool,
     pub(crate) kind: LineKind,
 }
 
@@ -36,7 +36,7 @@ impl Line {
         Self {
             field: Field::new(text),
             comp: None,
-            nothing: false,
+            no_candidates: false,
             kind,
         }
     }
