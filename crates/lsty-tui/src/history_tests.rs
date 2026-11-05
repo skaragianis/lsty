@@ -113,8 +113,8 @@ fn nothing_to_undo_or_redo() {
     assert_eq!(todo_of(dir.path()), "(A) A\nB\nC\nD\nE\n");
 }
 
-// 36.33: a busy lock keeps the record; the refusal of a changed line
-// drops it.
+// 36.33: a busy lock keeps the record, and `:undo` its line to try again;
+// the refusal of a changed line drops both.
 #[test]
 fn a_busy_lock_keeps_the_record_and_a_changed_line_drops_it() {
     let config = Config {
@@ -124,13 +124,15 @@ fn a_busy_lock_keeps_the_record_and_a_changed_line_drops_it() {
     let (dir, mut model) = workdir_model(LIST, config);
     press(&mut model, "x");
     let mut held = held_lock(dir.path());
-    press(&mut model, "u");
+    keys(&mut model, ":undo<CR>");
     assert_eq!(kept(&model), (1, 0));
+    assert!(model.line.is_some(), "the line stays to try again");
     held.release().unwrap_or_else(|e| panic!("{}", e.message()));
     fs::write(dir.path().join("todo.txt"), "x 2026-09-29 A +t\nB\n")
         .unwrap_or_else(|e| panic!("{e}"));
-    press(&mut model, "u");
+    keys(&mut model, "<CR>");
     assert_eq!(kept(&model), (0, 0));
+    assert!(model.line.is_none(), "the line closes");
     assert_eq!(
         model.message.as_deref(),
         Some("can't undo: the list changed — look again")

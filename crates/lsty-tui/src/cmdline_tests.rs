@@ -13,8 +13,8 @@ use crate::{
     setform::{Form, OPTIONS, Op, parse},
     setshow::{duration_text, value_text},
     test_util::{
-        SAMPLE, alone, deps, held_lock, keys, press, screen, started, todo_of,
-        workdir, workdir_model,
+        SAMPLE, alone, deps, keys, press, screen, started, todo_of, workdir,
+        workdir_model,
     },
     words::split_words,
 };
@@ -265,28 +265,6 @@ fn nothing_to_undo_closes_the_line_with_a_message() {
     assert!(status(&model).contains("nothing to undo"));
 }
 
-// A busy lock keeps the step, and `<CR>` again retries it; a changed list
-// drops it, and `<CR>` again would reach the step before.
-#[test]
-fn a_refused_undo_keeps_the_line_open_unless_its_step_is_dropped() {
-    let config = Config {
-        lock_timeout: Duration::from_millis(30),
-        ..alone()
-    };
-    let (dir, mut model) = workdir_model(SAMPLE, config);
-    line(&mut model, "do 1");
-    let mut held = held_lock(dir.path());
-    line(&mut model, "undo");
-    let text = model.line.as_ref().map(|l| l.field.text());
-    assert_eq!(text.as_deref(), Some("undo"));
-    held.release().unwrap_or_else(|e| panic!("{}", e.message()));
-    let todo = dir.path().join("todo.txt");
-    fs::write(&todo, "x 2026-09-29 Changed outside\nBuy milk +home\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    keys(&mut model, "<CR>");
-    assert!(model.line.is_none());
-}
-
 #[test]
 fn a_read_opens_a_popup_that_scrolls_and_closes() {
     let (_dir, mut model) = workdir_model(
@@ -502,6 +480,7 @@ fn a_number_without_a_shown_task_leaves_the_cursor() {
         ("0", "no task 0"),
         ("7", "no task 7"),
         ("99999999999999999999999", "no task 99999999999999999999999"),
+        ("do 1 --expect nope", "expected \"nope\""),
     ];
     for (typed, said) in cases {
         line(&mut model, typed);
