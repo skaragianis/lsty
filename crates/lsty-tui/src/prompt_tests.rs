@@ -120,7 +120,7 @@ fn escape_closes_the_prompt_and_writes_nothing() {
 }
 
 #[test]
-fn a_selection_with_an_archived_task_opens_no_prompt() {
+fn a_count_over_an_archived_task_opens_no_prompt() {
     let dir = workdir("Buy\n");
     fs::write(dir.path().join("done.txt"), "x 2026-09-01 Old\n")
         .unwrap_or_else(|e| panic!("{e}"));
