@@ -74,7 +74,7 @@ const KEYS: [Key; 7] = [
 ];
 
 /// The keys of a selection, over an archived task, that no other row presses.
-const OVER_ARCHIVED: [&str; 6] = ["d", "J", "K", "gd", "gt", "gT"];
+const OVER_ARCHIVED: [&str; 5] = ["J", "K", "gd", "gt", "gT"];
 
 /// A folder with `todo` and the key bindings `toml`.
 fn bound(todo: &str, toml: &str) -> TempDir {
