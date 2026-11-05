@@ -84,6 +84,10 @@ impl Model {
         }
         let ids = self.tasks_of(count);
         let tasks = self.chosen(&ids);
+        if let Answer::Refused(why) = answer {
+            self.refuse(why, &tasks);
+            return false;
+        }
         let again = self.count_for(count, tasks.len());
         let toggles = action == Action::ToggleStart;
         let stops = answer == Answer::Resolved(Command::Stop);
@@ -110,11 +114,7 @@ impl Model {
         tasks: &[Chosen],
     ) -> bool {
         let (command, passes) = match answer {
-            Answer::Applies => return false,
-            Answer::Refused(why) => {
-                self.refuse(why, tasks);
-                return false;
-            }
+            Answer::Applies | Answer::Refused(_) => return false,
             Answer::CoreRefuses(command) => (command, false),
             Answer::Resolved(command) => (command, true),
         };
@@ -297,18 +297,19 @@ impl Model {
     /// Says why a press over `tasks` writes nothing: in the error style when
     /// a task stands in the way, else as a plain message.
     pub(crate) fn refuse(&mut self, why: Refusal, tasks: &[Chosen]) {
+        let archived = if self.visual.is_some() {
+            messages::ARCHIVED_TASKS
+        } else {
+            messages::SOME_ARCHIVED
+        };
         let text = match why {
             Refusal::Quiet => return,
             Refusal::Sorted => messages::sorted(self.sort.name()),
             Refusal::Says(text) => text.to_owned(),
             Refusal::Closed | Refusal::Archived => {
-                named(tasks, messages::archived_task, messages::ARCHIVED_TASKS)
+                named(tasks, messages::archived_task, archived)
             }
-            Refusal::NoId => named(
-                tasks,
-                messages::archived_no_id,
-                messages::ARCHIVED_TASKS,
-            ),
+            Refusal::NoId => named(tasks, messages::archived_no_id, archived),
             Refusal::AllDone => {
                 named(tasks, messages::closed_task, messages::CLOSED_TASKS)
             }

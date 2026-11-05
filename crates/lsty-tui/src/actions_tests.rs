@@ -67,6 +67,10 @@ fn the_archived_messages() {
         "the selection has archived tasks — nothing changed"
     );
     assert_eq!(
+        messages::SOME_ARCHIVED,
+        "some are archived — nothing changed"
+    );
+    assert_eq!(
         messages::busy("todo.txt"),
         "todo.txt is busy (locked by another writer) — nothing changed, try again"
     );
