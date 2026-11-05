@@ -184,14 +184,23 @@ fn dot_after_a_selection_repeats_over_as_many_tasks() {
 
 #[test]
 fn a_reload_that_empties_the_list_ends_the_selection() {
-    let dir = workdir(LIST);
-    let mut model = model_of(dir.path());
-    press(&mut model, "jv");
-    fs::write(dir.path().join("todo.txt"), "")
-        .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut model);
-    assert_eq!(model.mode(), Mode::Normal);
-    assert_eq!(model.visual, None);
+    for (then, written) in [("", ""), ("P\nQ\n", "x 2026-09-29 P\nQ\n")] {
+        let dir = workdir(LIST);
+        let mut model = model_of(dir.path());
+        press(&mut model, "jv");
+        fs::write(dir.path().join("todo.txt"), "")
+            .unwrap_or_else(|e| panic!("{e}"));
+        reload(&mut model);
+        assert_eq!(model.mode(), Mode::Normal);
+        assert_eq!(model.visual, None);
+        // The next key answers for no line that was selected.
+        fs::write(dir.path().join("todo.txt"), then)
+            .unwrap_or_else(|e| panic!("{e}"));
+        reload(&mut model);
+        keys(&mut model, "x");
+        assert_eq!(todo_of(dir.path()), written);
+        assert_ne!(model.message.as_deref(), LOOK);
+    }
 }
 
 #[test]
