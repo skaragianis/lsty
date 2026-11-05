@@ -370,6 +370,7 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
         ("i after a priority, which can go", "(A) Abc\n", "", "i", ""),
         ("I on a done task", DONE, "", "I", BEFORE),
         ("o on a project", "A +p\n", "", "o", BEFORE),
+        ("between two ids", "id:a id:b\n", "", "i<Right><Right>", ""),
     ];
     for (name, todo, done, typed, want) in rows {
         let (_dir, model) = hinted((todo, done), None, "", typed);
