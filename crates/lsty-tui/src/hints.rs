@@ -186,7 +186,10 @@ pub(crate) fn label(
             Answer::Refused(Refusal::AllDone | Refusal::Closed),
         ) => return None,
         (_, Action::Wontdo, Answer::Resolved(Command::Reopen)) => "will",
-        (_, _, Answer::Resolved(Command::Reopen)) => "reopen",
+        (_, _, Answer::Resolved(Command::Reopen))
+        | (_, Action::ToggleComplete, Answer::Refused(Refusal::Closed)) => {
+            "reopen"
+        }
         (_, _, Answer::Resolved(Command::Stop)) => "stop",
         _ => action.hint(),
     })

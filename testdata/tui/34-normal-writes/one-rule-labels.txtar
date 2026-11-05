@@ -25,7 +25,7 @@ keys j
 status x reopen  <Esc> exit  T wont\b
 frame wontdo-then-plain
 keys j
-status x done  <Esc> exit  T wont\b
+status x reopen  <Esc> exit  T wont\b
 frame some-archived
 keys <Esc>
 status x reopen  T wont\b
@@ -119,7 +119,7 @@ x 2026-09-01 Old skip wontdo:true
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  4 selected  todo.txt  manual  ▶ 1 in doing  x done  <Esc> exit  T wont  d delete  y yank                           9.9.9
+ VISUAL  4 selected  todo.txt  manual  ▶ 1 in doing  x reopen  <Esc> exit  T wont  d delete  y yank                         9.9.9
 -- all-archived --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  9   Open                                                                                                                      │
