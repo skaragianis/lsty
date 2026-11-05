@@ -1,7 +1,7 @@
 size 100 8
 start
 keys v j
-status x done  t start  T wont\b
+status x done  <Esc> exit  t start  T wont\b
 keys x
 status 1 done: Open; 2 done: Mine
 frame x-both

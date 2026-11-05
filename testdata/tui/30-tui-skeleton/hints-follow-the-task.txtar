@@ -8,25 +8,25 @@ status  x reopen  T wont  o new
 keys j
 status  x reopen  T will  o new
 keys g g v
-status  x done  t start  T wont  d delete
+status  x done  <Esc> exit  t start  T wont\b
 keys j
-status  x done  t start  T wont  d delete
+status  x done  <Esc> exit  t start  T wont\b
 keys <Esc> v
-status  x done  t stop  T wont  d delete
+status  x done  <Esc> exit  t stop  T wont\b
 keys <Esc> G v
-status  x reopen  T will  d delete
+status  x reopen  <Esc> exit  T will\b
 keys k
-status  x reopen  T wont  d delete
+status  x reopen  <Esc> exit  T wont\b
 keys <Esc> G
 size 72 8
 frame narrow-won't-do
 keys g g
 frame narrow-todo
-size 90 8
+size 100 8
 keys j j j v
-status  x reopen  T will\b
+status  x reopen  <Esc> exit  T will\b
 keys k k
-status  x done  t stop  T wont\b
+status  x done  <Esc> exit  t stop  T wont\b
 -- config.toml --
 show_sidebar = false
 show_detail = false
