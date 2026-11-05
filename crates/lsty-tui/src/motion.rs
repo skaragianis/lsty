@@ -238,6 +238,16 @@ impl Model {
         }
     }
 
+    /// Keeps the cursor on its row of the screen, as far as the list still
+    /// reaches it, and else on the last row.
+    pub(crate) fn stay_on_row(&mut self) {
+        let top = self.top;
+        self.keep_top(top);
+        let at = self.cursor.saturating_sub(top - self.top);
+        self.cursor = at.min(self.rows.len().saturating_sub(1));
+        self.settle_focus();
+    }
+
     /// Puts the top of the view at `top`, or at the last page when there
     /// is less to show, whether or not that shows the cursor row.
     pub(crate) fn keep_top(&mut self, top: usize) {

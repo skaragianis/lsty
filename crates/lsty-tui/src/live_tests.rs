@@ -6,7 +6,10 @@ use std::{
     time::Duration,
 };
 
-use lsty_core::{config::Config, errs::Source, lock::Cancel};
+use lsty_core::{
+    config::{Config, Hidden},
+    lock::Cancel,
+};
 
 use crate::{
     Notice, Watcher,
@@ -14,7 +17,7 @@ use crate::{
     model::Model,
     msg::{Cmd, Msg},
     test_util::{
-        alone, at, cursor_text, deps, held_lock, keys, load_of, press, reload,
+        alone, cursor_text, deps, held_lock, keys, load_of, press, reload,
         start, started_from, workdir, workdir_model,
     },
 };
@@ -253,16 +256,39 @@ fn a_busy_lock_is_tried_again_at_the_next_minute() {
     assert_eq!(model.snap.todo().to_bytes(), NEXT.as_bytes());
 }
 
+/// After an outside edit the cursor stays on a task whose line did not change
+/// and is still shown, and otherwise on its row: the same row of the screen.
 #[test]
-fn a_reload_that_inserts_above_the_cursor_keeps_it_on_its_task() {
-    let dir = workdir("One\nTwo\nThree\n");
-    let (mut model, _) = watched(dir.path(), alone());
-    keys(&mut model, "G");
-    fs::write(dir.path().join("todo.txt"), "New one\nOne\nTwo\nThree\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    changed(&mut model);
-    reload(&mut model);
-    assert_eq!(model.cursor_place(), Some(at(Source::Todo, 4)));
+fn an_outside_edit_keeps_the_cursor_on_its_task_or_its_row() {
+    let list: Vec<String> = (1..=30).map(|n| format!("T{n:02}\n")).collect();
+    let list = list.concat().replace("T21", "T21 dep:b");
+    let rows = [
+        ("20j", "T02", "T02\nNew", "T21 dep:b"),
+        ("20j", "T02\n", "", "T21 dep:b"),
+        ("20j", "T21", "T21 +agent", "T21 +agent dep:b"),
+        ("20j", "T21 dep:b\n", "", "T22"),
+        ("Gk", "T29\n", "", "T28"),
+        ("G", "T30\n", "", "T29"),
+        // It is unchanged and hidden now, as the new task blocks it.
+        ("20j", "T01", "New id:b\nT01", "T20"),
+    ];
+    for (typed, from, to, under) in rows {
+        let dir = workdir(&list);
+        let config = Config {
+            hidden_tasks: vec![Hidden::Blocked],
+            ..alone()
+        };
+        let (mut model, _) = watched(dir.path(), config);
+        model.update(Msg::Resize(80, 12));
+        keys(&mut model, typed);
+        let row = model.cursor - model.top;
+        fs::write(dir.path().join("todo.txt"), list.replacen(from, to, 1))
+            .unwrap_or_else(|e| panic!("{e}"));
+        changed(&mut model);
+        reload(&mut model);
+        assert_eq!(cursor_text(&model), under, "{typed} {from}");
+        assert_eq!(model.cursor - model.top, row, "{typed} {from}");
+    }
 }
 
 // An undo after another writer changed the file, with no reload between,
