@@ -9,6 +9,8 @@ stdout '`wait IDS…` returns when one of the tasks changes, or at once if one i
 stdout 'Check them with `lsty show` before acting\.'
 stdout 'found_by'
 stdout 'next --start'
+stdout 'Use --takeover and wontdo only when told to'
+stdout 'stop, wontdo, del, replace'
 stdout '(?m)^todo file''s folder \(file:\.\./notes/plan\.md\); ~ is home\.$'
 stdout '(?m)^  add, addm: —; repeats; no-op with --if-absent \(by text on the same day\)$'
 stdout '(?m)^  id: NR \+ --expect, or id:; no-op; by NR after the lines shifted: detected$'
