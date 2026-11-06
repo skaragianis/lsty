@@ -230,7 +230,7 @@ fn ended(child: &mut Child, want: i32, mut idle: impl FnMut()) -> Check {
 }
 
 fn busy_list_never_opens_the_screen() -> Check {
-    let work = Work::new()?;
+    let work = Work::new()?.config("lock_timeout = \"200ms\"\n")?;
     let folder = File::open(&work.root)?;
     folder.lock()?;
     let (mut child, mut screen) = start(&work.root)?;
