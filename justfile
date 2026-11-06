@@ -27,9 +27,10 @@ lint: lint-rust
     cargo deny --locked check
     cargo machete
 
-# Run all tests
+# Run all tests with nextest, then the doctests, which nextest does not run
 test:
-    cargo test --workspace --all-features --locked --no-fail-fast
+    cargo nextest run --workspace --all-features --locked --no-fail-fast
+    cargo test --workspace --all-features --locked --doc
 
 # Rewrite the expected output of failing transcripts
 update:
