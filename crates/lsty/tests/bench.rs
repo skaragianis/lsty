@@ -129,13 +129,16 @@ impl Fixture {
         let plain = |w: &str| {
             w.len() >= 3 && w.chars().all(|c| c.is_ascii_alphabetic())
         };
+        // `pri N A` changes it, and `del N TERM` leaves a text that
+        // starts as it did: another plain word follows the term
         let (nr, word) = self
             .middle(|l| {
-                l.split(' ')
-                    .find(|w| plain(w))
-                    .filter(|_| !l.contains("dep:"))
+                let mut words = l.split(' ').skip_while(|w| !plain(w));
+                let (word, next) = (words.next()?, words.next()?);
+                (plain(next) && !l.contains("dep:") && !l.starts_with("(A) "))
+                    .then_some(word)
             })
-            .ok_or("no unblocked task with a plain word")?;
+            .ok_or("no unblocked task with two plain words")?;
         let (pri, ()) = self
             .middle(|l| {
                 let b = l.as_bytes();
@@ -505,11 +508,14 @@ fn settings() -> Result<Settings, String> {
     })
 }
 
-/// Checks that need no hyperfine: every command works on the measured
-/// files, and results that differ are not compared.
+/// Checks that need no hyperfine: every command works on files of 122
+/// lines (the middle task has priority A) and 400 (a date follows its
+/// first word), and results that differ are not compared.
 fn check() -> Result<(), String> {
     let tmp = work_dir()?;
-    prepare(settings()?.lines, tmp.path())?;
+    for lines in [122, 400] {
+        prepare(lines, tmp.path())?;
+    }
     let res = |lines, names: &[&str]| {
         let rows = names
             .iter()
