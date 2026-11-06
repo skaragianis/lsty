@@ -2,10 +2,10 @@
 //! `--pri-helper DIR NR` it prioritizes line NR of the list in DIR 25
 //! times with alternating letters; with `--add-helper DIR NR` it adds 25
 //! distinct tasks; with `--reader-helper DIR` it loads the list over and
-//! over until `DIR/stop` exists and fails when task `k` is missing or
-//! carries a warning; with `--shared-helper DIR DONE NR` it adds 50 done
-//! tasks to its own todo file and archives them into the shared done
-//! file.
+//! over until `DIR/stop` exists, and fails when task `k` is missing,
+//! carries a warning or is not in the done file at the end; with
+//! `--shared-helper DIR DONE NR` it adds 50 done tasks to its own todo
+//! file and archives them into the shared done file.
 #![expect(
     clippy::disallowed_methods,
     reason = "the helper reads its own argv; tests build paths of their own, which are UTF-8"
@@ -15,7 +15,7 @@ use std::{
     ffi::OsString,
     fs, io,
     path::{Path, PathBuf},
-    process::{Child, Command, ExitCode},
+    process::{Command, ExitCode},
 };
 
 use libtest_mimic::{Arguments, Trial};
@@ -235,40 +235,40 @@ fn reader_helper(args: &[String]) -> ExitCode {
     }
 }
 
-/// Loads the list until `stop` exists, or for a minute at most, so that
-/// a reader whose test was killed does not go on for ever. `false` when
-/// task `k` had a warning, or when the reader never loaded or never saw
-/// `k` in the done file, which means it did not overlap the moves.
+/// Loads the list until `stop` exists, then once more, or for a minute
+/// at most, so that a reader whose test was killed does not go on for
+/// ever. It writes `seen` when it first finds task `k` in the done file.
+/// `false` when `k` had a warning, or was not in the done file at the
+/// end.
 fn read_until_stopped(dir: &Path) -> errs::Result<bool> {
     let found = found(dir);
     let config = Config::default();
     let params = Params::new(test_clock()?, &config);
     let cancel = Cancel::new();
-    let (mut loads, mut in_done) = (0_usize, 0_usize);
+    let mut seen = false;
     let end = std::time::Instant::now() + std::time::Duration::from_secs(60);
-    while !dir.join("stop").exists() && std::time::Instant::now() < end {
+    loop {
+        let stopped =
+            dir.join("stop").exists() || std::time::Instant::now() > end;
         let snap = list::load(
             &found,
             std::time::Duration::from_secs(60),
             &cancel,
             &params,
         )?;
-        loads += 1;
-        if loads == 1 {
-            fs::write(dir.join("ready"), "").map_err(|e| io_at(dir, &e))?;
-        }
         let task = snap.by_id("k")?;
         if !snap.warnings_for([task]).is_empty() {
             return Ok(false);
         }
-        if task.source() == Source::Done {
-            in_done += 1;
-            if in_done == 1 {
-                fs::write(dir.join("seen"), "").map_err(|e| io_at(dir, &e))?;
-            }
+        let in_done = task.source() == Source::Done;
+        if stopped {
+            return Ok(in_done);
+        }
+        if in_done && !seen {
+            seen = true;
+            fs::write(dir.join("seen"), "").map_err(|e| io_at(dir, &e))?;
         }
     }
-    Ok(loads > 0 && in_done > 0)
 }
 
 fn io_at(dir: &Path, err: &io::Error) -> Error {
@@ -285,44 +285,39 @@ fn moves_and_reader() -> Result<(), String> {
         .arg(&dir)
         .spawn()
         .map_err(|e| e.to_string())?;
-    let moved = move_back_and_forth(&dir, &mut reader);
+    let moved = move_back_and_forth(&dir);
     fs::write(dir.join("stop"), "").map_err(|e| e.to_string())?;
     let status = reader.wait().map_err(|e| e.to_string())?;
     moved.map_err(|e| e.to_string())?;
-    if !dir.join("seen").exists() {
-        return Err(format!(
-            "the reader ({status}) never saw k in the done file"
-        ));
-    }
     if status.success() {
         return Ok(());
     }
     Err(format!("reader: {status}"))
 }
 
-fn move_back_and_forth(dir: &Path, reader: &mut Child) -> errs::Result<()> {
+fn move_back_and_forth(dir: &Path) -> errs::Result<()> {
     let targets = parse_refs("id:k")?;
     let opts = DoOpts {
         archive: Toggle::On,
         ..DoOpts::default()
     };
-    // The reader says when it is running and when it has seen the task
-    // in the done file; the moves go on until then, at least MOVES times,
-    // and stop once the reader has gone.
-    for _ in 0..10_000 {
-        if dir.join("ready").exists() {
-            break;
-        }
-        std::thread::sleep(std::time::Duration::from_millis(1));
-    }
+    // The first move waits, holding no lock, until the reader has seen
+    // the task in the done file: one load between moves, and a sign the
+    // reader is running. The moves end with the task there again.
     with_env(&found(dir), |env| {
-        for round in 1.. {
-            finish(env, &targets, opts)?;
-            restore(env, &targets, ClaimOpts::default())?;
-            let gone = !matches!(reader.try_wait(), Ok(None));
-            if gone || round >= MOVES && dir.join("seen").exists() {
-                break;
+        finish(env, &targets, opts)?;
+        let end =
+            std::time::Instant::now() + std::time::Duration::from_secs(10);
+        while !dir.join("seen").exists() {
+            if std::time::Instant::now() > end {
+                let e = io::Error::other("the reader saw no move");
+                return Err(io_at(dir, &e));
             }
+            std::thread::sleep(std::time::Duration::from_millis(1));
+        }
+        for _ in 0..MOVES {
+            restore(env, &targets, ClaimOpts::default())?;
+            finish(env, &targets, opts)?;
         }
         Ok(())
     })
