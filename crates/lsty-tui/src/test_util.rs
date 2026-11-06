@@ -2,6 +2,7 @@
 
 use std::{
     cell::{Cell, RefCell},
+    collections::HashMap,
     fs,
     path::{Path, PathBuf},
     rc::Rc,
@@ -15,11 +16,11 @@ use lsty_core::{
     dates::Clock,
     discover::{self, FileState, Found, FoundBy, Input},
     errs::{self, Code, Nr, Source},
-    keys::{self, Stroke, parse_keys},
+    keys::{self, Keymap, Stroke, parse_keys},
     list::{Params, Snapshot},
     lock,
     ops::IdSource,
-    theme::{self, Profile},
+    theme::{self, Profile, Theme},
     todotxt::File,
 };
 use ratatui::{buffer::Buffer, layout::Rect};
@@ -103,19 +104,42 @@ pub(crate) fn workdir_cancelling(
     (dir, model)
 }
 
+thread_local! {
+    /// The built-in default theme, which no file changes.
+    static THEME: Theme = theme::load(
+        theme::DEFAULT_NAME,
+        Path::new("themes"),
+        Path::new("."),
+        true,
+        Profile::TrueColor,
+    )
+    .0;
+    /// The key map of each `keys.toml` and leader loaded so far: a walk
+    /// starts a thousand models over a handful of files.
+    static KEYMAPS: RefCell<HashMap<KeysOf, Keymap>> = RefCell::default();
+}
+
+/// The text of a `keys.toml`, if it can be read, and the leader.
+type KeysOf = (Option<Vec<u8>>, String);
+
+/// `keys::load` of `dir`'s `keys.toml`, once for each text of it. A file
+/// that cannot be read gives the defaults, as a missing one does.
+fn keymap(dir: &Path, leader: &str) -> Keymap {
+    let path = dir.join("keys.toml");
+    let text = fs::read(&path).ok();
+    KEYMAPS.with_borrow_mut(|maps| {
+        maps.entry((text, leader.to_owned()))
+            .or_insert_with(|| keys::load(&path, dir, false, leader).0)
+            .clone()
+    })
+}
+
 /// The dependencies of a model of `dir`'s todo file, with the default
 /// config and keys and the built-in default theme.
 pub(crate) fn deps(dir: &Path, config: Config) -> Deps {
-    let (keymap, _) =
-        keys::load(&dir.join("keys.toml"), dir, false, &config.leader);
+    let keymap = keymap(dir, &config.leader);
+    let theme = THEME.with(Theme::clone);
     let themes = dir.join("themes");
-    let (theme, _) = theme::load(
-        theme::DEFAULT_NAME,
-        &themes,
-        dir,
-        true,
-        Profile::TrueColor,
-    );
     let now = Rc::new(Cell::new(instant(NOW)));
     Deps {
         version: "9.9.9",
