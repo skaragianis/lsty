@@ -206,6 +206,7 @@ fn a_paste_goes_into_the_field_only() {
 fn a_busy_lock_keeps_the_draft() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
+    model.deps.config.lock_timeout = Duration::from_millis(50);
     press(&mut model, "ax");
     let mut held = held_lock(dir.path());
     keys(&mut model, "<CR>");
@@ -221,6 +222,7 @@ fn a_busy_lock_keeps_the_draft() {
 #[test]
 fn a_failed_write_of_a_new_task_does_not_chain() {
     let (dir, mut model) = workdir_model(LIST, keeping());
+    model.deps.config.lock_timeout = Duration::from_millis(50);
     keys(&mut model, "ox");
     let mut held = held_lock(dir.path());
     keys(&mut model, "<CR>");

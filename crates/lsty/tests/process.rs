@@ -280,8 +280,9 @@ fn lock_timeout() -> Check {
     let before = work.todo()?;
     let folder = File::open(Path::new(&work.root))?;
     folder.lock()?;
-    // --no-config keeps the default 2 s wait, not Work's 30 s.
-    let run = work.run("agent1", &["do", "id:c1", "--json", "--no-config"])?;
+    let config = work.root.join(".config/lsty/config.toml");
+    fs::write(config, "lock_timeout = \"200ms\"\n")?;
+    let run = work.run("agent1", &["do", "id:c1", "--json"])?;
     if run.code != 4 || !run.out.contains("\"code\":\"lock_timeout\"") {
         return Err(format!("exit {}, {}", run.code, run.out).into());
     }

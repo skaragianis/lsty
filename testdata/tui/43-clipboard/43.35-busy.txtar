@@ -9,6 +9,7 @@ lock release
 -- config.toml --
 show_sidebar = false
 show_detail = false
+lock_timeout = "50ms"
 -- todo.txt --
 A
 -- s-clip --
