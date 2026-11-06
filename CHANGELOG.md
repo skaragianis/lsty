@@ -4,6 +4,60 @@ Changes that a user of lsty can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.7.0 (2026-11-06)
+
+### Added
+
+- **core:** Add won't do
+- **tui:** Make t start and stop and T mark won't do
+- **tui:** Refuse t on a done task instead of reopening it
+- **tui:** Put a claim back on a second t
+- **tui:** Decide every writing key by one rule
+- **tui:** Dim the hints whose key would change nothing
+- **tui:** Dim the hints of the keys that do not write tasks
+- **tui:** Show a typed count in the status line and make the hints follow it
+
+### Fixed
+
+- **core:** Make the messages that count agree with their number
+- **tui:** Dim a hint only when its key would do nothing
+- **tui:** Read the files again when a dim key is pressed
+- **theme:** Draw built-in themes in the terminal's own colours at 16 colours
+- **tui:** Name the place tab leaves for in the detail hint
+- **tui:** Show x done first in the detail hints
+- **tui:** Keep a sticky row for what starts from it
+- **tui:** Dim the panel and focus hints whose key would do nothing
+- **tui:** Act on the rows as drawn when a key comes before they change
+- **tui:** Drop keys when the cursor leaves their task and jump to the true ends
+- **tui:** Keep what a selection lights and forget keys a reading cannot place
+- **tui:** Write nothing from a prompt a reading cannot place and say so
+- **tui:** Refuse a key whose line changed since the list was drawn
+- **tui:** Alert on a dim press too and cover every part of the line check
+- **tui:** Forget keys lost in a popup once the next one ends them
+- **tui:** Refuse a prompt or a selection whose lines changed
+- **tui:** Forget the refusal when an empty list ends a selection
+- **tui:** Refuse a field whose line changed under it
+- **tui:** Refuse a dep: whose line changed and say how to save
+- **tui:** Put the warning first in the refusal of a dep:
+- **tui:** Ask the rule again from where a lost line last stood
+- **tui:** Refuse an undo or redo on a line that changed since
+- **tui:** Leave a dependent out of a paste when an outside edit moved it
+- **core:** Put the blank lines a move crossed back with an undo
+- **tui:** Keep the cursor on its row unless an outside edit left its line alone
+- **tui:** Keep the selection and the repeat through a dim press
+- **tui:** Say some are archived when nothing is selected
+- **tui:** Dim the hint of a key with no candidate to move to
+- **tui:** Dim the delete keys of a field with nothing to delete
+- **tui:** Let x and T pass over an archived task in a press
+- **tui:** Show the next panel key before the fold keys
+- **tui:** Show the way out of VISUAL right after its first key
+- **tui:** Close the command line when the list it aimed at changed
+- **tui:** Reopen the command line only for a busy lock
+- **tui:** Say reopen for x on archived tasks
+- **core:** Say reopened as after a restore
+- **tui:** Say x reopen over done and archived tasks
+- **tui:** Make T mark won't do only
+
 ## 0.6.1 (2026-10-29)
 
 Pull requests are now welcome, see [CONTRIBUTING.md](https://github.com/skaragianis/lsty/blob/main/CONTRIBUTING.md).
