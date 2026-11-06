@@ -57,19 +57,11 @@ fn main() -> ExitCode {
     if args.first().map(String::as_str) == Some(HELPER_FLAG) {
         return helper(&args[1..]);
     }
-    run_tests()
-}
-
-/// Runs the cases one at a time unless `--test-threads` says otherwise:
-/// they race processes against windows of a few hundred milliseconds.
-fn run_tests() -> ExitCode {
-    let mut arguments = Arguments::from_args();
-    arguments.test_threads.get_or_insert(1);
     let trials = TESTS
         .iter()
         .map(|(name, test)| Trial::test(*name, move || Ok(test()?)))
         .collect();
-    libtest_mimic::run(&arguments, trials).exit_code()
+    libtest_mimic::run(&Arguments::from_args(), trials).exit_code()
 }
 
 // The helper process.
