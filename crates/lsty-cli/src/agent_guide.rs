@@ -10,9 +10,9 @@ use crate::{
 const INTRO: [&[&str]; 9] = [
     &[
         "# Identity",
-        "Set LSTY_OWNER once per run: agent-<first 4 session-id characters> or",
-        "another run-unique id. Use it for every call; never a bare model or",
-        "product name. Never use --human or --no-config. A restart is a new run.",
+        "Set LSTY_OWNER once per run: agent-<first 4 session-id characters>. Use it",
+        "for every call; never a bare model or product name. Never use --human or",
+        "--no-config. A restart is a new run.",
     ],
     &[
         "# Calls",
@@ -26,14 +26,14 @@ const INTRO: [&[&str]; 9] = [
     &[
         "# Getting work",
         "`next --start` claims the next ready task; a retry resumes the same claim.",
-        "Read its files before working. If next returns",
-        "  your blocked claim: work on its blocker or stop the claim.",
-        "  a resumed claim you cannot have made this run: a name collision. Leave",
-        "    it untouched, choose a new LSTY_OWNER and tell the human.",
-        "  no task, but blocked_count, later_count or claimed_count above 0: the",
-        "    queue is not done: tasks await a prerequisite, start date or another worker.",
+        "Read its files before working. next may also return:",
+        "- your blocked claim: work on its blocker, or stop the claim.",
+        "- a resumed claim you cannot have made this run: a name collision. Leave it",
+        "  untouched, choose a new LSTY_OWNER and tell the human.",
+        "- no task, with blocked_count, later_count or claimed_count above 0: the",
+        "  queue is not done; tasks wait on a prerequisite, a start date or a worker.",
         "`wait IDS…` returns when one of the tasks changes, or at once if one is done",
-        "(exit 5 after --timeout, default 1h, 0: no limit). It watches only those ids:",
+        "(exit 5 after --timeout, default 1h; 0: no limit). It watches only those ids:",
         "to add one, end it and wait on all. Check them with `lsty show` before acting.",
     ],
     &[
@@ -64,12 +64,12 @@ const INTRO: [&[&str]; 9] = [
     ],
     &[
         "# Claims",
-        "                       nobody        yours         other's",
-        "  start                claims        no-op         claimed",
-        "  do                   wrong_state   done          claimed",
-        "  stop, del, replace   allowed       allowed       claimed",
-        "  other changes        allowed       allowed       warning",
-        "Use --takeover only when told to.",
+        "                              nobody        yours         other's",
+        "  start                       claims        no-op         claimed",
+        "  do                          wrong_state   done          claimed",
+        "  stop, wontdo, del, replace  allowed       allowed       claimed",
+        "  other changes               allowed       allowed       warning",
+        "Use --takeover and wontdo only when told to.",
     ],
     &[
         "# Retries",

@@ -17,11 +17,11 @@ Terminal lists for Humans and Agents.
 
 ![lsty navigating, adding, filtering, and completing tasks while an agent works](https://raw.githubusercontent.com/skaragianis/lsty/main/assets/demo.gif)
 
-lsty is a vim-inspired [todo.txt](http://todotxt.org/) TUI written in Rust,
+lsty is a Vim-inspired [todo.txt](http://todotxt.org/) TUI written in Rust,
 and a [todo.sh](https://github.com/todotxt/todo.txt-cli)-inspired CLI with
 extensions for safe concurrent use by humans, scripts, and LLM agents.
 
-## Some Use Cases
+## What It's For
 
 - Personal todo list that includes recurring tasks
 - Human in the loop with agents posting decisions for approval
@@ -34,17 +34,15 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 
 - Watch agents work lists in "real-time"
 - Vim-inspired TUI with configurable key bindings and themes. Normal, insert,
-  visual and command-line modes. `u` for undo and `<c-r>` for redo
-- Plain-text todo.txt files, with priorities, projects, contexts, dependencies,
-  dates, and links
-- Filters on text, projects, contexts, tags, priorities and dates, combined
-  with and (a space), or (`|`) and not (`-`)
+  visual and command-line modes. `u` for undo and `<C-r>` for redo
+- Priorities, projects, contexts, dependencies, dates, and links
+- Extensive filtering combined with and (a space), or (`|`) and not (`-`)
 - Auto-completion of commands, filters, projects and contexts
 - Nesting of projects and contexts with `.` or `/`
-- Cycle priorities and completion
 - A CLI for listing, adding, editing, waiting on, and completing tasks
-- JSON output for scripts and agents
-- Task ownership, claiming, and dependencies for coordinating work
+- JSON output for scripts and agents. Retry-safe commands
+- Task ownership and claiming for coordinating work
+- Clipboard support (OSC 52 for SSH) and optional mouse support
 - Concurrent access by lsty processes, with locking, atomic writes, and file
   watching
 - No databases or daemons, just text files
@@ -120,8 +118,9 @@ Default keys in normal mode:
 | `j` / `k`, or arrow keys | Move down / up              |
 | `gg` / `G`               | Go to the first / last task |
 | `O`                      | Add a task above the cursor |
-| `x`                      | Toggle completion           |
-| `T`                      | Stop doing the task         |
+| `x`                      | Complete or reopen          |
+| `t`                      | Start or stop the task      |
+| `T`                      | Mark won't do               |
 | `dd` or `Del`            | Delete the task             |
 | `gx`                     | Open the task's links       |
 | `PageDown` / `PageUp`    | Move down / up a page       |
@@ -136,8 +135,11 @@ filtered.
 address (`https://...`, `ftp://...`, any scheme). If the opener fails, the
 address is copied to the clipboard.
 
-Text between back ticks is literal and not interpreted as a project, context,
+Text between backticks is literal and not interpreted as a project, context,
 tag, or link.
+
+A task you decide not to do is marked done with the tag `wontdo:true`, and the
+TUI shows it with `✗`.
 
 Task changes are written as you make them. After quitting, try the CLI against
 the same list:
@@ -194,12 +196,12 @@ separated by spaces and all must match.
 
 The date fields are `due`, `t` (threshold), `started`, `ended`, `created` and
 `completed`; a date is `today`, a weekday such as `fri`, `+3d`, `-7d` or
-`2026-10-01`. The states are `open`, `done`, `doing`, `blocked`, `later`,
-`overdue`, `archived`, `dangling` and `stale`. `lsty help` describes the
-language too.
+`2026-10-01`. The states are `open`, `done`, `wontdo`, `doing`, `blocked`,
+`later`, `overdue`, `archived`, `dangling` and `stale`. `lsty help` describes
+the language too.
 
 The Filters panel lists the built-in filters Today, Overdue, Upcoming, Doing,
-Waiting and No project, then the saved ones.
+Waiting, No project and Won't do, then your custom ones.
 
 In the TUI, `x` or a click on a project or context in its panel moves it
 through or (`|`, with the one chosen before it), and (`&`), not (`-`) and
@@ -254,7 +256,7 @@ auto_archive = false
 | `show_sidebar`      | `true`                         | `true`, `false`                              | Show the projects, contexts and filters panel                           |
 | `sidebar_min_width` | `80`                           | 0 or more                                    | The terminal width below which the sidebar is hidden                    |
 | `show_detail`       | `true`                         | `true`, `false`                              | Show the detail panel                                                   |
-| `detail_min_width`  | `120`                          | 0 or more                                    | The terminal width below which the detail panel is hidden               |
+| `detail_min_width`  | `120`                          | 0 or more                                    | The narrowest terminal that shows the detail panel beside the list      |
 | `detail_position`   | `"right"`                      | `right`, `bottom`                            | Beside the list when wide enough, or always below it                    |
 | `show_ids`          | `true`                         | `true`, `false`                              | Show the `id:` and `dep:` tags in a row's text                          |
 | `wrap`              | `true`                         | `true`, `false`                              | Wrap a long task onto up to 3 rows of the list                          |
