@@ -21,7 +21,7 @@ use crate::{
     model::Model,
     press::{Answer, Command, Refusal, decide},
     test_util::{
-        Board, NOW, alone, deps, instant, keys, press, started, workdir,
+        Board, NOW, alone, deps, files, instant, keys, press, started, workdir,
     },
 };
 
@@ -67,11 +67,6 @@ fn list(kinds: &[usize]) -> (TempDir, Model) {
         press(&mut model, "j");
     }
     (dir, model)
-}
-
-pub(crate) fn files(dir: &Path) -> [Vec<u8>; 2] {
-    ["todo.txt", "done.txt"]
-        .map(|name| fs::read(dir.join(name)).unwrap_or_default())
 }
 
 type Ran = errs::Result<(Outcome, Clock)>;
@@ -679,12 +674,6 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
     assert!(detail > 40, "{detail}");
 }
 
-pub(crate) fn before_the_key(model: &mut Model, first: &str) {
-    if !first.is_empty() {
-        keys(model, first);
-    }
-}
-
 /// Moves to the detail panel, and tells whether `key` could be asked there:
 /// it opens from NORMAL only, on a task, and has not every key.
 fn into_detail(model: &mut Model, action: Action, key: &str) -> bool {
@@ -703,7 +692,7 @@ fn agrees(action: Action, key: &str, case: &Case, in_detail: bool) -> bool {
     let name = format!("{key} on {todo:?} {done:?} after {first} {in_detail}");
     let board = Board::default();
     let (dir, mut model, opened) = watched((todo, done), &board);
-    before_the_key(&mut model, first);
+    keys(&mut model, first);
     if in_detail && !into_detail(&mut model, action, key) {
         return false;
     }
@@ -763,7 +752,7 @@ fn pastes_or_says(
         format!("{key} on {held:?} {todo:?} {done:?} {first} {in_detail}");
     let board = Board::default();
     let (dir, mut model, _opened) = watched((todo, done), &board);
-    before_the_key(&mut model, first);
+    keys(&mut model, first);
     if !held.is_empty() {
         board.set(held);
     }
@@ -842,7 +831,7 @@ fn a_refused_key_says_what_it_always_said() {
         let name = format!("{key} on {todo:?} {done:?} after {first}");
         let (dir, mut model, _opened) =
             watched((todo, done), &Board::default());
-        before_the_key(&mut model, first);
+        keys(&mut model, first);
         let before = files(dir.path());
         keys(&mut model, key);
         assert_eq!(model.message.as_deref(), Some(said), "{name}");

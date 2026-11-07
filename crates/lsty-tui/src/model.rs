@@ -145,7 +145,7 @@ pub(crate) struct Model {
 
 impl Model {
     /// [`Model::with_sink`] with a sink that drops every notice.
-    #[cfg(any(test, feature = "harness"))]
+    #[cfg(any(test, feature = "harness", feature = "fuzzing"))]
     pub(crate) fn new(start: Start, deps: Deps) -> errs::Result<Self> {
         Self::with_sink(start, deps, std::sync::Arc::new(|_| {}))
     }

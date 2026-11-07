@@ -18,7 +18,7 @@ mod script;
 pub mod txtar;
 
 use std::{
-    fs,
+    fs, io,
     path::{Path, PathBuf},
     process::{Command, ExitCode},
     sync::Arc,
@@ -52,6 +52,29 @@ pub fn workspace_root() -> PathBuf {
         .expect("cargo sets CARGO_MANIFEST_DIR when it runs the tests");
     let root = Path::new(&dir).join("../..");
     fs::canonicalize(&root).unwrap_or(root)
+}
+
+/// Runs `property` over each seed file of the fuzz target `target`, in the
+/// order of their names; there must be at least `min` of them.
+///
+/// # Errors
+///
+/// When the seeds cannot be read.
+///
+/// # Panics
+///
+/// When there are fewer than `min` seeds, or the property fails.
+pub fn holds(target: &str, min: usize, property: fn(&[u8])) -> io::Result<()> {
+    let dir = workspace_root().join("fuzz/seeds").join(target);
+    let mut files: Vec<_> = fs::read_dir(dir)?
+        .map(|e| e.map(|e| e.path()))
+        .collect::<io::Result<_>>()?;
+    files.sort();
+    assert!(files.len() >= min, "seed files are missing");
+    for file in files {
+        property(&fs::read(file)?);
+    }
+    Ok(())
 }
 
 /// A set of transcripts and the `lsty` program they run.
@@ -228,7 +251,7 @@ fn bin_folder(lsty: &Path) -> Result<tempfile::TempDir, String> {
 }
 
 fn sorted_entries(dir: &Path) -> Result<Vec<PathBuf>, String> {
-    let read = |e: std::io::Error| format!("{}: {e}", dir.display());
+    let read = |e: io::Error| format!("{}: {e}", dir.display());
     let mut entries = fs::read_dir(dir)
         .map_err(read)?
         .map(|entry| entry.map(|e| e.path()))

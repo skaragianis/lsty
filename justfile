@@ -19,6 +19,8 @@ lint-rust:
     cargo clippy --workspace --all-targets --all-features --locked -- -D warnings
     cargo clippy --workspace --all-targets --locked -- -D warnings
     cargo clippy --manifest-path fuzz/Cargo.toml --locked -- -D warnings
+    @# fuzz/ builds the versions lsty ships: to renew it, copy Cargo.lock there
+    awk 'FNR == 1 {n = ""} /^name = /{n = $3} /^version = / && n != "" {if (FILENAME == ARGV[1]) v[n] = v[n] $3; else if (n in v && !index(v[n], $3)) {print "fuzz/Cargo.lock: " n " " $3 " is not in Cargo.lock"; bad = 1}} END {exit bad}' Cargo.lock fuzz/Cargo.lock
     LC_ALL=C git grep -nE '^[ -!#-~]{80,}$' -- '*.rs' ':!crates/lsty-core/src/theme/profile/table.rs' ':!crates/lsty-tui/src/tuitest.rs'; test $? = 1
     RUSTDOCFLAGS=-Dwarnings cargo doc --no-deps --document-private-items --workspace --all-features --locked
 

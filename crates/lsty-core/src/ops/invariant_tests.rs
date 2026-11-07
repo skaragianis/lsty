@@ -2,10 +2,9 @@
 
 use std::io;
 
-use crate::{
-    errs::fuzzing::quote_property, query::fuzzing::query_property,
-    todotxt::invariant_tests::holds,
-};
+use lsty_scripttest::holds;
+
+use crate::{errs::fuzzing::quote_property, query::fuzzing::query_property};
 
 #[test]
 fn quote_seeds_round_trip() -> io::Result<()> {
