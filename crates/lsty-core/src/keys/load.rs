@@ -54,11 +54,31 @@ pub fn load(
     no_config: bool,
     leader: &str,
 ) -> (Keymap, Vec<Warning>) {
+    let read = if no_config {
+        Ok(None)
+    } else {
+        fsio::read_in(cwd, path)
+    };
+    merge(read, leader)
+}
+
+/// The file as read, `None` when there is none, over the defaults.
+pub(super) fn merge(
+    read: errs::Result<Option<Vec<u8>>>,
+    leader: &str,
+) -> (Keymap, Vec<Warning>) {
     let mut warnings = Vec::new();
     let stroke = parse_leader(leader, &mut warnings);
     let mut tables = default_claims();
-    if !no_config {
-        read_file(cwd, path, stroke, &mut tables, &mut warnings);
+    match read {
+        Ok(Some(data)) => match parse_table(&data) {
+            Ok(t) => {
+                merge_file(t.get_ref(), stroke, &mut tables, &mut warnings);
+            }
+            Err(message) => warnings.push(warn(message)),
+        },
+        Ok(None) => {}
+        Err(e) => warnings.push(warn(e.message().to_owned())),
     }
     resolve_all(tables, warnings)
 }
@@ -91,24 +111,6 @@ fn default_claims() -> Tables {
             })
             .collect()
     })
-}
-
-fn read_file(
-    cwd: &Path,
-    path: &Path,
-    leader: Stroke,
-    tables: &mut Tables,
-    warnings: &mut Vec<Warning>,
-) {
-    let data = match fsio::read_in(cwd, path) {
-        Ok(Some(data)) => data,
-        Ok(None) => return,
-        Err(e) => return warnings.push(warn(e.message().to_owned())),
-    };
-    match parse_table(&data) {
-        Ok(table) => merge_file(table.get_ref(), leader, tables, warnings),
-        Err(message) => warnings.push(warn(message)),
-    }
 }
 
 /// One thing the file says, with where it starts.
@@ -240,7 +242,7 @@ fn parse_entry(
     keys
 }
 
-fn parse_key(
+pub(super) fn parse_key(
     mode: Mode,
     text: &str,
     leader: Stroke,

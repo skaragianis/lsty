@@ -1,0 +1,6 @@
+[normal]
+delete = "dd"
+yank = ["yy", 5]
+cursor_down = ["Down", "<Foo>", "", "<C-"]
+go_top = ["3d"]
+cycle_priority = ["Down", "P"]

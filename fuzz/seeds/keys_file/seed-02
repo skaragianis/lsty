@@ -1,0 +1,3 @@
+[normal]
+yank = ["Y"]
+delete = ["Y", "x"]

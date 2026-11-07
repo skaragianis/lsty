@@ -1,0 +1,5 @@
+[normal]
+help = ["<Tab>x"]
+
+[detail]
+next_link = ["Down"]

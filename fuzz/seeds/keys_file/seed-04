@@ -1,0 +1,8 @@
+picker = ["x"]
+vizual.delete = ["d"]
+
+[normal]
+frobnicate = ["f"]
+
+[insert]
+yank = ["y"]

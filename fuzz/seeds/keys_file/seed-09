@@ -1,0 +1,10 @@
+[normal]
+yank = ["<leader>y"]
+help = ["gx"]
+
+[panel]
+toggle_entry = ["<leader>", "<Space>"]
+
+[detail]
+open_link = ["o"]
+delete = ["q", "dd"]
