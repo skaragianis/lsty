@@ -10,6 +10,7 @@ cargo-fuzz = true
 [dependencies]
 libfuzzer-sys = "0.4"
 lsty-core = { path = "../crates/lsty-core", features = ["fuzzing"] }
+lsty-tui = { path = "../crates/lsty-tui", features = ["fuzzing"] }
 
 # Not a member of the main workspace.
 [workspace]
@@ -52,6 +53,13 @@ bench = false
 [[bin]]
 name = "lineid_pairs"
 path = "fuzz_targets/lineid_pairs.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "hints"
+path = "fuzz_targets/hints.rs"
 test = false
 doc = false
 bench = false

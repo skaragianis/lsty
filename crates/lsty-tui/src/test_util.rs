@@ -16,7 +16,7 @@ use lsty_core::{
     dates::Clock,
     discover::{self, FileState, Found, FoundBy, Input},
     errs::{self, Code, Nr, Source},
-    keys::{self, Keymap, Stroke, parse_keys},
+    keys::{self, Action, Keymap, Stroke, parse_keys},
     list::{Params, Snapshot},
     lock,
     ops::IdSource,
@@ -28,9 +28,11 @@ use tempfile::TempDir;
 
 use crate::{
     Deps, Start,
+    hints::dim,
     live::Load,
     model::Model,
     msg::{Cmd, Msg},
+    press::Answer,
     track::Place,
 };
 
@@ -241,10 +243,13 @@ pub(crate) fn press(model: &mut Model, text: &str) -> Vec<Cmd> {
     cmds
 }
 
-/// Sends the keys of `notation` and returns the commands of the last
-/// one, as they are. A notation that does not parse panics.
+/// Sends the keys of `notation`, none when it is empty, and returns the
+/// commands of the last one, as they are. A notation that does not parse
+/// panics.
 pub(crate) fn keys(model: &mut Model, notation: &str) -> Vec<Cmd> {
-    let strokes = parse_keys(notation, None)
+    let strokes = Some(notation)
+        .filter(|n| !n.is_empty())
+        .map_or(Ok(Vec::new()), |n| parse_keys(n, None))
         .unwrap_or_else(|e| panic!("{notation}: {e}"));
     let mut cmds = Vec::new();
     for stroke in strokes {
@@ -290,6 +295,42 @@ pub(crate) fn snapshot(todo: &str, done: &str, now: &str) -> Snapshot {
         File::parse(done.as_bytes()),
         &params,
     )
+}
+
+/// What the todo and the done file in `dir` hold, empty when missing.
+pub(crate) fn files(dir: &Path) -> [Vec<u8>; 2] {
+    ["todo.txt", "done.txt"]
+        .map(|name| fs::read(dir.join(name)).unwrap_or_default())
+}
+
+/// A list that read the files `stale` holds only as a key was pressed,
+/// against one that read them before: the same files, message, tone and
+/// screen.
+pub(crate) fn same_as(
+    stale: (&Path, &Model),
+    fresh: (&Path, &Model),
+    name: &str,
+) {
+    assert_eq!(files(stale.0), files(fresh.0), "{name}");
+    assert_eq!(stale.1.message, fresh.1.message, "{name}");
+    assert_eq!(stale.1.tone, fresh.1.tone, "{name}");
+    let shown = |m: &Model| screen(m, m.width, m.height);
+    assert_eq!(shown(stale.1), shown(fresh.1), "{name}");
+}
+
+/// The hint of `action` is `fresh`, what a list that read the files says;
+/// without one, lit.
+pub(crate) fn hint_is(
+    model: &Model,
+    action: Action,
+    fresh: Option<Answer>,
+    name: &str,
+) {
+    let now = model.answers()(action);
+    match fresh {
+        Some(fresh) => assert_eq!(now, fresh, "{name}: hint"),
+        None => assert!(!dim(now), "{name}: lit now"),
+    }
 }
 
 /// What the todo file in `dir` holds, empty when it is missing.

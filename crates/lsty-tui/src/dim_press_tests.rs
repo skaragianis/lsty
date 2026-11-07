@@ -3,7 +3,7 @@
 
 use std::{
     cell::Cell,
-    fs,
+    fs, io,
     path::Path,
     rc::Rc,
     thread,
@@ -14,19 +14,21 @@ use lsty_core::{
     config::Config,
     keys::{Action, Mode},
 };
+use lsty_scripttest::holds;
 use tempfile::TempDir;
 
 use crate::{
     deps::Deps,
     focus::Focus,
+    fuzzing::hints_property,
     hints::dim,
     messages::Tone,
     model::Model,
     msg::{Cmd, Msg},
-    press_tests::{before_the_key, files},
+    press::Answer,
     test_util::{
-        Board, alone, cursor_text, deps, held_lock, keys, reload, screen,
-        started, workdir,
+        Board, alone, cursor_text, deps, files, held_lock, hint_is, keys,
+        reload, same_as, screen, started, workdir,
     },
 };
 
@@ -88,7 +90,7 @@ fn bound(todo: &str, toml: &str) -> TempDir {
 fn opened(shown: &str, first: &str) -> (TempDir, Model) {
     let dir = bound(shown, STOP_BOUND);
     let mut model = started(deps(dir.path(), alone()));
-    before_the_key(&mut model, first);
+    keys(&mut model, first);
     (dir, model)
 }
 
@@ -131,23 +133,31 @@ fn stale_against_fresh(
     outside(fresh_dir.path(), from, to);
     let moved_on = files(stale_dir.path());
     reload(&mut fresh);
+    let hint = fresh.answers()(action);
     keys(&mut fresh, key);
     assert_eq!(files(fresh_dir.path()) != moved_on, writes, "{name}");
     keys(&mut stale, key);
     assert_eq!(files(stale_dir.path()), moved_on, "{name}: wrote");
     if writes {
-        looks_again(&stale, action, &name);
+        looks_again(&stale, action, Some(hint), &name);
         keys(&mut stale, key);
     }
-    assert_eq!(files(stale_dir.path()), files(fresh_dir.path()), "{name}");
-    assert_eq!(stale.message, fresh.message, "{name}");
-    assert_eq!(stale.tone, fresh.tone, "{name}");
-    assert_eq!(screen(&stale, 80, 24), screen(&fresh, 80, 24), "{name}");
+    same_as(
+        (stale_dir.path(), &stale),
+        (fresh_dir.path(), &fresh),
+        &name,
+    );
 }
 
-fn looks_again(model: &Model, action: Action, name: &str) {
+/// The list said to look again; the hint of `action` now is as `hint_is`.
+fn looks_again(
+    model: &Model,
+    action: Action,
+    fresh: Option<Answer>,
+    name: &str,
+) {
     assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN), "{name}");
-    assert!(!dim(model.answers()(action)), "{name}: lit now");
+    hint_is(model, action, fresh, name);
 }
 
 /// A dim key does nothing, whichever it is: after it the selection is as it
@@ -160,7 +170,7 @@ fn a_dim_press_leaves_the_selection_and_the_repeat_alone() {
         let (twin_dir, mut twin) = with_archived(list);
         keys(&mut model, real);
         keys(&mut twin, real);
-        before_the_key(&mut model, first);
+        keys(&mut model, first);
         let (mode, selected) = (model.key_mode(), model.selected_rows());
         let before = files(dir.path());
         keys(&mut model, key);
@@ -275,7 +285,7 @@ fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
         outside(dir.path(), BLOCKED, to);
         let before = files(dir.path());
         keys(&mut model, "x");
-        looks_again(&model, Action::ToggleComplete, &name);
+        looks_again(&model, Action::ToggleComplete, None, &name);
         assert_eq!(files(dir.path()), before, "{name}");
         assert_eq!(cursor_text(&model), under, "{name}");
         keys(&mut model, "x");
@@ -292,7 +302,7 @@ fn a_count_does_not_outlive_a_look_again() {
         let (dir, mut model) = opened(BLOCKED, "j");
         outside(dir.path(), BLOCKED, FREED);
         keys(&mut model, "2x");
-        looks_again(&model, Action::ToggleComplete, second);
+        looks_again(&model, Action::ToggleComplete, None, second);
         assert_eq!(model.typed_count(), 0);
         keys(&mut model, second);
         let todo = files(dir.path())[0].clone();
@@ -359,7 +369,7 @@ fn a_press_after_a_change_to_the_done_file_alone_looks_again() {
     assert!(dim(model.answers()(Action::CyclePriority)));
     fs::write(&done, "").unwrap_or_else(|e| panic!("{e}"));
     keys(&mut model, "-");
-    looks_again(&model, Action::CyclePriority, "done file");
+    looks_again(&model, Action::CyclePriority, None, "done file");
     assert_eq!(cursor_text(&model), "A");
 }
 
@@ -375,7 +385,7 @@ fn a_press_on_an_empty_list_that_has_tasks_now_looks_again() {
         fs::write(dir.path().join("todo.txt"), "New\n")
             .unwrap_or_else(|e| panic!("{e}"));
         keys(&mut model, key);
-        looks_again(&model, action, key);
+        looks_again(&model, action, None, key);
         assert_eq!(files(dir.path())[0], b"New\n");
         keys(&mut model, key);
         assert_eq!(files(dir.path())[0], then, "{key}");
@@ -443,7 +453,7 @@ fn a_dim_press_that_cannot_read_says_the_file_is_busy() {
     held.release().unwrap_or_else(|e| panic!("{}", e.message()));
     assert_eq!(files(dir.path())[0], FREED.as_bytes());
     keys(&mut model, "x");
-    looks_again(&model, Action::ToggleComplete, "lock let go");
+    looks_again(&model, Action::ToggleComplete, None, "lock let go");
     assert_eq!(files(dir.path())[0], FREED.as_bytes());
 }
 
@@ -463,7 +473,7 @@ fn a_refused_press_does_not_wait_for_a_held_lock() {
             ..alone()
         };
         let mut model = started(deps(dir.path(), config));
-        before_the_key(&mut model, first);
+        keys(&mut model, first);
         let rows = model.rows.len();
         fs::write(dir.path().join("todo.txt"), to)
             .unwrap_or_else(|e| panic!("{e}"));
@@ -595,7 +605,7 @@ fn walked(place: &Place, action: Action) -> (TempDir, Model, Rc<Cell<usize>>) {
     };
     let mut model = started(deps);
     model.update(Msg::Resize(width, 24));
-    before_the_key(&mut model, first);
+    keys(&mut model, first);
     (dir, model, opened)
 }
 
@@ -673,4 +683,11 @@ fn in_a_panel_no_key_that_works_is_dim() {
         }
     }
     assert_eq!(wrong, Vec::<String>::new());
+}
+
+/// A run of keys, the file sometimes changed behind the list, each key
+/// against its hint, over the seeds of the fuzz target.
+#[test]
+fn every_key_of_a_seed_does_what_its_hint_says() -> io::Result<()> {
+    holds("hints", 13, hints_property)
 }

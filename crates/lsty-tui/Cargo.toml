@@ -11,6 +11,8 @@ repository.workspace = true
 # The headless driver that the golden-frame tests use. For the crate's own
 # tests only; it is unstable and not part of the supported interface.
 harness = ["dep:regex", "dep:tempfile"]
+# The property the fuzz target checks, with the helpers of the unit tests.
+fuzzing = ["dep:tempfile"]
 
 [dependencies]
 jiff.workspace = true

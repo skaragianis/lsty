@@ -83,6 +83,9 @@ mod words;
 mod wrap;
 mod yank;
 
+#[cfg(any(test, feature = "fuzzing"))]
+#[expect(clippy::panic, reason = "a failed write fails the fuzz target")]
+pub mod fuzzing;
 #[cfg(feature = "harness")]
 pub mod tuitest;
 
@@ -138,7 +141,16 @@ mod sizes_tests;
 mod styles_tests;
 #[cfg(test)]
 mod tall_tests;
-#[cfg(test)]
+#[cfg(any(test, feature = "fuzzing"))]
+#[expect(clippy::panic, reason = "the fixtures fail by panicking")]
+#[cfg_attr(
+    not(test),
+    expect(dead_code, reason = "the fuzz target takes part of them"),
+    expect(
+        clippy::disallowed_methods,
+        reason = "the fixtures build paths of their own, which are UTF-8"
+    )
+)]
 mod test_util;
 #[cfg(test)]
 mod text_tests;
