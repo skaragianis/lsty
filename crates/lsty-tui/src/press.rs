@@ -279,21 +279,20 @@ fn repeat(m: &Model) -> Answer {
     let Some(again) = &m.again else {
         return Answer::Refused(Refusal::Quiet);
     };
-    let count = match again {
-        Again::Task { action, .. } if !action.reads_count() => 1,
-        Again::Task { count, .. }
-        | Again::Block { count, .. }
-        | Again::Prompt { count, .. } => {
-            let typed = m.typed_count();
-            if typed > 0 { typed } else { *count }
-        }
-    };
-    match decide(again.action(), m, &m.summary(count)) {
+    match decide(again.action(), m, &m.summary(repeats_over(m, again))) {
         Answer::Resolved(_) => Answer::Applies,
         answer @ (Answer::Applies
         | Answer::Refused(_)
         | Answer::CoreRefuses(_)) => answer,
     }
+}
+
+/// How many tasks `.` repeats `again` over: the count typed, else the one
+/// it stored; one for a key whose count is not a number of tasks.
+pub(crate) fn repeats_over(m: &Model, again: &Again) -> usize {
+    let one =
+        matches!(again, Again::Task { action, .. } if !action.reads_count());
+    if one { 1 } else { again.count(m.typed_count()) }
 }
 
 /// What a press of `action` over the tasks of `s` would do. Every action is

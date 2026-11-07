@@ -151,6 +151,14 @@ impl Again {
             Self::Prompt { kind, .. } => kind.action(),
         }
     }
+
+    /// The count it runs again with: the one typed, else the one it had.
+    pub(crate) const fn count(&self, typed: usize) -> usize {
+        let (Self::Task { count, .. }
+        | Self::Block { count, .. }
+        | Self::Prompt { count, .. }) = self;
+        if typed > 0 { typed } else { *count }
+    }
 }
 
 impl Model {
@@ -291,16 +299,12 @@ impl Model {
         let Some(again) = self.again.clone() else {
             return Vec::new();
         };
-        let or_typed = |had| if typed > 0 { typed } else { had };
+        let count = again.count(typed);
         match again {
-            Again::Task { action, count } => {
-                return self.run(action, or_typed(count));
-            }
-            Again::Block { action, count } => {
-                self.repeat_block(action, or_typed(count));
-            }
-            Again::Prompt { kind, count, text } => {
-                self.repeat_prompt(kind, or_typed(count), text);
+            Again::Task { action, .. } => return self.run(action, count),
+            Again::Block { action, .. } => self.repeat_block(action, count),
+            Again::Prompt { kind, text, .. } => {
+                self.repeat_prompt(kind, count, text);
             }
         }
         Vec::new()
