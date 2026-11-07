@@ -1,10 +1,13 @@
-use std::{fs, path::Path};
+use std::{fs, io, path::Path};
+
+use lsty_scripttest::holds;
 
 use super::{
     Keymap,
     actions::{Action, Mode},
     actions_tests::{MOVING, motions},
     defaults::defaults,
+    fuzzing::keys_property,
     load,
     matcher::Binding,
 };
@@ -665,4 +668,9 @@ fn the_detail_table_adds_to_the_normal_one() {
         load_text("[detail]\nbogus = [\"z\"]", false, "<Space>");
     assert_eq!(warnings.len(), 1, "{warnings:?}");
     assert!(warnings[0].contains("[detail]"), "{warnings:?}");
+}
+
+#[test]
+fn keys_file_seeds_hold() -> io::Result<()> {
+    holds("keys_file", 10, keys_property)
 }

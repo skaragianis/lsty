@@ -1,0 +1,6 @@
+[completion]
+accept = ["<C-y>", "<Tab>"]
+
+[insert]
+delete_word_back = ["<C-y>", "<C-w>"]
+commit = ["<CR>", "<Tab>x"]

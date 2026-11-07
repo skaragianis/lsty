@@ -8,6 +8,8 @@
 
 mod actions;
 mod defaults;
+#[cfg(any(test, feature = "fuzzing"))]
+pub mod fuzzing;
 mod load;
 mod matcher;
 mod notation;

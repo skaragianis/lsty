@@ -1,0 +1,7 @@
+[normal]
+go_top = ["<home>", "G"]
+cursor_down = ["<C-D>", "<c-d>", "j"]
+half_page_down = ["0"]
+
+[help]
+search = ["1", "<A-C-lt>", "abc"]

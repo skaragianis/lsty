@@ -63,3 +63,10 @@ path = "fuzz_targets/hints.rs"
 test = false
 doc = false
 bench = false
+
+[[bin]]
+name = "keys_file"
+path = "fuzz_targets/keys_file.rs"
+test = false
+doc = false
+bench = false
