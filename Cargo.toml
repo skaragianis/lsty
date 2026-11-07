@@ -81,3 +81,14 @@ codegen-units = 1
 lto = "fat"
 strip = true
 panic = "abort"
+
+# Tests parse TOML and draw frames many times over: these crates built
+# optimised make the test suite, and so every mutant run, cheaper.
+[profile.dev.package]
+toml = { opt-level = 1 }
+toml_parser = { opt-level = 1 }
+winnow = { opt-level = 1 }
+ratatui-core = { opt-level = 1 }
+unicode-segmentation = { opt-level = 1 }
+unicode-width = { opt-level = 1 }
+compact_str = { opt-level = 1 }
