@@ -4,7 +4,6 @@
 use lsty_core::{
     errs::Source,
     keys::Action,
-    list::TaskId,
     ops::{self, Placement, Target},
 };
 
@@ -16,57 +15,70 @@ use crate::{
     press::{Answer, Summary, decide},
 };
 
+/// The rows `lo` to `hi` a move takes and the row it goes past, if any.
+pub(crate) type Span = (usize, usize, Option<usize>);
+
 impl Model {
     /// `move_task_down` and `move_task_up`. With a count the task
     /// passes that many shown tasks, or as many as there are. In VISUAL
     /// mode the selection moves as a block and the count is dropped.
     pub(crate) fn move_task(&mut self, action: Action, count: usize) {
-        if let Some((lo, hi)) = self.selected_rows() {
-            self.move_rows(action, lo, hi);
-            return;
-        }
-        let down = action == Action::MoveTaskDown;
-        let again = Again::Task { action, count };
-        let past = |m: &Self| m.neighbour(count.max(1), down);
-        self.reorder_past((self.cursor, self.cursor), down, past, again);
-    }
-
-    /// Moves the rows `lo` to `hi` past the next shown row, and tells
-    /// `.` to repeat the move over as many rows.
-    fn move_rows(&mut self, action: Action, lo: usize, hi: usize) {
-        let down = action == Action::MoveTaskDown;
-        let next = if down {
-            Some(hi + 1)
-        } else {
-            lo.checked_sub(1)
-        };
-        let again = Again::Block {
-            action,
-            count: hi - lo + 1,
-        };
-        let past = |m: &Self| Some(m.rows.get(next?)?.id);
-        self.reorder_past((lo, hi), down, past, again);
+        self.move_by(action, false, count);
     }
 
     /// `.` after a block move: `count` rows from the cursor move as one
     /// block again.
     pub(crate) fn repeat_block(&mut self, action: Action, count: usize) {
-        let n = self.picked_rows(count).len();
-        if n == 0 {
-            return;
-        }
-        self.move_rows(action, self.cursor, self.cursor + n - 1);
+        self.move_by(action, true, count);
     }
 
-    /// Moves the rows `lo` to `hi` past the task that `past` finds, in one
-    /// write, unless the rule refuses; it then sets what `.` repeats.
-    fn reorder_past(
-        &mut self,
-        (lo, hi): (usize, usize),
+    /// What a move takes and goes past; `None` when it takes no rows. The
+    /// selection, or with `block` as many rows as `count` picks from the
+    /// cursor, goes past the next row; else the cursor's task goes past
+    /// `count` shown tasks, held within the todo rows.
+    pub(crate) fn move_span(
+        &self,
         down: bool,
-        past: impl FnOnce(&Self) -> Option<TaskId>,
-        again: Again,
-    ) {
+        block: bool,
+        count: usize,
+    ) -> Option<Span> {
+        let n = self.picked_rows(count).len();
+        let span = if block {
+            Some((n > 0).then(|| (self.cursor, self.cursor + n - 1))?)
+        } else {
+            self.selected_rows()
+        };
+        if let Some((lo, hi)) = span {
+            let past = down.then_some(hi + 1).or_else(|| lo.checked_sub(1));
+            return Some((lo, hi, past));
+        }
+        let todo = self.rows[self.cursor..]
+            .iter()
+            .take_while(|r| r.source != Source::Done)
+            .count();
+        let to = if down {
+            self.cursor + count.max(1).min(todo.saturating_sub(1))
+        } else {
+            self.cursor.saturating_sub(count.max(1))
+        };
+        Some((self.cursor, self.cursor, (to != self.cursor).then_some(to)))
+    }
+
+    /// Moves the rows of `move_span` past its row in one write, unless the
+    /// rule refuses; it then sets what `.` repeats.
+    fn move_by(&mut self, action: Action, block: bool, count: usize) {
+        let down = action == Action::MoveTaskDown;
+        let Some((lo, hi, past)) = self.move_span(down, block, count) else {
+            return;
+        };
+        let again = if block || self.selected_rows().is_some() {
+            Again::Block {
+                action,
+                count: hi - lo + 1,
+            }
+        } else {
+            Again::Task { action, count }
+        };
         let rows = self.rows_between(lo, hi);
         let s = Summary::of(&self.snap, lo, rows);
         let answer = decide(again.action(), self, &s);
@@ -75,7 +87,8 @@ impl Model {
             self.refuse(why, &tasks);
             return;
         }
-        let Some(past) = past(self) else {
+        let Some(past) = past.and_then(|i| self.rows.get(i)).map(|r| r.id)
+        else {
             return;
         };
         let Some(anchor) = self.chosen(&[past]).first().map(Chosen::target)
@@ -92,20 +105,5 @@ impl Model {
         if self.settle(result) {
             self.again = Some(again);
         }
-    }
-
-    /// The shown task `n` rows from the cursor, held within the todo
-    /// rows; `None` when the cursor cannot move that way.
-    fn neighbour(&self, n: usize, down: bool) -> Option<TaskId> {
-        let todo = self.rows[self.cursor..]
-            .iter()
-            .take_while(|r| r.source != Source::Done)
-            .count();
-        let to = if down {
-            self.cursor + n.min(todo.saturating_sub(1))
-        } else {
-            self.cursor.saturating_sub(n)
-        };
-        (to != self.cursor).then(|| self.rows.get(to).map(|r| r.id))?
     }
 }
