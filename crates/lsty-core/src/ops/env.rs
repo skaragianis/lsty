@@ -2,7 +2,10 @@
 
 use std::time::Duration;
 
-use super::ids::{IdSource, OsIds};
+use super::{
+    ids::{IdSource, OsIds},
+    refs::Target,
+};
 use crate::{
     config::Config,
     dates::Clock,
@@ -121,6 +124,9 @@ pub struct Env<'a> {
     /// of its lines, and what it finds under the lock must still be that
     /// line. `None` takes a number as one of the file as it is.
     pub aim: Option<&'a Snapshot>,
+    /// The lines of `aim` a count or a selection took, written or not:
+    /// one that is not its line now writes nothing.
+    pub aimed: &'a [Target],
 }
 
 impl<'a> Env<'a> {
@@ -157,6 +163,7 @@ impl<'a> Env<'a> {
             hooks: &OsHooks,
             ids: &OsIds,
             aim: None,
+            aimed: &[],
         }
     }
 }

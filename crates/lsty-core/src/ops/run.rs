@@ -108,6 +108,11 @@ fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
     clean(env, done_mode)?;
     let snap = Snapshot::build(env.found.clone(), todo, done, &env.params());
     let landing = env.aim.map(|from| Landing::of(from, &snap));
+    if let Some(landing) = &landing {
+        for target in env.aimed {
+            target.landed(landing)?;
+        }
+    }
     let mut tx = Tx::new(snap, !todo_exists);
     tx.landing = landing;
     Ok(tx)
