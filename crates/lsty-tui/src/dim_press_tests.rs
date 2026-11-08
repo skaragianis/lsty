@@ -215,6 +215,10 @@ fn a_dim_press_on_a_list_that_moved_on_never_writes() {
             }
         }
     }
+    // A selection whose lines changed, the key still dim: it says its own.
+    let to = "x 2026-09-01 A +k\n";
+    let changed = (CLOSED, "x 2026-09-01 A\n", to);
+    stale_against_fresh((Action::CyclePriority, "-", "ggVj"), changed, false);
 }
 
 /// `.` stores the key from a press on the last task, which the outside
@@ -690,5 +694,5 @@ fn in_a_panel_no_key_that_works_is_dim() {
 /// against its hint, over the seeds of the fuzz target.
 #[test]
 fn every_key_of_a_seed_does_what_its_hint_says() -> io::Result<()> {
-    holds("hints", 21, hints_property)
+    holds("hints", 22, hints_property)
 }

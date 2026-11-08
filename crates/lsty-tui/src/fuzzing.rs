@@ -254,8 +254,10 @@ fn under(model: &Model, key: &str, todo: &[u8]) -> Vec<Vec<u8>> {
         return Vec::new();
     }
     let again = model.again.as_ref().filter(|_| action == Action::Repeat);
-    let count =
-        again.map_or_else(|| model.typed_count(), |a| repeats_over(model, a));
+    let count = again.map_or_else(
+        || model.typed_count(),
+        |a| repeats_over(a, model.typed_count()),
+    );
     let rows = model.rows_of(count).iter();
     rows.filter_map(|row| model.snap.task(row.id))
         .map(|task| model.snap.line(task).raw().to_vec())
@@ -329,7 +331,9 @@ fn behind(
     let stale = main.checked(key, true, trail);
     let looked = main.model.message.as_deref() == Some(LIST_CHANGED)
         && main.files() == moved_on;
-    let lost = under.iter().any(|l| twins(&moved_on[0], l) != 1);
+    // A key the watcher's reading drew dim says its own words.
+    let dim_now = read && fresh.is_some_and(|(_, answer)| dim(answer));
+    let lost = !dim_now && under.iter().any(|l| twins(&moved_on[0], l) != 1);
     assert!(looked || !lost, "a line under the key changed: {trail:?}");
     if looked {
         looked_again((main, twin), (fresh, stale), (count, key), trail);

@@ -464,7 +464,11 @@ impl Model {
             return self.prompt_keys(fed);
         }
         match fed.outcome {
-            Outcome::Matched { action, .. } if lost && writes_line(action) => {
+            Outcome::Matched { action, count }
+                if lost
+                    && writes_line(action)
+                    && !hints::dim(self.answers_at(count)(action)) =>
+            {
                 self.say_changed();
                 Vec::new()
             }
