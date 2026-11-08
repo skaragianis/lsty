@@ -126,11 +126,15 @@ impl Side {
     /// files, the mode, the selection and what `.` repeats; a lit one that
     /// writes tasks, and opens no field to, changes the files and refuses
     /// none. On a `stale` list, which reads the files as it presses, or when
-    /// it says to look again, a dim key only writes nothing.
+    /// it says to look again, a dim key only writes nothing. Over keys or a
+    /// selection whose lines a reading changed, a key that writes on its
+    /// lines writes nothing, says to look again and ends the selection.
     /// Tells what the hint said.
     fn checked(&mut self, key: &str, stale: bool, trail: &[String]) -> Hint {
         let asked = asked(&self.model, key);
         let writes = asked.is_some_and(|(a, _)| writes(&self.model, a));
+        let lost =
+            self.model.keys_lost && asked.is_some_and(|(a, _)| writes_line(a));
         let before = self.kept();
         keys(&mut self.model, key);
         self.screen();
@@ -144,6 +148,7 @@ impl Side {
             Some((_, answer)) if dim(answer) => {
                 assert_eq!(self.kept(), before, "dim {name}");
             }
+            Some(_) if lost => self.said_look_again(&before.0, &name),
             Some(_) if !stale && self.list() && writes => {
                 assert_ne!(self.files(), before.0, "lit {name}");
                 assert_ne!(self.model.tone, Tone::Alert, "lit {name}");
@@ -151,6 +156,14 @@ impl Side {
             _ => {}
         }
         asked
+    }
+
+    /// The press wrote nothing, said to look again and ended the selection.
+    fn said_look_again(&self, before: &[Vec<u8>; 2], name: &str) {
+        let m = &self.model;
+        let ended = (m.message.as_deref(), &self.files(), m.key_mode());
+        let looks = (Some(LIST_CHANGED), before, Mode::Normal);
+        assert_eq!(ended, looks, "lost {name}");
     }
 
     /// Whether the list is shown, no field open.
@@ -315,9 +328,10 @@ fn behind(
 }
 
 /// The list said to look again and wrote nothing: right only when its key
-/// was lit, or the twin wrote or emptied. Reads the files, as the watcher
-/// would, and presses the key again, now with the hint the twin had; when
-/// looking again ended a selection, the twin ends it too and presses again.
+/// was lit, or the twin wrote, emptied or looked again too. Reads the files,
+/// as the watcher would, and presses the key again, now with the hint the
+/// twin had; when looking again ended a selection, the twin ends it too, or
+/// looks again too, and presses again.
 fn looked_again(
     (main, twin): (&mut Side, &mut Side),
     (fresh, stale): (Hint, Hint),
@@ -327,11 +341,19 @@ fn looked_again(
     let wrote = twin.files() != main.files();
     let was_dim = stale.is_some_and(|(_, answer)| dim(answer));
     let emptied = twin.model.rows.is_empty();
-    assert!(!was_dim || wrote || emptied, "looked again: {trail:?}");
+    let both = twin.model.message.as_deref() == Some(LIST_CHANGED);
+    assert!(
+        !was_dim || wrote || emptied || both,
+        "looked again: {trail:?}"
+    );
     reload(&mut main.model);
     keys(&mut main.model, count);
     let mut fresh = fresh;
-    if main.model.key_mode() != twin.model.key_mode() {
+    if both {
+        // The twin looked again too, its selection having lost its lines.
+        keys(&mut twin.model, count);
+        fresh = twin.checked(key, false, trail);
+    } else if main.model.key_mode() != twin.model.key_mode() {
         // Looking again ended the selection, which the twin keeps.
         keys(&mut twin.model, "<Esc>");
         keys(&mut twin.model, count);
