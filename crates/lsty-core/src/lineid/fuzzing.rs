@@ -37,6 +37,26 @@ pub fn pairs_property(old: &[&[u8]], new: &[&[u8]]) {
     assert_eq!(pairs.len(), lcs(old, new), "{old:?} {new:?}: {pairs:?}");
 }
 
+/// [`pairs_property`] over two lists of [`lines`] split at the first
+/// `|`, each cut to 300 lines: the table is as big as the product of the
+/// lengths.
+pub fn pairs_bytes(data: &[u8]) {
+    let mut parts = data.splitn(2, |b| *b == b'|');
+    let mut list = || lines(parts.next().unwrap_or_default());
+    let (old, new) = (list(), list());
+    pairs_property(&old[..old.len().min(300)], &new[..new.len().min(300)]);
+}
+
+/// [`remap_property`] over a pick byte and two lists of [`lines`], split
+/// at `|`.
+pub fn remap_bytes(data: &[u8]) {
+    let mut parts = data.splitn(3, |b| *b == b'|');
+    let pick = parts.next().and_then(|p| p.first()).copied();
+    let mut list = || lines(parts.next().unwrap_or_default());
+    let (old, new) = (list(), list());
+    remap_property(&old, &new, usize::from(pick.unwrap_or(0)));
+}
+
 /// One line per byte, from a small alphabet that includes a blank line,
 /// so that repeats are common.
 #[must_use]

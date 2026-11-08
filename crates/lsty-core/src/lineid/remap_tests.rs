@@ -1,8 +1,12 @@
 //! Table tests for the line mapping.
 
+use std::io;
+
+use lsty_scripttest::holds;
+
 use super::{
     follow,
-    fuzzing::{Lcg, lines as bytes, remap_property},
+    fuzzing::{Lcg, lines as bytes, remap_bytes, remap_property},
     remap,
 };
 use crate::todotxt::File;
@@ -160,6 +164,11 @@ fn partners_are_unique_and_equal() {
         let new = rng.codes(nb, 3);
         remap_property(&bytes(&old), &bytes(&new), rng.below(12));
     }
+}
+
+#[test]
+fn remap_seeds_hold() -> io::Result<()> {
+    holds("lineid_remap", 3, remap_bytes)
 }
 
 #[test]
