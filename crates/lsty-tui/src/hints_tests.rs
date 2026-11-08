@@ -449,6 +449,8 @@ fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
         "focus_filters",
     ];
     const NONE: &str = "u undo <C-r> redo . repeat";
+    // A prompt's `.` on the last task, which leaves it as it is.
+    const KEPT: &str = "<C-r> redo . repeat gx link J move down";
     const TEXT: &[&str] = &[
         "delete_word_back",
         "delete_to_start",
@@ -508,6 +510,51 @@ fn the_configured_hints_of_keys_that_write_no_task_dim_by_the_rule() {
             "",
             "yyxk",
             "<C-r> redo K move up".to_owned(),
+        ),
+        (
+            "a due date the task has",
+            "normal",
+            NORMAL,
+            "A\nB due:2030-01-01\n",
+            "",
+            "gd2030-01-01<CR>j",
+            KEPT.to_owned(),
+        ),
+        (
+            "no due date to clear",
+            "normal",
+            NORMAL,
+            "A due:2030-01-01\nB\n",
+            "",
+            "gd<CR>j",
+            KEPT.to_owned(),
+        ),
+        (
+            "a tag the task has",
+            "normal",
+            NORMAL,
+            "A\nB +p k:v\n",
+            "",
+            "gt+p k:v<CR>j",
+            KEPT.to_owned(),
+        ),
+        (
+            "one of the tags the task has",
+            "normal",
+            NORMAL,
+            "A\nB +p\n",
+            "",
+            "gt+p k:v<CR>j",
+            "<C-r> redo gx link J move down".to_owned(),
+        ),
+        (
+            "a tag the task has not",
+            "normal",
+            NORMAL,
+            "A +p\nB\n",
+            "",
+            "gT+p<CR>j",
+            KEPT.to_owned(),
         ),
         (
             "archived",

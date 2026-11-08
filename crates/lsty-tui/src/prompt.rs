@@ -281,7 +281,8 @@ impl Model {
     }
 
     /// `repeat` of a prompt's action: the same text over the tasks under
-    /// the cursor, without opening the prompt.
+    /// the cursor, without opening the prompt. One that changes nothing
+    /// says why, and leaves what `.` repeats alone.
     pub(crate) fn repeat_prompt(
         &mut self,
         kind: Kind,
@@ -297,10 +298,33 @@ impl Model {
             return;
         }
         let result = self.attempt(|env| write(env, kind, &chosen, &text));
-        if self.settle(result) {
-            self.again = Some(Again::Prompt { kind, count, text });
-            self.summarize(chosen.len());
+        let wrote = result.as_ref().is_ok_and(|(o, _)| !o.no_op());
+        if !self.settle(result) {
+            return;
         }
+        if !wrote {
+            self.tone = messages::Tone::Alert;
+            return;
+        }
+        self.again = Some(Again::Prompt { kind, count, text });
+        self.summarize(chosen.len());
+    }
+
+    /// Whether `.` of a prompt, over `count` tasks, would leave each of
+    /// them as it is.
+    pub(crate) fn keeps(&self, again: &Again, count: usize) -> bool {
+        let Again::Prompt { kind, text, .. } = again else {
+            return false;
+        };
+        let (tags, today) = (words(text), self.clock.today());
+        let mut lines = self.rows_of(count).iter().filter_map(|row| {
+            self.snap.task(row.id).map(|task| self.snap.line(task))
+        });
+        lines.all(|line| match kind {
+            Kind::SetDue => ops::due_keeps(line, text, today),
+            Kind::AddTag => ops::tag_keeps(line, &tags, today),
+            Kind::RemoveTag => ops::untag_keeps(line, &tags),
+        })
     }
 
     /// Replaces the messages of several tasks by a count when they do
@@ -508,15 +532,17 @@ fn write(
     text: &str,
 ) -> errs::Result<Outcome> {
     let targets: Vec<Target> = tasks.iter().map(Chosen::target).collect();
-    let words = || -> Vec<String> {
-        text.split(is_sep)
-            .filter(|w| !w.is_empty())
-            .map(str::to_owned)
-            .collect()
-    };
     match kind {
         Kind::SetDue => ops::due(env, &targets, text),
-        Kind::AddTag => ops::tag(env, &targets, &words()),
-        Kind::RemoveTag => ops::untag(env, &targets, &words()),
+        Kind::AddTag => ops::tag(env, &targets, &words(text)),
+        Kind::RemoveTag => ops::untag(env, &targets, &words(text)),
     }
+}
+
+/// The tags of a prompt's text.
+fn words(text: &str) -> Vec<String> {
+    text.split(is_sep)
+        .filter(|w| !w.is_empty())
+        .map(str::to_owned)
+        .collect()
 }
