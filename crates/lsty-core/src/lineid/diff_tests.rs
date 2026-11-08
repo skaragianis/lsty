@@ -1,6 +1,10 @@
+use std::io;
+
+use lsty_scripttest::holds;
+
 use super::{
     diff::common_pairs,
-    fuzzing::{Lcg, lines, pairs_property},
+    fuzzing::{Lcg, lines, pairs_bytes, pairs_property},
 };
 
 /// The pairs keep equal lines in order, and as many as any diff can.
@@ -72,4 +76,9 @@ fn a_tie_between_lines_in_either_order_goes_to_the_last_of_the_new_ones() {
     // with the last `a` of the new list.
     let (old, new) = (lines(&[0, 1]), lines(&[1, 0, 0]));
     assert_eq!(common_pairs(&old, &new), [(0, 2)]);
+}
+
+#[test]
+fn pairs_seeds_hold() -> io::Result<()> {
+    holds("lineid_pairs", 3, pairs_bytes)
 }
