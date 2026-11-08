@@ -10,8 +10,8 @@ use crate::{
     messages,
     model::Model,
     test_util::{
-        alone, deps, keys, press, reload, screen, settled, started, todo_of,
-        workdir,
+        alone, deps, keys, load_of, press, reload, screen, settled, started,
+        todo_of, workdir,
     },
 };
 
@@ -461,8 +461,8 @@ const UNDER_WAY: &[Under] = &[
 ];
 
 // Keys typed on a task refuse at the last of them when a reading took the
-// line from under them, or cannot tell it did not. A line that only shifted
-// goes on, and so does a key that writes nothing.
+// line from under them, or cannot tell it did not, and read the files again.
+// A line that only shifted goes on, and so does a key that writes nothing.
 #[test]
 fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
     for &(todo, to, typed, outside, then, want, says) in UNDER_WAY {
@@ -482,7 +482,7 @@ fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
                 .unwrap_or_else(|e| panic!("{e}"));
             reload(&mut model);
         }
-        keys(&mut model, then);
+        let cmds = keys(&mut model, then);
         let file = todo_of(dir.path());
         let lines: Vec<&str> =
             file.lines().filter(|l| !l.is_empty()).collect();
@@ -493,6 +493,7 @@ fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
             assert_eq!(said, says, "{name}");
             let open = model.line.is_some() || model.visual.is_some();
             assert!(!open, "{name}: it ends");
+            load_of(cmds); // and reads the files again
         } else {
             assert_ne!(said, LOOK, "{name}");
         }

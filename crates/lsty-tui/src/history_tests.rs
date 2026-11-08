@@ -9,8 +9,8 @@ use lsty_core::config::{Config, Hidden};
 use crate::{
     model::Model,
     test_util::{
-        alone, cursor_text, deps, held_lock, keys, press, reload, started,
-        todo_of, workdir, workdir_model,
+        alone, cursor_text, deps, held_lock, keys, load_of, press, reload,
+        started, todo_of, workdir, workdir_model,
     },
 };
 
@@ -258,13 +258,18 @@ fn an_outside_edit_under_an_undo_or_redo() {
             if read {
                 reload(&mut model);
             }
-            keys(&mut model, key);
+            let cmds = keys(&mut model, key);
             assert_eq!(todo_of(dir.path()), want.unwrap_or(edit), "{name}");
             let verb = if *key == "u" { "undo" } else { "redo" };
             let refusal =
                 format!("can't {verb}: the list changed — look again");
             let said = model.message.as_deref().unwrap_or_default();
             assert_eq!(said == refusal, want.is_none(), "{name}: {said}");
+            if want.is_none() {
+                model.update(load_of(cmds).read());
+                let fresh = model.moved_on(true).ok();
+                assert_eq!(fresh, Some(false), "{name}: read");
+            }
         }
     }
 }

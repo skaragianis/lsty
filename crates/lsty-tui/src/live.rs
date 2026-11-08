@@ -127,6 +127,8 @@ struct Debt {
     polling: bool,
     /// The last reload did not get the files, or the folder is gone.
     owed: bool,
+    /// The list said it changed: the input that said so reads at once.
+    kick: bool,
 }
 
 /// What the status line says about the files.
@@ -159,6 +161,7 @@ impl Live {
             debt: Debt {
                 polling: false,
                 owed: snap.found().state == FileState::DirMissing,
+                kick: false,
             },
             shown: Shown {
                 deleted: false,
@@ -378,6 +381,16 @@ impl Model {
     /// Owes a reload: the files are not what the list shows.
     pub(crate) fn owe_reload(&mut self) {
         self.live.debt.owed = true;
+        self.live.debt.kick = true;
+    }
+
+    /// Starts the reload an input owed by saying the list changed, so that
+    /// the hints show the files as they are.
+    pub(crate) fn kick_reload(&mut self) -> Option<Cmd> {
+        if !std::mem::take(&mut self.live.debt.kick) {
+            return None;
+        }
+        self.reload_owed()
     }
 
     /// Starts a reload now when one is owed or the watch is down.
