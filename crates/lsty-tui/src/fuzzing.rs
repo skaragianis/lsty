@@ -7,7 +7,6 @@ use std::{fs, path::Path};
 use lsty_core::{
     config::Config,
     keys::{Action, Matcher, Mode, Outcome, parse_keys},
-    list::Task,
     ops::LIST_CHANGED,
 };
 use tempfile::TempDir;
@@ -207,39 +206,14 @@ fn asked(model: &Model, key: &str) -> Hint {
 }
 
 /// Whether `action`, lit now, changes the bytes of the files: undo, redo
-/// and the keys that write on their lines, but `<Esc>`, `.` of `t`, which
-/// cannot be sure, and a move past lines equal to the moved ones.
+/// and the keys that write on their lines, but `<Esc>` and `.` of `t`,
+/// which cannot be sure.
 fn writes(model: &Model, action: Action) -> bool {
     let again = model.again.as_ref().filter(|_| action == Action::Repeat);
     let unsure = action == Action::Cancel
-        || again.is_some_and(|a| a.action() == Action::ToggleStart)
-        || past_equal(model, again.map_or(action, Again::action), again);
+        || again.is_some_and(|a| a.action() == Action::ToggleStart);
     let history = matches!(action, Action::Undo | Action::Redo);
     (history || writes_line(action)) && !unsure
-}
-
-/// Whether `J` or `K` (`does`), or `.` of them (`again`), moves its rows
-/// only past rows of the same line, so the bytes stay. A lit move between
-/// equal lines that writes nothing is a case of the product's own.
-fn past_equal(model: &Model, does: Action, again: Option<&Again>) -> bool {
-    let down = does == Action::MoveTaskDown;
-    if !down && does != Action::MoveTaskUp {
-        return false;
-    }
-    let typed = model.typed_count();
-    let block = matches!(again, Some(Again::Block { .. }));
-    let count = again.map_or(typed, |a| a.count(typed));
-    let Some((lo, hi, Some(past))) = model.move_span(down, block, count)
-    else {
-        return false;
-    };
-    let Some(rows) = model.rows.get(lo.min(past)..=hi.max(past)) else {
-        return false;
-    };
-    let mut lines = rows.iter().map(|r| model.snap.task(r.id));
-    let raw = |t: &Task| model.snap.line(t).raw();
-    let first = lines.next().flatten().map(raw);
-    lines.all(|t| t.map(raw) == first)
 }
 
 /// The lines under `key` in NORMAL mode, when it is lit and writes on them

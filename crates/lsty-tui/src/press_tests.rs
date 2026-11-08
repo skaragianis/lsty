@@ -407,6 +407,7 @@ const TODO: &str = "A\n";
 const TWO: &str = "A\nB\n";
 const THREE: &str = "A\nB\nC\n";
 const FOUR: &str = "A\nB\nC\nD\n";
+const TWINS: &str = "A\nA\n";
 const MIXED: &str = "A\nB\nx 2026-09-01 D\nC\n";
 const OLD: &str = "x 2026-09-01 Old\n";
 const OLD_ID: &str = "x 2026-09-01 Old id:o\n";
@@ -492,6 +493,10 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
         (TWO, "", "vj", true),
         (TODO, OLD, "vj", true),
         (THREE, "", "svj", true),
+        (TWINS, "", "", true),
+        ("A\nA\nB\n", "", "2", false),
+        ("A\nA\nA\n", "", "vj", true),
+        ("A\nB\nA\n", "", "/A<CR>", false),
     ];
     const MOVES_UP: &[Case] = &[
         (TWO, "", "j9", false),
@@ -505,6 +510,7 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
         (THREE, "", "jvj", false),
         (THREE, "", "vj", true),
         (TODO, OLD, "vj", true),
+        (TWINS, "", "j", true),
     ];
     let rows: [KeyCases; 27] = [
         (Action::ToggleComplete, "x", NEEDS_A_TASK),
@@ -557,6 +563,9 @@ fn the_keys_that_write_no_task_do_what_their_hint_says() {
                 (TODO, OLD, "gd2030-01-01<CR>j", true),
                 (THREE, "", "J", false),
                 (TWO, "", "J", true),
+                ("A\nB\nA\nB\n", "", "J", true),
+                ("A\nB\nA\nB\n", "", "J2", false),
+                ("A\nA\nB\nA\nA\nA\n", "", "vjJ<Esc>j", true),
                 (TODO, "", "yyp", false),
                 (MIXED, "", "2TGk", false),
                 (MIXED, "", "vjTGk", false),
