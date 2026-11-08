@@ -128,7 +128,14 @@ impl Model {
         if there > 0 && matches!(command, Command::Do | Command::Wontdo) {
             self.cursor = (cursor + tasks.len()).min(self.rows.len() - 1);
         }
-        let result = self.attempt(|env| self.perform(env, command, &changing));
+        let aimed: Vec<Target> = tasks.iter().map(Chosen::target).collect();
+        let result = self.attempt(|env| {
+            let env = Env {
+                aimed: &aimed,
+                ..env.clone()
+            };
+            self.perform(&env, command, &changing)
+        });
         let said: Vec<String> = result.as_ref().map_or_else(
             |_| Vec::new(),
             |(outcome, _)| {

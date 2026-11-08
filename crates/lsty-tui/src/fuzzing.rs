@@ -296,6 +296,13 @@ fn behind(
         keys(&mut twin.model, "<Esc>");
     }
     keys(&mut main.model, count);
+    let typed = count;
+    // A digit after a key that matched nothing is no count.
+    let count = if main.model.typed_count() == 0 {
+        ""
+    } else {
+        count
+    };
     // The watcher reads between the count and the key: the lines it
     // shows bind only a key typed before it.
     let read = op & 4 != 0;
@@ -308,7 +315,7 @@ fn behind(
     rewrite(twin.dir.path(), op, arg);
     let moved_on = main.files();
     reload(&mut twin.model);
-    keys(&mut twin.model, count);
+    keys(&mut twin.model, typed);
     if read {
         reload(&mut main.model);
     }

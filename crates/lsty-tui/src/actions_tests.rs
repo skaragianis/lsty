@@ -250,6 +250,9 @@ fn a_delete_keeps_the_top_of_a_sorted_view() {
 type Aimed = (&'static str, &'static str, &'static str, &'static str);
 
 const ALPHA_TAGGED: &str = "Alpha +outside\nB\n";
+/// A done task the count or selection takes and does not write.
+const DONE_B: &str = "x 2026-09-01 D\nB\n";
+
 const REFUSED: &[Aimed] = &[
     ("A\nB\nC\n", "gdfri<CR>", "A2\nB\nC\n", "a prompt"),
     ("A\nB\nC\n", "vjx", "A\nB2\nC\n", "a selection"),
@@ -286,6 +289,13 @@ const REFUSED: &[Aimed] = &[
     ("A\nB\nC\n", "x", "A\nC\nB\n", "another pair reordered"),
     ("A\nB\n", "x", "A\nA\nB\n", "a twin came"),
     ("A\nA\nB\n", "x", "A\nB\n", "a twin went"),
+    (
+        DONE_B,
+        "2x",
+        "x 2026-09-01 D\nx 2026-09-01 D\nB\n",
+        "a count, unwritten",
+    ),
+    (DONE_B, "vjx", "B\n", "a selection, unwritten"),
     (
         "|x 2026-09-01 Old\n",
         "x",
