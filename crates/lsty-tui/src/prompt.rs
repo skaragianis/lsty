@@ -310,11 +310,13 @@ impl Model {
         self.summarize(chosen.len());
     }
 
-    /// Whether `.` of a prompt, over `count` tasks, would leave each of
-    /// them as it is.
-    pub(crate) fn keeps(&self, again: &Again, count: usize) -> bool {
+    /// Whether `.` of `again`, with `typed` the count typed, would leave
+    /// each line as it is: a prompt over its tasks, or a move.
+    pub(crate) fn keeps(&self, again: &Again, typed: usize) -> bool {
+        let count = again.count(typed);
         let Again::Prompt { kind, text, .. } = again else {
-            return false;
+            let block = matches!(again, Again::Block { .. });
+            return self.moves_nothing(again.action(), block, count);
         };
         let (tags, today) = (words(text), self.clock.today());
         let mut lines = self.rows_of(count).iter().filter_map(|row| {

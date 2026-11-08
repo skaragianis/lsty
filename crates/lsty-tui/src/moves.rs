@@ -64,8 +64,37 @@ impl Model {
         Some((self.cursor, self.cursor, (to != self.cursor).then_some(to)))
     }
 
+    /// Whether `J` or `K` (`action`) moves the rows of `move_span` only past
+    /// lines equal to them and next to them in the file, so no task changes
+    /// place.
+    pub(crate) fn moves_nothing(
+        &self,
+        action: Action,
+        block: bool,
+        count: usize,
+    ) -> bool {
+        let down = action == Action::MoveTaskDown;
+        if !down && action != Action::MoveTaskUp {
+            return false;
+        }
+        let Some((lo, hi, Some(past))) = self.move_span(down, block, count)
+        else {
+            return false;
+        };
+        let rows = self.rows.get(lo.min(past)..=hi.max(past)).unwrap_or(&[]);
+        // The line number plus the rows after it, one for lines in a run.
+        let mut lines =
+            rows.iter().zip((0..rows.len()).rev()).map(|(r, i)| {
+                let task = self.snap.task(r.id)?;
+                Some((self.snap.line(task).raw(), task.nr().index() + i))
+            });
+        let first = lines.next().flatten();
+        first.is_some() && lines.all(|line| line == first)
+    }
+
     /// Moves the rows of `move_span` past its row in one write, unless the
-    /// rule refuses; it then sets what `.` repeats.
+    /// rule refuses or no task would change place; it then sets what `.`
+    /// repeats.
     fn move_by(&mut self, action: Action, block: bool, count: usize) {
         let down = action == Action::MoveTaskDown;
         let Some((lo, hi, past)) = self.move_span(down, block, count) else {
@@ -85,6 +114,9 @@ impl Model {
         let tasks = self.chosen(&ids_of(rows));
         if let Answer::Refused(why) = answer {
             self.refuse(why, &tasks);
+            return;
+        }
+        if self.moves_nothing(action, block, count) {
             return;
         }
         let Some(past) = past.and_then(|i| self.rows.get(i)).map(|r| r.id)
