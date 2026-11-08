@@ -119,24 +119,6 @@ fn a_moved_line_is_followed_by_its_number() {
     assert_ne!(plain.place(at(Source::Todo, 1)), at(Source::Todo, 3));
 }
 
-/// Another writer changed the file before the operation read it: the
-/// lines go from what was shown, through what was read, to what was
-/// written.
-#[test]
-fn lines_are_followed_through_a_file_that_changed_before_the_read() {
-    let (shown, read, new) = ("A\nB\n", "X\nA\nB\n", "X\nB\nA\n");
-    let rec =
-        record(read, new, vec![change(ChangeKind::Moved, Some(2), Some(3))]);
-    let map = Remap::new(
-        &snapshot(shown, "", NOW),
-        &snapshot(new, "", NOW),
-        Some(&rec),
-        &[],
-    );
-    assert_eq!(map.place(at(Source::Todo, 1)), at(Source::Todo, 3));
-    assert_eq!(map.place(at(Source::Todo, 2)), at(Source::Todo, 2));
-}
-
 #[test]
 fn a_line_the_operation_blanked_or_removed_is_gone() {
     let (old, new) = ("A\nB\nC\n", "A\n\nC\n");

@@ -54,9 +54,6 @@ struct FileMap {
     plain: Vec<Option<usize>>,
     /// Which lines of the file an operation took out of the list.
     gone: Vec<bool>,
-    /// Where each line of the record's `pre` stood in the old reading,
-    /// when that was not the same lines.
-    shown: Option<Vec<Option<usize>>>,
     /// Which new lines an old line went to.
     taken: Vec<bool>,
     /// For each count of old lines, the new line that the nearest
@@ -68,7 +65,6 @@ impl FileMap {
     fn plain(plain: Vec<Option<usize>>) -> Self {
         let mut map = Self {
             plain,
-            shown: None,
             gone: Vec::new(),
             taken: Vec::new(),
             nearest: Vec::new(),
@@ -77,18 +73,17 @@ impl FileMap {
         map
     }
 
-    /// The map of a file that `file` wrote: `old` was read before,
-    /// `new` is the file now. A line of `follow` whose text is repeated
-    /// is paired by the full diff, the others by the quick one.
+    /// The map of a file that `file` wrote: `old` is the reading it
+    /// wrote over, `new` the file now. A line of `follow` whose text is
+    /// repeated is paired by the full diff, the others by the quick one.
     fn written(
         old: &File,
         new: &File,
         file: &FileRecord,
         follow: &[Place],
     ) -> Self {
-        let read_same = same(&old.lines, file.pre());
-        let followed = exact(old, file, read_same);
-        let diffed = read_same && same(&new.lines, file.post());
+        let followed = exact(file);
+        let diffed = same(&new.lines, file.post());
         let mut plain = if diffed
             && twinned(old, file.source, follow, &followed.recorded)
         {
@@ -106,7 +101,6 @@ impl FileMap {
         }
         let mut map = Self::plain(plain);
         map.gone = followed.gone;
-        map.shown = followed.shown;
         map
     }
 
@@ -188,16 +182,6 @@ impl Remap {
         (!gone && (followed || free)).then_some(now)
     }
 
-    /// Where the line at `at` of the record's `pre` stood in the old
-    /// reading, `None` when the reading did not have it.
-    pub(crate) fn shown(&self, at: Place) -> Option<Place> {
-        let (source, nr) = at;
-        let map = &self.of(source).shown;
-        let Some(map) = map else { return Some(at) };
-        let to = (*map.get(nr.index())?)?;
-        Some((source, Nr::from_index(to)?))
-    }
-
     /// The place of `at` now: its own when the line was followed, and
     /// otherwise the place just after the nearest earlier line that was
     /// (the first line when there is none). A changed line is thereby
@@ -242,18 +226,11 @@ struct Through {
     gone: Vec<bool>,
     /// Which lines the record places: moved or changed in place.
     recorded: Vec<bool>,
-    /// The inverse of the reading's lines in `pre`, unless they are the same.
-    shown: Option<Vec<Option<usize>>>,
 }
 
-fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
-    let read = if read_same {
-        (0..old.lines.len()).map(Some).collect()
-    } else {
-        lineid::remap(&old.lines, file.pre())
-    };
-    let through = file.pre_to_post();
-    let mut recorded_pre = vec![false; file.pre().len()];
+fn exact(file: &FileRecord) -> Through {
+    let lines = file.pre_to_post();
+    let mut recorded = vec![false; file.pre().len()];
     for at in file
         .changes
         .iter()
@@ -261,33 +238,14 @@ fn exact(old: &File, file: &FileRecord, read_same: bool) -> Through {
         .filter_map(|c| c.nr_before)
         .map(Nr::index)
     {
-        if let Some(slot) = recorded_pre.get_mut(at) {
+        if let Some(slot) = recorded.get_mut(at) {
             *slot = true;
         }
     }
-    let shown = (!read_same).then(|| {
-        let mut shown = vec![None; file.pre().len()];
-        for (i, at) in read.iter().enumerate() {
-            if let Some(slot) = at.and_then(|at| shown.get_mut(at)) {
-                *slot = Some(i);
-            }
-        }
-        shown
-    });
     Through {
-        shown,
-        lines: read
-            .iter()
-            .map(|at| at.and_then(|i| through.get(i).copied().flatten()))
-            .collect(),
-        gone: read
-            .iter()
-            .map(|at| at.is_some_and(|i| vanished(file, through.get(i))))
-            .collect(),
-        recorded: read
-            .iter()
-            .map(|at| at.is_some_and(|i| recorded_pre.get(i) == Some(&true)))
-            .collect(),
+        gone: lines.iter().map(|&to| vanished(file, to)).collect(),
+        lines,
+        recorded,
     }
 }
 
@@ -296,8 +254,6 @@ fn same(lines: &[Line], kept: &[Arc<[u8]>]) -> bool {
 }
 
 /// Whether a line of the record went nowhere, or to a blank line.
-fn vanished(file: &FileRecord, to: Option<&Option<usize>>) -> bool {
-    to.copied()
-        .flatten()
-        .is_none_or(|t| file.post().get(t).is_some_and(|line| line.is_empty()))
+fn vanished(file: &FileRecord, to: Option<usize>) -> bool {
+    to.is_none_or(|t| file.post().get(t).is_some_and(|line| line.is_empty()))
 }

@@ -323,6 +323,14 @@ impl Model {
         }
     }
 
+    /// Shows the files an operation read when another writer had changed
+    /// them since the list did, so that its write lands as on that reading.
+    pub(crate) fn catch_up(&mut self, read: &Snapshot, clock: Clock) {
+        if !same_state(read, &self.snap) {
+            self.install(read.clone(), clock, None);
+        }
+    }
+
     /// Reads the files now and tells whether they had moved on from the list
     /// shown, which then shows them. `at_once` does not wait for the lock.
     pub(crate) fn moved_on(&mut self, at_once: bool) -> errs::Result<bool> {
@@ -518,11 +526,6 @@ impl Model {
         let appeared = places(|c| c.before.is_empty(), |c| c.nr_after);
         let vanished = places(|c| c.after.is_empty(), |c| c.nr_before);
         let acted = places(|_| true, |c| c.nr_before);
-        // The record's `pre` may be a different reading from the shown one.
-        let vanished: HashSet<_> = vanished
-            .into_iter()
-            .filter_map(|p| moved.shown(p))
-            .collect();
         let from = if wrote.undone {
             let present = places(|_| true, |c| c.nr_after);
             let mut rows =

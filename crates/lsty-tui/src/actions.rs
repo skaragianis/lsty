@@ -257,6 +257,7 @@ impl Model {
             self.message = join(&said);
             return;
         }
+        self.catch_up(outcome.read(), clock.clone());
         let touched = touched(&outcome);
         let record = outcome.take_undo();
         let snap = outcome.into_after();
