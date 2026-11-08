@@ -49,11 +49,11 @@ diff runs="1000" seed="1" lines="":
 # Fuzz every target for SECONDS each, starting from its seeds
 fuzz seconds="60":
     cd fuzz && cargo metadata --locked --format-version 1 >/dev/null && \
-        for t in $(cargo fuzz list); do \
+        ts=$(cargo fuzz list) && for t in $ts; do \
             mkdir -p corpus/$t && \
             cargo fuzz run $t corpus/$t seeds/$t \
-                -- -max_total_time={{quote(seconds)}} || exit 1; \
-        done
+                -- -max_total_time={{quote(seconds)}} || failed=1; \
+        done && exit ${failed:-0}
 
 # Mutation-test lsty-core on at most three cores
 mutants:
