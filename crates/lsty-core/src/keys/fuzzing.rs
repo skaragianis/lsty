@@ -24,6 +24,8 @@ struct Rebind {
     action: Action,
     start: usize,
     keys: Vec<Vec<Stroke>>,
+    /// Each of `keys` as written.
+    written: Vec<String>,
 }
 
 /// Any bytes as `keys.toml` load without a panic; each problem is a
@@ -34,7 +36,8 @@ struct Rebind {
 /// keys it was given, and the last entry of a key wins it; the detail
 /// panel inherits the normal keys of the actions it does not claim
 /// unless they clash with its own; no key of a mode is the same as or
-/// the start of another; and every matcher reaches each binding it holds.
+/// the start of another, nor does an insert key start a completion key;
+/// and every matcher reaches each binding it holds.
 ///
 /// # Panics
 ///
@@ -67,7 +70,12 @@ pub fn keys_property(data: &[u8]) {
             rebinds.iter().filter(|r| r.mode == mode).collect();
         no_clash(mode, table);
         defaults_kept(mode, table, &ours);
-        rebinds_kept(mode, table, &ours);
+        let below = if mode == Mode::Completion {
+            map.table(Mode::Insert)
+        } else {
+            &[]
+        };
+        rebinds_kept(mode, table, below, &ours, &warnings);
         inherited(&map, mode, &ours);
         let mut m = map.matcher(mode);
         for b in table {
@@ -77,13 +85,7 @@ pub fn keys_property(data: &[u8]) {
     }
     let mut layered = map.layered(Mode::Completion, Mode::Insert);
     for c in map.table(Mode::Completion) {
-        let shadowed = map
-            .table(Mode::Insert)
-            .iter()
-            .any(|i| starts_with(&c.strokes, &i.strokes));
-        if !shadowed {
-            reaches(&mut layered, &c.strokes, c.action);
-        }
+        reaches(&mut layered, &c.strokes, c.action);
     }
     feed_any(&mut layered, data, &pool);
 }
@@ -134,10 +136,10 @@ fn rebind(
         );
         return None;
     };
-    let keys: Vec<_> = list
+    let (keys, written): (Vec<_>, Vec<_>) = list
         .iter()
         .filter_map(|text| match parse_key(mode, text, leader()) {
-            Ok(strokes) => Some(strokes),
+            Ok(strokes) => Some((strokes, text.clone())),
             Err(e) => {
                 assert!(e.message().contains(&quote(text)), "{e:?}");
                 warned(warnings, &format!("[{m}] {action}: {e}"));
@@ -150,6 +152,7 @@ fn rebind(
         action,
         start: key.span().start,
         keys,
+        written,
     })
 }
 
@@ -218,8 +221,15 @@ fn defaults_kept(mode: Mode, table: &[Binding], ours: &[&Rebind]) {
 
 /// A rebound action has only keys the file gave it, and keeps each that
 /// no later entry gives another and no longer key of an action this mode
-/// claims hides.
-fn rebinds_kept(mode: Mode, table: &[Binding], ours: &[&Rebind]) {
+/// claims hides, nor a key of `below`, the layer under it, starts: that
+/// one is warned of.
+fn rebinds_kept(
+    mode: Mode,
+    table: &[Binding],
+    below: &[Binding],
+    ours: &[&Rebind],
+    warnings: &[Warning],
+) {
     for r in ours {
         for b in table.iter().filter(|b| b.action == r.action) {
             assert!(
@@ -238,8 +248,22 @@ fn rebinds_kept(mode: Mode, table: &[Binding], ours: &[&Rebind]) {
                     || starts_with(&b.strokes, s)
                         && claims(mode, b.action, ours)
             });
+            let under = below.iter().find(|i| starts_with(s, &i.strokes));
+            if let Some(i) = under.filter(|_| !later) {
+                // The first spelling of the key in the list is the one kept.
+                let first = r.keys.iter().position(|k| k == s).unwrap_or(0);
+                warned(
+                    warnings,
+                    &format!(
+                        "[{}] {} is hidden by {}",
+                        mode.as_str(),
+                        quote(&r.written[first]),
+                        quote(&i.written)
+                    ),
+                );
+            }
             assert!(
-                later || kept,
+                later || kept || under.is_some(),
                 "[{}] {} lost a key the file gave it last: {s:?}",
                 mode.as_str(),
                 r.action
