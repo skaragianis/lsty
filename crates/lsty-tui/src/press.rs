@@ -152,13 +152,24 @@ impl Model {
     /// help or a picker the rule has no say: those keys move there, whatever
     /// lies behind.
     pub(crate) fn answers(&self) -> impl Fn(Action) -> Answer + '_ {
+        self.answers_at(self.typed_count())
+    }
+
+    /// What the hints would ask with `count` typed. `gx` reads the count
+    /// the list holds, for its hint alone: it writes no line.
+    pub(crate) fn answers_at(
+        &self,
+        count: usize,
+    ) -> impl Fn(Action) -> Answer + '_ {
         let ruled = !matches!(self.key_mode(), Mode::Help | Mode::Picker);
-        let count = self.typed_count();
         let typed = self.summary(count);
         let one = (count > 1).then(|| self.summary(1));
         move |action| {
             if !ruled {
                 return Answer::Applies;
+            }
+            if action == Action::Repeat {
+                return repeat(self, count);
             }
             let cursor = one.as_ref().filter(|_| !action.reads_count());
             decide(action, self, cursor.unwrap_or(&typed))
@@ -275,12 +286,12 @@ const fn lit_if(lit: bool, why: Refusal) -> Answer {
 /// `.`: as the key it repeats over the tasks it stored or the count typed over
 /// them, whose word it does not take. `J` and `K` take a distance, not tasks.
 /// Nothing to repeat says nothing; a prompt whose text every task has
-/// already is dim, and the press says so.
-fn repeat(m: &Model) -> Answer {
+/// already is dim, and the press says so. `typed` is the count typed.
+fn repeat(m: &Model, typed: usize) -> Answer {
     let Some(again) = &m.again else {
         return Answer::Refused(Refusal::Quiet);
     };
-    let count = repeats_over(m, again);
+    let count = repeats_over(again, typed);
     match decide(again.action(), m, &m.summary(count)) {
         Answer::Applies | Answer::Resolved(_) if m.keeps(again, count) => {
             Answer::Refused(Refusal::Quiet)
@@ -294,10 +305,10 @@ fn repeat(m: &Model) -> Answer {
 
 /// How many tasks `.` repeats `again` over: the count typed, else the one
 /// it stored; one for a key whose count is not a number of tasks.
-pub(crate) fn repeats_over(m: &Model, again: &Again) -> usize {
+pub(crate) fn repeats_over(again: &Again, typed: usize) -> usize {
     let one =
         matches!(again, Again::Task { action, .. } if !action.reads_count());
-    if one { 1 } else { again.count(m.typed_count()) }
+    if one { 1 } else { again.count(typed) }
 }
 
 /// What a press of `action` over the tasks of `s` would do. Every action is
@@ -399,7 +410,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             let lit = !m.hist.redo.is_empty();
             return lit_if(lit, Refusal::Says("nothing to redo"));
         }
-        Action::Repeat => return repeat(m),
+        Action::Repeat => return repeat(m, m.typed_count()),
         Action::DeleteChar
         | Action::DeleteWordBack
         | Action::DeleteWordForward

@@ -292,6 +292,8 @@ const ABCD: &str = "A\nB\nC\nD\n";
 const LOOK: Option<&str> = Some(LIST_CHANGED);
 const SAME: &str = "A\nB +k\nC\n";
 const LINKED: &str = "A https://a.test +k\nB\n";
+const CLOSED: &str = "x 2026-09-01 A\nx 2026-09-01 B\n";
+const CLOSED_K: &str = "x 2026-09-01 A +k\nx 2026-09-01 B\n";
 
 /// The file, the done file after a `|`, keys to where they are typed, those
 /// typed before the reading, what it reads, each reading after a `|`, those
@@ -318,6 +320,17 @@ const UNDER_WAY: &[Under] = &[
     (ABC, "j", "g", "A\nB +k\nC\n", "g", "A\nB +k\nC\n", None),
     (ABC, "j", "2", "A\nB +k\nC\n", "j", "A\nB +k\nC\n", None),
     (ABC, "j", "2", "A\nB +k\nC\n", "J", "A\nB +k\nC\n", LOOK),
+    (CLOSED, "gg", "2", CLOSED_K, "-", CLOSED_K, None),
+    (CLOSED, "gg", "vj", CLOSED_K, "-", CLOSED_K, None),
+    (
+        "A due:2030-01-01\nB\nC\n",
+        "Ggd2030-01-01<CR>|gg",
+        "2",
+        "A due:2030-01-01 +k\nB\nC due:2030-01-01\n",
+        ".",
+        "A due:2030-01-01 +k\nB\nC due:2030-01-01\n",
+        LOOK,
+    ),
     (ABC, "j", "g", "A\nB +k\nC\n", "o", "A\nB +k\nC\n", LOOK),
     (
         ABC,
