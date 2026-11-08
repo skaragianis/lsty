@@ -17,7 +17,7 @@ use crate::{
     history::Again,
     messages::Tone,
     model::Model,
-    msg::Msg,
+    msg::{Cmd, Msg},
     press::{Answer, repeats_over, writes_line},
     test_util::{
         alone, deps, files, hint_is, keys, reload, same_as, screen, started,
@@ -100,6 +100,8 @@ const REWRITE: u8 = 0xF0;
 struct Side {
     dir: TempDir,
     model: Model,
+    /// What the last checked press asked for.
+    cmds: Vec<Cmd>,
 }
 
 impl Side {
@@ -111,7 +113,11 @@ impl Side {
         }
         let mut model = started(deps(dir.path(), config.clone()));
         model.update(Msg::Resize(width, 24));
-        Self { dir, model }
+        Self {
+            dir,
+            model,
+            cmds: Vec::new(),
+        }
     }
 
     fn files(&self) -> [Vec<u8>; 2] {
@@ -136,7 +142,7 @@ impl Side {
         let lost =
             self.model.keys_lost && asked.is_some_and(|(a, _)| writes_line(a));
         let before = self.kept();
-        keys(&mut self.model, key);
+        self.cmds = keys(&mut self.model, key);
         self.screen();
         let said = &self.model.message;
         let looked = stale || said.as_deref() == Some(LIST_CHANGED);
@@ -335,10 +341,10 @@ fn behind(
 }
 
 /// The list said to look again and wrote nothing: right only when its key
-/// was lit, or the twin wrote, emptied or looked again too. Reads the files,
-/// as the watcher would, and presses the key again, now with the hint the
-/// twin had; when looking again ended a selection, the twin ends it too, or
-/// looks again too, and presses again.
+/// was lit, or the twin wrote, emptied or looked again too. Takes the
+/// reading the list asked for, if its press had not read, and presses the
+/// key again, now with the hint the twin had; when looking again ended a
+/// selection, the twin ends it too, or looks again too, and presses again.
 fn looked_again(
     (main, twin): (&mut Side, &mut Side),
     (fresh, stale): (Hint, Hint),
@@ -353,7 +359,11 @@ fn looked_again(
         !was_dim || wrote || emptied || both,
         "looked again: {trail:?}"
     );
-    reload(&mut main.model);
+    for cmd in std::mem::take(&mut main.cmds) {
+        if let Cmd::Load(load) = cmd {
+            main.model.update(load.read());
+        }
+    }
     keys(&mut main.model, count);
     let mut fresh = fresh;
     if both {

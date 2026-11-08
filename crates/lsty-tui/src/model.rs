@@ -281,6 +281,7 @@ impl Model {
         }
         let step = self.refilter.serial;
         let mut cmds = self.dispatch(msg);
+        cmds.extend(self.kick_reload());
         self.note_candidates();
         cmds.extend(self.refilter.timer(step));
         if input {
