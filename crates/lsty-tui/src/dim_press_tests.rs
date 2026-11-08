@@ -194,6 +194,7 @@ fn a_dim_press_leaves_the_selection_and_the_repeat_alone() {
     for real in ["gg-", "ggVjJ<Esc>", "gggd2030-01-01<CR>"] {
         check("A\nB\nC\nD\n", real, ("G", "3."), "ggj.");
     }
+    check("A\nB\nC\nD\n", "gg2gd2030-01-01<CR>", ("gg", "1."), "jj.");
 }
 
 /// Each way of pressing a key: alone, over a selection, with a count.

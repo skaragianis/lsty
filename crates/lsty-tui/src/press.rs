@@ -54,7 +54,7 @@ pub(crate) enum Refusal {
     AllDone,
     /// `t` on todo and done tasks.
     SomeDone,
-    /// The key has nothing to work on, and says nothing.
+    /// The key has nothing to work on, and says nothing of its own.
     Quiet,
     /// `J` and `K` in a view that is not in file order.
     Sorted,
@@ -274,12 +274,17 @@ const fn lit_if(lit: bool, why: Refusal) -> Answer {
 
 /// `.`: as the key it repeats over the tasks it stored or the count typed over
 /// them, whose word it does not take. `J` and `K` take a distance, not tasks.
-/// Nothing to repeat says nothing.
+/// Nothing to repeat says nothing; a prompt whose text every task has
+/// already is dim, and the press says so.
 fn repeat(m: &Model) -> Answer {
     let Some(again) = &m.again else {
         return Answer::Refused(Refusal::Quiet);
     };
-    match decide(again.action(), m, &m.summary(repeats_over(m, again))) {
+    let count = repeats_over(m, again);
+    match decide(again.action(), m, &m.summary(count)) {
+        Answer::Applies | Answer::Resolved(_) if m.keeps(again, count) => {
+            Answer::Refused(Refusal::Quiet)
+        }
         Answer::Resolved(_) => Answer::Applies,
         answer @ (Answer::Applies
         | Answer::Refused(_)

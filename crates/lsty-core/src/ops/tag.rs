@@ -122,19 +122,40 @@ pub(super) fn apply_tag(
     line: &Line,
     tag: &Tag,
 ) -> Result<Applied> {
+    match kept(line, tag) {
+        Some(applied) => Ok(applied),
+        None => tx.append_tok(id, line, &tag.text).map(Applied::Added),
+    }
+}
+
+/// What `tag` does to `line` short of appending it: set in place, or kept.
+/// `None` when it is appended.
+fn kept(line: &Line, tag: &Tag) -> Option<Applied> {
     let at = first_of_key(line, &tag.key).filter(|_| {
         tag.kind == Kind::Tag && SETTABLE_KEYS.contains(&tag.key.as_slice())
     });
     if let Some(at) = at {
-        return Ok(set_first(line, at, tag));
+        return Some(set_first(line, at, tag));
     }
-    if line
-        .tokens()
+    line.tokens()
         .any(|t| t.kind == tag.kind && t.name_text() == tag.text)
-    {
-        return Ok(Applied::Kept);
-    }
-    tx.append_tok(id, line, &tag.text).map(Applied::Added)
+        .then_some(Applied::Kept)
+}
+
+/// Whether `line` has `tag` already, so that adding it writes nothing.
+pub(super) fn has(line: &Line, tag: &Tag) -> bool {
+    matches!(kept(line, tag), Some(Applied::Kept))
+}
+
+/// Whether `tag` of `tags` would leave `line` as it is: it has each one;
+/// not for a text that is not a tag, which the press refuses.
+#[must_use]
+pub fn tag_keeps(line: &Line, tags: &[String], today: Date) -> bool {
+    tags.iter().all(|t| {
+        parse_tag(t)
+            .and_then(|tag| normalize(tag, today))
+            .is_ok_and(|tag| has(line, &tag))
+    })
 }
 
 /// Writes the value of `tag` over token `at`, unless it is the same.
@@ -187,6 +208,15 @@ pub fn untag(
         tx.each_edit(targets, &env.actor, |tx, id| {
             untag_task(tx, env, id, &removals)
         })
+    })
+}
+
+/// Whether `untag` of `tags` would leave `line` as it is: it has none;
+/// not for a text that is not a tag, which the press refuses.
+#[must_use]
+pub fn untag_keeps(line: &Line, tags: &[String]) -> bool {
+    tags.iter().all(|t| {
+        parse_untag(t).is_ok_and(|u| !line.tokens().any(|t| u.matches(&t)))
     })
 }
 
