@@ -1,5 +1,5 @@
 [completion]
-accept = ["<C-y>", "<Tab>"]
+accept = ["<C-y>", "<Tab>", "<C-w>", "<C-w>x"]
 
 [insert]
 delete_word_back = ["<C-y>", "<C-w>"]

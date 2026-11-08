@@ -274,7 +274,14 @@ fn resolve_all(
     for (mode, mut claims) in Mode::ALL.into_iter().zip(tables) {
         resolve_conflicts(mode, &mut claims, &mut warnings);
         let claimed: Vec<Action> = claims.iter().map(|c| c.action).collect();
-        let mut bound = drop_hidden(mode, &flatten(claims), &mut warnings);
+        // INSERT comes before COMPLETION in `Mode::ALL`.
+        let below: &[Binding] = if mode == Mode::Completion {
+            &keymap.bindings[Mode::Insert.index()]
+        } else {
+            &[]
+        };
+        let mut bound =
+            drop_hidden(mode, &flatten(claims), below, &mut warnings);
         if mode == Mode::Detail {
             let normal = &keymap.bindings[Mode::Normal.index()];
             inherit(&mut bound, &claimed, normal);
@@ -350,15 +357,24 @@ fn inherit(own: &mut Vec<Binding>, claimed: &[Action], normal: &[Binding]) {
     own.extend(taken);
 }
 
-/// Drops each binding that is the start of a longer one.
+/// Drops each binding that a key of `below`, the layer the mode sits
+/// over, starts, then each that starts a longer one that is not dropped.
 fn drop_hidden(
     mode: Mode,
     bound: &[Binding],
+    below: &[Binding],
     warnings: &mut Vec<Warning>,
 ) -> Vec<Binding> {
+    let under = |b: &Binding| {
+        below.iter().find(|o| starts_with(&b.strokes, &o.strokes))
+    };
     let mut kept = Vec::new();
     for b in bound {
-        match bound.iter().find(|o| starts_with(&o.strokes, &b.strokes)) {
+        let by = under(b).or_else(|| {
+            let mut live = bound.iter().filter(|o| under(o).is_none());
+            live.find(|o| starts_with(&o.strokes, &b.strokes))
+        });
+        match by {
             None => kept.push(b.clone()),
             Some(o) => warnings.push(warn(format!(
                 "[{}] {} is hidden by {}",

@@ -260,6 +260,15 @@ const ROWS: &[Row] = &[
         ..BASE
     },
     Row {
+        case: "28.14 hidden by an insert key",
+        text: "[completion]\naccept = [\"<C-w>\", \"<C-w>x\"]",
+        mode: Mode::Completion,
+        action: Action::Accept,
+        want: &["<C-w>"],
+        warnings: &[r#"[completion] "<C-w>x" is hidden by "<C-w>""#],
+        ..BASE
+    },
+    Row {
         case: "28.15 unknown action",
         text: "[normal]\nfrobnicate = [\"f\"]\n[insert]\nyank = [\"y\"]",
         want: &["dd", "<Del>"],
