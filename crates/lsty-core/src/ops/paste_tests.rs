@@ -357,11 +357,12 @@ fn a_link_that_would_close_a_cycle_is_not_restored() {
 #[test]
 fn copies_and_foreign_text_get_an_id_and_moves_keep_theirs() {
     let dir = folder("A id:a\nB\n", None);
-    let lines = [foreign("one"), own("A id:a"), own("C id:c")];
+    // The moved line keeps the id the draw would pick first.
+    let lines = [foreign("one"), own("A id:a"), own("C id:aaaa")];
     paste_at(&dir, &lines, &Place::End).expect("paste");
     assert_eq!(
         dir.todo(),
-        "A id:a\nB\n2026-09-29 one id:aaaa\n2026-09-29 A id:bbbb\nC id:c\n"
+        "A id:a\nB\n2026-09-29 one id:bbbb\n2026-09-29 A id:cccc\nC id:aaaa\n"
     );
 }
 
