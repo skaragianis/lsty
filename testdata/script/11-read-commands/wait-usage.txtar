@@ -11,7 +11,7 @@ stderr '^lsty: wait takes id: references, not done:1$'
 
 exit 2 lsty wait id:c1 --timeout soon --json --no-config
 stdout '"code":"invalid_value"'
-stdout '"message":"not a duration: soon"'
+stdout '"message":"not a duration: soon — a number and a unit: 2s, 500ms, 4h, 2d, 1h30m"'
 
 exit 2 lsty wait id:c1 --start --no-config
 stderr '^lsty: wait does not take --start$'

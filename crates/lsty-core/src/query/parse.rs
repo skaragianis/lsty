@@ -15,10 +15,11 @@ const TERM_FORMS: [&str; 3] = [
 const BAR_HINT: &str = "write a|b, without spaces around the bar";
 
 /// The error of a term that is not valid: `invalid_value` for the field
-/// `filter`.
+/// `filter`. The message says only the problem: `accepted` is a grammar,
+/// too long for a line.
 pub(super) fn invalid(value: &str, problem: &str, accepted: &[&str]) -> Error {
     let message = format!("filter: {} {problem}", quote(value));
-    Error::invalid_value(message, value, accepted)
+    Error::invalid_named(message, value, accepted)
         .with_field("field", Field::Str("filter".to_owned()))
 }
 

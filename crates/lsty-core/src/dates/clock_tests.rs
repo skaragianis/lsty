@@ -166,7 +166,8 @@ fn assert_out_of_range(
         panic!("{vars:?} accepted");
     };
     assert_eq!(err.code(), Code::InvalidValue, "{vars:?}");
-    assert_eq!(err.message(), format!("{field} is out of range: {value}"));
+    let message = format!("{field} is out of range: {value} — {accepted}");
+    assert_eq!(err.message(), message);
     let fields: Vec<_> = err.fields().collect();
     assert_eq!(
         fields,
