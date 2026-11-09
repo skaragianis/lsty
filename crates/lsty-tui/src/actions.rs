@@ -15,7 +15,7 @@ use crate::{
     history::{Again, pairs_of},
     messages::{self, Tone},
     model::Model,
-    press::{Answer, Command, Refusal, decide},
+    press::{Answer, Command, Refusal},
     track::{Place, Touched, Wrote, place_of},
 };
 
@@ -57,29 +57,9 @@ impl Model {
     /// Does a task action over the task under the cursor, or `count`
     /// tasks from it.
     pub(crate) fn act(&mut self, action: Action, count: usize) -> bool {
-        let mut answer = decide(action, self, &self.summary(count));
-        let had = !self.rows.is_empty();
-        // A key refused here cannot write, so nothing is owed to its read.
-        let refused = matches!(answer, Answer::Refused(_));
-        match dim(answer).then(|| self.moved_on(refused)) {
-            Some(Ok(true)) => {
-                answer = decide(action, self, &self.summary(count));
-                let looks = !dim(answer) || (had && self.rows.is_empty());
-                if looks && self.keys_lost {
-                    self.say_changed();
-                    return false;
-                }
-                if looks {
-                    self.alert(ops::LIST_CHANGED.to_owned());
-                    return false;
-                }
-            }
-            Some(Err(e)) if !refused => {
-                self.fail(&e);
-                return false;
-            }
-            _ => {}
-        }
+        let Some(answer) = self.read_first(action, count) else {
+            return false;
+        };
         let ids = self.tasks_of(count);
         let tasks = self.chosen(&ids);
         if let Answer::Refused(why) = answer {
@@ -101,6 +81,39 @@ impl Model {
             }
         }
         ran
+    }
+
+    /// What `action` answers with `count` typed, as its hint reads the
+    /// list: a dim one first reads the files and answers over them. `None`
+    /// when that reading failed, or made the key lit and so said to look
+    /// again.
+    pub(crate) fn read_first(
+        &mut self,
+        action: Action,
+        count: usize,
+    ) -> Option<Answer> {
+        let answer = |m: &Self| m.answers_at(count)(action);
+        let now = answer(self);
+        let had = !self.rows.is_empty();
+        // A key refused here cannot write, so nothing is owed to its read.
+        let refused = matches!(now, Answer::Refused(_));
+        match dim(now).then(|| self.moved_on(refused)) {
+            Some(Ok(true)) => {
+                let now = answer(self);
+                let looks = !dim(now) || (had && self.rows.is_empty());
+                if looks && self.keys_lost {
+                    self.say_changed();
+                } else if looks {
+                    self.alert(ops::LIST_CHANGED.to_owned());
+                }
+                (!looks).then_some(now)
+            }
+            Some(Err(e)) if !refused => {
+                self.fail(&e);
+                None
+            }
+            _ => Some(now),
+        }
     }
 
     /// Does what `answer` says over `tasks`, or, for `back`, puts back the
@@ -292,11 +305,12 @@ impl Model {
     }
 
     /// Whether the rule refuses `action` over the tasks of `count`, having
-    /// said why.
+    /// said why, or a dim press read a list it made lit.
     pub(crate) fn refused(&mut self, action: Action, count: usize) -> bool {
-        let answer = decide(action, self, &self.summary(count));
-        let Answer::Refused(why) = answer else {
-            return false;
+        let why = match self.read_first(action, count) {
+            Some(Answer::Refused(why)) => why,
+            Some(_) => return false,
+            None => return true,
         };
         let tasks = self.chosen(&self.tasks_of(count));
         self.refuse(why, &tasks);

@@ -488,6 +488,7 @@ impl Model {
     )]
     pub(crate) fn run(&mut self, action: Action, count: usize) -> Vec<Cmd> {
         match action {
+            moves if on_rows(moves) && self.refused(moves, count) => {}
             motion if motion.is_motion() => self.motion(motion, count),
             moves if moves.category() == Category::Windows => {
                 self.move_focus(moves);
@@ -707,6 +708,18 @@ impl Model {
         next.extend(self.reload_owed());
         next
     }
+}
+
+/// A key dim over an empty list or panel, which the files may fill.
+const fn on_rows(action: Action) -> bool {
+    action.is_motion()
+        || matches!(
+            action,
+            Action::EnterVisual
+                | Action::Fold
+                | Action::Unfold
+                | Action::ToggleEntry
+        )
 }
 
 fn matchers(deps: &Deps) -> BTreeMap<Mode, Matcher> {
