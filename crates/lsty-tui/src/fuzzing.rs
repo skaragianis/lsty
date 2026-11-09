@@ -6,6 +6,7 @@ use std::{fs, path::Path};
 
 use lsty_core::{
     config::Config,
+    errs::Source,
     keys::{Action, Matcher, Mode, Outcome, parse_keys},
     ops::LIST_CHANGED,
 };
@@ -138,8 +139,8 @@ impl Side {
     fn checked(&mut self, key: &str, stale: bool, trail: &[String]) -> Hint {
         let asked = asked(&self.model, key);
         let writes = asked.is_some_and(|(a, _)| writes(&self.model, a));
-        let lost =
-            self.model.keys_lost && asked.is_some_and(|(a, _)| writes_line(a));
+        let lost = self.model.keys_lost
+            && asked.is_some_and(|(a, _)| writes_line(aimed(&self.model, a)));
         let before = self.kept();
         self.cmds = keys(&mut self.model, key);
         self.screen();
@@ -216,6 +217,15 @@ fn writes(model: &Model, action: Action) -> bool {
     (history || writes_line(action)) && !unsure
 }
 
+/// The key `action` is: for `.`, the one it repeats, so that a `.` of `p`
+/// is a paste, aimed at a position, and a `.` of `x` writes on its lines.
+fn aimed(model: &Model, action: Action) -> Action {
+    match &model.again {
+        Some(again) if action == Action::Repeat => again.action(),
+        _ => action,
+    }
+}
+
 /// The lines under `key` in NORMAL mode, when it is lit and writes on them
 /// (`.` on those it repeats over), that the todo file holds once: one
 /// changed, gone or twinned after that is one the key must look again for.
@@ -223,8 +233,8 @@ fn under(model: &Model, key: &str, todo: &[u8]) -> Vec<Vec<u8>> {
     let Some((action, answer)) = asked(model, key) else {
         return Vec::new();
     };
-    if dim(answer) || !writes_line(action) || model.key_mode() != Mode::Normal
-    {
+    let line_key = writes_line(aimed(model, action));
+    if dim(answer) || !line_key || model.key_mode() != Mode::Normal {
         return Vec::new();
     }
     let again = model.again.as_ref().filter(|_| action == Action::Repeat);
@@ -267,12 +277,14 @@ fn rewrite(dir: &Path, op: u8, arg: usize) {
 /// when `key` looks. The list either does what the twin did, or writes
 /// nothing and says to look again, as it must when a line under a lit key
 /// changed; then, the reading it owes taken, its next press does what the
-/// twin did.
+/// twin did. A paste may also land beside another copy of its line than the
+/// twin's (see [`beside_a_copy`]): then the two differ and, `false`, the
+/// run ends.
 fn behind(
     (main, twin): (&mut Side, &mut Side),
     (op, arg, count, key): (u8, usize, &str, &str),
     trail: &[String],
-) {
+) -> bool {
     if main.model.matchers.values().any(Matcher::cancels) {
         keys(&mut main.model, "<Esc>");
         keys(&mut twin.model, "<Esc>");
@@ -302,6 +314,7 @@ fn behind(
         reload(&mut main.model);
     }
     let fresh = twin.checked(key, false, trail);
+    let seen = pastes_beside(&main.model, key);
     let stale = main.checked(key, true, trail);
     let looked = main.model.message.as_deref() == Some(LIST_CHANGED)
         && main.files() == moved_on;
@@ -311,11 +324,66 @@ fn behind(
     assert!(looked || !lost, "a line under the key changed: {trail:?}");
     if looked {
         looked_again((main, twin), (fresh, stale), (count, key), trail);
+    } else if main.model.message == twin.model.message
+        && main.model.tone == twin.model.tone
+        && seen.is_some_and(|s| {
+            beside_a_copy(&s, &moved_on, &main.files(), &twin.files())
+        })
+    {
+        return false;
     }
     // A key that did not look leaves the reading to the watcher.
     reload(&mut main.model);
     let (m, t) = (main.dir.path(), twin.dir.path());
     same_as((m, &main.model), (t, &twin.model), &format!("{trail:?}"));
+    true
+}
+
+/// For a lit `p` or `P` (or a `.` of one), whether it pastes below, and the
+/// line under the cursor that it pastes beside.
+fn pastes_beside(model: &Model, key: &str) -> Option<(bool, Vec<u8>)> {
+    let (action, _) = asked(model, key)?;
+    let aim = aimed(model, action);
+    let below = aim == Action::PasteBelow;
+    if !below && aim != Action::PasteAbove {
+        return None;
+    }
+    let row = model.rows.get(model.cursor);
+    let row = row.filter(|r| r.source != Source::Done)?;
+    let task = model.snap.task(row.id)?;
+    Some((below, model.snap.line(task).raw().to_vec()))
+}
+
+/// A stale paste that went in beside another copy of the line under it
+/// than the twin's paste, which read first and so had its cursor on the
+/// copy the reading's rule picks: right, since a paste lands beside the
+/// copy the person saw. Only when the list's todo file is `before` with
+/// the same lines the twin pasted put in beside a copy of `seen` there,
+/// `before` holds `seen` more than once, and the done files are alike: so
+/// no line of `before` was written on, moved or dropped. Any copy of `seen`
+/// passes, not only the one the diff pairs (left to `lineid`'s tests), and
+/// the run ends there.
+fn beside_a_copy(
+    (below, seen): &(bool, Vec<u8>),
+    before: &[Vec<u8>; 2],
+    list: &[Vec<u8>; 2],
+    twin: &[Vec<u8>; 2],
+) -> bool {
+    let [was, now, other] = [&before[0], &list[0], &twin[0]]
+        .map(|t| t.split(|b| *b == b'\n').collect::<Vec<_>>());
+    let n = other.len().saturating_sub(was.len());
+    let put = |at: usize, block| [&was[..at], block, &was[at..]].concat();
+    let mut blocks = (0..was.len())
+        .filter(|&at| put(at, &other[at..at + n]) == other)
+        .map(|at| &other[at..at + n]);
+    let copies = || (0..was.len()).filter(|&k| was[k] == seen.as_slice());
+    n > 0
+        && now != other
+        && list[1] == twin[1]
+        && copies().count() > 1
+        && blocks.any(|block| {
+            copies().any(|k| put(k + usize::from(*below), block) == now)
+        })
 }
 
 /// The list said to look again and wrote nothing: right only when its key
@@ -406,7 +474,9 @@ pub fn hints_property(data: &[u8]) {
                 (next(), ["", "2", "3"][next() % 3], next());
             let key = STALE[key % STALE.len()];
             trail.push(format!("rewrite {op} {arg} {count}{key}"));
-            behind((&mut main, &mut twin), (op, arg, count, key), &trail);
+            if !behind((&mut main, &mut twin), (op, arg, count, key), &trail) {
+                return;
+            }
         } else {
             let (key, then) = KEYS[usize::from(op) % KEYS.len()];
             trail.push(format!("{key}{then}"));
