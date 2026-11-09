@@ -392,16 +392,24 @@ fn a_finished_task_has_no_note_beside_its_due_date() {
     }
 }
 
+/// (todo, the start of the sidebar's first row): the widest entry and its
+/// count size the sidebar, with one spare cell, up to its limit; past it
+/// the name is cut and its count stays.
+const WIDE_NAMES: [(&str, &str); 2] = [
+    ("Task +a-long-project\n", "│ +a-long-project  1/1│"),
+    (
+        "Task +a-project-with-a-very-long-name-indeed\n",
+        "│ +a-project-with-a-very-… 1/1│",
+    ),
+];
+
 #[test]
-fn a_name_that_does_not_fit_is_cut_and_its_count_stays() {
-    let todo = "Task +a-project-with-a-very-long-name-indeed\n";
-    let (_dir, m) = model(no_detail(), (130, 30), todo);
-    let lines = screen(&m, 130, 30);
-    assert!(
-        lines[1].starts_with("│ +a-project-with-a-very"),
-        "{lines:?}"
-    );
-    assert!(lines[1].contains("… 1/1│"), "{lines:?}");
+fn the_widest_name_sizes_the_sidebar_and_a_longer_one_is_cut() {
+    for (todo, want) in WIDE_NAMES {
+        let (_dir, m) = model(no_detail(), (130, 30), todo);
+        let lines = screen(&m, 130, 30);
+        assert!(lines[1].starts_with(want), "{lines:?}");
+    }
 }
 
 #[test]
