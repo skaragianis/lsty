@@ -270,9 +270,7 @@ impl Model {
         if e.message() == ops::LIST_CHANGED {
             self.close_input();
         }
-        let kept =
-            matches!(e.code(), Code::LockTimeout | Code::ExpectMismatch);
-        if !kept && e.hint().is_some() {
+        if e.hint().is_some() {
             self.message = Some(messages::hinted(e));
         }
     }

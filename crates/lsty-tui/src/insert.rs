@@ -490,8 +490,7 @@ impl Model {
     /// Shows why a draft was refused, with what to do about it.
     fn fail_edit(&mut self, e: &errs::Error) {
         self.fail(e);
-        let Some(hint) = e.hint().filter(|_| e.code() != Code::LockTimeout)
-        else {
+        let Some(hint) = e.hint() else {
             return;
         };
         if let Some(message) = &mut self.message {
