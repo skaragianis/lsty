@@ -224,23 +224,49 @@ fn writes(model: &Model, action: Action) -> bool {
 /// (`.` on those it repeats over), that the todo file holds once: one
 /// changed, gone or twinned after that is one the key must look again for.
 fn under(model: &Model, key: &str, todo: &[u8]) -> Vec<Vec<u8>> {
-    let Some((action, answer)) = asked(model, key) else {
-        return Vec::new();
-    };
+    let count = aimed_count(model, key);
+    let mut lines = count.map_or_else(Vec::new, |n| row_lines(model, n));
+    lines.retain(|line| twins(todo, line) == 1);
+    lines
+}
+
+/// The count `key` reads in NORMAL mode, when it is lit and writes on its
+/// lines (for `.`, the rows it repeats over).
+fn aimed_count(model: &Model, key: &str) -> Option<usize> {
+    let (action, answer) = asked(model, key)?;
     let line_key = writes_line(model.aimed(action));
     if dim(answer) || !line_key || model.key_mode() != Mode::Normal {
-        return Vec::new();
+        return None;
     }
     let again = model.again.as_ref().filter(|_| action == Action::Repeat);
-    let count = again.map_or_else(
+    Some(again.map_or_else(
         || model.typed_count(),
         |a| repeats_over(a, model.typed_count()),
-    );
+    ))
+}
+
+/// The lines of the `count` rows from the cursor.
+fn row_lines(model: &Model, count: usize) -> Vec<Vec<u8>> {
     let rows = model.rows_of(count).iter();
     rows.filter_map(|row| model.snap.task(row.id))
         .map(|task| model.snap.line(task).raw().to_vec())
-        .filter(|line| twins(todo, line) == 1)
         .collect()
+}
+
+/// The count the twin types before `key`: `typed`, or, when the list's
+/// count reaches past the rows it shows, as many as it shows, so long as
+/// the twin's rows from its cursor start with those lines. A count aims at
+/// the rows on screen when its key is pressed: a line another writer added
+/// below them is not among them.
+fn reach(main: &Model, twin: &Model, key: &str, typed: &str) -> String {
+    let count = aimed_count(main, key).unwrap_or_default();
+    let shown = row_lines(main, count);
+    let short = (1..count).contains(&shown.len());
+    if short && row_lines(twin, shown.len()) == shown {
+        shown.len().to_string()
+    } else {
+        typed.to_owned()
+    }
 }
 
 /// How many lines of `todo` are `line`.
@@ -303,15 +329,17 @@ fn behind(
     rewrite(twin.dir.path(), op, arg);
     let moved_on = main.files();
     reload(&mut twin.model);
-    keys(&mut twin.model, typed);
     if read {
         reload(&mut main.model);
     }
-    let fresh = twin.checked(key, false, trail);
+    let reach = reach(&main.model, &twin.model, key, typed);
     let seen = pastes_beside(&main.model, key);
     let stale = main.checked(key, true, trail);
     let looked = main.model.message.as_deref() == Some(LIST_CHANGED)
         && main.files() == moved_on;
+    // A list that looks again reads, and its count then takes every row.
+    keys(&mut twin.model, if looked { typed } else { &reach });
+    let fresh = twin.checked(key, false, trail);
     // A key the watcher's reading drew dim says its own words.
     let dim_now = read && fresh.is_some_and(|(_, answer)| dim(answer));
     let lost = !dim_now && under.iter().any(|l| twins(&moved_on[0], l) != 1);
