@@ -131,7 +131,7 @@ fn parse_now(s: &str) -> Result<Timestamp> {
 }
 
 fn invalid(field: &'static str, value: &str, form: &str) -> Error {
-    Error::invalid_value(
+    Error::invalid_named(
         format!("{field} must be {form}: {value}"),
         value,
         &[form],

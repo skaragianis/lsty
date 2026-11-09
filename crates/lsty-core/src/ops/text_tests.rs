@@ -207,12 +207,22 @@ const APPEND: &[Case] = &[
             (
                 "1",
                 Op::Append("due:soon"),
-                Want::Refused(IV, "not a date: soon", ""),
+                Want::Refused(
+                    IV,
+                    "not a date: soon — today, tomorrow (tom), \
+                 yesterday; a weekday: monday … sunday, mon … sun; an \
+                 offset: 3d, +2w, -1m, 1y, 5b; a date: YYYY-MM-DD",
+                    "",
+                ),
             ),
             (
                 "1",
                 Op::Append("rec:1x"),
-                Want::Refused(IV, "not a recurrence: 1x", ""),
+                Want::Refused(
+                    IV,
+                    "not a recurrence: 1x — 3d, 2w, 1m, 1y, 5b, +1m",
+                    "",
+                ),
             ),
         ],
     ),
@@ -903,7 +913,11 @@ const TAG: &[Case] = &[
             (
                 "1",
                 Op::Tag(&["rec:often"]),
-                Want::Refused(IV, "not a recurrence: often", ""),
+                Want::Refused(
+                    IV,
+                    "not a recurrence: often — 3d, 2w, 1m, 1y, 5b, +1m",
+                    "",
+                ),
             ),
         ],
     ),
@@ -1237,7 +1251,13 @@ const DUE: &[Case] = &[
         &[(
             "1",
             Op::Due("someday"),
-            Want::Refused(IV, "not a date: someday", ""),
+            Want::Refused(
+                IV,
+                "not a date: someday — today, tomorrow (tom), \
+             yesterday; a weekday: monday … sunday, mon … sun; an \
+             offset: 3d, +2w, -1m, 1y, 5b; a date: YYYY-MM-DD",
+                "",
+            ),
         )],
     ),
 ];

@@ -560,6 +560,8 @@ fn a_line_that_cannot_run_is_refused() {
         ("undo x", ":undo takes no arguments"),
         ("red 2", ":redo takes no arguments"),
         ("due 1 nope", "not a date: nope — today, tomorrow"),
+        ("pri 1 7", "priority 7 is not a letter from A to Z"),
+        ("ls --sort=nope", "--sort: \"nope\" is not one of"),
     ];
     for (text, says) in refused {
         let (dir, mut model) = workdir_model(SAMPLE, alone());
@@ -571,6 +573,9 @@ fn a_line_that_cannot_run_is_refused() {
         assert!(model.line.is_some(), "{text}");
         let shown = format!("{} {}", above(&model), status(&model));
         assert!(shown.contains(says), "{text}: {shown}");
+        let said = model.message.as_deref().unwrap_or_default();
+        let lists = |s: &str| s.matches(" — ").count();
+        assert_eq!(lists(said), lists(says), "values once: {said}");
         assert_eq!(todo_of(dir.path()), before, "{text}");
     }
 }

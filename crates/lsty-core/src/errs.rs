@@ -298,9 +298,21 @@ struct Inner {
 pub type Result<T, E = Error> = std::result::Result<T, E>;
 
 impl Error {
-    /// An `invalid_value` error for the rejected `value`, with the forms
-    /// the caller `accepted`.
+    /// An `invalid_value` error for the rejected `value`: the `problem`,
+    /// then the forms the caller `accepted`.
     pub fn invalid_value(
+        problem: impl fmt::Display,
+        value: &str,
+        accepted: &[&str],
+    ) -> Self {
+        let message = format!("{problem} — {}", accepted.join("; "));
+        Self::invalid_named(message, value, accepted)
+    }
+
+    /// An `invalid_value` error whose `message` is whole: it names the
+    /// forms it `accepted` in its own words, or they are a grammar that
+    /// only the JSON lists.
+    pub fn invalid_named(
         message: impl Into<String>,
         value: &str,
         accepted: &[&str],

@@ -3,7 +3,7 @@
 
 use lsty_core::{
     dates::Clock,
-    errs::{self, Code, Field as Extra, Nr, Source},
+    errs::{self, Code, Nr, Source},
     keys::Action,
     list::{Claim, Snapshot, State, TaskId},
     ops::{self, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, Target},
@@ -349,29 +349,14 @@ impl Model {
 
     /// Shows why an operation did not run; nothing else changes.
     pub(crate) fn fail(&mut self, e: &errs::Error) {
-        let text = match e.code() {
-            Code::LockTimeout => messages::busy(&self.base_name()),
-            Code::ExpectMismatch => {
-                self.owe_reload();
-                self.exit_visual();
-                e.message().to_owned()
-            }
-            Code::Usage
-            | Code::UnknownCommand
-            | Code::InvalidValue
-            | Code::NoTty
-            | Code::NoIdentity
-            | Code::NoFile
-            | Code::NoTask
-            | Code::Blocked
-            | Code::Cycle
-            | Code::Claimed
-            | Code::WrongState
-            | Code::IdTaken
-            | Code::Ambiguous
-            | Code::EditConflict
-            | Code::Timeout
-            | Code::Io => with_forms(e),
+        if e.code() == Code::ExpectMismatch {
+            self.owe_reload();
+            self.exit_visual();
+        }
+        let text = if e.code() == Code::LockTimeout {
+            messages::busy(&self.base_name())
+        } else {
+            e.message().to_owned()
         };
         self.alert(text);
     }
@@ -411,15 +396,6 @@ fn named(tasks: &[Chosen], one: fn(&str) -> String, many: &str) -> String {
     match tasks {
         [task] => one(&task.name),
         _ => many.to_owned(),
-    }
-}
-
-/// The message of `e`, followed by the forms it accepts.
-fn with_forms(e: &errs::Error) -> String {
-    if let Some(Extra::Strs(forms)) = e.field("accepted") {
-        format!("{} — {}", e.message(), forms.join("; "))
-    } else {
-        e.message().to_owned()
     }
 }
 

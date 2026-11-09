@@ -70,7 +70,7 @@ fn same_file(var: &str, path: &Path, name: &str) -> errs::Error {
     let shown = errs::lossy_path(path);
     let message = format!("{var} is the {name} file: {shown}");
     let accepted = format!("a path other than the {name} file");
-    errs::Error::invalid_value(message, &shown, &[&accepted])
+    errs::Error::invalid_named(message, &shown, &[&accepted])
         .with_field("field", errs::Field::Str(var.to_owned()))
 }
 
