@@ -117,8 +117,8 @@ impl Model {
     }
 
     /// Puts the ends of a selection, lit on the rows `ends` of `old`, back
-    /// after a reading: on the lines that `line` finds, else on the same
-    /// rows. Only an empty list ends it.
+    /// after a reading: each on the line that `line` finds, else on the
+    /// same row. Only an empty list ends it.
     pub(crate) fn resume(
         &mut self,
         ends: Option<(usize, usize)>,
@@ -134,7 +134,7 @@ impl Model {
             self.row_at(at)
         };
         let (anchor, cursor) =
-            row(anchor).zip(row(cursor)).unwrap_or((anchor, cursor));
+            (row(anchor).unwrap_or(anchor), row(cursor).unwrap_or(cursor));
         self.visual = self.rows.get(anchor.min(last)).map(Row::place);
         self.cursor = cursor.min(last);
     }
