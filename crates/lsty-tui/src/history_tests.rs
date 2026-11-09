@@ -4,9 +4,14 @@ use std::{
     time::{Duration, Instant},
 };
 
-use lsty_core::config::{Config, Hidden};
+use lsty_core::{
+    config::{Config, Hidden},
+    keys::Action,
+    ops::LIST_CHANGED,
+};
 
 use crate::{
+    hints::dim,
     model::Model,
     test_util::{
         alone, cursor_text, deps, held_lock, keys, load_of, press, reload,
@@ -240,14 +245,21 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
         "u",
         None,
     ),
+    ("put back changed", "tt", "A +t\nB\nC\n", "t", None),
 ];
 
-// An undo or redo that writes on a line goes through a shift and refuses
-// anything else, whether the reading has drawn it or not. One that puts a line
-// back always writes, its neighbours only saying where.
+// An undo or redo, or the `t` that puts claims back, that writes on a line
+// goes through a shift and refuses anything else, whether the reading has
+// drawn it or not; once drawn, its hint is dim. One that puts a line back
+// always writes, its neighbours only saying where.
 #[test]
 fn an_outside_edit_under_an_undo_or_redo() {
     for (name, first, edit, key, want) in OUTSIDE_EDITS {
+        let (action, refusal) = match *key {
+            "u" => (Action::Undo, format!("can't undo: {LIST_CHANGED}")),
+            "t" => (Action::ToggleStart, LIST_CHANGED.to_owned()),
+            _ => (Action::Redo, format!("can't redo: {LIST_CHANGED}")),
+        };
         for read in [false, true] {
             let name = format!("{name}, read {read}");
             let dir = workdir("A\nB\nC\n");
@@ -257,12 +269,11 @@ fn an_outside_edit_under_an_undo_or_redo() {
                 .unwrap_or_else(|e| panic!("{e}"));
             if read {
                 reload(&mut model);
+                let hint = model.answers()(action);
+                assert_eq!(dim(hint), want.is_none(), "{name}: {hint:?}");
             }
             let cmds = keys(&mut model, key);
             assert_eq!(todo_of(dir.path()), want.unwrap_or(edit), "{name}");
-            let verb = if *key == "u" { "undo" } else { "redo" };
-            let refusal =
-                format!("can't {verb}: the list changed — look again");
             let said = model.message.as_deref().unwrap_or_default();
             assert_eq!(said == refusal, want.is_none(), "{name}: {said}");
             if want.is_none() {
