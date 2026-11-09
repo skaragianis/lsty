@@ -16,6 +16,7 @@ use super::{
 use crate::{
     errs::{Code, Error, Field, Nr, Result, Source},
     list::{Task, TaskId},
+    todotxt::Line,
 };
 
 /// Where [`reorder`] puts the block.
@@ -229,7 +230,10 @@ impl Tx {
         let at = at.min(block.rest.len());
         let (head, tail) = block.rest.split_at(at);
         let seq: Vec<usize> = [head, &block.lines, tail].concat();
-        if seq.is_sorted() {
+        // A twin of a line moved past it leaves the same bytes.
+        let lines = &self.snap.file(Source::Todo).lines;
+        let now = seq.iter().map(|&l| lines[l].raw());
+        if now.eq(lines.iter().map(Line::raw)) {
             self.say_each(block, "is already there");
             return;
         }
