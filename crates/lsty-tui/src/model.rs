@@ -10,6 +10,7 @@ use lsty_core::{
     keys::{Action, Category, Matcher, Mode, Outcome, Stroke},
     list::{Params, Snapshot, SortField},
     lock::Cancel,
+    ops,
     theme::Theme,
     todotxt::File,
 };
@@ -316,8 +317,10 @@ impl Model {
         if !typing {
             self.catch_up_day();
         }
+        // A press that says to look again leaves its row as it found it.
+        let looks = self.message.as_deref() == Some(ops::LIST_CHANGED);
         if !self.pointer.pressed() {
-            self.leave_sticky(None);
+            self.leave_sticky(self.cursor_place().filter(|_| looks));
         }
     }
 
