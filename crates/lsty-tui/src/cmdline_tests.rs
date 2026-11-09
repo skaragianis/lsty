@@ -555,6 +555,7 @@ fn a_line_that_cannot_run_is_refused() {
         ("w x", ":w takes no arguments"),
         ("undo x", ":undo takes no arguments"),
         ("red 2", ":redo takes no arguments"),
+        ("due 1 nope", "not a date: nope — today, tomorrow"),
     ];
     for (text, says) in refused {
         let (dir, mut model) = workdir_model(SAMPLE, alone());
