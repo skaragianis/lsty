@@ -4,6 +4,7 @@ use lsty_core::{
     config::{Config, Filter, Hidden},
     errs::Source,
     list::SortField,
+    ops::LIST_CHANGED,
     theme::Slot,
 };
 
@@ -447,6 +448,15 @@ fn a_priority_that_leaves_the_filter_stays() {
     let mut model = model_of(dir.path(), config);
     press(&mut model, "gp");
     assert_eq!(rows_of(&model), ["(B) X*"]);
+    // Changed outside, it stays through a press that says to look again,
+    // and the next press is on it.
+    fs::write(dir.path().join("todo.txt"), "(B) X +r\nY\n").unwrap();
+    press(&mut model, "gp");
+    assert_eq!(model.message.as_deref(), Some(LIST_CHANGED));
+    reload(&mut model);
+    assert_eq!(rows_of(&model), ["(B) X +r*"]);
+    press(&mut model, "gp");
+    assert_eq!(todo_of(dir.path()), "(C) X +r\nY\n");
 }
 
 // 34a.21: an archived task stays among the todo rows.
