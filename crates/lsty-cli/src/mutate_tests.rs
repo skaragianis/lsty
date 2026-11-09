@@ -305,6 +305,16 @@ fn the_id_flags_choose_the_id() {
             Some(id) => assert!(last.ends_with(id), "{args:?}: {last}"),
         }
     }
+    // The task already there is given the id printed.
+    let fake = fake(FIXTURE);
+    let args = ["add", "Call client +work", "--if-absent", "--print-id"];
+    let ran = fake.human(&args);
+    assert_eq!(ran.code, 0, "{}", ran.err);
+    let first = todo(&fake).lines().next().unwrap_or_default().to_owned();
+    assert_eq!(
+        first,
+        format!("Call client +work id:{}", ran.out.trim_end())
+    );
 }
 
 #[test]
