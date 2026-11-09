@@ -10,6 +10,7 @@ use lsty_core::{
 };
 
 use crate::{
+    messages::Tone,
     model::Model,
     msg::Msg,
     test_util::{
@@ -36,10 +37,11 @@ fn mode_of(model: &Model) -> String {
     rows.last().cloned().unwrap_or_default()
 }
 
-// 38.7: nothing is written when nothing changed.
+// 38.7: nothing is written when nothing changed; a stray blank is no
+// mistake either.
 #[test]
 fn a_draft_that_was_not_changed_writes_nothing() {
-    for key in ["<CR>", "<Esc>"] {
+    for key in ["<CR>", "<Esc>", "<Space><CR>"] {
         let dir = workdir(LIST);
         let path = dir.path().join("todo.txt");
         let old = SystemTime::UNIX_EPOCH + Duration::from_hours(438_288);
@@ -53,6 +55,7 @@ fn a_draft_that_was_not_changed_writes_nothing() {
         let seen = fs::metadata(&path).unwrap().modified().unwrap();
         assert_eq!(seen, old, "{key}");
         assert_eq!(todo_of(dir.path()), LIST);
+        assert_eq!(model.tone, Tone::Notice, "{key}");
     }
 }
 

@@ -195,6 +195,15 @@ fn a_dim_press_leaves_the_selection_and_the_repeat_alone() {
         check("A\nB\nC\nD\n", real, ("G", "3."), "ggj.");
     }
     check("A\nB\nC\nD\n", "gg2gd2030-01-01<CR>", ("gg", "1."), "jj.");
+    // A prompt's <CR> that changes nothing, over a count or a selection.
+    let real = "gg3gt+x<CR>gg3gd2030-01-01<CR>Gk-";
+    for way in [
+        ("gg", "3gd2030-01-01<CR>"),
+        ("ggVjj", "gt+x<CR>"),
+        ("gg", "3gT+y<CR>"),
+    ] {
+        check("A\nB\nC\nD\n", real, way, "<Esc>gg.");
+    }
 }
 
 /// Each way of pressing a key: alone, over a selection, with a count.

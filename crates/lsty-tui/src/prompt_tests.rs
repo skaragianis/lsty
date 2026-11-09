@@ -267,6 +267,11 @@ fn many_tasks_are_counted_when_their_messages_do_not_fit_the_status_line() {
     let message = "1 tagged +x; 2 tagged +x";
     assert_eq!(said(51, "Vjgt+x<CR>").as_deref(), Some(message));
     assert_eq!(said(50, "Vjgt+x<CR>").as_deref(), Some("2 tasks changed"));
+    let some = said(50, "gt+x<CR>Vjgt+x<CR>");
+    assert_eq!(some.as_deref(), Some("1 task changed; 1 unchanged"));
+    // Changing none, they say why, whatever the room.
+    let none = "1 already has +x; 2 already has +x";
+    assert_eq!(said(50, "Vjgt+x<CR>Vjgt+x<CR>").as_deref(), Some(none));
 }
 
 #[test]
