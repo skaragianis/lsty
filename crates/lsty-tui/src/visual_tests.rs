@@ -347,6 +347,15 @@ const UNDER_WAY: &[Under] = &[
     ),
     (ABC, "j", "2", "A\nB\n", "x", "A\nB\n", LOOK),
     (
+        ABC,
+        "jyyp",
+        "2",
+        "A\nB\nB\nC +k\n",
+        ".",
+        "A\nB\nB\n2026-09-29 B id:t002\nC +k\n",
+        None,
+    ),
+    (
         "(A) B\n|x 2026-09-01 Done\n",
         "s",
         "2",

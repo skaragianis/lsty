@@ -128,6 +128,15 @@ impl Summary {
 }
 
 impl Model {
+    /// The key `action` is: for `.`, the one it repeats, so that a `.` of `p`
+    /// is a paste, aimed at a position, and a `.` of `x` writes on its lines.
+    pub(crate) fn aimed(&self, action: Action) -> Action {
+        match &self.again {
+            Some(again) if action == Action::Repeat => again.action(),
+            _ => action,
+        }
+    }
+
     /// What a press with `count` reads.
     pub(crate) fn summary(&self, count: usize) -> Summary {
         let snap = &self.snap;

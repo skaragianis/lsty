@@ -469,7 +469,7 @@ impl Model {
         match fed.outcome {
             Outcome::Matched { action, count }
                 if lost
-                    && writes_line(action)
+                    && writes_line(self.aimed(action))
                     && !hints::dim(self.answers_at(count)(action)) =>
             {
                 self.say_changed();

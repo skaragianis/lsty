@@ -140,7 +140,7 @@ impl Side {
         let asked = asked(&self.model, key);
         let writes = asked.is_some_and(|(a, _)| writes(&self.model, a));
         let lost = self.model.keys_lost
-            && asked.is_some_and(|(a, _)| writes_line(aimed(&self.model, a)));
+            && asked.is_some_and(|(a, _)| writes_line(self.model.aimed(a)));
         let before = self.kept();
         self.cmds = keys(&mut self.model, key);
         self.screen();
@@ -217,15 +217,6 @@ fn writes(model: &Model, action: Action) -> bool {
     (history || writes_line(action)) && !unsure
 }
 
-/// The key `action` is: for `.`, the one it repeats, so that a `.` of `p`
-/// is a paste, aimed at a position, and a `.` of `x` writes on its lines.
-fn aimed(model: &Model, action: Action) -> Action {
-    match &model.again {
-        Some(again) if action == Action::Repeat => again.action(),
-        _ => action,
-    }
-}
-
 /// The lines under `key` in NORMAL mode, when it is lit and writes on them
 /// (`.` on those it repeats over), that the todo file holds once: one
 /// changed, gone or twinned after that is one the key must look again for.
@@ -233,7 +224,7 @@ fn under(model: &Model, key: &str, todo: &[u8]) -> Vec<Vec<u8>> {
     let Some((action, answer)) = asked(model, key) else {
         return Vec::new();
     };
-    let line_key = writes_line(aimed(model, action));
+    let line_key = writes_line(model.aimed(action));
     if dim(answer) || !line_key || model.key_mode() != Mode::Normal {
         return Vec::new();
     }
@@ -343,7 +334,7 @@ fn behind(
 /// line under the cursor that it pastes beside.
 fn pastes_beside(model: &Model, key: &str) -> Option<(bool, Vec<u8>)> {
     let (action, _) = asked(model, key)?;
-    let aim = aimed(model, action);
+    let aim = model.aimed(action);
     let below = aim == Action::PasteBelow;
     if !below && aim != Action::PasteAbove {
         return None;
