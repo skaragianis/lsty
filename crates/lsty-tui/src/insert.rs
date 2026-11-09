@@ -134,6 +134,14 @@ impl Draft {
         text.trim().is_empty() || words(&text).eq(words(prefill))
     }
 
+    /// Whether committing writes nothing: a new task is [`Self::blank`], or
+    /// a task's line is as it opened.
+    pub(crate) fn unchanged(&self) -> bool {
+        self.blank()
+            || matches!(&self.subject, Subject::Task { raw }
+                if self.field.text() == errs::lossy(raw))
+    }
+
     /// Takes the draft to a later reading. A line that is not kept is lost
     /// until the rule keeps it again from the last reading it stood in; a new
     /// task goes about where its anchor was.
@@ -332,11 +340,8 @@ impl Model {
     pub(crate) fn edit_action(&mut self, action: Action) {
         let width = self.field_box().1;
         match action {
-            // A new task with nothing typed: end INSERT mode, write and
-            // keep nothing.
-            Action::Commit | Action::Cancel
-                if self.edit.as_ref().is_some_and(Draft::blank) =>
-            {
+            // A new task with nothing typed: end INSERT mode, keep nothing.
+            Action::Cancel if self.edit.as_ref().is_some_and(Draft::blank) => {
                 self.end_edit();
             }
             Action::Commit => self.commit(),
@@ -365,11 +370,11 @@ impl Model {
         let Some(draft) = &self.edit else {
             return;
         };
+        if draft.unchanged() {
+            return self.end_edit();
+        }
         let text = draft.field.text();
         match &draft.subject {
-            Subject::Task { raw } if text == errs::lossy(raw) => {
-                self.end_edit();
-            }
             Subject::Task { .. } => self.commit_old(&text),
             Subject::New { .. } => self.commit_new(&text),
         }
