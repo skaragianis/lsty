@@ -1067,13 +1067,13 @@ fn a_t_is_lit_while_it_can_put_a_claim_back() {
     }
 }
 
-/// `.` of `t`: the press itself ends the window, so the hint read before it
-/// is lit where the key then says why not. Lit is the side a hint may err on.
+/// `.` of `t`: the press itself ends the window, so its hint is that of a
+/// new start, dim over a blocked task, and the key says why not.
 #[test]
-fn a_repeat_of_t_in_the_window_is_lit_and_says_why_not() {
+fn a_repeat_of_t_in_the_window_is_dim_and_says_why_not() {
     let (dir, mut model, _opened) = watched((CLAIMED, ""), &Board::default());
     keys(&mut model, "jt");
-    assert!(!dim(model.answers()(Action::Repeat)));
+    assert!(dim(model.answers()(Action::Repeat)));
     let before = files(dir.path());
     keys(&mut model, ".");
     assert_eq!(files(dir.path()), before);

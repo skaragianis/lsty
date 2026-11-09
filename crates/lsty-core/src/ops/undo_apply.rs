@@ -24,6 +24,7 @@ use super::{
 use crate::{
     errs::{Code, Error, Nr, Result, Source},
     lineid,
+    list::Snapshot,
     todotxt::{Line, share},
 };
 
@@ -46,6 +47,16 @@ pub fn redo(env: &Env<'_>, rec: &UndoRecord) -> Result<Outcome> {
     apply(env, rec, "redo")
 }
 
+/// Whether an undo or redo of `rec` from the reading `snap` would put it
+/// back: every line it wrote still stands there as it left it.
+#[must_use]
+pub fn lands(rec: &UndoRecord, snap: &Snapshot) -> bool {
+    rec.files.iter().all(|f| {
+        let now = &snap.file(f.source).lines;
+        !f.stale(now, kept_in(f.post(), now).as_deref())
+    })
+}
+
 impl FileRecord {
     /// Where each line of `pre` is in `post`, or `None`. The lines the
     /// operation staged are followed by number; the others by a diff.
@@ -62,6 +73,49 @@ impl FileRecord {
         }
         map
     }
+
+    /// Whether a line an undo of this file writes on no longer stands in
+    /// `now` as the record left it, or the lines a move crossed no longer
+    /// stand side by side. `kept` is where the lines of `post` stand in
+    /// `now`, `None` when they are the same lines.
+    fn stale(&self, now: &[Line], kept: Option<&[Option<usize>]>) -> bool {
+        let Some(kept) = kept else {
+            return false;
+        };
+        let held = |line: usize| kept.get(line).copied().flatten();
+        let gone = self.changes.iter().any(|c| {
+            must_hold(c.kind)
+                && c.nr_after.and_then(|nr| held(nr.index())).is_none()
+        });
+        let Some(lines) = self.crossed().filter(|_| !gone) else {
+            return gone;
+        };
+        let post = self.post();
+        let rows: Option<Vec<usize>> = lines
+            .filter(|&i| post.get(i).is_some_and(|l| !Line::is_blank_text(l)))
+            .map(held)
+            .collect();
+        let Some(rows) = rows else {
+            return true;
+        };
+        let Some((&from, &to)) = rows.first().zip(rows.last()) else {
+            return false;
+        };
+        let tasks = now[from..=to].iter();
+        tasks.filter(|l| !Line::is_blank_text(l.raw())).count() != rows.len()
+    }
+
+    /// The lines of the record from the first to the last that a move left
+    /// or took. They must all go back, so none can have gone.
+    fn crossed(&self) -> Option<RangeInclusive<usize>> {
+        let moved = self.changes.iter();
+        let ends = moved
+            .filter(|c| c.kind == ChangeKind::Moved)
+            .flat_map(|c| [c.nr_before, c.nr_after])
+            .flatten()
+            .map(Nr::index);
+        Some(ends.clone().min()?..=ends.max()?)
+    }
 }
 
 fn apply(
@@ -72,7 +126,10 @@ fn apply(
     run_with(env, &rec.action, true, Rules::Skip, |tx| {
         let plans: Vec<Plan<'_>> =
             rec.files.iter().map(|f| Plan::new(tx, f)).collect();
-        if plans.iter().any(|plan| plan.stale(tx)) {
+        if plans.iter().any(|p| {
+            p.rec
+                .stale(&tx.snap.file(p.rec.source).lines, p.kept.as_deref())
+        }) {
             return Err(Error::new(
                 Code::ExpectMismatch,
                 format!("can't {verb}: {LIST_CHANGED}"),
@@ -148,52 +205,10 @@ impl<'a> Plan<'a> {
         self.at.get(line).copied().flatten()
     }
 
-    /// Whether a line this undo writes on no longer stands as the record
-    /// left it, or the lines a move crossed no longer stand side by side.
-    fn stale(&self, tx: &Tx) -> bool {
-        let Some(kept) = &self.kept else {
-            return false;
-        };
-        let held = |line: usize| kept.get(line).copied().flatten();
-        let gone = self.rec.changes.iter().any(|c| {
-            must_hold(c.kind)
-                && c.nr_after.and_then(|nr| held(nr.index())).is_none()
-        });
-        let Some(lines) = self.crossed().filter(|_| !gone) else {
-            return gone;
-        };
-        let post = self.rec.post();
-        let rows: Option<Vec<usize>> = lines
-            .filter(|&i| post.get(i).is_some_and(|l| !Line::is_blank_text(l)))
-            .map(held)
-            .collect();
-        let Some(rows) = rows else {
-            return true;
-        };
-        let Some((&from, &to)) = rows.first().zip(rows.last()) else {
-            return false;
-        };
-        let now = &tx.snap.file(self.rec.source).lines;
-        let tasks = now[from..=to].iter();
-        tasks.filter(|l| !Line::is_blank_text(l.raw())).count() != rows.len()
-    }
-
-    /// The lines of the record from the first to the last that a move left
-    /// or took. They must all go back, so none can have gone.
-    fn crossed(&self) -> Option<RangeInclusive<usize>> {
-        let moved = self.rec.changes.iter();
-        let ends = moved
-            .filter(|c| c.kind == ChangeKind::Moved)
-            .flat_map(|c| [c.nr_before, c.nr_after])
-            .flatten()
-            .map(Nr::index);
-        Some(ends.clone().min()?..=ends.max()?)
-    }
-
     /// Puts the lines a move crossed back in their old order, in the places
     /// they stand in. A blank line put among them from outside stays.
     fn order_moved(&self, order: &mut [usize]) {
-        let Some(lines) = self.crossed() else {
+        let Some(lines) = self.rec.crossed() else {
             return;
         };
         let rows: HashSet<usize> = lines

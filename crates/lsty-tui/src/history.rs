@@ -2,6 +2,7 @@
 //! `<C-r>` can put it back, and `.` can do the last change again.
 
 use std::{
+    cell::Cell,
     collections::{HashMap, VecDeque},
     sync::Arc,
 };
@@ -10,6 +11,7 @@ use jiff::Timestamp;
 use lsty_core::{
     errs::{Code, Error, Source},
     keys::Action,
+    list::Snapshot,
     ops::{self, FileRecord, UndoRecord},
 };
 
@@ -35,6 +37,9 @@ pub(crate) struct Step {
     pub(crate) rec: UndoRecord,
     message: String,
     pairs: Vec<Pair>,
+    /// Whether `rec` lands on the reading of this serial, kept so that a
+    /// hint drawn every frame checks the file once per reading.
+    landed: Cell<Option<(u32, bool)>>,
 }
 
 impl Step {
@@ -48,6 +53,20 @@ impl Step {
             rec,
             message,
             pairs,
+            landed: Cell::new(None),
+        }
+    }
+
+    /// Whether putting this step back from `snap` would land: see
+    /// [`ops::lands`].
+    pub(crate) fn lands(&self, snap: &Snapshot) -> bool {
+        match self.landed.get() {
+            Some((serial, lands)) if serial == snap.serial() => lands,
+            _ => {
+                let lands = ops::lands(&self.rec, snap);
+                self.landed.set(Some((snap.serial(), lands)));
+                lands
+            }
         }
     }
 }
@@ -179,14 +198,13 @@ impl Model {
     /// Applies the top step of one stack and moves it to the other. A
     /// step that is refused is dropped; one that met a busy lock stays.
     fn rewind(&mut self, way: Way) {
-        if self.refused(way.action(), 1) {
-            return;
-        }
         let stack = match way {
             Way::Undo => &self.hist.undo,
             Way::Redo => &self.hist.redo,
         };
+        // A step whose lines changed is refused by the write, which drops it.
         let Some(top) = stack.last() else {
+            self.refused(way.action(), 1);
             return;
         };
         let result = self.attempt(|env| match way {

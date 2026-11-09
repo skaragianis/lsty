@@ -10,8 +10,13 @@ use lsty_core::{
 };
 
 use crate::{
-    field::Field, focus::Focus, history::Again, messages, model::Model,
-    panel::Panel, rows::Row,
+    field::Field,
+    focus::Focus,
+    history::{Again, Step},
+    messages,
+    model::Model,
+    panel::Panel,
+    rows::Row,
 };
 
 /// The `lsty` command a key resolves to.
@@ -228,12 +233,20 @@ const fn toggle_start(s: &Summary) -> Answer {
     }
 }
 
-/// `t` in the window after it stopped these tasks: it puts their claims back,
-/// which a blocked task does not refuse.
+/// `t` in the window after it stopped these tasks, where it would start
+/// them: it puts their claims back, which a blocked task does not refuse.
 fn puts_back(m: &Model, s: &Summary) -> bool {
-    s.blocked_todo > 0
+    s.todo > 0
+        && s.done == 0
         && m.stopped_over(m.rows_between(s.lo, s.lo + s.total - 1))
             == Some(true)
+}
+
+/// `u`, `<C-r>` and the `t` that puts claims back: a step to apply, whose
+/// lines still stand in the reading as it left them. Over lines changed
+/// since, the press runs, writes nothing and says so.
+fn rewinds(m: &Model, top: Option<&Step>) -> bool {
+    top.is_some_and(|top| top.lands(&m.snap))
 }
 
 /// `stop`, bound by a user: `lsty stop`, which says so when none is underway.
@@ -299,8 +312,15 @@ fn repeat(m: &Model, typed: usize) -> Answer {
     let Some(again) = &m.again else {
         return Answer::Refused(Refusal::Quiet);
     };
-    let count = repeats_over(again, typed);
-    match decide(again.action(), m, &m.summary(count)) {
+    let s = m.summary(repeats_over(again, typed));
+    // `.` ends the window of `t` before it runs, so it starts them anew.
+    let back = again.action() == Action::ToggleStart && puts_back(m, &s);
+    let answer = if back {
+        toggle_start(&s)
+    } else {
+        decide(again.action(), m, &s)
+    };
+    match answer {
         Answer::Applies | Answer::Resolved(_) if m.keeps(again, typed) => {
             Answer::Refused(Refusal::Quiet)
         }
@@ -369,7 +389,11 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             return lit_if(m.focus_after(action).is_some(), Refusal::Quiet);
         }
         Action::ToggleStart if puts_back(m, s) => {
-            return Answer::Resolved(Command::Start);
+            return if rewinds(m, m.hist.undo.last()) {
+                Answer::Resolved(Command::Start)
+            } else {
+                Answer::CoreRefuses(Command::Start)
+            };
         }
         Action::ToggleComplete => complete,
         Action::ToggleStart => toggle_start,
@@ -410,13 +434,18 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             let lit = links >= wanted.max(1);
             return lit_if(lit, Refusal::Says(messages::NO_LINK));
         }
+        Action::Undo if m.kept.is_some() => return Answer::Applies,
+        Action::Undo if m.hist.undo.is_empty() => {
+            return Answer::Refused(Refusal::Says("nothing to undo"));
+        }
+        Action::Redo if m.hist.redo.is_empty() => {
+            return Answer::Refused(Refusal::Says("nothing to redo"));
+        }
         Action::Undo => {
-            let lit = m.kept.is_some() || !m.hist.undo.is_empty();
-            return lit_if(lit, Refusal::Says("nothing to undo"));
+            return lit_if(rewinds(m, m.hist.undo.last()), Refusal::Quiet);
         }
         Action::Redo => {
-            let lit = !m.hist.redo.is_empty();
-            return lit_if(lit, Refusal::Says("nothing to redo"));
+            return lit_if(rewinds(m, m.hist.redo.last()), Refusal::Quiet);
         }
         Action::Repeat => return repeat(m, m.typed_count()),
         Action::DeleteChar
