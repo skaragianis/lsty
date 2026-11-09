@@ -266,10 +266,14 @@ fn a_pane_key_digit_is_no_count_in_visual_mode() {
     assert_eq!(model.selected_rows(), Some((0, 1)));
 }
 
-// A reading leaves what is typed on an open line or in a field.
+// A reading leaves what is typed on an open line, even one that empties the
+// list and so ends the selection, or in a field.
 #[test]
 fn a_reload_keeps_the_keys_typed_on_an_open_line_or_in_a_field() {
-    for (mode, typed) in [("command", "jvgdj"), ("insert", "jccj")] {
+    for (mode, typed, read) in [
+        ("command", "jvgdj", ""),
+        ("insert", "jccj", "A\nB\nC\nD\nE\nF\n"),
+    ] {
         let dir = workdir(LIST);
         fs::write(
             dir.path().join("keys.toml"),
@@ -278,7 +282,7 @@ fn a_reload_keeps_the_keys_typed_on_an_open_line_or_in_a_field() {
         .unwrap_or_else(|e| panic!("{e}"));
         let mut model = model_of(dir.path());
         press(&mut model, typed);
-        fs::write(dir.path().join("todo.txt"), format!("{LIST}F\n"))
+        fs::write(dir.path().join("todo.txt"), read)
             .unwrap_or_else(|e| panic!("{e}"));
         reload(&mut model);
         press(&mut model, "k");
