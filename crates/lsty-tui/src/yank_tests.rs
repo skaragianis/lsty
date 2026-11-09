@@ -269,6 +269,7 @@ fn a_second_paste_does_not_link_the_dependents_again() {
     reload(&mut model);
     keys(&mut model, "Gp");
     assert_eq!(todo_of(dir.path()), "\nB\nC\nA id:a\n");
+    assert_eq!(model.message.as_deref(), Some("pasted 1 task (1 moved)"));
 }
 
 #[test]
