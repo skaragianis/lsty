@@ -661,6 +661,16 @@ const HUMAN_ROWS: &[Case] = &[
             ),
         )],
     },
+    Case {
+        name: "18.25 human edits an owned task not underway",
+        todo: "A owner:agent1\n",
+        steps: &[step(
+            "",
+            "1",
+            Op::Tag("+x"),
+            Want::Done("A owner:agent1 +x\n", &["1 tagged +x"]),
+        )],
+    },
 ];
 
 const GONE1: &str =
