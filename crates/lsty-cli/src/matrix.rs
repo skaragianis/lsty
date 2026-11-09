@@ -95,7 +95,7 @@ pub(crate) const MATRIX: &[Row] = &[
             "add gives each new task an id",
             "--top renumbers everything, --after and --before the lines \
              below",
-            "--if-absent --id may give the existing task an id",
+            "--if-absent --id or --print-id may give the existing task an id",
             "--blocks REF gives REF a dep: on the new task",
         ],
         renumbers: true,
