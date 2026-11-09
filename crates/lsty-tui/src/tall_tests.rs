@@ -459,18 +459,20 @@ fn placing_the_view_and_the_cursor_counts_the_rows_of_the_tasks() {
     }
 }
 
-/// The rows of `text` laid out 14 cells wide on the first row, 12 after.
-fn laid(text: &str) -> Vec<String> {
+/// The rows of `text` laid out `first` cells wide on the first row,
+/// `later` after.
+fn laid(text: &str, (first, later): (usize, usize)) -> Vec<String> {
     let inline = Inline::new(&Config::default());
-    lay_out(&Line::parse(text.as_bytes()), None, inline, (14, 12))
+    lay_out(&Line::parse(text.as_bytes()), None, inline, (first, later))
         .iter()
         .map(|row| row.iter().map(|s| s.text.as_ref()).collect())
         .collect()
 }
 
 /// (text, rows at 14 then 12 cells): how projects and contexts the last row
-/// would cut or leave out follow the ellipsis.
-const TAGS: [(&str, &[&str]); 15] = [
+/// would cut or leave out follow the ellipsis, also when the last tag or the
+/// cut it needs fills the room exactly.
+const TAGS: [(&str, &[&str]); 17] = [
     ("fix it +a @b", &["fix it +a @b"]),
     (
         "+a @b one two three four five six seven",
@@ -528,33 +530,72 @@ const TAGS: [(&str, &[&str]); 15] = [
         "+abcd aaaa bbbb cccc dddd eeee +abcd more",
         &["+abcd aaaa", "bbbb cccc", "dddd eeee…"],
     ),
+    (
+        "aaaa bbbb cccc dddd eeeeeee +abcdefghi hhhh",
+        &["aaaa bbbb cccc", "dddd eeeeeee", "+abcdefghi …"],
+    ),
+    (
+        "+a aaaa bbbbbb cccc ddddddd eeee ffffff +a",
+        &["+a aaaa bbbbbb", "cccc ddddddd", "eeee ffffff…"],
+    ),
 ];
 
 #[test]
 fn projects_and_contexts_the_last_row_would_cut_follow_the_ellipsis() {
     for (text, want) in TAGS {
-        assert_eq!(laid(text), want, "{text}");
+        assert_eq!(laid(text, (14, 12)), want, "{text}");
     }
+    // rows one cell wide: the fourth word still leaves an ellipsis
+    assert_eq!(laid("a b c d", (1, 1)), ["a", "b", "…"]);
 }
+
+/// (text, widths, the last row as text and slot): the ellipsis takes the
+/// slot of the text it cuts, also when the cut ends a word, and the tags
+/// after it keep theirs.
+type Styled = (
+    &'static str,
+    (usize, usize),
+    &'static [(&'static str, Slot)],
+);
+
+const STYLED: [Styled; 2] = [
+    (
+        "aaaa bbbb cccc dddd eeee ffff +p @c",
+        (12, 12),
+        &[
+            ("eeee", Slot::Text),
+            ("…", Slot::Text),
+            (" ", Slot::Text),
+            ("@c", Slot::Context),
+            (" ", Slot::Text),
+            ("+p", Slot::Project),
+        ],
+    ),
+    (
+        "aaaa bbbb cccc dddd eeee ffff k:v gggg +p",
+        (14, 12),
+        &[
+            ("ffff", Slot::Text),
+            (" ", Slot::Text),
+            ("k:v", Slot::Muted),
+            ("…", Slot::Muted),
+            (" ", Slot::Text),
+            ("+p", Slot::Project),
+        ],
+    ),
+];
 
 #[test]
 fn the_tags_that_follow_the_ellipsis_keep_their_style() {
     let inline = Inline::new(&Config::default());
-    let line = Line::parse(b"aaaa bbbb cccc dddd eeee ffff +p @c");
-    let rows = lay_out(&line, None, inline, (12, 12));
-    let last: Vec<_> =
-        rows[2].iter().map(|s| (s.text.as_ref(), s.slot)).collect();
-    assert_eq!(
-        last,
-        [
-            ("eeee", Some(Slot::Text)),
-            ("…", Some(Slot::Text)),
-            (" ", Some(Slot::Text)),
-            ("@c", Some(Slot::Context)),
-            (" ", Some(Slot::Text)),
-            ("+p", Some(Slot::Project)),
-        ]
-    );
+    for (text, widths, want) in STYLED {
+        let rows =
+            lay_out(&Line::parse(text.as_bytes()), None, inline, widths);
+        let last: Vec<_> =
+            rows[2].iter().map(|s| (s.text.as_ref(), s.slot)).collect();
+        let want: Vec<_> = want.iter().map(|&(t, s)| (t, Some(s))).collect();
+        assert_eq!(last, want, "{text}");
+    }
 }
 
 #[test]
