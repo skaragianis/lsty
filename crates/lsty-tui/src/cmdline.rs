@@ -244,7 +244,8 @@ impl Model {
     }
 
     /// Runs a command of the command line as one write, or shows what
-    /// a read printed.
+    /// a read printed. A write that changed nothing says why in the
+    /// alert tone.
     fn run_cli(&mut self, words: &[String]) {
         let home = self.deps.home.clone();
         let result =
@@ -252,6 +253,7 @@ impl Model {
         match result {
             Err(e) => self.fail_line(&e),
             Ok((inline, clock)) => {
+                let none = matches!(&inline, Inline::Wrote(o) if o.no_op());
                 match inline {
                     Inline::Wrote(outcome) => self.adopt(*outcome, clock),
                     Inline::Read(lines) => {
@@ -259,6 +261,9 @@ impl Model {
                     }
                 }
                 self.close_input();
+                if none {
+                    self.tone = messages::Tone::Alert;
+                }
             }
         }
     }

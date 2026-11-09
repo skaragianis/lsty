@@ -3,6 +3,7 @@
 
 use lsty_core::{
     case::lower,
+    dates::Clock,
     errs::{self, Code},
     keys::Action,
     list::{Snapshot, Task, TaskId},
@@ -264,7 +265,8 @@ impl Model {
             return;
         }
         let chosen = self.chosen(&tasks);
-        let ran = self.ending(&tasks, |m| {
+        let mut kept = None;
+        self.ending(&tasks, |m| {
             let result = m.attempt(|env| write(env, kind, &chosen, &text));
             if !result
                 .as_ref()
@@ -272,11 +274,12 @@ impl Model {
             {
                 m.close_input();
             }
-            m.settle(result)
+            kept = m.took(result);
+            kept.is_some()
         });
-        if ran {
+        if let Some(kept) = kept {
             self.again = Some(Again::Prompt { kind, count, text });
-            self.summarize(chosen.len());
+            self.summarize(chosen.len(), kept);
         }
     }
 
@@ -298,16 +301,28 @@ impl Model {
             return;
         }
         let result = self.attempt(|env| write(env, kind, &chosen, &text));
-        let wrote = result.as_ref().is_ok_and(|(o, _)| !o.no_op());
-        if !self.settle(result) {
+        let Some(kept) = self.took(result) else {
             return;
-        }
-        if !wrote {
-            self.tone = messages::Tone::Alert;
-            return;
-        }
+        };
         self.again = Some(Again::Prompt { kind, count, text });
-        self.summarize(chosen.len());
+        self.summarize(chosen.len(), kept);
+    }
+
+    /// Takes what a prompt's action did: one that changed nothing says
+    /// why in the alert tone. Once it wrote, the number of its tasks it
+    /// left as they were.
+    fn took(
+        &mut self,
+        result: errs::Result<(Outcome, Clock)>,
+    ) -> Option<usize> {
+        let kept = match &result {
+            Ok((outcome, _)) if !outcome.no_op() => Some(unchanged(outcome)),
+            Ok(_) | Err(_) => None,
+        };
+        if self.settle(result) && kept.is_none() {
+            self.tone = messages::Tone::Alert;
+        }
+        kept
     }
 
     /// Whether `.` of `again`, with `typed` the count typed, would leave
@@ -329,9 +344,9 @@ impl Model {
         })
     }
 
-    /// Replaces the messages of several tasks by a count when they do
-    /// not fit the status line.
-    fn summarize(&mut self, n: usize) {
+    /// Replaces the messages of several tasks, `kept` of them left as
+    /// they were, by a count when they do not fit the status line.
+    fn summarize(&mut self, n: usize, kept: usize) {
         let Some(shown) = self.message.take() else {
             return;
         };
@@ -339,7 +354,13 @@ impl Model {
         let room = usize::from(self.width).saturating_sub(used + 2);
         let long = width_of(&shown) > room;
         self.message = Some(if n > 1 && long {
-            format!("{n} tasks changed")
+            let changed =
+                format!("{} changed", ops::counted(n - kept, "task"));
+            if kept == 0 {
+                changed
+            } else {
+                format!("{changed}; {kept} unchanged")
+            }
         } else {
             shown
         });
@@ -539,6 +560,20 @@ fn write(
         Kind::AddTag => ops::tag(env, &targets, &words(text)),
         Kind::RemoveTag => ops::untag(env, &targets, &words(text)),
     }
+}
+
+/// How many of the tasks `outcome` is about it left as they were.
+fn unchanged(outcome: &Outcome) -> usize {
+    fn line(snap: &Snapshot, id: TaskId) -> Option<&[u8]> {
+        snap.task(id).map(|t| snap.line(t).raw())
+    }
+    let (read, after) = (outcome.read(), outcome.after());
+    outcome
+        .before()
+        .iter()
+        .zip(outcome.tasks())
+        .filter(|&(&was, &now)| line(read, was) == line(after, now))
+        .count()
 }
 
 /// The tags of a prompt's text.

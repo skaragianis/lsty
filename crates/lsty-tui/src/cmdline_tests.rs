@@ -7,6 +7,7 @@ use lsty_core::{
 
 use crate::{
     focus::Focus,
+    messages::Tone,
     model::Model,
     msg::{Cmd, Msg},
     output::Output,
@@ -255,6 +256,9 @@ fn undo_and_redo_run_from_the_line() {
     line(&mut model, "redo");
     let data = todo_of(dir.path());
     assert!(data.starts_with("x "), "{data}");
+    line(&mut model, "do 1");
+    let said = (model.tone, model.message.as_deref());
+    assert_eq!(said, (Tone::Alert, Some("1 is already done")));
 }
 
 #[test]
