@@ -15,6 +15,7 @@ use tempfile::TempDir;
 use crate::{
     hints::dim,
     history::Again,
+    insert::Draft,
     messages::Tone,
     model::Model,
     msg::{Cmd, Msg},
@@ -208,10 +209,12 @@ fn asked(model: &Model, key: &str) -> Hint {
 
 /// Whether `action`, lit now, changes the bytes of the files: undo, redo
 /// and the keys that write on their lines, but `<Esc>` and `.` of `t`,
-/// which cannot be sure.
+/// which cannot be sure, and a commit of a field with nothing typed.
 fn writes(model: &Model, action: Action) -> bool {
     let again = model.again.as_ref().filter(|_| action == Action::Repeat);
+    let unchanged = model.edit.as_ref().is_some_and(Draft::unchanged);
     let unsure = action == Action::Cancel
+        || action == Action::Commit && unchanged
         || again.is_some_and(|a| a.action() == Action::ToggleStart);
     let history = matches!(action, Action::Undo | Action::Redo);
     (history || writes_line(action)) && !unsure
