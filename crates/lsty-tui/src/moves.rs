@@ -23,7 +23,9 @@ impl Model {
     /// passes that many shown tasks, or as many as there are. In VISUAL
     /// mode the selection moves as a block and the count is dropped.
     pub(crate) fn move_task(&mut self, action: Action, count: usize) {
-        self.move_by(action, false, count);
+        if self.read_first(action, count).is_some() {
+            self.move_by(action, false, count);
+        }
     }
 
     /// `.` after a block move: `count` rows from the cursor move as one

@@ -116,14 +116,14 @@ fn outside(dir: &Path, from: &str, to: &str) {
 }
 
 /// One press on a list whose lines `from` the outside made `to`, against
-/// the same press on a list that has read the same files: `writes` tells
-/// which of the two outcomes it is. The first asks to look again and writes
+/// the same press on a list that has read the same files: `acts` tells
+/// which of the two outcomes it is. The first asks to look again and does
 /// nothing, and the next press does what the up to date one did. The second
 /// is the same press as the up to date one.
 fn stale_against_fresh(
     (action, key, first): (Action, &str, &str),
     (list, from, to): (&str, &str, &str),
-    writes: bool,
+    acts: bool,
 ) {
     let name = format!("{key} after {first} on {list:?} to {to:?}");
     let (stale_dir, mut stale) = opened(list, first);
@@ -135,10 +135,12 @@ fn stale_against_fresh(
     reload(&mut fresh);
     let hint = fresh.answers()(action);
     keys(&mut fresh, key);
-    assert_eq!(files(fresh_dir.path()) != moved_on, writes, "{name}");
+    // A selection the reading changed makes the fresh press look again too.
+    let again = fresh.message.as_deref() == Some(LOOK_AGAIN);
+    assert_eq!(!dim(hint) && !again, acts, "{name}: acts");
     keys(&mut stale, key);
     assert_eq!(files(stale_dir.path()), moved_on, "{name}: wrote");
-    if writes {
+    if acts {
         looks_again(&stale, action, Some(hint), &name);
         keys(&mut stale, key);
     }
@@ -228,6 +230,21 @@ fn a_dim_press_on_a_list_that_moved_on_never_writes() {
     let to = "x 2026-09-01 A +k\n";
     let changed = (CLOSED, "x 2026-09-01 A\n", to);
     stale_against_fresh((Action::CyclePriority, "-", "ggVj"), changed, false);
+    // A move at the end, and a line the outside put below it.
+    let below = ("A\nB\n", "B\n", "B\nC\n");
+    stale_against_fresh((Action::MoveTaskDown, "J", "G"), below, true);
+    let block = ("A\nB\nC\n", "B\n", "B\nD\n");
+    stale_against_fresh((Action::Repeat, ".", "VjJ<Esc>k"), block, true);
+    // Keys that write nothing themselves, on a list the outside filled.
+    let filled = ("\n", "\n", "A\n");
+    for (action, key) in [
+        (Action::ChangeDescription, "cc"),
+        (Action::SetDue, "gd"),
+        (Action::Yank, "yy"),
+        (Action::CursorDown, "j"),
+    ] {
+        stale_against_fresh((action, key, ""), filled, true);
+    }
 }
 
 /// `.` stores the key from a press on the last task, which the outside
@@ -703,5 +720,5 @@ fn in_a_panel_no_key_that_works_is_dim() {
 /// against its hint, over the seeds of the fuzz target.
 #[test]
 fn every_key_of_a_seed_does_what_its_hint_says() -> io::Result<()> {
-    holds("hints", 32, hints_property)
+    holds("hints", 34, hints_property)
 }

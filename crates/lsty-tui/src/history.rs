@@ -321,6 +321,7 @@ impl Model {
         let count = again.count(typed);
         match again {
             Again::Task { action, .. } => return self.run(action, count),
+            _ if self.read_first(Action::Repeat, typed).is_none() => {}
             Again::Block { action, .. } => self.repeat_block(action, count),
             Again::Prompt { kind, text, .. } => {
                 self.repeat_prompt(kind, count, text);

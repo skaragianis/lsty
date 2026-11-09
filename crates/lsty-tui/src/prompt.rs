@@ -189,14 +189,11 @@ impl Model {
     /// Opens the prompt of `kind` on the task under the cursor, or
     /// `count` tasks from it, unless one of them is archived.
     pub(crate) fn open_prompt(&mut self, kind: Kind, count: usize) {
-        let answer = decide(kind.action(), self, &self.summary(count));
-        let tasks = self.tasks_of(count);
-        let count = self.count_for(count, tasks.len());
-        let chosen = self.chosen(&tasks);
-        if let Answer::Refused(why) = answer {
-            self.refuse(why, &chosen);
+        if self.refused(kind.action(), count) {
             return;
         }
+        let tasks = self.tasks_of(count);
+        let count = self.count_for(count, tasks.len());
         let places = places(&self.snap, &tasks);
         let prompt = Prompt {
             kind,
