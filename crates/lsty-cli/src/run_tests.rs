@@ -48,11 +48,15 @@ pub(crate) struct Ran {
     pub(crate) paged: Vec<(Vec<OsString>, String)>,
 }
 
-/// A watch with nothing to watch again.
-struct Still;
+/// A watch whose change comes after the wait first reads the files, at
+/// the first rewatch, as another writer's would.
+struct Later(Option<(Rc<EditorFn>, PathBuf)>);
 
-impl Watcher for Still {
+impl Watcher for Later {
     fn rewatch(&mut self) -> Result<(), String> {
+        if let Some((change, dir)) = self.0.take() {
+            change(&dir).expect("the change");
+        }
         Ok(())
     }
 }
@@ -96,8 +100,8 @@ impl Fake {
         self
     }
 
-    /// A watch that runs `change` on the work folder as it starts and
-    /// then tells of it; without one the watch cannot start.
+    /// A watch that tells of a change as it starts and runs `change` on
+    /// the work folder just after; without one the watch cannot start.
     pub(crate) fn watching(
         mut self,
         change: impl Fn(&Path) -> io::Result<()> + 'static,
@@ -171,13 +175,12 @@ impl Fake {
         found.map(|(_, v)| v.clone())
     }
 
-    /// The fake watch: runs the change of [`Fake::watching`] and tells of
-    /// it.
+    /// The fake watch: tells of the change of [`Fake::watching`], which
+    /// it runs at the first rewatch.
     fn watch(&self, sink: &Sink) -> Result<Box<dyn Watcher>, String> {
         let change = self.change.as_ref().ok_or("no watch")?;
-        change(&self.path()).map_err(|e| e.to_string())?;
         sink(Notice::Changed);
-        Ok(Box::new(Still))
+        Ok(Box::new(Later(Some((Rc::clone(change), self.path())))))
     }
 
     fn run_os(&self, args: Vec<OsString>) -> Ran {
