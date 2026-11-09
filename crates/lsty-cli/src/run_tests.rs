@@ -824,6 +824,9 @@ const FACTS_TODO: &str = "\
 started:2026-09-29T0700Z owner:agent1 color:red due:2026-11-01
 Mine started:2026-09-29T1100Z
 x 2026-09-28 2026-09-20 Shipped owner:agent2 pri:C
+Ask id:ask dep:tell
+Tell id:tell dep:why
+Why id:why dep:ask
 ";
 
 /// The whole `show` block, with the claim in a zone that is not UTC.
@@ -866,6 +869,11 @@ fn show_prints_every_fact_in_local_time() {
     assert!(done.contains("  priority: C\n"), "{done}");
     assert!(done.contains("  finished by agent2\n"), "{done}");
     assert!(!done.contains("tag:"), "{done}");
+    assert_eq!(
+        show("5"),
+        "5 Ask id:ask dep:tell\n  text: Ask\n  state: todo\n  id: ask\n  \
+        blocked by: 6 Tell (id:tell)\n  dependency cycle: 5 → 6 → 7 → 5\n"
+    );
     let archived = show("done:1");
     assert!(archived.starts_with("done:1 x 2026-09-01"), "{archived}");
 }
