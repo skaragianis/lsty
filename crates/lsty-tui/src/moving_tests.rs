@@ -310,7 +310,8 @@ fn a_completed_task_stays_until_what_the_next_key_starts_is_over() {
     assert_eq!(model.selected_rows(), Some((1, 2)));
 }
 
-// A done row looks the same in either file: the press does too.
+// A done row looks the same in either file: the press does too, and the
+// cursor stays on the done row the selection ends in, not on one it passed.
 #[test]
 fn a_press_over_a_done_row_is_the_same_with_auto_archive() {
     let rows = [
@@ -329,6 +330,8 @@ fn a_press_over_a_done_row_is_the_same_with_auto_archive() {
             press(&mut model, "Gxvk");
             press(&mut model, key);
             assert_eq!(model.message.as_deref(), Some(said), "{name}");
+            let on = &rows_of(&model)[model.cursor];
+            assert_eq!(on, "x 2026-09-29 C", "{name}");
         }
     }
 }
