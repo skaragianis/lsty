@@ -410,7 +410,7 @@ fn looked_again(
         // The twin looked again too, its selection having lost its lines.
         keys(&mut twin.model, count);
         fresh = twin.checked(key, false, trail);
-    } else if main.model.key_mode() != twin.model.key_mode() {
+    } else if main.model.visual.is_none() && twin.model.visual.is_some() {
         // Looking again ended the selection, which the twin keeps.
         keys(&mut twin.model, "<Esc>");
         keys(&mut twin.model, count);
