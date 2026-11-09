@@ -277,7 +277,7 @@ fn one_task_keeps_its_message_however_long() {
 }
 
 /// The keys typed in the search, and its text after them.
-const SEARCH_COMPLETES: [(&str, &str); 19] = [
+const SEARCH_COMPLETES: [(&str, &str); 20] = [
     ("/-file:to<Tab>", "-file:todo.txt"),
     ("/+a|file:to<Tab>", "+a|file:todo.txt"),
     ("/+w<Tab>", "+work"),
@@ -297,6 +297,7 @@ const SEARCH_COMPLETES: [(&str, &str); 19] = [
     ("/+home|+w<Tab>", "+home|+work"),
     ("/is:done|is:la<Tab>", "is:done|is:later"),
     ("/+h|+w<Left><Left><Left><Tab>", "+home|+w"),
+    ("/+ho|+w<Left><Left><Left><Left><Tab>", "+home|+w"),
 ];
 
 #[test]

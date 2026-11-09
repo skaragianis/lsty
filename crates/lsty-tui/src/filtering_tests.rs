@@ -239,8 +239,8 @@ fn names_move_with_their_connectives_and_the_other_terms_stay() {
 #[test]
 fn a_name_already_moved_stays_in_the_search() {
     let (_dir, mut model) = workdir_model(LIST, alone());
-    keys(&mut model, "/+work|+home +work<CR>");
-    assert_eq!(model.panels[PROJECTS].active.len(), 2);
+    keys(&mut model, "/+work|+home +work +work.acme<CR>");
+    assert_eq!(model.panels[PROJECTS].active.len(), 3);
     assert_eq!(model.search, "+work");
 }
 
