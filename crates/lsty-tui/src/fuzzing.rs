@@ -136,8 +136,19 @@ impl Side {
     /// it says to look again, a dim key only writes nothing. Over keys or a
     /// selection whose lines a reading changed, a key that writes on its
     /// lines writes nothing, says to look again and ends the selection.
-    /// Tells what the hint said.
+    /// Tells what the hint said. A key its mode reads as two, one that acts
+    /// or is dropped before its last stroke (`dd` in VISUAL: `d`, then a
+    /// `d` of NORMAL), is checked as each in turn.
     fn checked(&mut self, key: &str, stale: bool, trail: &[String]) -> Hint {
+        let Some(at) = first_key(&self.model, key) else {
+            return self.pressed(key, stale, trail);
+        };
+        self.checked(&key[..at], stale, trail);
+        self.checked(&key[at..], stale, trail)
+    }
+
+    /// [`Side::checked`] of a key its mode reads as one.
+    fn pressed(&mut self, key: &str, stale: bool, trail: &[String]) -> Hint {
         let asked = asked(&self.model, key);
         let writes = asked.is_some_and(|(a, _)| writes(&self.model, a));
         let lost = self.model.keys_lost
@@ -198,13 +209,29 @@ type Kept = ([Vec<u8>; 2], Mode, Option<(usize, usize)>, Option<Again>);
 /// The action `key` runs now, as the list's own matcher reads it, and what
 /// its hint says; `None` when it runs no action.
 fn asked(model: &Model, key: &str) -> Hint {
-    let mut matcher = model.matchers.get(&model.key_mode())?.clone();
-    let strokes = parse_keys(key, None).ok()?;
-    let fed = strokes.into_iter().map(|s| matcher.feed(s)).last()?;
-    let Outcome::Matched { action, .. } = fed.outcome else {
+    let Some(Outcome::Matched { action, .. }) = fed(model, key) else {
         return None;
     };
     Some((action, model.answers()(action)))
+}
+
+/// What the list's own matcher makes of `key` at its last stroke.
+fn fed(model: &Model, key: &str) -> Option<Outcome> {
+    let mut matcher = model.matchers.get(&model.key_mode())?.clone();
+    let strokes = parse_keys(key, None).ok()?;
+    strokes.into_iter().map(|s| matcher.feed(s).outcome).last()
+}
+
+/// The length of the first of the keys `key` is, when the matcher of the
+/// mode stops waiting before its last stroke: it runs an action, or drops
+/// the keys pending.
+fn first_key(model: &Model, key: &str) -> Option<usize> {
+    let all = parse_keys(key, None).ok()?;
+    (1..key.len()).find(|&at| {
+        let head = key.get(..at).and_then(|h| parse_keys(h, None).ok());
+        head.is_some_and(|h| all.starts_with(&h))
+            && fed(model, &key[..at]).is_some_and(|o| o != Outcome::Pending)
+    })
 }
 
 /// Whether `action`, lit now, changes the bytes of the files: undo, redo
