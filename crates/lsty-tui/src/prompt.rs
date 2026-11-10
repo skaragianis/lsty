@@ -309,10 +309,10 @@ impl Model {
         self.summarize(chosen.len(), kept);
     }
 
-    /// Takes what a prompt's action did: one that changed nothing says
-    /// why in the alert tone. Once it wrote, the number of its tasks it
-    /// left as they were.
-    fn took(
+    /// Takes what a prompt's action or a move did: one that changed nothing
+    /// says why in the alert tone. Once it wrote, the number of its tasks
+    /// it left as they were.
+    pub(crate) fn took(
         &mut self,
         result: errs::Result<(Outcome, Clock)>,
     ) -> Option<usize> {
@@ -327,12 +327,11 @@ impl Model {
     }
 
     /// Whether `.` of `again`, with `typed` the count typed, would leave
-    /// each line as it is: a prompt over its tasks, or a move.
+    /// each line as it is: a prompt over its tasks.
     pub(crate) fn keeps(&self, again: &Again, typed: usize) -> bool {
         let count = again.count(typed);
         let Again::Prompt { kind, text, .. } = again else {
-            let block = matches!(again, Again::Block { .. });
-            return self.moves_nothing(again.action(), block, count);
+            return false;
         };
         let (tags, today) = (words(text), self.clock.today());
         let mut lines = self.rows_of(count).iter().filter_map(|row| {

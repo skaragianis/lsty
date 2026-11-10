@@ -101,16 +101,16 @@ fn a_move_that_cannot_go_writes_nothing() {
     assert_eq!(modified(dir.path()), before);
     assert_eq!(model.hist.undo.len(), 0);
     assert!(model.message.is_none());
-    // The line between twins went as the key was pressed: the move would
-    // leave the same lines.
-    let dir = workdir("A\n\nA\n");
+    // Past an identical line it is lit, and the core says why, as an alert
+    // that leaves what `.` repeats alone.
+    let dir = workdir("A\nA\nB\n");
     let mut model = model_of(dir.path(), alone());
-    fs::write(dir.path().join("todo.txt"), "A\nA\n")
-        .unwrap_or_else(|e| panic!("{e}"));
     let before = modified(dir.path());
     keys(&mut model, "J");
     assert_eq!(modified(dir.path()), before);
     assert_eq!(model.message.as_deref(), Some("1 is already there"));
+    assert_eq!(model.tone, Tone::Alert);
+    assert!(model.again.is_none());
 }
 
 #[test]
