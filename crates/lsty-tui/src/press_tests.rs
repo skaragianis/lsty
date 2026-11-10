@@ -1001,7 +1001,6 @@ fn a_failed_completion_keeps_the_cursor() {
     let (dir, mut model) = list(&[1, 7]);
     fs::write(dir.path().join("todo.txt"), "Changed\n")
         .unwrap_or_else(|e| panic!("{e}"));
-    model.miss_change();
     let cursor = model.cursor;
     press(&mut model, "2x");
     assert_eq!(model.tone, Tone::Alert);

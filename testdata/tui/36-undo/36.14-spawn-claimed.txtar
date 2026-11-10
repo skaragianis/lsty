@@ -18,12 +18,12 @@ Z
 -- refused --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
 │  2 ✓ Pay rec:1w                                                    │
-│  1 ▶ Pay rec:1w                                          10-06  0m │
+│  1   Pay rec:1w                                        10-06  t001 │
 │  3   Z                                                             │
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  can't undo: the list changed
+ NORMAL  todo.txt  manual  can't undo: the list changed — look again
 -- refused-todo --
 x 2026-09-29 Pay rec:1w due:2026-09-30
 2026-09-29 Pay rec:1w due:2026-10-06 started:2026-09-29T0900Z owner:agent1

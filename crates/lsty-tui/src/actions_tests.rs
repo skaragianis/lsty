@@ -395,8 +395,6 @@ fn ahead(
     };
     let mut model = model_of(dir.path(), config);
     write(outside);
-    // The other writer's change lands after the check before the key.
-    model.miss_change();
     if owed {
         let mut held = held_lock(dir.path());
         reload(&mut model);

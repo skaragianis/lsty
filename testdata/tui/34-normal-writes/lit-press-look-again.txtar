@@ -7,6 +7,7 @@ keys x
 frame b-frame
 fg b-colour
 file todo.txt b-file
+tick 50ms
 keys x
 frame c-frame
 file todo.txt c-file
@@ -31,7 +32,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Blocker                                                                                   b │
-│  2 ⧗ Free dep:b                                                                                  │
+│  2   Free                                                                                        │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -40,12 +41,12 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..
 -- b-colour --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttttt...................................................................................i.E
-E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+E.tt...tttt........................................................................................E
 E..................................................................................................E
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..xxxxxxxxxxxxxxxxxxxxxxxxxxxxx..D.DDDD..D.DDDDD..k.yyyy..k.yyy......mmmmm.
+NNNNNNNN.tttttttt..mmmmmm..xxxxxxxxxxxxxxxxxxxxxxxxxxxxx..k.yyyy..k.yyyyy..k.yyyy..k.yyy......mmmmm.
 -- b-file --
 Blocker id:b
 Free dep:b

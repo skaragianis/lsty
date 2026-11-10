@@ -250,7 +250,7 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
 ];
 
 /// A list after the keys `first`, its file then edited to `edit` outside
-/// and, for `read`, read again, else missed. In the `gap` the file is put
+/// and, for `read`, read again. In the `gap` the file is put
 /// back as the keys left it, not read.
 fn edited_after(
     first: &str,
@@ -266,8 +266,6 @@ fn edited_after(
         .unwrap_or_else(|e| panic!("{e}"));
     if read {
         reload(&mut model);
-    } else {
-        model.miss_change();
     }
     if gap {
         fs::write(dir.path().join("todo.txt"), stood)
