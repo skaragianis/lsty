@@ -13,6 +13,7 @@ use tempfile::TempDir;
 
 use crate::{
     hints::dim,
+    messages::PUT_BACK,
     model::Model,
     test_util::{
         alone, cursor_text, deps, held_lock, keys, load_of, press, reload,
@@ -274,11 +275,35 @@ fn edited_after(
     (dir, model)
 }
 
+/// A dim undo, redo or put-back in the gap kept its `steps` and the window
+/// of `t`: once its lines are read back, `key` is lit and writes.
+fn lights_when_read(
+    model: &mut Model,
+    dir: &Path,
+    (key, action): (&str, Action),
+    steps: Option<(usize, usize)>,
+    name: &str,
+) {
+    let Some(steps) = steps else {
+        return;
+    };
+    assert_eq!(kept(model), steps, "{name}: step kept");
+    let on_disk = todo_of(dir);
+    reload(model);
+    assert!(!dim(model.answers()(action)), "{name}: lit again");
+    keys(model, key);
+    assert_ne!(todo_of(dir), on_disk, "{name}: wrote");
+    if key == "t" {
+        assert_eq!(model.message.as_deref(), Some(PUT_BACK), "{name}");
+    }
+}
+
 // An undo or redo, or the `t` that puts claims back, that writes on a line
 // goes through a shift and refuses anything else, whether the reading has
 // drawn it or not; once drawn, its hint is dim, and it writes nothing though
-// the lines stand again on disk. One that puts a line back always writes,
-// its neighbours only saying where.
+// the lines stand again on disk, keeping its step: read back, it lights and
+// writes. One that puts a line back always writes, its neighbours only
+// saying where.
 #[test]
 fn an_outside_edit_under_an_undo_or_redo() {
     for (name, first, edit, key, want) in OUTSIDE_EDITS {
@@ -297,6 +322,7 @@ fn an_outside_edit_under_an_undo_or_redo() {
                 assert_eq!(dim(hint), want.is_none(), "{name}: {hint:?}");
             }
             let on_disk = todo_of(dir.path());
+            let steps = gap.then(|| kept(&model));
             let cmds = keys(&mut model, key);
             assert_eq!(
                 todo_of(dir.path()),
@@ -310,6 +336,8 @@ fn an_outside_edit_under_an_undo_or_redo() {
                 let shown = model.snap.todo().to_bytes();
                 assert_eq!(shown, todo_of(dir.path()).as_bytes(), "{name}");
             }
+            let pressed = (*key, action);
+            lights_when_read(&mut model, dir.path(), pressed, steps, &name);
         }
     }
 }
