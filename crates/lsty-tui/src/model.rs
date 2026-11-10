@@ -278,7 +278,6 @@ impl Model {
         self.unseen |= msg.changes_the_list();
         if matches!(msg, Msg::Key(_)) {
             self.pointer.let_go();
-            self.leave_sticky(self.cursor_place());
         }
         let step = self.refilter.serial;
         let mut cmds = self.dispatch(msg);
