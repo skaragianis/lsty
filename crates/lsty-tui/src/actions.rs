@@ -39,7 +39,7 @@ impl Chosen {
 
     /// Whether `command` changes this task, rather than say it is already
     /// there.
-    pub(crate) const fn changed_by(&self, command: Command) -> bool {
+    const fn changed_by(&self, command: Command) -> bool {
         match command {
             Command::Do | Command::Wontdo => {
                 !matches!(self.state, State::Done)
@@ -69,7 +69,9 @@ impl Model {
         let toggles = action == Action::ToggleStart;
         let stops = answer == Answer::Resolved(Command::Stop);
         let back = toggles && !stops && self.just_stopped(count);
-        let ran = self.ending(&ids, |m| m.answered(answer, back, &tasks));
+        let selected = self.visual.is_some();
+        let ran =
+            self.ending(&ids, |m| m.answered(answer, back, &tasks, selected));
         if ran {
             self.again = Some(Again::Task {
                 action,
@@ -89,6 +91,7 @@ impl Model {
         answer: Answer,
         back: bool,
         tasks: &[Chosen],
+        selected: bool,
     ) -> bool {
         let (command, passes) = match answer {
             Answer::Applies | Answer::Refused(_) => return false,
@@ -108,8 +111,14 @@ impl Model {
         if there > 0 && matches!(command, Command::Do | Command::Wontdo) {
             self.cursor = (cursor + tasks.len()).min(self.rows.len() - 1);
         }
+        let aimed: Vec<Target> = tasks
+            .iter()
+            .filter(|_| selected)
+            .map(Chosen::target)
+            .collect();
         let result = self.attempt(|env| {
             let env = Env {
+                aimed: &aimed,
                 dry: !passes,
                 ..env.clone()
             };
