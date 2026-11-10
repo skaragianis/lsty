@@ -10,12 +10,13 @@ use std::{
 use jiff::Timestamp;
 use lsty_core::{
     errs::{Code, Error, Source},
-    keys::Action,
+    keys::{Action, Outcome},
     list::Snapshot,
     ops::{self, FileRecord, UndoRecord},
 };
 
 use crate::{
+    hints::dim,
     messages,
     model::{MESSAGE_LIFE, Model},
     msg::Cmd,
@@ -276,6 +277,18 @@ impl Model {
             .then(|| self.clock_now().is_ok_and(|c| c.now() < stopped.until))
     }
 
+    /// Ends the window unless `outcome` keeps it: keys still to come, a
+    /// `t`, or a dim key that does nothing (a dim `.` runs with the window
+    /// aside, in `repeat`).
+    pub(crate) fn keep_stop_window(&mut self, outcome: Outcome) {
+        self.hist.stopped = self.hist.stopped.take().filter(|_| {
+            matches!(outcome, Outcome::Pending)
+                || matches!(outcome, Outcome::Matched { action, count }
+                    if action == Action::ToggleStart
+                        || dim(self.answers_at(count)(action)))
+        });
+    }
+
     /// Tells whether the window is open over the tasks of `count`, and ends
     /// it if they are the tasks.
     pub(crate) fn just_stopped(&mut self, count: usize) -> bool {
@@ -320,7 +333,12 @@ impl Model {
         };
         let count = again.count(typed);
         match again {
-            Again::Task { action, .. } => return self.run(action, count),
+            Again::Task { action, .. } => {
+                let window = self.hist.stopped.take();
+                let cmds = self.run(action, count);
+                self.hist.stopped = self.hist.stopped.take().or(window);
+                return cmds;
+            }
             Again::Block { action, .. } => self.move_by(action, true, count),
             Again::Prompt { kind, text, .. } => {
                 self.repeat_prompt(kind, count, text);
