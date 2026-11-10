@@ -303,21 +303,6 @@ pub(crate) fn files(dir: &Path) -> [Vec<u8>; 2] {
         .map(|name| fs::read(dir.join(name)).unwrap_or_default())
 }
 
-/// A list that read the files `stale` holds only as a key was pressed,
-/// against one that read them before: the same files, message, tone and
-/// screen.
-pub(crate) fn same_as(
-    stale: (&Path, &Model),
-    fresh: (&Path, &Model),
-    name: &str,
-) {
-    assert_eq!(files(stale.0), files(fresh.0), "{name}");
-    assert_eq!(stale.1.message, fresh.1.message, "{name}");
-    assert_eq!(stale.1.tone, fresh.1.tone, "{name}");
-    let shown = |m: &Model| screen(m, m.width, m.height);
-    assert_eq!(shown(stale.1), shown(fresh.1), "{name}");
-}
-
 /// The hint of `action` is `fresh`, what a list that read the files says;
 /// without one, lit.
 pub(crate) fn hint_is(

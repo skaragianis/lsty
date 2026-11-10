@@ -124,7 +124,8 @@ impl Side {
     /// files, the selection and what `.` repeats; a lit one that writes
     /// tasks, and opens no field to, changes the files and refuses none.
     /// A press on a `stale` list is judged against the twin's (see
-    /// [`behind`]). Over keys or a selection whose lines a reading changed,
+    /// [`behind`]), but a dim one keeps as any does, unless the core words
+    /// its refusal. Over keys or a selection whose lines a reading changed,
     /// a key that writes on its lines writes nothing, says to look again and
     /// ends the selection. Tells what the hint said. A key its mode reads as
     /// two, one that acts or is dropped before its last stroke (`dd` in
@@ -149,7 +150,7 @@ impl Side {
         let said = &self.model.message;
         let name = format!("{key} {asked:?} said {said:?} after {trail:?}");
         match asked {
-            Some((_, answer)) if dim(answer) && stale => {}
+            Some((_, Answer::CoreRefuses(_))) if stale => {}
             Some((_, answer)) if dim(answer) => {
                 assert_eq!(self.kept(), before, "dim {name}");
             }

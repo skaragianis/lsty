@@ -28,7 +28,7 @@ use crate::{
     press::Answer,
     test_util::{
         Board, alone, cursor_text, deps, files, held_lock, hint_is, keys,
-        reload, same_as, screen, started, workdir,
+        screen, started, workdir,
     },
 };
 
@@ -115,43 +115,6 @@ fn outside(dir: &Path, from: &str, to: &str) {
     fs::write(&path, now.replace(from, to)).unwrap_or_else(|e| panic!("{e}"));
 }
 
-/// One press on a list whose lines `from` the outside made `to`, against
-/// the same press on a list that has read the same files: `acts` tells
-/// which of the two outcomes it is. The first asks to look again and does
-/// nothing, and the next press does what the up to date one did. The second
-/// is the same press as the up to date one.
-fn stale_against_fresh(
-    (action, key, first): (Action, &str, &str),
-    (list, from, to): (&str, &str, &str),
-    acts: bool,
-) {
-    let name = format!("{key} after {first} on {list:?} to {to:?}");
-    let (stale_dir, mut stale) = opened(list, first);
-    let (fresh_dir, mut fresh) = opened(list, first);
-    assert!(dim(stale.answers()(action)), "{name}: dim to start with");
-    outside(stale_dir.path(), from, to);
-    stale.miss_change();
-    outside(fresh_dir.path(), from, to);
-    let moved_on = files(stale_dir.path());
-    reload(&mut fresh);
-    let hint = fresh.answers()(action);
-    keys(&mut fresh, key);
-    // A selection the reading changed makes the fresh press look again too.
-    let again = fresh.message.as_deref() == Some(LOOK_AGAIN);
-    assert_eq!(!dim(hint) && !again, acts, "{name}: acts");
-    keys(&mut stale, key);
-    assert_eq!(files(stale_dir.path()), moved_on, "{name}: wrote");
-    if acts {
-        looks_again(&stale, action, Some(hint), &name);
-        keys(&mut stale, key);
-    }
-    same_as(
-        (stale_dir.path(), &stale),
-        (fresh_dir.path(), &fresh),
-        &name,
-    );
-}
-
 /// The list said to look again; the hint of `action` now is as `hint_is`.
 fn looks_again(
     model: &Model,
@@ -209,84 +172,25 @@ fn a_dim_press_leaves_the_selection_and_the_repeat_alone() {
     }
 }
 
-/// Each way of pressing a key: alone, over a selection, with a count.
-#[test]
-fn a_dim_press_on_a_list_that_moved_on_never_writes() {
-    for (action, key, first, (shown, freed, other)) in KEYS {
-        let selected = format!("{first}Vj");
-        let counted = format!("2{key}");
-        for way in [(key, first), (key, &selected), (&counted, first)] {
-            // A selection refuses unless its lines only shifted.
-            let writes = way.1 != selected || freed == NO_BLOCKER;
-            for (to, writes) in [(freed, writes), (other, false)] {
-                stale_against_fresh(
-                    (action, way.0, way.1),
-                    (shown, shown, to),
-                    writes,
-                );
-            }
-        }
-    }
-    // A selection whose lines changed, the key still dim: it says its own.
-    let to = "x 2026-09-01 A +k\n";
-    let changed = (CLOSED, "x 2026-09-01 A\n", to);
-    stale_against_fresh((Action::CyclePriority, "-", "ggVj"), changed, false);
-    // A move at the end, and a line the outside put below it.
-    let below = ("A\nB\n", "B\n", "B\nC\n");
-    stale_against_fresh((Action::MoveTaskDown, "J", "G"), below, true);
-    let block = ("A\nB\nC\n", "B\n", "B\nD\n");
-    stale_against_fresh((Action::Repeat, ".", "VjJ<Esc>k"), block, true);
-    // Keys that write nothing themselves, on a list the outside filled.
-    let filled = ("\n", "\n", "A\n");
-    for (action, key) in [
-        (Action::ChangeDescription, "cc"),
-        (Action::SetDue, "gd"),
-        (Action::Yank, "yy"),
-        (Action::CursorDown, "j"),
-    ] {
-        stale_against_fresh((action, key, ""), filled, true);
-    }
-}
-
-/// `.` stores the key from a press on the last task, which the outside
-/// leaves alone. A selection has no `.`.
-#[test]
-fn a_dim_repeat_on_a_list_that_moved_on_never_writes() {
-    for (action, key, first, (shown, freed, other)) in KEYS {
-        let mine = if action == Action::Stop {
-            "Mine started:2026-09-29T0800Z\n"
-        } else {
-            "Mine\n"
-        };
-        let before = format!("G{key}gg{first}");
-        let list = format!("{shown}{mine}");
-        for press in [".", "2."] {
-            for (to, writes) in [(freed, true), (other, false)] {
-                stale_against_fresh(
-                    (Action::Repeat, press, &before),
-                    (&list, shown, to),
-                    writes,
-                );
-            }
-        }
-    }
-}
-
 /// Where the cursor ends up, and that the next press is on the task it is
-/// on. A selection stays through the look again and follows its lines. Lines
-/// the outside changed drop it, as any reload does.
+/// on. Lines the outside changed drop a selection, as any reload does.
 #[test]
 fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
     let rows = [
         // It changed: the row stays, on the task now there.
         (
             "j",
-            "New\nBlocker id:b\nA\nB dep:b\n",
+            "New\nBlocker id:b\nA +p\nB\n",
             "Blocker id:b",
-            "New\nx 2026-09-29 Blocker id:b\nA\nB dep:b\n",
+            "New\nx 2026-09-29 Blocker id:b\nA +p\nB\n",
         ),
-        // It stayed where it was.
-        ("j", FREED, "A", "Blocker id:b\nx 2026-09-29 A\nB\n"),
+        // A counted row below it changed: the count is gone.
+        (
+            "gg2",
+            "Blocker id:b\nA +p\nB\n",
+            "Blocker id:b",
+            "x 2026-09-29 Blocker id:b\nA +p\nB\n",
+        ),
         // It went away: the next task has the cursor.
         (
             "j",
@@ -295,13 +199,11 @@ fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
             "Blocker id:b\nx 2026-09-29 B\n",
         ),
         // The lines of the selection changed: it ended, the cursor stayed.
-        ("jVj", FREED, "B", "Blocker id:b\nA\nx 2026-09-29 B\n"),
-        // They stayed, and the outside took away what blocked them.
         (
             "jVj",
-            NO_BLOCKER,
-            "B dep:b",
-            "x 2026-09-29 A dep:b\nx 2026-09-29 B dep:b\n",
+            "Blocker id:b\nA +p\nB\n",
+            "B",
+            "Blocker id:b\nA +p\nx 2026-09-29 B\n",
         ),
         // All that was selected went away.
         (
@@ -313,9 +215,8 @@ fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
     ];
     for (first, to, under, want) in rows {
         let name = format!("{first} to {to:?}");
-        let (dir, mut model) = opened(BLOCKED, first);
-        outside(dir.path(), BLOCKED, to);
-        model.miss_change();
+        let (dir, mut model) = opened(FREED, first);
+        outside(dir.path(), FREED, to);
         let before = files(dir.path());
         keys(&mut model, "x");
         looks_again(&model, Action::ToggleComplete, None, &name);
@@ -324,6 +225,12 @@ fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
         keys(&mut model, "x");
         assert_eq!(files(dir.path())[0], want.as_bytes(), "{name}");
     }
+    // Lines that only shifted keep a selection, and a lit press is on them.
+    let (dir, mut model) = opened(FREED, "jVj");
+    outside(dir.path(), FREED, "New\nBlocker id:b\nA\nB\n");
+    keys(&mut model, "x");
+    let want = "New\nBlocker id:b\nx 2026-09-29 A\nx 2026-09-29 B\n";
+    assert_eq!(files(dir.path())[0], want.as_bytes());
 }
 
 /// A count is for the press it was typed for, and the next one reads its
@@ -355,39 +262,8 @@ fn a_count_does_not_outlive_a_look_again() {
     assert_eq!(files(dir.path()), before);
 }
 
-/// The task the cursor was on went away and the next one is refused too:
-/// the reason is about the task now shown.
-#[test]
-fn a_refused_press_names_the_task_now_under_the_cursor() {
-    let rows = [
-        (
-            BLOCKED,
-            "j",
-            "Blocker id:b\nB dep:b\n",
-            "x",
-            "B dep:b",
-            "task 2 is blocked by 1 (Blocker)",
-        ),
-        (
-            CLOSED,
-            "gg",
-            "x 2026-09-01 A\nB\n",
-            "2t",
-            "x 2026-09-01 A",
-            "some are done — nothing changed",
-        ),
-    ];
-    for (from, first, to, key, under, says) in rows {
-        let (dir, mut model) = opened(from, first);
-        outside(dir.path(), from, to);
-        keys(&mut model, key);
-        assert_eq!(cursor_text(&model), under);
-        assert_eq!(model.message.as_deref(), Some(says));
-    }
-}
-
 /// Only the done file moved: the archived task under the cursor is gone, and
-/// the key is lit over the task that took its place.
+/// the key looks again over the task that took its place.
 #[test]
 fn a_press_after_a_change_to_the_done_file_alone_looks_again() {
     let dir = workdir("A\n");
@@ -399,38 +275,21 @@ fn a_press_after_a_change_to_the_done_file_alone_looks_again() {
     };
     let mut model = started(deps(dir.path(), config));
     keys(&mut model, "G");
-    assert!(dim(model.answers()(Action::CyclePriority)));
     fs::write(&done, "").unwrap_or_else(|e| panic!("{e}"));
-    keys(&mut model, "-");
-    looks_again(&model, Action::CyclePriority, None, "done file");
+    keys(&mut model, "x");
+    looks_again(&model, Action::ToggleComplete, None, "done file");
     assert_eq!(cursor_text(&model), "A");
 }
 
-/// Tasks came to an empty list: a key that said nothing says so, once.
+/// The list shows no task: `x` says nothing and reads nothing, whatever
+/// the file now holds.
 #[test]
-fn a_press_on_an_empty_list_that_has_tasks_now_looks_again() {
-    let rows: [(_, _, &[u8]); 2] = [
-        ("x", Action::ToggleComplete, b"x 2026-09-29 New\n"),
-        ("dd", Action::Delete, b"\n"),
-    ];
-    for (key, action, then) in rows {
-        let (dir, mut model) = opened("", "");
-        fs::write(dir.path().join("todo.txt"), "New\n")
-            .unwrap_or_else(|e| panic!("{e}"));
-        keys(&mut model, key);
-        looks_again(&model, action, None, key);
-        assert_eq!(files(dir.path())[0], b"New\n");
-        keys(&mut model, key);
-        assert_eq!(files(dir.path())[0], then, "{key}");
-    }
-}
-
-/// The file changed and the list did not: there is nothing to look at.
-#[test]
-fn a_press_on_a_list_that_stays_empty_says_nothing() {
-    for (shown, first, to) in
-        [("A\n", "/zzz<CR>", "A\nB\n"), ("", "", "A t:2099-01-01\n")]
-    {
+fn a_press_on_an_empty_list_says_nothing() {
+    for (shown, first, to) in [
+        ("A\n", "/zzz<CR>", "A\nB\n"),
+        ("", "", "A t:2099-01-01\n"),
+        ("", "", "New\n"),
+    ] {
         let (dir, mut model) = opened(shown, first);
         fs::write(dir.path().join("todo.txt"), to)
             .unwrap_or_else(|e| panic!("{e}"));
@@ -441,21 +300,20 @@ fn a_press_on_a_list_that_stays_empty_says_nothing() {
     }
 }
 
-/// Emptied from outside, however it came about: the list is empty, the key
-/// says why, and nothing is written.
+/// Emptied from outside, however it came about: the list is empty, the lit
+/// key says the list changed, and nothing is written.
 #[test]
 fn a_press_on_a_list_emptied_outside_looks_again() {
     let (later, gone) = ("A t:2030-01-01\nB t:2030-01-01\n", "gone");
     for first in ["j", "jVj"] {
         for to in ["", later, gone] {
-            let (dir, mut model) = opened(BLOCKED, first);
+            let (dir, mut model) = opened(FREED, first);
             let todo = dir.path().join("todo.txt");
             if to == gone {
                 fs::remove_file(&todo).unwrap_or_else(|e| panic!("{e}"));
             } else {
                 fs::write(&todo, to).unwrap_or_else(|e| panic!("{e}"));
             }
-            model.miss_change();
             let before = files(dir.path());
             keys(&mut model, "x");
             let name = format!("{first} to {to:?}");
@@ -468,7 +326,8 @@ fn a_press_on_a_list_emptied_outside_looks_again() {
 }
 
 /// A read that fails ends the press with the message the core would give, the
-/// list as it was. Once the lock is free, the next press reads.
+/// list as it was. Once the lock is free, the next press finds the line
+/// changed.
 #[test]
 fn a_dim_press_that_cannot_read_says_the_file_is_busy() {
     let dir = workdir(BLOCKED);
@@ -487,12 +346,12 @@ fn a_dim_press_that_cannot_read_says_the_file_is_busy() {
     held.release().unwrap_or_else(|e| panic!("{}", e.message()));
     assert_eq!(files(dir.path())[0], FREED.as_bytes());
     keys(&mut model, "x");
-    looks_again(&model, Action::ToggleComplete, None, "lock let go");
+    assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN));
     assert_eq!(files(dir.path())[0], FREED.as_bytes());
 }
 
 /// A key that cannot write does not wait for the lock, and what it says is
-/// true of the list still shown. Once the lock is free, the next press reads.
+/// true of the list still shown.
 #[test]
 fn a_refused_press_does_not_wait_for_a_held_lock() {
     let done = Some("A is done — x reopens it");
@@ -518,9 +377,6 @@ fn a_refused_press_does_not_wait_for_a_held_lock() {
         assert_eq!(model.message.as_deref(), says, "{key}");
         assert_eq!(model.rows.len(), rows, "{key}: the list as it was");
         held.release().unwrap_or_else(|e| panic!("{}", e.message()));
-        keys(&mut model, key);
-        assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN), "{key}");
-        assert_eq!(files(dir.path())[0], to.as_bytes(), "{key}");
     }
 }
 

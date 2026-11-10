@@ -11,7 +11,6 @@ use lsty_core::{
 };
 
 use crate::{
-    hints::dim,
     history::{Again, pairs_of},
     messages::{self, Tone},
     model::Model,
@@ -57,9 +56,7 @@ impl Model {
     /// Does a task action over the task under the cursor, or `count`
     /// tasks from it.
     pub(crate) fn act(&mut self, action: Action, count: usize) -> bool {
-        let Some(answer) = self.read_first(action, count) else {
-            return false;
-        };
+        let answer = self.answers_at(count)(action);
         let ids = self.tasks_of(count);
         let tasks = self.chosen(&ids);
         if let Answer::Refused(why) = answer {
@@ -81,39 +78,6 @@ impl Model {
             }
         }
         ran
-    }
-
-    /// What `action` answers with `count` typed, as its hint reads the
-    /// list: a dim one first reads the files and answers over them. `None`
-    /// when that reading failed, or made the key lit and so said to look
-    /// again.
-    pub(crate) fn read_first(
-        &mut self,
-        action: Action,
-        count: usize,
-    ) -> Option<Answer> {
-        let answer = |m: &Self| m.answers_at(count)(action);
-        let now = answer(self);
-        let had = !self.rows.is_empty();
-        // A key refused here cannot write, so nothing is owed to its read.
-        let refused = matches!(now, Answer::Refused(_));
-        match dim(now).then(|| self.moved_on(refused)) {
-            Some(Ok(true)) => {
-                let now = answer(self);
-                let looks = !dim(now) || (had && self.rows.is_empty());
-                if looks && self.keys_lost {
-                    self.say_changed();
-                } else if looks {
-                    self.alert(ops::LIST_CHANGED.to_owned());
-                }
-                (!looks).then_some(now)
-            }
-            Some(Err(e)) if !refused => {
-                self.fail(&e);
-                None
-            }
-            _ => Some(now),
-        }
     }
 
     /// Does what `answer` says over `tasks`, or, for `back`, puts back the
@@ -305,12 +269,10 @@ impl Model {
     }
 
     /// Whether the rule refuses `action` over the tasks of `count`, having
-    /// said why, or a dim press read a list it made lit.
+    /// said why.
     pub(crate) fn refused(&mut self, action: Action, count: usize) -> bool {
-        let why = match self.read_first(action, count) {
-            Some(Answer::Refused(why)) => why,
-            Some(_) => return false,
-            None => return true,
+        let Answer::Refused(why) = self.answers_at(count)(action) else {
+            return false;
         };
         let tasks = self.chosen(&self.tasks_of(count));
         self.refuse(why, &tasks);

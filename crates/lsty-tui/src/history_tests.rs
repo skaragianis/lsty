@@ -278,8 +278,8 @@ fn an_outside_edit_under_an_undo_or_redo() {
             assert_eq!(said == refusal, want.is_none(), "{name}: {said}");
             if want.is_none() {
                 model.update(load_of(cmds).read());
-                let fresh = model.moved_on(true).ok();
-                assert_eq!(fresh, Some(false), "{name}: read");
+                let shown = model.snap.todo().to_bytes();
+                assert_eq!(shown, todo_of(dir.path()).as_bytes(), "{name}");
             }
         }
     }
