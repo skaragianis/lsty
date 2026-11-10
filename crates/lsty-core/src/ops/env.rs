@@ -127,6 +127,10 @@ pub struct Env<'a> {
     /// The lines of `aim` a count or a selection took, written or not:
     /// one that is not its line now writes nothing.
     pub aimed: &'a [Target],
+    /// Whether the operation plans on `aim` alone, without the lock, and
+    /// writes nothing: what it would say of the list on screen. Without
+    /// `aim` it reads under the lock; it never writes.
+    pub dry: bool,
 }
 
 impl<'a> Env<'a> {
@@ -164,6 +168,7 @@ impl<'a> Env<'a> {
             ids: &OsIds,
             aim: None,
             aimed: &[],
+            dry: false,
         }
     }
 }

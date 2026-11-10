@@ -110,6 +110,7 @@ impl Model {
         let result = self.attempt(|env| {
             let env = Env {
                 aimed: &aimed,
+                dry: !passes,
                 ..env.clone()
             };
             self.perform(&env, command, &changing)
@@ -295,6 +296,11 @@ impl Model {
                 named(tasks, messages::closed_task, messages::CLOSED_TASKS)
             }
             Refusal::SomeDone => messages::SOME_DONE.to_owned(),
+            // The window of `t` ends, so that the next `t` starts them.
+            Refusal::Changed => {
+                self.hist.stopped = None;
+                ops::LIST_CHANGED.to_owned()
+            }
         };
         if matches!(why, Refusal::Sorted | Refusal::Says(_)) {
             self.message = Some(text);

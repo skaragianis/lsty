@@ -12,7 +12,7 @@ use lsty_core::{
     errs::{Code, Error, Source},
     keys::Action,
     list::Snapshot,
-    ops::{self, FileRecord, UndoRecord},
+    ops::{self, Env, FileRecord, UndoRecord},
 };
 
 use crate::{
@@ -202,14 +202,19 @@ impl Model {
             Way::Undo => &self.hist.undo,
             Way::Redo => &self.hist.redo,
         };
-        // A step whose lines changed is refused by the write, which drops it.
+        // A step whose lines changed is refused by the write, which drops it;
+        // one whose lines changed on screen is refused without the lock.
         let Some(top) = stack.last() else {
             self.refused(way.action(), 1);
             return;
         };
-        let result = self.attempt(|env| match way {
-            Way::Undo => ops::undo(env, &top.rec),
-            Way::Redo => ops::redo(env, &top.rec),
+        let dry = !top.lands(&self.snap);
+        let result = self.attempt(|env| {
+            let env = &Env { dry, ..env.clone() };
+            match way {
+                Way::Undo => ops::undo(env, &top.rec),
+                Way::Redo => ops::redo(env, &top.rec),
+            }
         });
         match result {
             Ok((outcome, clock)) => {
@@ -224,7 +229,11 @@ impl Model {
                 if e.code() == Code::ExpectMismatch {
                     self.hist.stack(way).pop();
                 }
-                self.fail(&e);
+                if dry {
+                    self.alert(e.message().to_owned());
+                } else {
+                    self.fail(&e);
+                }
             }
         }
     }
@@ -319,11 +328,13 @@ impl Model {
             return Vec::new();
         };
         let count = again.count(typed);
+        let dry =
+            matches!(again, Again::Prompt { .. }) && self.keeps(&again, typed);
         match again {
             Again::Task { action, .. } => return self.run(action, count),
             Again::Block { action, .. } => self.move_by(action, true, count),
             Again::Prompt { kind, text, .. } => {
-                self.repeat_prompt(kind, count, text);
+                self.repeat_prompt(kind, count, text, dry);
             }
         }
         Vec::new()

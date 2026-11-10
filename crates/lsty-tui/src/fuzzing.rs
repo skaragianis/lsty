@@ -124,12 +124,12 @@ impl Side {
     /// files, the selection and what `.` repeats; a lit one that writes
     /// tasks, and opens no field to, changes the files and refuses none.
     /// A press on a `stale` list is judged against the twin's (see
-    /// [`behind`]), but a dim one keeps as any does, unless the core words
-    /// its refusal. Over keys or a selection whose lines a reading changed,
-    /// a key that writes on its lines writes nothing, says to look again and
-    /// ends the selection. Tells what the hint said. A key its mode reads as
-    /// two, one that acts or is dropped before its last stroke (`dd` in
-    /// VISUAL: `d`, then a `d` of NORMAL), is checked as each in turn.
+    /// [`behind`]), but a dim one keeps as any does. Over keys or a
+    /// selection whose lines a reading changed, a key that writes on its
+    /// lines writes nothing, says to look again and ends the selection.
+    /// Tells what the hint said. A key its mode reads as two, one that acts
+    /// or is dropped before its last stroke (`dd` in VISUAL: `d`, then a `d`
+    /// of NORMAL), is checked as each in turn.
     fn checked(&mut self, key: &str, stale: bool, trail: &[String]) -> Hint {
         let Some(at) = first_key(&self.model, key) else {
             return self.pressed(key, stale, trail);
@@ -150,7 +150,6 @@ impl Side {
         let said = &self.model.message;
         let name = format!("{key} {asked:?} said {said:?} after {trail:?}");
         match asked {
-            Some((_, Answer::CoreRefuses(_))) if stale => {}
             Some((_, answer)) if dim(answer) => {
                 assert_eq!(self.kept(), before, "dim {name}");
             }
@@ -177,11 +176,17 @@ impl Side {
         matches!(self.model.key_mode(), Mode::Normal | Mode::Visual)
     }
 
-    /// What a dim key keeps. Not the mode: a press that lets go of the last
-    /// sticky task rightly takes the focus from an empty panel to the list.
+    /// What a dim key keeps, the list it read included. Not the mode: a
+    /// press that lets go of the last sticky task rightly takes the focus
+    /// from an empty panel to the list.
     fn kept(&self) -> Kept {
         let m = &self.model;
-        (self.files(), m.selected_rows(), m.again.clone())
+        (
+            self.files(),
+            m.snap.serial(),
+            m.selected_rows(),
+            m.again.clone(),
+        )
     }
 
     /// Whether the two lists show the same, so that a run can go on.
@@ -196,7 +201,7 @@ impl Side {
 /// The action a key runs and what its hint says, when it runs one.
 type Hint = Option<(Action, Answer)>;
 
-type Kept = ([Vec<u8>; 2], Option<(usize, usize)>, Option<Again>);
+type Kept = ([Vec<u8>; 2], u32, Option<(usize, usize)>, Option<Again>);
 
 /// The action `key` runs now, as the list's own matcher reads it, and what
 /// its hint says; `None` when it runs no action.

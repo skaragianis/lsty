@@ -67,6 +67,8 @@ pub(crate) enum Refusal {
     NoId,
     /// The key has nothing to work on, and says this.
     Says(&'static str),
+    /// `t` in the window after it stopped tasks whose lines changed since.
+    Changed,
 }
 
 /// What a press would do.
@@ -80,8 +82,9 @@ pub(crate) enum Answer {
     Resolved(Command),
     /// The press is refused, by the key.
     Refused(Refusal),
-    /// The command runs over all the tasks and says why it writes nothing:
-    /// it names the blockers or the task in its message.
+    /// The command plans over all the tasks of the list on screen, without
+    /// the lock, and says why it writes nothing: it names the blockers or
+    /// the task in its message.
     CoreRefuses(Command),
 }
 
@@ -253,7 +256,7 @@ fn puts_back(m: &Model, s: &Summary) -> bool {
 
 /// `u`, `<C-r>` and the `t` that puts claims back: a step to apply, whose
 /// lines still stand in the reading as it left them. Over lines changed
-/// since, the press runs, writes nothing and says so.
+/// since, the press writes nothing and says so without the lock.
 fn rewinds(m: &Model, top: Option<&Step>) -> bool {
     top.is_some_and(|top| top.lands(&m.snap))
 }
@@ -401,7 +404,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             return if rewinds(m, m.hist.undo.last()) {
                 Answer::Resolved(Command::Start)
             } else {
-                Answer::CoreRefuses(Command::Start)
+                Answer::Refused(Refusal::Changed)
             };
         }
         Action::ToggleComplete => complete,
