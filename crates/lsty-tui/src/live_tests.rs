@@ -141,7 +141,6 @@ fn a_reload_that_finds_the_same_content_changes_nothing() {
     changed(&mut model);
     reload(&mut model);
     assert!(std::ptr::eq(first_task(&model), before));
-    assert!(model.reload_owed().is_none(), "nothing is owed");
 }
 
 // 33.27
@@ -177,7 +176,7 @@ fn a_change_to_the_done_file_alone_is_shown() {
 }
 
 #[test]
-fn a_folder_where_the_todo_file_was_is_told_and_owed_again() {
+fn a_folder_where_the_todo_file_was_is_told() {
     let dir = workdir(LIST);
     // Resolved: on macOS the temporary folder is behind a link.
     let real = fs::canonicalize(dir.path()).unwrap_or_else(|e| panic!("{e}"));
@@ -192,7 +191,6 @@ fn a_folder_where_the_todo_file_was_is_told_and_owed_again() {
         Some(format!("{} is a folder", path.display()).as_str())
     );
     assert!(model.file_exists(), "the list shown stays");
-    assert!(model.reload_owed().is_some(), "owed again");
 }
 
 #[test]
@@ -244,28 +242,36 @@ fn every_minute_reads_the_files_watched_or_not() {
     }
 }
 
+// A key that reads the files under the lock shows them too, though it
+// changes nothing.
 #[test]
-fn a_busy_lock_is_tried_again_at_the_next_minute() {
-    let dir = workdir(LIST);
-    let config = Config {
-        lock_timeout: Duration::from_millis(1),
-        ..alone()
-    };
-    let (mut model, _feed) = watched(dir.path(), config);
-    let path = dir.path().join("todo.txt");
-    let mut held = held_lock(dir.path());
-    fs::write(&path, NEXT).unwrap_or_else(|e| panic!("{e}"));
-    changed(&mut model);
-    reload(&mut model);
-    assert_eq!(
-        model.notices(),
-        ["todo.txt is busy; showing the last state read"]
-    );
-    assert_eq!(model.snap.todo().to_bytes(), LIST.as_bytes());
-    held.release().unwrap_or_else(|e| panic!("{}", e.message()));
-    minute(&mut model);
-    assert_eq!(model.notices(), Vec::<String>::new());
-    assert_eq!(model.snap.todo().to_bytes(), NEXT.as_bytes());
+fn a_busy_lock_is_tried_again_at_the_next_minute_or_key() {
+    for by_key in [false, true] {
+        let dir = workdir(LIST);
+        let config = Config {
+            lock_timeout: Duration::from_millis(1),
+            ..alone()
+        };
+        let (mut model, _feed) = watched(dir.path(), config);
+        let path = dir.path().join("todo.txt");
+        let mut held = held_lock(dir.path());
+        fs::write(&path, NEXT).unwrap_or_else(|e| panic!("{e}"));
+        changed(&mut model);
+        reload(&mut model);
+        assert_eq!(
+            model.notices(),
+            ["todo.txt is busy; showing the last state read"]
+        );
+        assert_eq!(model.snap.todo().to_bytes(), LIST.as_bytes());
+        held.release().unwrap_or_else(|e| panic!("{}", e.message()));
+        if by_key {
+            keys(&mut model, ":archive<CR>");
+        } else {
+            minute(&mut model);
+        }
+        assert_eq!(model.notices(), Vec::<String>::new(), "{by_key}");
+        assert_eq!(model.snap.todo().to_bytes(), NEXT.as_bytes(), "{by_key}");
+    }
 }
 
 /// After an outside edit the cursor stays on a task whose line did not change

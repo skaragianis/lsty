@@ -9,7 +9,7 @@ use crate::{
     model::Model,
     msg::Msg,
     test_util::{
-        alone, deps, keys, load_of, press, reload, started, todo_of, workdir,
+        alone, deps, keys, press, reload, started, todo_of, workdir,
         workdir_cancelling,
     },
 };
@@ -85,11 +85,7 @@ fn a_field_whose_line_changed_refuses_then_drops_on_esc() {
             } else {
                 fs::write(dir.path().join("todo.txt"), disk).unwrap();
             }
-            let cmds = keys(&mut model, first);
-            if !read {
-                // The refusal reads the files itself.
-                model.update(load_of(cmds).read());
-            }
+            keys(&mut model, first);
             assert_eq!(todo_of(dir.path()), disk, "{name}");
             stays_open(&model, "more", &name);
             keys(&mut model, "<CR>x");

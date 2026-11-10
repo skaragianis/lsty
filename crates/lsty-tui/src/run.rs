@@ -320,8 +320,7 @@ fn apply(
 }
 
 /// Reads on a thread of its own and sends the result to the loop. When
-/// no thread can be had the reading fails like any other and is owed
-/// again.
+/// no thread can be had the reading fails like any other.
 fn read_in_background(load: Box<Load>, tx: &Sender<Event>) {
     let (serial, clock) = (load.serial, load.clock.clone());
     let sender = tx.clone();

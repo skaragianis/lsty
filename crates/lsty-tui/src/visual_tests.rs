@@ -10,8 +10,8 @@ use crate::{
     messages,
     model::Model,
     test_util::{
-        alone, deps, keys, load_of, press, reload, screen, settled, started,
-        todo_of, workdir,
+        alone, deps, keys, press, reload, screen, settled, started, todo_of,
+        workdir,
     },
 };
 
@@ -508,7 +508,7 @@ fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
                 .unwrap_or_else(|e| panic!("{e}"));
             reload(&mut model);
         }
-        let cmds = keys(&mut model, then);
+        keys(&mut model, then);
         let file = todo_of(dir.path());
         let lines: Vec<&str> =
             file.lines().filter(|l| !l.is_empty()).collect();
@@ -519,7 +519,6 @@ fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
             assert_eq!(said, says, "{name}");
             let open = model.line.is_some() || model.visual.is_some();
             assert!(!open, "{name}: it ends");
-            load_of(cmds); // and reads the files again
         } else {
             assert_ne!(said, LOOK, "{name}");
         }

@@ -1,6 +1,6 @@
 //! What an operation needs from its caller.
 
-use std::time::Duration;
+use std::{cell::Cell, time::Duration};
 
 use super::{
     ids::{IdSource, OsIds},
@@ -131,6 +131,9 @@ pub struct Env<'a> {
     /// writes nothing: what it would say of the list on screen. Without
     /// `aim` it reads under the lock; it never writes.
     pub dry: bool,
+    /// Where a refusal of lines that changed leaves the lists it read
+    /// under the lock, so that the caller can show them.
+    pub read_back: Option<&'a Cell<Option<Snapshot>>>,
 }
 
 impl<'a> Env<'a> {
@@ -169,6 +172,7 @@ impl<'a> Env<'a> {
             aim: None,
             aimed: &[],
             dry: false,
+            read_back: None,
         }
     }
 }

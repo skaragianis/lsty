@@ -196,7 +196,7 @@ impl Model {
             path: title_path(&start.found.todo, deps.home.as_deref()),
             deps,
             clock,
-            live: Live::new(&snap),
+            live: Live::default(),
             snap,
             pointer: Pointer::default(),
             cancel,
@@ -281,7 +281,7 @@ impl Model {
         }
         let step = self.refilter.serial;
         let mut cmds = self.dispatch(msg);
-        cmds.extend(self.kick_reload());
+        self.show_read();
         self.note_candidates();
         cmds.extend(self.refilter.timer(step));
         if input {

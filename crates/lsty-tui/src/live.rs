@@ -1,7 +1,7 @@
 //! Keeping the list in step with the files: the watcher's notices, the
 //! debounce, the reload and what the status line says about it.
 
-use std::{collections::HashSet, time::Duration};
+use std::{cell::Cell, collections::HashSet, time::Duration};
 
 use jiff::tz::TimeZone;
 use lsty_core::{
@@ -32,9 +32,10 @@ use crate::{
 pub(crate) const DEBOUNCE: Duration = Duration::from_millis(50);
 
 /// Where a reload is.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 enum Phase {
     /// Nothing is owed.
+    #[default]
     Idle,
     /// An event started the debounce.
     Waiting,
@@ -120,17 +121,8 @@ impl PartialEq for Reading {
 
 impl Eq for Reading {}
 
-/// Why a reload is due without a notice.
-#[derive(Clone, Copy, Debug)]
-struct Debt {
-    /// The last reload did not get the files, or the folder is gone.
-    owed: bool,
-    /// The list said it changed: the input that said so reads at once.
-    kick: bool,
-}
-
 /// What the status line says about the files.
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Default)]
 struct Shown {
     /// The todo file was there and is not any more.
     deleted: bool,
@@ -140,35 +132,18 @@ struct Shown {
 }
 
 /// What the model knows about the files beyond the list.
+#[derive(Default)]
 pub(crate) struct Live {
     watcher: Option<Box<dyn Watcher>>,
     phase: Phase,
-    debt: Debt,
+    /// The lists the core read when it refused a write on lines that
+    /// changed, and the clock it read them by, shown once the input is
+    /// over.
+    pub(crate) read: Cell<Option<(Snapshot, Clock)>>,
     shown: Shown,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
     serial: u64,
-}
-
-impl Live {
-    /// The state after the first reading, `snap`. A reload is owed while
-    /// the folder is gone.
-    pub(crate) fn new(snap: &Snapshot) -> Self {
-        Self {
-            watcher: None,
-            phase: Phase::Idle,
-            debt: Debt {
-                owed: snap.found().state == FileState::DirMissing,
-                kick: false,
-            },
-            shown: Shown {
-                deleted: false,
-                busy: false,
-                unwatched: false,
-            },
-            serial: 0,
-        }
-    }
 }
 
 /// Reads both files under shared locks. A folder that is missing has
@@ -305,9 +280,8 @@ impl Model {
         self.on_event().into_iter().collect()
     }
 
-    /// A reload that failed is owed again at the next event or tick.
+    /// A reload that failed: the next event or minute reads again.
     fn failed(&mut self, e: &errs::Error) {
-        self.live.debt.owed = true;
         if e.code() == Code::LockTimeout {
             self.live.shown.busy = true;
         } else {
@@ -315,21 +289,12 @@ impl Model {
         }
     }
 
-    /// Shows a reading. While the folder is gone a reload is owed for
-    /// each tick, so that its return is noticed.
-    fn accept(&mut self, snap: Snapshot, clock: Clock) {
-        self.live.debt.owed = snap.found().state == FileState::DirMissing;
+    /// Shows a reading: of the watch, or the one an operation made under
+    /// the lock, so that its write lands as on that reading.
+    pub(crate) fn accept(&mut self, snap: Snapshot, clock: Clock) {
         self.live.shown.busy = false;
         if !same_state(&snap, &self.snap) {
             self.install(snap, clock, None);
-        }
-    }
-
-    /// Shows the files an operation read when another writer had changed
-    /// them since the list did, so that its write lands as on that reading.
-    pub(crate) fn catch_up(&mut self, read: &Snapshot, clock: Clock) {
-        if !same_state(read, &self.snap) {
-            self.install(read.clone(), clock, None);
         }
     }
 
@@ -363,27 +328,14 @@ impl Model {
         changed
     }
 
-    /// Owes a reload: the files are not what the list shows.
-    pub(crate) fn owe_reload(&mut self) {
-        self.live.debt.owed = true;
-        self.live.debt.kick = true;
-    }
-
-    /// Starts the reload an input owed by saying the list changed, so that
-    /// the hints show the files as they are.
-    pub(crate) fn kick_reload(&mut self) -> Option<Cmd> {
-        if !std::mem::take(&mut self.live.debt.kick) {
-            return None;
+    /// Shows the lists the core read when it refused a write on lines that
+    /// changed, as a reading of the watch would be, before the next input
+    /// reads the list.
+    pub(crate) fn show_read(&mut self) {
+        if let Some((snap, clock)) = self.live.read.take() {
+            self.unseen = true;
+            self.accept(snap, clock);
         }
-        self.reload_owed()
-    }
-
-    /// Starts a reload now when one is owed.
-    pub(crate) fn reload_owed(&mut self) -> Option<Cmd> {
-        if !self.live.debt.owed {
-            return None;
-        }
-        self.read_now()
     }
 
     /// Starts a reload now, or after the one under way. The minute does
