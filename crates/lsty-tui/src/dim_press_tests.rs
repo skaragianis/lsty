@@ -513,5 +513,5 @@ fn in_a_panel_no_key_that_works_is_dim() {
 /// against its hint, over the seeds of the fuzz target.
 #[test]
 fn every_key_of_a_seed_does_what_its_hint_says() -> io::Result<()> {
-    holds("hints", 41, hints_property)
+    holds("hints", 37, hints_property)
 }

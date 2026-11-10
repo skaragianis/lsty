@@ -2,13 +2,12 @@
 //! the files sometimes changed behind its back, against what the hint of
 //! each key said the key would do.
 
-use std::{fs, path::Path};
+use std::{cmp::Ordering, fs, path::Path};
 
 use lsty_core::{
     config::Config,
     errs::Source,
     keys::{Action, Matcher, Mode, Outcome, parse_keys},
-    ops::LIST_CHANGED,
 };
 use tempfile::TempDir;
 
@@ -98,6 +97,12 @@ const REWRITE: u8 = 0xF0;
 struct Side {
     dir: TempDir,
     model: Model,
+    /// Where each line of the file another writer changed went, while the
+    /// list has not read it: none when it changed, went or got a twin.
+    moved: Vec<Vec<usize>>,
+    /// While its `<CR>` is checked, the lines the key that opened a field
+    /// was to write on.
+    opened: Vec<(usize, usize)>,
 }
 
 impl Side {
@@ -109,71 +114,106 @@ impl Side {
         }
         let mut model = started(deps(dir.path(), config.clone()));
         model.update(Msg::Resize(width, 24));
-        Self { dir, model }
+        let (moved, opened) = (Vec::new(), Vec::new());
+        Self {
+            dir,
+            model,
+            moved,
+            opened,
+        }
     }
 
     fn files(&self) -> [Vec<u8>; 2] {
         files(self.dir.path())
     }
 
-    fn screen(&self) -> Vec<String> {
-        screen(&self.model, self.model.width, self.model.height)
-    }
-
     /// Presses `key` and checks it against its hint: a dim key changes
     /// nothing but its message (see [`Side::kept`]); a lit one that writes
-    /// tasks, and opens no field to, changes the files and refuses none.
-    /// A press on a `stale` list is judged against the twin's (see
-    /// [`behind`]), but a dim one keeps as any does. Over keys or a
-    /// selection whose lines a reading changed, a key that writes on its
-    /// lines writes nothing, says to look again and ends the selection.
-    /// Tells what the hint said. A key its mode reads as two, one that acts
-    /// or is dropped before its last stroke (`dd` in VISUAL: `d`, then a `d`
-    /// of NORMAL), is checked as each in turn.
-    fn checked(&mut self, key: &str, stale: bool, trail: &[String]) -> Hint {
+    /// tasks either writes, or writes nothing and says why as an alert; and
+    /// a key writes only on the lines the person saw (see [`Side::seen`]).
+    /// A key its mode reads as two, one that acts or is dropped before its
+    /// last stroke (`dd` in VISUAL: `d`, then a `d` of NORMAL), is checked
+    /// as each in turn.
+    fn checked(&mut self, key: &str, trail: &[String]) {
         let Some(at) = first_key(&self.model, key) else {
-            return self.pressed(key, stale, trail);
+            return self.pressed(key, trail);
         };
-        self.checked(&key[..at], stale, trail);
-        self.checked(&key[at..], stale, trail)
+        self.checked(&key[..at], trail);
+        self.checked(&key[at..], trail);
     }
 
     /// [`Side::checked`] of a key its mode reads as one.
-    fn pressed(&mut self, key: &str, stale: bool, trail: &[String]) -> Hint {
+    fn pressed(&mut self, key: &str, trail: &[String]) {
         let asked = asked(&self.model, key);
-        let writes = asked.is_some_and(|(a, _)| writes(&self.model, a));
-        let lost = self.model.keys_lost
-            && asked.is_some_and(|(a, _)| writes_line(self.model.aimed(a)));
+        let writes = !self.opened.is_empty()
+            || asked.is_some_and(|(a, _)| writes(&self.model, a));
+        let aim = asked.map(|(a, _)| self.model.aimed(a));
+        let history = matches!(aim, Some(Action::Undo | Action::Redo));
+        let moves =
+            matches!(aim, Some(Action::MoveTaskDown | Action::MoveTaskUp));
+        let seen = self.seen(key);
+        let sticky = self.model.rows.iter().any(|r| r.sticky);
         let before = self.kept();
         keys(&mut self.model, key);
-        self.screen();
-        let said = &self.model.message;
-        let name = format!("{key} {asked:?} said {said:?} after {trail:?}");
+        screen(&self.model, self.model.width, self.model.height);
+        let m = &self.model;
+        let name =
+            format!("{key} {asked:?} said {:?} after {trail:?}", m.message);
+        let wrote = self.files();
+        let named = named(m.message.as_deref());
+        assert!(
+            history || kept_lines(&before.0, &wrote, &seen, &named, !moves),
+            "wrote on lines not seen: {name}"
+        );
         match asked {
             Some((_, answer)) if dim(answer) => {
-                assert_eq!(self.kept(), before, "dim {name}");
+                let mut kept = self.kept();
+                // Like any key, a dim one lets go of the sticky tasks as the
+                // timer would: the focus then leaves a panel that has
+                // nothing to show for the list.
+                let let_go = sticky && !m.rows.iter().any(|r| r.sticky);
+                if let_go && kept.6 == Mode::Normal {
+                    kept.6 = before.6;
+                }
+                assert_eq!(kept, before, "dim {name}");
             }
-            Some(_) if lost => self.said_look_again(&before.0, &name),
-            Some((a, _))
-                if !stale
-                    && self.list()
-                    && writes
-                    && !core_refused(&self.model, a) =>
-            {
-                assert_ne!(self.files(), before.0, "lit {name}");
-                assert_ne!(self.model.tone, Tone::Alert, "lit {name}");
+            Some(_) if writes && self.list() => {
+                let alert = m.tone == Tone::Alert && m.message.is_some();
+                assert!(alert || wrote != before.0, "lit {name}");
             }
             _ => {}
         }
-        asked
     }
 
-    /// The press wrote nothing, said to look again and ended the selection.
-    fn said_look_again(&self, before: &[Vec<u8>; 2], name: &str) {
+    /// The lines on disk a lit `key` may write on, as a file and a line:
+    /// those of the rows it acts on, followed to where another writer moved
+    /// them when the list has not read its change; for `<CR>`, those of the
+    /// key that opened the field. None once a reading changed the lines
+    /// under the keys typed or the selection.
+    fn seen(&self, key: &str) -> Vec<(usize, usize)> {
+        if !self.opened.is_empty() {
+            return self.opened.clone();
+        }
         let m = &self.model;
-        let ended = (m.message.as_deref(), &self.files(), m.key_mode());
-        let looks = (Some(LIST_CHANGED), before, Mode::Normal);
-        assert_eq!(ended, looks, "lost {name}");
+        let Some((action, _)) = asked(m, key) else {
+            return Vec::new();
+        };
+        if m.keys_lost || !writes_line(m.aimed(action)) {
+            return Vec::new();
+        }
+        let again = m.again.as_ref().filter(|_| action == Action::Repeat);
+        let typed = m.typed_count();
+        let count = again.map_or(typed, |a| repeats_over(a, typed));
+        let rows = m.rows_of(count).iter().map(|r| (r.source, r.nr.index()));
+        rows.flat_map(|(source, at)| match source {
+            Source::Done => vec![(1, at)],
+            Source::Todo if !self.moved.is_empty() => {
+                let to = self.moved.get(at).cloned().unwrap_or_default();
+                to.into_iter().map(|at| (0, at)).collect()
+            }
+            Source::Todo => vec![(0, at)],
+        })
+        .collect()
     }
 
     /// Whether the list is shown, no field open.
@@ -182,26 +222,19 @@ impl Side {
     }
 
     /// What a dim key keeps: the files, the list it holds, the undo steps,
-    /// the selection and what `.` repeats. Not the mode: a press that lets
-    /// go of the last sticky task rightly takes the focus from an empty
-    /// panel to the list.
+    /// whether the window of `t` is open, the selection, what `.` repeats
+    /// and the mode.
     fn kept(&self) -> Kept {
         let m = &self.model;
         (
             self.files(),
             m.snap.serial(),
             (m.hist.undo.len(), m.hist.redo.len()),
+            m.hist.stopped.is_some(),
             m.selected_rows(),
             m.again.clone(),
+            m.key_mode(),
         )
-    }
-
-    /// Whether the two lists show the same, so that a run can go on.
-    fn agrees(&self, twin: &Self) -> bool {
-        let (m, t) = (&self.model, &twin.model);
-        self.files() == twin.files()
-            && (&m.message, m.tone) == (&t.message, t.tone)
-            && self.screen() == twin.screen()
     }
 }
 
@@ -212,8 +245,10 @@ type Kept = (
     [Vec<u8>; 2],
     u32,
     (usize, usize),
+    bool,
     Option<(usize, usize)>,
     Option<Again>,
+    Mode,
 );
 
 /// The action `key` runs now, as the list's own matcher reads it, and what
@@ -257,273 +292,112 @@ fn writes(model: &Model, action: Action) -> bool {
     (history || writes_line(action)) && !unsure
 }
 
-/// Whether `action`, or `.` of it, wrote nothing because the core refused
-/// it: a move past lines equal to its own, a prompt's text each task has,
-/// or an undo or redo whose lines changed.
-fn core_refused(model: &Model, action: Action) -> bool {
-    let again = model.again.as_ref().filter(|_| action == Action::Repeat);
-    let said = model.message.as_deref().unwrap_or_default();
-    let action = again.map_or(action, Again::action);
-    let refused: &[&str] = if matches!(action, Action::Undo | Action::Redo) {
-        &[LIST_CHANGED]
-    } else if matches!(action, Action::MoveTaskDown | Action::MoveTaskUp) {
-        &[" is already there"]
-    } else if matches!(
-        action,
-        Action::SetDue | Action::AddTag | Action::RemoveTag
-    ) {
-        &[" is already due ", " already has ", " has no "]
-    } else {
-        &[]
-    };
-    refused.iter().any(|words| said.contains(words))
-}
-
-/// The lines `key` writes on in NORMAL mode, when it is lit and writes on
-/// lines (`.` on those it repeats over).
-fn under(model: &Model, key: &str) -> Vec<Vec<u8>> {
-    let (Some(count), Some((action, _))) =
-        (aimed_count(model, key), asked(model, key))
-    else {
-        return Vec::new();
-    };
-    // A count writes only the tasks its command changes.
-    let answer = model.answers_at(count)(model.aimed(action));
-    let command = if let Answer::Resolved(command) = answer {
-        Some(command)
-    } else {
-        None
-    };
-    let written = |id| {
-        let task = model.chosen(&[id]);
-        command.is_none_or(|c| task.iter().all(|t| t.changed_by(c)))
-    };
-    let rows = model.rows_of(count).iter().filter(|r| written(r.id));
-    rows.filter_map(|row| model.snap.task(row.id))
-        .map(|task| model.snap.line(task).raw().to_vec())
-        .collect()
-}
-
-/// The count `key` reads in NORMAL mode, when it is lit and writes on its
-/// lines (for `.`, the rows it repeats over).
-fn aimed_count(model: &Model, key: &str) -> Option<usize> {
-    let (action, answer) = asked(model, key)?;
-    let line_key = writes_line(model.aimed(action));
-    if dim(answer) || !line_key || model.key_mode() != Mode::Normal {
-        return None;
-    }
-    let again = model.again.as_ref().filter(|_| action == Action::Repeat);
-    Some(again.map_or_else(
-        || model.typed_count(),
-        |a| repeats_over(a, model.typed_count()),
-    ))
-}
-
-/// The lines of the `count` rows from the cursor.
-fn row_lines(model: &Model, count: usize) -> Vec<Vec<u8>> {
-    let rows = model.rows_of(count).iter();
-    rows.filter_map(|row| model.snap.task(row.id))
-        .map(|task| model.snap.line(task).raw().to_vec())
-        .collect()
-}
-
-/// The count the twin types before `key`: `typed`, or, when the list's
-/// count reaches past the rows it shows, as many as it shows, so long as
-/// the twin's rows from its cursor start with those lines. A count aims at
-/// the rows on screen when its key is pressed: a line another writer added
-/// below them is not among them.
-fn reach(main: &Model, twin: &Model, key: &str, typed: &str) -> String {
-    let count = aimed_count(main, key).unwrap_or_default();
-    let shown = row_lines(main, count);
-    let short = (1..count).contains(&shown.len());
-    if short && row_lines(twin, shown.len()) == shown {
-        shown.len().to_string()
-    } else {
-        typed.to_owned()
-    }
-}
-
-/// How many lines of `todo` are `line`.
-fn twins(todo: &[u8], line: &[u8]) -> usize {
-    todo.split(|b| *b == b'\n').filter(|l| *l == line).count()
-}
-
 /// Changes the todo file in `dir` as another writer would: a line `arg`
 /// picks gets more text, goes, or gets a twin, or a line comes first.
-fn rewrite(dir: &Path, op: u8, arg: usize) {
+/// Tells where each line went: none when it changed, went or got a twin.
+fn rewrite(dir: &Path, op: u8, arg: usize) -> Vec<Vec<usize>> {
     let path = dir.join("todo.txt");
     let text = fs::read_to_string(&path).unwrap_or_default();
     let mut lines: Vec<String> = text.lines().map(str::to_owned).collect();
-    let at = arg % lines.len().max(1);
-    let there = at < lines.len();
-    match op % 4 {
-        0 if there => lines[at].push_str(" +r"),
-        1 if there => drop(lines.remove(at)),
-        2 if there => lines.insert(at, lines[at].clone()),
+    let n = lines.len();
+    let at = arg % n.max(1);
+    let op = if at < n { op % 4 } else { 3 };
+    match op {
+        0 => lines[at].push_str(" +r"),
+        1 => drop(lines.remove(at)),
+        2 => lines.insert(at, lines[at].clone()),
         _ => lines.insert(0, LINES[arg % LINES.len()].into()),
     }
     let text = lines.iter().fold(String::new(), |all, l| all + l + "\n");
     fs::write(&path, text).unwrap_or_else(|e| panic!("{e}"));
+    let went = |i: usize| match (op, i.cmp(&at)) {
+        (0..=2, Ordering::Equal) => Vec::new(),
+        (1, Ordering::Greater) => vec![i - 1],
+        (2, Ordering::Greater) | (3, _) => vec![i + 1],
+        _ => vec![i],
+    };
+    (0..n).map(went).collect()
 }
 
-/// The list and its twin read the same rewrite: the twin at once, the list
-/// when `op` says the watcher reads between `count` and `key`, else only
-/// after `key`. A stale press never writes what the twin's would not: it
-/// writes nothing, what the twin wrote, or only on the lines it aimed at
-/// (see [`on_its_rows`]), but for a paste beside another copy of its line
-/// (see [`beside_a_copy`]); and a lit key whose line changed writes nothing
-/// and says to look again. Once the list has read, the run goes on while it
-/// shows what the twin shows, and ends (`false`) otherwise.
+/// Another writer changes the file between the count and the key, and the
+/// list reads it then when `op` says the watcher does, else only after the
+/// key.
 fn behind(
-    (main, twin): (&mut Side, &mut Side),
+    side: &mut Side,
     (op, arg, count, key): (u8, usize, &str, &str),
     trail: &[String],
-) -> bool {
-    if main.model.matchers.values().any(Matcher::cancels) {
-        keys(&mut main.model, "<Esc>");
-        keys(&mut twin.model, "<Esc>");
+) {
+    if side.model.matchers.values().any(Matcher::cancels) {
+        keys(&mut side.model, "<Esc>");
     }
-    keys(&mut main.model, count);
-    let typed = count;
-    // A digit after a key that matched nothing is no count.
-    let count = if main.model.typed_count() == 0 {
-        ""
+    keys(&mut side.model, count);
+    let moved = rewrite(side.dir.path(), op, arg);
+    if op & 4 == 0 {
+        side.moved = moved;
     } else {
-        count
-    };
-    // The watcher reads between the count and the key: the lines it
-    // shows bind only a key typed before it.
-    let read = op & 4 != 0;
-    let under = if read && count.is_empty() {
-        Vec::new()
-    } else {
-        under(&main.model, key)
-    };
-    let shown = main.files();
-    rewrite(main.dir.path(), op, arg);
-    rewrite(twin.dir.path(), op, arg);
-    let moved_on = main.files();
-    reload(&mut twin.model);
-    if read {
-        reload(&mut main.model);
+        reload(&mut side.model);
     }
-    let reach = reach(&main.model, &twin.model, key, typed);
-    let seen = pastes_beside(&main.model, key);
-    main.checked(key, true, trail);
-    let looked = main.model.message.as_deref() == Some(LIST_CHANGED);
-    keys(&mut twin.model, &reach);
-    let fresh = twin.checked(key, false, trail);
-    // The twin's count, cut to the rows shown, was not typed: a `.` after
-    // it repeats what the list keeps.
-    if reach != typed {
-        twin.model.again.clone_from(&main.model.again);
-    }
-    // A key the watcher's reading drew dim says its own words.
-    let dim_now = read && fresh.is_some_and(|(_, answer)| dim(answer));
-    // A line the file held once that changed, went or got a twin.
-    let lost = !dim_now
-        && under
-            .iter()
-            .any(|l| twins(&shown[0], l) == 1 && twins(&moved_on[0], l) != 1);
-    let wrote = main.files();
-    assert!(!lost || looked && wrote == moved_on, "lost: {trail:?}");
-    let beside = seen
-        .as_ref()
-        .is_some_and(|s| beside_a_copy(s, &moved_on, &wrote, &twin.files()));
-    let aimed = seen.is_none() && on_its_rows(&under, &moved_on, &wrote);
-    let fresh_too =
-        wrote == moved_on || wrote == twin.files() || beside || aimed;
-    assert!(fresh_too, "wrote what a fresh press would not: {trail:?}");
-    reload(&mut main.model);
-    main.agrees(twin)
+    side.checked(key, trail);
+    side.moved.clear();
+    reload(&mut side.model);
 }
 
-/// Whether a press wrote on no line of `before` but those `under` it: the
-/// others but blank ones are all still there, as many of each, in their
-/// order, and of those under it at most one copy each is gone. Where the
-/// lines it wrote went is not checked, nor what it wrote on them: a count or
-/// a cursor on the twin can take in a row the stale list never showed, a
-/// line another writer put among the counted rows or a refilter its reading
-/// applied.
-fn on_its_rows(
-    under: &[Vec<u8>],
+/// Whether a press kept every line of `before` but the `seen` ones (a file
+/// and a line each): all still there, in their order, and, `in_place`
+/// when it moves no line and keeps their number, each where it was. Lines
+/// it adds may go anywhere. A `named` line, a dependent the press says it
+/// unblocked or relinked, may change in its `dep:` but nowhere else.
+fn kept_lines(
     before: &[Vec<u8>; 2],
-    wrote: &[Vec<u8>; 2],
+    after: &[Vec<u8>; 2],
+    seen: &[(usize, usize)],
+    named: &[(usize, usize)],
+    in_place: bool,
 ) -> bool {
-    let lines = |t: &[u8]| -> Vec<Vec<u8>> {
-        let lines = t.split(|b| *b == b'\n').filter(|l| !l.is_empty());
-        lines.map(<[u8]>::to_vec).collect()
-    };
-    let take = |from: &mut Vec<Vec<u8>>, line: &Vec<u8>| {
-        if let Some(at) = from.iter().position(|l| l == line) {
-            from.remove(at);
+    (0..2).all(|file| {
+        let was: Vec<_> = before[file].split(|b| *b == b'\n').collect();
+        let now: Vec<_> = after[file].split(|b| *b == b'\n').collect();
+        let mut others = was
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !seen.contains(&(file, *i)));
+        let same = |i: usize, line: &[u8], now: &[u8]| {
+            now == line
+                || named.contains(&(file, i))
+                    && but_deps(now) == but_deps(line)
+        };
+        if in_place && was.len() == now.len() {
+            others.all(|(i, line)| same(i, line, now[i]))
+        } else {
+            let mut rest = now.iter();
+            others.all(|(i, line)| rest.any(|l| same(i, line, l)))
         }
-    };
-    before.iter().zip(wrote).all(|(was, now)| {
-        let was = lines(was);
-        let now = lines(now).into_iter().filter(|l| was.contains(l));
-        let (mut gone, mut rest) = (was.clone(), was.iter());
-        let ordered = now.into_iter().all(|l| {
-            take(&mut gone, &l);
-            rest.any(|w| *w == l)
-        });
-        for line in under {
-            take(&mut gone, line);
-        }
-        ordered && gone.is_empty()
     })
 }
 
-/// For a lit `p` or `P` (or a `.` of one), whether it pastes below, and the
-/// line under the cursor that it pastes beside.
-fn pastes_beside(model: &Model, key: &str) -> Option<(bool, Vec<u8>)> {
-    let (action, _) = asked(model, key)?;
-    let aim = model.aimed(action);
-    let below = aim == Action::PasteBelow;
-    if !below && aim != Action::PasteAbove {
-        return None;
-    }
-    let row = model.rows.get(model.cursor);
-    let row = row.filter(|r| r.source != Source::Done)?;
-    let task = model.snap.task(row.id)?;
-    Some((below, model.snap.line(task).raw().to_vec()))
+/// The todo lines a message names as dependents it unblocked or relinked,
+/// by their number before the press.
+fn named(message: Option<&str>) -> Vec<(usize, usize)> {
+    let message = message.unwrap_or_default();
+    let said = ["unblocked ", "relinked "]
+        .into_iter()
+        .flat_map(|word| message.split(word).skip(1));
+    let nrs =
+        said.flat_map(|s| s.split(';').next().unwrap_or_default().split(", "));
+    let at = |n: &str| n.trim().parse::<usize>().ok()?.checked_sub(1);
+    nrs.filter_map(at).map(|i| (0, i)).collect()
 }
 
-/// A stale paste that went in beside another copy of the line under it
-/// than the twin's paste, which read first and so had its cursor on the
-/// copy the reading's rule picks: right, since a paste lands beside the
-/// copy the person saw. Only when the list's todo file is `before` with
-/// the same lines the twin pasted put in beside a copy of `seen` there,
-/// `before` holds `seen` more than once, and the done files are alike: so
-/// no line of `before` was written on, moved or dropped. Any copy of `seen`
-/// passes, not only the one the diff pairs (left to `lineid`'s tests), and
-/// the run ends there.
-fn beside_a_copy(
-    (below, seen): &(bool, Vec<u8>),
-    before: &[Vec<u8>; 2],
-    list: &[Vec<u8>; 2],
-    twin: &[Vec<u8>; 2],
-) -> bool {
-    let [was, now, other] = [&before[0], &list[0], &twin[0]]
-        .map(|t| t.split(|b| *b == b'\n').collect::<Vec<_>>());
-    let n = other.len().saturating_sub(was.len());
-    let put = |at: usize, block| [&was[..at], block, &was[at..]].concat();
-    let mut blocks = (0..was.len())
-        .filter(|&at| put(at, &other[at..at + n]) == other)
-        .map(|at| &other[at..at + n]);
-    let copies = || (0..was.len()).filter(|&k| was[k] == seen.as_slice());
-    n > 0
-        && now != other
-        && list[1] == twin[1]
-        && copies().count() > 1
-        && blocks.any(|block| {
-            copies().any(|k| put(k + usize::from(*below), block) == now)
-        })
+/// The words of a line but its `dep:` tags.
+fn but_deps(line: &[u8]) -> Vec<&[u8]> {
+    line.split(|b| *b == b' ')
+        .filter(|w| !w.starts_with(b"dep:"))
+        .collect()
 }
 
 /// Builds a todo file and a run of keys from `data` and presses them over
-/// a list and its twin, each key checked against its hint, and sometimes
-/// changes the file behind the list's back.
+/// a list, each key checked against its hint, and sometimes changes the
+/// file behind the list's back.
 ///
 /// The first byte picks the config, one bit each: the sidebar (1), the
 /// archived tasks (2), the width (4) and the detail panel (8); the second
@@ -554,27 +428,33 @@ pub fn hints_property(data: &[u8]) {
         ..alone()
     };
     let width = if setup & 4 == 0 { 60 } else { 120 };
-    let mut main = Side::new(todo.as_bytes(), &config, width);
-    let mut twin = Side::new(todo.as_bytes(), &config, width);
+    let mut side = Side::new(todo.as_bytes(), &config, width);
     let mut trail = vec![format!("{todo:?} {setup}")];
     let mut bytes = steps.iter().copied();
     while let Some(op) = bytes.next() {
-        if op >= REWRITE && main.list() {
+        if op >= REWRITE && side.list() {
             let mut next = || usize::from(bytes.next().unwrap_or(0));
             let (arg, count, key) =
                 (next(), ["", "2", "3"][next() % 3], next());
             let key = STALE[key % STALE.len()];
             trail.push(format!("rewrite {op} {arg} {count}{key}"));
-            if !behind((&mut main, &mut twin), (op, arg, count, key), &trail) {
-                return;
-            }
+            behind(&mut side, (op, arg, count, key), &trail);
         } else {
             let (key, then) = KEYS[usize::from(op) % KEYS.len()];
             trail.push(format!("{key}{then}"));
-            main.checked(key, false, &trail);
-            keys(&mut twin.model, key);
-            keys(&mut main.model, then);
-            keys(&mut twin.model, then);
+            let opens = side.seen(key);
+            side.checked(key, &trail);
+            match then.strip_suffix("<CR>") {
+                Some(text) if !opens.is_empty() && !side.list() => {
+                    keys(&mut side.model, text);
+                    side.opened = opens;
+                    side.checked("<CR>", &trail);
+                    side.opened.clear();
+                }
+                _ => {
+                    keys(&mut side.model, then);
+                }
+            }
         }
     }
 }
