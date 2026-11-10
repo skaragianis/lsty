@@ -311,21 +311,20 @@ fn a_line_that_comes_back_lets_the_field_write() {
     }
 }
 
-// `go` and `gO` write a link on the line: on a changed row they open nothing.
+// `go` and `gO` on a row changed outside and not read open the field; its
+// commit writes nothing, says so and keeps what was typed.
 #[test]
-fn go_on_a_changed_row_opens_no_field() {
-    for key in ["go", "gO"] {
+fn go_on_a_changed_row_keeps_what_was_typed() {
+    for (key, says) in [("go", DEP_REFUSED), ("gO", REFUSED)] {
         let dir = workdir(LIST);
         let mut model = model_of(dir.path());
         keys(&mut model, "j");
         fs::write(dir.path().join("todo.txt"), LINE_CHANGED).unwrap();
         keys(&mut model, key);
-        assert!(model.edit.is_none(), "{key}");
-        assert_eq!(model.message.as_deref(), Some(LIST_CHANGED), "{key}");
+        keys(&mut model, "New<CR>");
+        assert!(field_text(&model).contains("New"), "{key}");
+        assert_eq!(model.message.as_deref(), Some(says), "{key}");
         assert_eq!(todo_of(dir.path()), LINE_CHANGED, "{key}");
-        // The refusal showed the line as it is: now the key is aimed at it.
-        keys(&mut model, key);
-        assert!(model.edit.is_some(), "{key}");
     }
 }
 

@@ -12,7 +12,7 @@ use lsty_core::{
     errs::{self, Code},
     list::{self, Params, Snapshot},
     lock::Cancel,
-    ops::{self, Change, Landing},
+    ops::{Change, Landing},
     todotxt::File,
 };
 
@@ -296,36 +296,6 @@ impl Model {
         if !same_state(&snap, &self.snap) {
             self.install(snap, clock, None);
         }
-    }
-
-    /// Reads the files before a key that writes on the line under the
-    /// cursor opens a field. Whether that line is not there to write, said
-    /// when so.
-    pub(crate) fn row_changed(&mut self) -> bool {
-        let read = self.clock_now().and_then(|clock| {
-            let snap = fetch(
-                self.snap.found(),
-                &self.deps.config,
-                &clock,
-                &self.cancel,
-            )?;
-            Ok((snap, clock))
-        });
-        let (snap, clock) = match read {
-            Ok(read) => read,
-            Err(e) => {
-                self.fail(&e);
-                return true;
-            }
-        };
-        let landing = Landing::of(&self.snap, &snap);
-        let at = self.cursor_place();
-        let changed = at.is_some_and(|at| landed_at(&landing, at).is_none());
-        self.accept(snap, clock);
-        if changed {
-            self.alert(ops::LIST_CHANGED.to_owned());
-        }
-        changed
     }
 
     /// Shows the lists the core read when it refused a write on lines that
