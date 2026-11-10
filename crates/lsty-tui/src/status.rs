@@ -14,7 +14,7 @@ use crate::{
     messages::Tone,
     model::Model,
     rows::MARKER_DOING,
-    text::{Span, cut, pad, put, width, width_of},
+    text::{Span, cut, fit, pad, put, width, width_of},
 };
 
 fn mode_slot(mode: Mode) -> Slot {
@@ -117,6 +117,13 @@ impl Model {
         }
     }
 
+    /// Whether a warning or an error is up: the status line then puts it
+    /// first, and drops what does not fit after it.
+    fn warned(&self) -> bool {
+        !self.notices().is_empty()
+            || self.message.is_some() && self.tone != Tone::Notice
+    }
+
     /// The status line before the hints.
     pub(crate) fn status_base(&self) -> Vec<Span<'_>> {
         let name = self.mode().as_str().to_uppercase();
@@ -128,7 +135,18 @@ impl Model {
             Span::new(mode, Some(mode_slot(self.mode()))),
             Span::new(" ", None),
         ];
+        let w = usize::from(self.width);
+        let warned = self.line.is_none() && self.warned();
         for (i, part) in self.status_parts().into_iter().enumerate() {
+            let left = w.saturating_sub(width(&out) + 2 * usize::from(i > 0));
+            let part = match (warned, i) {
+                (true, 0) => fit(part, left),
+                (true, _) if width(&part) > left => {
+                    pad(&mut out, w, None);
+                    break;
+                }
+                _ => part,
+            };
             if i > 0 {
                 out.push(Span::new("  ", None));
             }
@@ -137,6 +155,9 @@ impl Model {
         out
     }
 
+    /// The pieces after the mode. A warning, an error or a refusal comes
+    /// first, then the start notices, then the rest in its order; a plain
+    /// message comes last of the rest.
     fn status_parts(&self) -> Vec<Vec<Span<'_>>> {
         if let Some(line) = &self.line {
             let text = format!("{}{}", line.kind.label(), line.field.text());
@@ -155,17 +176,23 @@ impl Model {
         if let Some(doing) = self.doing() {
             parts.push(doing);
         }
-        for notice in self.notices() {
-            parts.push(vec![Span::new(notice, Some(Slot::Warning))]);
+        let mut head: Vec<_> = self
+            .notices()
+            .into_iter()
+            .map(|notice| vec![Span::new(notice, Some(Slot::Warning))])
+            .collect();
+        if let Some(m) = &self.message {
+            let alert = self.tone == Tone::Alert;
+            let slot = if alert { Slot::Error } else { Slot::Warning };
+            let m = vec![Span::new(m.as_str(), Some(slot))];
+            if self.tone == Tone::Notice {
+                parts.push(m);
+            } else {
+                head.insert(0, m);
+            }
         }
-        if let Some(message) = &self.message {
-            let slot = Some(match self.tone {
-                Tone::Alert => Slot::Error,
-                Tone::Notice => Slot::Warning,
-            });
-            parts.push(vec![Span::new(message.as_str(), slot)]);
-        }
-        parts
+        head.extend(parts);
+        head
     }
 
     fn doing(&self) -> Option<Vec<Span<'_>>> {

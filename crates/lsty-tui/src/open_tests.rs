@@ -320,6 +320,7 @@ fn a_failed_copy_after_a_failed_opener_is_said_too() {
         model.message.as_deref(),
         Some("can't open https://x.org/a: nope; copied it instead; boom")
     );
+    assert_eq!(model.tone, crate::messages::Tone::Alert);
 }
 
 /// A URL word with a C1 control character (as UTF-8) and one with the

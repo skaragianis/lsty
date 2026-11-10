@@ -18,6 +18,6 @@ Call +work
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 has no +nope  x done  t start  T wont  o new  a append           9.9.9
+ NORMAL  1 has no +nope  todo.txt  manual  x done  t start  T wont  o new  a append           9.9.9
 -- a-file --
 Call +work

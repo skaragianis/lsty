@@ -37,7 +37,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  the list changed — look again  x done  t start  T wont  o new      9.9.9
+ NORMAL  the list changed — look again  todo.txt  manual  x done  t start  T wont  o new      9.9.9
 -- b-colour --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttttt...................................................................................i.E
@@ -46,7 +46,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..xxxxxxxxxxxxxxxxxxxxxxxxxxxxx..D.DDDD..D.DDDDD..k.yyyy..k.yyy......mmmmm.
+NNNNNNNN.xxxxxxxxxxxxxxxxxxxxxxxxxxxxx..tttttttt..mmmmmm..D.DDDD..D.DDDDD..k.yyyy..k.yyy......mmmmm.
 -- b-file --
 Blocker id:b
 Free dep:b
@@ -58,7 +58,7 @@ Free dep:b
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  task 2 is blocked by 1 (Blocker)  x done  t start  T wont  o new   9.9.9
+ NORMAL  task 2 is blocked by 1 (Blocker)  todo.txt  manual  x done  t start  T wont  o new   9.9.9
 -- c-file --
 Blocker id:b
 Free dep:b

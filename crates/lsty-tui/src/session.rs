@@ -6,7 +6,6 @@ use lsty_core::keys::Action;
 
 use crate::{
     line::LineKind,
-    messages::Tone,
     model::Model,
     sidebar::{CONTEXTS, PROJECTS},
     store::{Folds, Saved, Store},
@@ -131,8 +130,7 @@ impl Model {
             return;
         }
         self.session.failed = true;
-        self.tone = Tone::Alert;
-        self.message = Some(format!("can't save session state: {why}"));
+        self.alert(format!("can't save session state: {why}"));
     }
 
     /// Keeps a line run on the `:` line.

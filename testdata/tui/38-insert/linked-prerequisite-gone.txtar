@@ -26,7 +26,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit  <CR> commit  9.9.9
+ INSERT  the list changed — look again; <Esc> drops your edit  todo.txt  manual  <CR> commit  9.9.9
 -- a-file --
 One
 Three

@@ -4,10 +4,13 @@
 use lsty_core::{errs, ops, todotxt::Line};
 
 /// How the message in the status line is drawn.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub(crate) enum Tone {
-    /// What happened, or a warning.
+    /// What happened.
     Notice,
+    /// A warning, or a refusal that is no error: it comes first on the status
+    /// line.
+    Warning,
     /// An error: nothing was done.
     Alert,
 }

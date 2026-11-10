@@ -26,7 +26,7 @@ Call started:2026-09-29T0900Z
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  todo.txt is busy (locked by another writer) — nothing changed, try again
+ NORMAL  todo.txt is busy (locked by another writer) — nothing changed, try again  todo.txt  manual
 -- retry-is-a-new-claim --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▷ Call                                                                                     0m │

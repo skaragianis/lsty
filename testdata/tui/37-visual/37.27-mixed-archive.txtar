@@ -30,7 +30,7 @@ x 2026-09-02 Old two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  some are archived — nothing changed  x done            9.9.9
+ VISUAL  some are archived — nothing changed  2 selected  todo.txt  manual  x done            9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   A                                                                                           │
@@ -43,7 +43,7 @@ x 2026-09-02 Old two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  some are archived — nothing changed  x done            9.9.9
+ VISUAL  some are archived — nothing changed  2 selected  todo.txt  manual  x done            9.9.9
 -- a-file --
 A
 B

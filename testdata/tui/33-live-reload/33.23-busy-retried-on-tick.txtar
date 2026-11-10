@@ -34,7 +34,7 @@ N +p
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  todo.txt is busy; showing the last state read  9.9.9
+ NORMAL  todo.txt is busy; showing the last state read  todo.txt  manual  9.9.9
 -- free --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   A +p                                                                    │

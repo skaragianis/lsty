@@ -26,7 +26,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  todo.txt is busy (locked by another writer) — nothing changed, try again
+ INSERT  todo.txt is busy (locked by another writer) — nothing changed, try again  todo.txt  manual
 -- a-file --
 Buy
 -- b-frame --

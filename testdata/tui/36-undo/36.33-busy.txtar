@@ -23,7 +23,7 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  todo.txt is busy (locked by another writer)
+ NORMAL  todo.txt is busy (locked by another writer) — nothing change…
 -- busy-todo --
 x 2026-09-29 Buy
 -- after --

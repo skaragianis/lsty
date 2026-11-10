@@ -24,7 +24,7 @@ Buy +t
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  can't redo: the list changed — look again
+ NORMAL  can't redo: the list changed — look again  todo.txt  manual
 -- refused-todo --
 Buy +t
 -- dropped --
@@ -35,6 +35,6 @@ Buy +t
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  nothing to redo  x done  t start     9.9.9
+ NORMAL  nothing to redo  todo.txt  manual  x done  t start     9.9.9
 -- dropped-todo --
 Buy +t

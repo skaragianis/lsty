@@ -20,6 +20,6 @@ A
 │                                                                                                                                          │
 │                                                                                                                                          │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  not a date: soon — today, tomorrow (tom), yesterday; a weekday: monday … sunday, mon … sun; an offset: 3d, +2w, -
+ INSERT  not a date: soon — today, tomorrow (tom), yesterday; a weekday: monday … sunday, mon … sun; an offset: 3d, +2w, -1m, 1y, 5b; a dat…
 -- file --
 A
