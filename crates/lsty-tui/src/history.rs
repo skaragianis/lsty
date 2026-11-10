@@ -12,7 +12,7 @@ use lsty_core::{
     errs::{Code, Error, Source},
     keys::Action,
     list::Snapshot,
-    ops::{self, Env, FileRecord, UndoRecord},
+    ops::{self, FileRecord, UndoRecord},
 };
 
 use crate::{
@@ -202,20 +202,14 @@ impl Model {
             Way::Undo => &self.hist.undo,
             Way::Redo => &self.hist.redo,
         };
-        // A step whose lines changed is refused by the write, which drops it;
-        // one whose lines changed on screen is refused without the lock and
-        // kept, to light again if the lines come back.
+        // A step whose lines changed is refused by the write, which drops it.
         let Some(top) = stack.last() else {
             self.refused(way.action(), 1);
             return;
         };
-        let dry = !top.lands(&self.snap);
-        let result = self.attempt(|env| {
-            let env = &Env { dry, ..env.clone() };
-            match way {
-                Way::Undo => ops::undo(env, &top.rec),
-                Way::Redo => ops::redo(env, &top.rec),
-            }
+        let result = self.attempt(|env| match way {
+            Way::Undo => ops::undo(env, &top.rec),
+            Way::Redo => ops::redo(env, &top.rec),
         });
         match result {
             Ok((outcome, clock)) => {
@@ -226,7 +220,6 @@ impl Model {
                     Some(format!("{}: {}", way.past(), step.message));
                 self.rewound(outcome, clock, way, step);
             }
-            Err(e) if dry => self.alert(e.message().to_owned()),
             Err(e) => {
                 if e.code() == Code::ExpectMismatch {
                     self.hist.stack(way).pop();

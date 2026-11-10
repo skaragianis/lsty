@@ -158,7 +158,7 @@ impl Side {
                 if !stale
                     && self.list()
                     && writes
-                    && !kept_as_is(&self.model, a) =>
+                    && !core_refused(&self.model, a) =>
             {
                 assert_ne!(self.files(), before.0, "lit {name}");
                 assert_ne!(self.model.tone, Tone::Alert, "lit {name}");
@@ -257,25 +257,26 @@ fn writes(model: &Model, action: Action) -> bool {
     (history || writes_line(action)) && !unsure
 }
 
-/// Whether `action`, or `.` of it, wrote nothing because the core found
-/// each line already as the key would leave it: a move past lines equal to
-/// its own, or a prompt's text each task has.
-fn kept_as_is(model: &Model, action: Action) -> bool {
+/// Whether `action`, or `.` of it, wrote nothing because the core refused
+/// it: a move past lines equal to its own, a prompt's text each task has,
+/// or an undo or redo whose lines changed.
+fn core_refused(model: &Model, action: Action) -> bool {
     let again = model.again.as_ref().filter(|_| action == Action::Repeat);
     let said = model.message.as_deref().unwrap_or_default();
     let action = again.map_or(action, Again::action);
-    let kept: &[&str] =
-        if matches!(action, Action::MoveTaskDown | Action::MoveTaskUp) {
-            &[" is already there"]
-        } else if matches!(
-            action,
-            Action::SetDue | Action::AddTag | Action::RemoveTag
-        ) {
-            &[" is already due ", " already has ", " has no "]
-        } else {
-            &[]
-        };
-    kept.iter().any(|kept| said.contains(kept))
+    let refused: &[&str] = if matches!(action, Action::Undo | Action::Redo) {
+        &[LIST_CHANGED]
+    } else if matches!(action, Action::MoveTaskDown | Action::MoveTaskUp) {
+        &[" is already there"]
+    } else if matches!(
+        action,
+        Action::SetDue | Action::AddTag | Action::RemoveTag
+    ) {
+        &[" is already due ", " already has ", " has no "]
+    } else {
+        &[]
+    };
+    refused.iter().any(|words| said.contains(words))
 }
 
 /// The lines `key` writes on in NORMAL mode, when it is lit and writes on
