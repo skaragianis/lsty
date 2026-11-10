@@ -18,7 +18,7 @@ use crate::{
     msg::{Cmd, Msg},
     test_util::{
         alone, cursor_text, deps, held_lock, keys, load_of, press, reload,
-        start, started_from, workdir, workdir_model,
+        screen, start, started_from, workdir, workdir_model,
     },
 };
 
@@ -215,21 +215,33 @@ fn an_empty_todo_file_removed_is_told_and_its_return_too() {
     assert_eq!(model.notices(), Vec::<String>::new());
 }
 
+/// Every minute reads the files, watched or not, since a watch can miss
+/// events; a list that has not changed stays as it is. A watch that fails
+/// to start says so.
 #[test]
-fn a_watch_that_fails_to_start_says_so_and_reloads_each_minute() {
-    let dir = workdir(LIST);
-    let d = deps(dir.path(), alone());
-    let mut s = start(dir.path());
-    s.watch = Some(Box::new(|_, _| Err("no inotify".to_owned())));
-    let mut model = started_from(s, d);
-    assert_eq!(
-        model.message.as_deref(),
-        Some("can't watch todo.txt: no inotify; reloading every minute")
-    );
-    fs::write(dir.path().join("todo.txt"), NEXT)
-        .unwrap_or_else(|e| panic!("{e}"));
-    minute(&mut model);
-    assert_eq!(model.snap.todo().to_bytes(), NEXT.as_bytes());
+fn every_minute_reads_the_files_watched_or_not() {
+    let said = "can't watch todo.txt: no inotify; reloading every minute";
+    for watch in [false, true] {
+        let dir = workdir(LIST);
+        let mut s = start(dir.path());
+        let feed = Rc::new(Feed::default());
+        s.watch = Some(if watch {
+            Box::new(move |_, _| Ok(Box::new(Scripted(Rc::clone(&feed)))))
+        } else {
+            Box::new(|_, _| Err("no inotify".to_owned()))
+        });
+        let mut model = started_from(s, deps(dir.path(), alone()));
+        let message = model.message.clone();
+        assert_eq!(message.as_deref(), (!watch).then_some(said), "{watch}");
+        press(&mut model, "j");
+        let shown = screen(&model, 80, 24);
+        minute(&mut model);
+        assert_eq!(screen(&model, 80, 24), shown, "{watch}");
+        fs::write(dir.path().join("todo.txt"), NEXT)
+            .unwrap_or_else(|e| panic!("{e}"));
+        minute(&mut model);
+        assert_eq!(model.snap.todo().to_bytes(), NEXT.as_bytes(), "{watch}");
+    }
 }
 
 #[test]

@@ -332,12 +332,15 @@ fn a_new_minute_derives_the_times_again() {
     now.set(instant("2026-09-29T10:00:30Z"));
     let cmds = model.update(Msg::Minute);
     assert!(screen(&model, 80, 24)[1].contains("3h"));
+    let [next, Cmd::Load(_)] = cmds.as_slice() else {
+        panic!("the minute reads the files: {cmds:?}");
+    };
     assert_eq!(
-        cmds,
-        [Cmd::After {
+        next,
+        &Cmd::After {
             delay: Duration::from_secs(30),
             msg: Msg::Minute,
-        }]
+        }
     );
 }
 

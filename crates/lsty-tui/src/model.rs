@@ -696,14 +696,14 @@ impl Model {
         }
     }
 
-    /// Derives the list again for the new time.
+    /// Derives the list again for the new time and reads the files.
     fn on_minute(&mut self) -> Vec<Cmd> {
         let mut next = vec![self.next_minute()];
         let Ok(clock) = self.clock_now() else {
             return next;
         };
         self.derive_again_at(clock);
-        next.extend(self.reload_owed());
+        next.extend(self.read_now());
         next
     }
 }
