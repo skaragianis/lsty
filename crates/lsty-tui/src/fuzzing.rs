@@ -120,8 +120,8 @@ impl Side {
         screen(&self.model, self.model.width, self.model.height)
     }
 
-    /// Presses `key` and checks it against its hint: a dim key keeps the
-    /// files, the selection and what `.` repeats; a lit one that writes
+    /// Presses `key` and checks it against its hint: a dim key changes
+    /// nothing but its message (see [`Side::kept`]); a lit one that writes
     /// tasks, and opens no field to, changes the files and refuses none.
     /// A press on a `stale` list is judged against the twin's (see
     /// [`behind`]), but a dim one keeps as any does. Over keys or a
@@ -176,14 +176,16 @@ impl Side {
         matches!(self.model.key_mode(), Mode::Normal | Mode::Visual)
     }
 
-    /// What a dim key keeps, the list it read included. Not the mode: a
-    /// press that lets go of the last sticky task rightly takes the focus
-    /// from an empty panel to the list.
+    /// What a dim key keeps: the files, the list it holds, the undo steps,
+    /// the selection and what `.` repeats. Not the mode: a press that lets
+    /// go of the last sticky task rightly takes the focus from an empty
+    /// panel to the list.
     fn kept(&self) -> Kept {
         let m = &self.model;
         (
             self.files(),
             m.snap.serial(),
+            (m.hist.undo.len(), m.hist.redo.len()),
             m.selected_rows(),
             m.again.clone(),
         )
@@ -201,7 +203,13 @@ impl Side {
 /// The action a key runs and what its hint says, when it runs one.
 type Hint = Option<(Action, Answer)>;
 
-type Kept = ([Vec<u8>; 2], u32, Option<(usize, usize)>, Option<Again>);
+type Kept = (
+    [Vec<u8>; 2],
+    u32,
+    (usize, usize),
+    Option<(usize, usize)>,
+    Option<Again>,
+);
 
 /// The action `key` runs now, as the list's own matcher reads it, and what
 /// its hint says; `None` when it runs no action.
@@ -315,13 +323,12 @@ fn rewrite(dir: &Path, op: u8, arg: usize) {
 
 /// The list and its twin read the same rewrite: the twin at once, the list
 /// when `op` says the watcher reads between `count` and `key`, else only
-/// after `key`. A stale press never
-/// writes what the twin's would not: it writes nothing, what the twin
-/// wrote, or only on the lines it aimed at (see [`on_its_rows`]), but for a
-/// paste beside another copy of its line (see [`beside_a_copy`]); and a lit
-/// key whose line changed writes nothing and says to look again. Once the
-/// list has read, the run goes on while it shows what the twin shows, and
-/// ends (`false`) otherwise.
+/// after `key`. A stale press never writes what the twin's would not: it
+/// writes nothing, what the twin wrote, or only on the lines it aimed at
+/// (see [`on_its_rows`]), but for a paste beside another copy of its line
+/// (see [`beside_a_copy`]); and a lit key whose line changed writes nothing
+/// and says to look again. Once the list has read, the run goes on while it
+/// shows what the twin shows, and ends (`false`) otherwise.
 fn behind(
     (main, twin): (&mut Side, &mut Side),
     (op, arg, count, key): (u8, usize, &str, &str),
