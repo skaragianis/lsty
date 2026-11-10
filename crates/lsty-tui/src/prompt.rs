@@ -282,14 +282,12 @@ impl Model {
 
     /// `repeat` of a prompt's action: the same text over the tasks under
     /// the cursor, without opening the prompt. One that changes nothing
-    /// says why, and leaves what `.` repeats alone; `dry` when the list on
-    /// screen shows it, which it says without the lock.
+    /// says why, and leaves what `.` repeats alone.
     pub(crate) fn repeat_prompt(
         &mut self,
         kind: Kind,
         count: usize,
         text: String,
-        dry: bool,
     ) {
         let rows = self.picked_rows(count);
         let s = Summary::of(&self.snap, self.cursor, rows);
@@ -299,9 +297,7 @@ impl Model {
             self.refuse(why, &chosen);
             return;
         }
-        let result = self.attempt(|env| {
-            write(&Env { dry, ..env.clone() }, kind, &chosen, &text)
-        });
+        let result = self.attempt(|env| write(env, kind, &chosen, &text));
         let Some(kept) = self.took(result) else {
             return;
         };
@@ -324,24 +320,6 @@ impl Model {
             self.tone = messages::Tone::Alert;
         }
         kept
-    }
-
-    /// Whether `.` of `again`, with `typed` the count typed, would leave
-    /// each line as it is: a prompt over its tasks.
-    pub(crate) fn keeps(&self, again: &Again, typed: usize) -> bool {
-        let count = again.count(typed);
-        let Again::Prompt { kind, text, .. } = again else {
-            return false;
-        };
-        let (tags, today) = (words(text), self.clock.today());
-        let mut lines = self.rows_of(count).iter().filter_map(|row| {
-            self.snap.task(row.id).map(|task| self.snap.line(task))
-        });
-        lines.all(|line| match kind {
-            Kind::SetDue => ops::due_keeps(line, text, today),
-            Kind::AddTag => ops::tag_keeps(line, &tags, today),
-            Kind::RemoveTag => ops::untag_keeps(line, &tags),
-        })
     }
 
     /// Replaces the messages of several tasks, `kept` of them left as
