@@ -130,10 +130,7 @@ impl Model {
             Placement::Before(anchor)
         };
         let result = self.attempt(|env| ops::reorder(env, &targets, &place));
-        // Only a list behind the files aims a move that keeps every line.
-        if matches!(&result, Ok((outcome, _)) if outcome.no_op()) {
-            self.say_changed();
-        } else if self.settle(result) {
+        if self.settle(result) {
             self.again = Some(again);
         }
     }
