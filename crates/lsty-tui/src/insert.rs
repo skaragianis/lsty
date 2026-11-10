@@ -223,7 +223,7 @@ impl Model {
     /// An archived task is the prerequisite only with an id, as for
     /// `dep`, and the new task goes at the end of the todo file.
     pub(crate) fn open_dependent(&mut self) {
-        if self.refused(Action::InsertDependent, 1) || self.row_changed() {
+        if self.refused(Action::InsertDependent, 1) {
             return;
         }
         let Some(task) = self
@@ -257,7 +257,7 @@ impl Model {
     /// one under the cursor, which waits for it once it is written.
     /// Where `insert_above` has no anchor, it is `insert_above`.
     pub(crate) fn open_prerequisite(&mut self) {
-        if self.refused(Action::InsertPrerequisite, 1) || self.row_changed() {
+        if self.refused(Action::InsertPrerequisite, 1) {
             return;
         }
         self.open_new(false);
