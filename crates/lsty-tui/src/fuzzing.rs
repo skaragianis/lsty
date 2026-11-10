@@ -18,12 +18,9 @@ use crate::{
     insert::Draft,
     messages::Tone,
     model::Model,
-    msg::{Cmd, Msg},
+    msg::Msg,
     press::{Answer, repeats_over, writes_line},
-    test_util::{
-        alone, deps, files, hint_is, keys, reload, same_as, screen, started,
-        workdir,
-    },
+    test_util::{alone, deps, files, keys, reload, screen, started, workdir},
 };
 
 /// The lines of a todo file; one may come more than once, as twins.
@@ -101,8 +98,6 @@ const REWRITE: u8 = 0xF0;
 struct Side {
     dir: TempDir,
     model: Model,
-    /// What the last checked press asked for.
-    cmds: Vec<Cmd>,
 }
 
 impl Side {
@@ -114,11 +109,7 @@ impl Side {
         }
         let mut model = started(deps(dir.path(), config.clone()));
         model.update(Msg::Resize(width, 24));
-        Self {
-            dir,
-            model,
-            cmds: Vec::new(),
-        }
+        Self { dir, model }
     }
 
     fn files(&self) -> [Vec<u8>; 2] {
@@ -130,15 +121,14 @@ impl Side {
     }
 
     /// Presses `key` and checks it against its hint: a dim key keeps the
-    /// files, the mode, the selection and what `.` repeats; a lit one that
-    /// writes tasks, and opens no field to, changes the files and refuses
-    /// none. On a `stale` list, which reads the files as it presses, or when
-    /// it says to look again, a dim key only writes nothing. Over keys or a
-    /// selection whose lines a reading changed, a key that writes on its
-    /// lines writes nothing, says to look again and ends the selection.
-    /// Tells what the hint said. A key its mode reads as two, one that acts
-    /// or is dropped before its last stroke (`dd` in VISUAL: `d`, then a
-    /// `d` of NORMAL), is checked as each in turn.
+    /// files, the selection and what `.` repeats; a lit one that writes
+    /// tasks, and opens no field to, changes the files and refuses none.
+    /// A press on a `stale` list is judged against the twin's (see
+    /// [`behind`]). Over keys or a selection whose lines a reading changed,
+    /// a key that writes on its lines writes nothing, says to look again and
+    /// ends the selection. Tells what the hint said. A key its mode reads as
+    /// two, one that acts or is dropped before its last stroke (`dd` in
+    /// VISUAL: `d`, then a `d` of NORMAL), is checked as each in turn.
     fn checked(&mut self, key: &str, stale: bool, trail: &[String]) -> Hint {
         let Some(at) = first_key(&self.model, key) else {
             return self.pressed(key, stale, trail);
@@ -154,15 +144,12 @@ impl Side {
         let lost = self.model.keys_lost
             && asked.is_some_and(|(a, _)| writes_line(self.model.aimed(a)));
         let before = self.kept();
-        self.cmds = keys(&mut self.model, key);
+        keys(&mut self.model, key);
         self.screen();
         let said = &self.model.message;
-        let looked = stale || said.as_deref() == Some(LIST_CHANGED);
         let name = format!("{key} {asked:?} said {said:?} after {trail:?}");
         match asked {
-            Some((_, answer)) if dim(answer) && looked => {
-                assert_eq!(self.files(), before.0, "dim {name}");
-            }
+            Some((_, answer)) if dim(answer) && stale => {}
             Some((_, answer)) if dim(answer) => {
                 assert_eq!(self.kept(), before, "dim {name}");
             }
@@ -189,22 +176,26 @@ impl Side {
         matches!(self.model.key_mode(), Mode::Normal | Mode::Visual)
     }
 
-    /// What a dim key keeps.
+    /// What a dim key keeps. Not the mode: a press that lets go of the last
+    /// sticky task rightly takes the focus from an empty panel to the list.
     fn kept(&self) -> Kept {
         let m = &self.model;
-        (
-            self.files(),
-            m.key_mode(),
-            m.selected_rows(),
-            m.again.clone(),
-        )
+        (self.files(), m.selected_rows(), m.again.clone())
+    }
+
+    /// Whether the two lists show the same, so that a run can go on.
+    fn agrees(&self, twin: &Self) -> bool {
+        let (m, t) = (&self.model, &twin.model);
+        self.files() == twin.files()
+            && (&m.message, m.tone) == (&t.message, t.tone)
+            && self.screen() == twin.screen()
     }
 }
 
 /// The action a key runs and what its hint says, when it runs one.
 type Hint = Option<(Action, Answer)>;
 
-type Kept = ([Vec<u8>; 2], Mode, Option<(usize, usize)>, Option<Again>);
+type Kept = ([Vec<u8>; 2], Option<(usize, usize)>, Option<Again>);
 
 /// The action `key` runs now, as the list's own matcher reads it, and what
 /// its hint says; `None` when it runs no action.
@@ -321,12 +312,12 @@ fn rewrite(dir: &Path, op: u8, arg: usize) {
 
 /// The list and its twin read the same rewrite: the twin at once, the list
 /// when `op` says the watcher reads between `count` and `key`, else only
-/// when `key` looks. The list either does what the twin did, or writes
-/// nothing and says to look again, as it must when a line under a lit key
-/// changed; then, the reading it owes taken, its next press does what the
-/// twin did. A paste may also land beside another copy of its line than the
-/// twin's (see [`beside_a_copy`]): then the two differ and, `false`, the
-/// run ends.
+/// after `key`. A stale press never writes what the twin's would not: it
+/// writes nothing or what the twin wrote, but for a paste beside another
+/// copy of its line (see [`beside_a_copy`]); and a lit key whose line
+/// changed writes nothing and says to look again. Once the list has read,
+/// the run goes on while it shows what the twin shows, and ends (`false`)
+/// otherwise.
 fn behind(
     (main, twin): (&mut Side, &mut Side),
     (op, arg, count, key): (u8, usize, &str, &str),
@@ -361,31 +352,21 @@ fn behind(
     }
     let reach = reach(&main.model, &twin.model, key, typed);
     let seen = pastes_beside(&main.model, key);
-    let stale = main.checked(key, true, trail);
-    let looked = main.model.message.as_deref() == Some(LIST_CHANGED)
-        && main.files() == moved_on;
-    // A list that looks again reads, and its count then takes every row.
-    keys(&mut twin.model, if looked { typed } else { &reach });
+    main.checked(key, true, trail);
+    let looked = main.model.message.as_deref() == Some(LIST_CHANGED);
+    keys(&mut twin.model, &reach);
     let fresh = twin.checked(key, false, trail);
     // A key the watcher's reading drew dim says its own words.
     let dim_now = read && fresh.is_some_and(|(_, answer)| dim(answer));
     let lost = !dim_now && under.iter().any(|l| twins(&moved_on[0], l) != 1);
-    assert!(looked || !lost, "a line under the key changed: {trail:?}");
-    if looked {
-        looked_again((main, twin), (fresh, stale), (count, key), trail);
-    } else if main.model.message == twin.model.message
-        && main.model.tone == twin.model.tone
-        && seen.is_some_and(|s| {
-            beside_a_copy(&s, &moved_on, &main.files(), &twin.files())
-        })
-    {
-        return false;
-    }
-    // A key that did not look leaves the reading to the watcher.
+    let wrote = main.files();
+    assert!(!lost || looked && wrote == moved_on, "lost: {trail:?}");
+    let beside = seen
+        .is_some_and(|s| beside_a_copy(&s, &moved_on, &wrote, &twin.files()));
+    let fresh_too = wrote == moved_on || wrote == twin.files() || beside;
+    assert!(fresh_too, "wrote what a fresh press would not: {trail:?}");
     reload(&mut main.model);
-    let (m, t) = (main.dir.path(), twin.dir.path());
-    same_as((m, &main.model), (t, &twin.model), &format!("{trail:?}"));
-    true
+    main.agrees(twin)
 }
 
 /// For a lit `p` or `P` (or a `.` of one), whether it pastes below, and the
@@ -433,50 +414,6 @@ fn beside_a_copy(
         && blocks.any(|block| {
             copies().any(|k| put(k + usize::from(*below), block) == now)
         })
-}
-
-/// The list said to look again and wrote nothing: right only when its key
-/// was lit, or the twin wrote, emptied or looked again too. Takes the
-/// reading the list asked for, if its press had not read, and presses the
-/// key again, now with the hint the twin had; when looking again ended a
-/// selection, the twin ends it too, or looks again too, and presses again.
-fn looked_again(
-    (main, twin): (&mut Side, &mut Side),
-    (fresh, stale): (Hint, Hint),
-    (count, key): (&str, &str),
-    trail: &[String],
-) {
-    let wrote = twin.files() != main.files();
-    let was_dim = stale.is_some_and(|(_, answer)| dim(answer));
-    let emptied = twin.model.rows.is_empty();
-    let both = twin.model.message.as_deref() == Some(LIST_CHANGED);
-    assert!(
-        !was_dim || wrote || emptied || both,
-        "looked again: {trail:?}"
-    );
-    for cmd in std::mem::take(&mut main.cmds) {
-        if let Cmd::Load(load) = cmd {
-            main.model.update(load.read());
-        }
-    }
-    keys(&mut main.model, count);
-    let mut fresh = fresh;
-    if both {
-        // The twin looked again too, its selection having lost its lines.
-        keys(&mut twin.model, count);
-        fresh = twin.checked(key, false, trail);
-    } else if main.model.visual.is_none() && twin.model.visual.is_some() {
-        // Looking again ended the selection, which the twin keeps.
-        keys(&mut twin.model, "<Esc>");
-        keys(&mut twin.model, count);
-        fresh = twin.checked(key, false, trail);
-    }
-    let Some((action, answer)) = fresh else {
-        panic!("{key} runs no action: {trail:?}");
-    };
-    let name = format!("hint after looking again: {trail:?}");
-    hint_is(&main.model, action, Some(answer), &name);
-    main.checked(key, false, trail);
 }
 
 /// Builds a todo file and a run of keys from `data` and presses them over
