@@ -437,7 +437,14 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
         let stays = !typed.starts_with('v') || model.cursor == 1;
         assert!(stays, "{name}: the cursor stays");
         model.update(load_of(cmds).read());
-        assert_eq!(model.moved_on(true).ok(), Some(false), "{name}: read");
+        let read = |f| fs::read(dir.path().join(f)).unwrap_or_default();
+        let shown =
+            (model.snap.todo().to_bytes(), model.snap.done().to_bytes());
+        assert_eq!(
+            shown,
+            (read("todo.txt"), read("done.txt")),
+            "{name}: read"
+        );
     }
 }
 

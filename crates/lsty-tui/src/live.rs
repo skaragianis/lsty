@@ -353,26 +353,13 @@ impl Model {
         }
     }
 
-    /// Reads the files now and tells whether they had moved on from the list
-    /// shown, which then shows them. `at_once` does not wait for the lock.
-    pub(crate) fn moved_on(&mut self, at_once: bool) -> errs::Result<bool> {
-        let clock = self.clock_now()?;
-        let mut config = self.deps.config.clone();
-        if at_once {
-            config.lock_timeout = Duration::ZERO;
-        }
-        let read = fetch(self.snap.found(), &config, &clock, &self.cancel)?;
-        let moved = !same_state(&read.0, &self.snap);
-        self.accept(read, clock);
-        Ok(moved)
-    }
-
     /// Before a key that is not dim on the list drawn: reads the files when
     /// their size or time is not what the last reading found. It does not
     /// wait for the lock; a held one leaves the list as it is, for the next
-    /// key to try. Keys typed, or the line under the cursor, that the
-    /// reading moved are lost (see [`Model::check_typed`]).
-    pub(crate) fn read_if_moved(&mut self) {
+    /// key to try. The lines of the `count` rows from the cursor, or of the
+    /// selection, that the reading moved are lost (see
+    /// [`Model::check_typed`]).
+    pub(crate) fn read_if_moved(&mut self, count: usize) {
         if Stamp::of(self.snap.found()) == self.live.stamp {
             return;
         }
@@ -385,13 +372,10 @@ impl Model {
         else {
             return;
         };
-        let typed = self
-            .edit
-            .is_none()
-            .then(|| self.lines_under(self.typed_count()));
+        let typed = self.edit.is_none().then(|| self.lines_under(count));
         let landing = Landing::of(&self.snap, &read.0);
         self.accept(read, clock);
-        self.check_typed(typed, Some(&landing));
+        self.check_typed(typed, Some(&landing), count);
     }
 
     /// Takes the files as the last reading found them, as when they change
@@ -520,7 +504,7 @@ impl Model {
             Some(landing) => landed_at(landing, at),
             None => moved.track(at),
         });
-        self.check_typed(typed, landing.as_ref());
+        self.check_typed(typed, landing.as_ref(), self.typed_count());
         if ends.is_some() && self.visual.is_none() {
             self.reset_keys();
         }
@@ -549,11 +533,12 @@ impl Model {
         &mut self,
         typed: Option<Vec<Place>>,
         landing: Option<&Landing>,
+        count: usize,
     ) {
         let (Some(typed), Some(landing)) = (typed, landing) else {
             return;
         };
-        let now = self.lines_under(self.typed_count());
+        let now = self.lines_under(count);
         let same = typed
             .iter()
             .map(|at| landed_at(landing, *at))

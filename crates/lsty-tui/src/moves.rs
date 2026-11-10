@@ -19,21 +19,6 @@ use crate::{
 pub(crate) type Span = (usize, usize, Option<usize>);
 
 impl Model {
-    /// `move_task_down` and `move_task_up`. With a count the task
-    /// passes that many shown tasks, or as many as there are. In VISUAL
-    /// mode the selection moves as a block and the count is dropped.
-    pub(crate) fn move_task(&mut self, action: Action, count: usize) {
-        if self.read_first(action, count).is_some() {
-            self.move_by(action, false, count);
-        }
-    }
-
-    /// `.` after a block move: `count` rows from the cursor move as one
-    /// block again.
-    pub(crate) fn repeat_block(&mut self, action: Action, count: usize) {
-        self.move_by(action, true, count);
-    }
-
     /// What a move takes and goes past; `None` when it takes no rows. The
     /// selection, or with `block` as many rows as `count` picks from the
     /// cursor, goes past the next row; else the cursor's task goes past
@@ -94,10 +79,19 @@ impl Model {
         first.is_some() && lines.all(|line| line == first)
     }
 
-    /// Moves the rows of `move_span` past its row in one write, unless the
-    /// rule refuses or no task would change place; it then sets what `.`
-    /// repeats.
-    fn move_by(&mut self, action: Action, block: bool, count: usize) {
+    /// `move_task_down` and `move_task_up`: moves the rows of `move_span`
+    /// past its row in one write, unless the rule refuses or no task would
+    /// change place; it then sets what `.` repeats. With a count the task
+    /// passes that many shown tasks, or as many as there are. In VISUAL
+    /// mode the selection moves as a block and the count is dropped; with
+    /// `block`, a `.` after a block move, `count` rows from the cursor move
+    /// as one block again.
+    pub(crate) fn move_by(
+        &mut self,
+        action: Action,
+        block: bool,
+        count: usize,
+    ) {
         let down = action == Action::MoveTaskDown;
         let Some((lo, hi, past)) = self.move_span(down, block, count) else {
             return;

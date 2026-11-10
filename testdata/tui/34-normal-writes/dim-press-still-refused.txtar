@@ -1,30 +1,24 @@
 size 100 8
 start
-keys j
 write todo.txt next
-keys x
+keys T
 frame a-frame
 file todo.txt a-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Blocker id:b
-Stuck dep:b
+x 2026-09-01 Done
 -- next --
-New
-Blocker id:b
-Stuck dep:b
+Done
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  2   New                                                                                         │
-│  1   Blocker                                                                                   b │
-│  3 ⧗ Stuck dep:b                                                                                 │
+│  1 ✓ Done                                                                                28d ago │
+│                                                                                                  │
+│                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  task 3 is blocked by 2 (Blocker)  x done  t start  T wont  o new   9.9.9
+ NORMAL  todo.txt  manual  Done is done — x reopens it  x reopen  o new  a append  dd delete  9.9.9
 -- a-file --
-New
-Blocker id:b
-Stuck dep:b
+Done

@@ -418,7 +418,7 @@ impl Model {
 
     fn feed(&mut self, stroke: Stroke) -> Vec<Cmd> {
         if self.edit.is_some() {
-            self.read_if_moved();
+            self.read_if_moved(0);
             self.reveal();
             self.edit_press(stroke);
             return Vec::new();
@@ -488,7 +488,11 @@ impl Model {
         let drawn = answer(self);
         let lit = !drawn.is_some_and(hints::dim);
         if lit {
-            self.read_if_moved();
+            let typed = match outcome {
+                Outcome::Matched { count, .. } => count,
+                Outcome::Pending | Outcome::NoMatch => self.typed_count(),
+            };
+            self.read_if_moved(typed);
         }
         let lost = !matches!(outcome, Outcome::Pending)
             && std::mem::take(&mut self.keys_lost);
@@ -506,7 +510,6 @@ impl Model {
     )]
     pub(crate) fn run(&mut self, action: Action, count: usize) -> Vec<Cmd> {
         match action {
-            moves if on_rows(moves) && self.refused(moves, count) => {}
             motion if motion.is_motion() => self.motion(motion, count),
             moves if moves.category() == Category::Windows => {
                 self.move_focus(moves);
@@ -539,7 +542,7 @@ impl Model {
             }
             Action::CycleSort => self.cycle_sort(),
             Action::MoveTaskDown | Action::MoveTaskUp => {
-                self.move_task(action, count);
+                self.move_by(action, false, count);
             }
             Action::ToggleStart
             | Action::Stop
@@ -726,18 +729,6 @@ impl Model {
         next.extend(self.reload_owed());
         next
     }
-}
-
-/// A key dim over an empty list or panel, which the files may fill.
-const fn on_rows(action: Action) -> bool {
-    action.is_motion()
-        || matches!(
-            action,
-            Action::EnterVisual
-                | Action::Fold
-                | Action::Unfold
-                | Action::ToggleEntry
-        )
 }
 
 fn matchers(deps: &Deps) -> BTreeMap<Mode, Matcher> {
