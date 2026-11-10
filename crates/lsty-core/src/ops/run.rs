@@ -49,6 +49,9 @@ pub(super) fn run_with<F>(
 where
     F: FnOnce(&mut Tx) -> Result<()>,
 {
+    if env.dry && env.aim.is_some() {
+        return run_locked(env, action, Mode::Exclusive, rules, plan);
+    }
     let done_mode = if writes_done {
         Mode::Exclusive
     } else {
@@ -83,7 +86,10 @@ fn run_locked<F>(
 where
     F: FnOnce(&mut Tx) -> Result<()>,
 {
-    let mut tx = open(env, done_mode)?;
+    let mut tx = match env.aim.filter(|_| env.dry) {
+        Some(snap) => Tx::new(snap.clone(), false),
+        None => open(env, done_mode)?,
+    };
     plan(&mut tx)?;
     if rules != Rules::Skip {
         tx.cascade();
@@ -94,7 +100,11 @@ where
     }
     let sealed = tx.seal();
     sealed.check_done_lock(action, done_mode)?;
-    let written = sealed.write(env)?;
+    let written = if env.dry {
+        Vec::new()
+    } else {
+        sealed.write(env)?
+    };
     Ok(sealed.report(env, action, &written))
 }
 

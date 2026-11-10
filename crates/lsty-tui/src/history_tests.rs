@@ -9,6 +9,7 @@ use lsty_core::{
     keys::Action,
     ops::LIST_CHANGED,
 };
+use tempfile::TempDir;
 
 use crate::{
     hints::dim,
@@ -248,10 +249,38 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
     ("put back changed", "tt", "A +t\nB\nC\n", "t", None),
 ];
 
+/// A list after the keys `first`, its file then edited to `edit` outside
+/// and, for `read`, read again, else missed. In the `gap` the file is put
+/// back as the keys left it, not read.
+fn edited_after(
+    first: &str,
+    edit: &str,
+    read: bool,
+    gap: bool,
+) -> (TempDir, Model) {
+    let dir = workdir("A\nB\nC\n");
+    let mut model = model_of(dir.path());
+    keys(&mut model, first);
+    let stood = todo_of(dir.path());
+    fs::write(dir.path().join("todo.txt"), edit)
+        .unwrap_or_else(|e| panic!("{e}"));
+    if read {
+        reload(&mut model);
+    } else {
+        model.miss_change();
+    }
+    if gap {
+        fs::write(dir.path().join("todo.txt"), stood)
+            .unwrap_or_else(|e| panic!("{e}"));
+    }
+    (dir, model)
+}
+
 // An undo or redo, or the `t` that puts claims back, that writes on a line
 // goes through a shift and refuses anything else, whether the reading has
-// drawn it or not; once drawn, its hint is dim. One that puts a line back
-// always writes, its neighbours only saying where.
+// drawn it or not; once drawn, its hint is dim, and it writes nothing though
+// the lines stand again on disk. One that puts a line back always writes,
+// its neighbours only saying where.
 #[test]
 fn an_outside_edit_under_an_undo_or_redo() {
     for (name, first, edit, key, want) in OUTSIDE_EDITS {
@@ -262,21 +291,23 @@ fn an_outside_edit_under_an_undo_or_redo() {
         };
         for read in [false, true] {
             let name = format!("{name}, read {read}");
-            let dir = workdir("A\nB\nC\n");
-            let mut model = model_of(dir.path());
-            keys(&mut model, first);
-            fs::write(dir.path().join("todo.txt"), edit)
-                .unwrap_or_else(|e| panic!("{e}"));
+            // Dim, it writes nothing though its lines stand again on disk.
+            let gap = read && want.is_none();
+            let (dir, mut model) = edited_after(first, edit, read, gap);
             if read {
-                reload(&mut model);
                 let hint = model.answers()(action);
                 assert_eq!(dim(hint), want.is_none(), "{name}: {hint:?}");
             }
+            let on_disk = todo_of(dir.path());
             let cmds = keys(&mut model, key);
-            assert_eq!(todo_of(dir.path()), want.unwrap_or(edit), "{name}");
+            assert_eq!(
+                todo_of(dir.path()),
+                want.unwrap_or(&on_disk),
+                "{name}"
+            );
             let said = model.message.as_deref().unwrap_or_default();
             assert_eq!(said == refusal, want.is_none(), "{name}: {said}");
-            if want.is_none() {
+            if want.is_none() && !read {
                 model.update(load_of(cmds).read());
                 let shown = model.snap.todo().to_bytes();
                 assert_eq!(shown, todo_of(dir.path()).as_bytes(), "{name}");

@@ -282,12 +282,14 @@ impl Model {
 
     /// `repeat` of a prompt's action: the same text over the tasks under
     /// the cursor, without opening the prompt. One that changes nothing
-    /// says why, and leaves what `.` repeats alone.
+    /// says why, and leaves what `.` repeats alone; `dry` when the list on
+    /// screen shows it, which it says without the lock.
     pub(crate) fn repeat_prompt(
         &mut self,
         kind: Kind,
         count: usize,
         text: String,
+        dry: bool,
     ) {
         let rows = self.picked_rows(count);
         let s = Summary::of(&self.snap, self.cursor, rows);
@@ -297,7 +299,9 @@ impl Model {
             self.refuse(why, &chosen);
             return;
         }
-        let result = self.attempt(|env| write(env, kind, &chosen, &text));
+        let result = self.attempt(|env| {
+            write(&Env { dry, ..env.clone() }, kind, &chosen, &text)
+        });
         let Some(kept) = self.took(result) else {
             return;
         };

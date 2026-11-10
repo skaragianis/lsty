@@ -6,7 +6,6 @@ use std::{
     fs, io,
     path::Path,
     rc::Rc,
-    thread,
     time::{Duration, Instant},
 };
 
@@ -34,8 +33,8 @@ use crate::{
 
 const LOOK_AGAIN: &str = "the list changed — look again";
 
-const BUSY: &str =
-    "todo.txt is busy (locked by another writer) — nothing changed, try again";
+const NOT_UNDERWAY: &str = "1 is not underway; 2 is not underway";
+const DUE: &str = "1 is already due 2030-01-01";
 
 /// `stop` has no default key.
 const STOP_BOUND: &str = "[normal]\nstop = [\"<F9>\"]\n\
@@ -325,42 +324,25 @@ fn a_press_on_a_list_emptied_outside_looks_again() {
     }
 }
 
-/// A read that fails ends the press with the message the core would give, the
-/// list as it was. Once the lock is free, the next press finds the line
-/// changed.
-#[test]
-fn a_dim_press_that_cannot_read_says_the_file_is_busy() {
-    let dir = workdir(BLOCKED);
-    let config = Config {
-        lock_timeout: Duration::from_millis(30),
-        ..alone()
-    };
-    let mut model = started(deps(dir.path(), config));
-    keys(&mut model, "j");
-    outside(dir.path(), BLOCKED, FREED);
-    let mut held = held_lock(dir.path());
-    keys(&mut model, "x");
-    assert_eq!(model.message.as_deref(), Some(BUSY));
-    assert_eq!(model.tone, Tone::Alert);
-    assert_eq!(cursor_text(&model), "A dep:b", "the list as it was");
-    held.release().unwrap_or_else(|e| panic!("{}", e.message()));
-    assert_eq!(files(dir.path())[0], FREED.as_bytes());
-    keys(&mut model, "x");
-    assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN));
-    assert_eq!(files(dir.path())[0], FREED.as_bytes());
-}
-
 /// A key that cannot write does not wait for the lock, and what it says is
-/// true of the list still shown.
+/// true of the list still shown, though the files now let it write.
 #[test]
 fn a_refused_press_does_not_wait_for_a_held_lock() {
     let done = Some("A is done — x reopens it");
+    let blocked = Some("task 2 is blocked by 1 (Blocker)");
+    let reopen = Some("1 is done; reopen it first");
     for (shown, first, to, key, says) in [
         (CLOSED, "gg", REOPENED, "T", done),
         ("", "", "New\n", "x", None),
         ("", "", "New\n", "dd", None),
+        (BLOCKED, "jVj", NO_BLOCKER, "x", blocked),
+        (BLOCKED, "j", FREED, "t", blocked),
+        (REOPENED, "ggVj", CLAIMS.1, "<F9>", Some(NOT_UNDERWAY)),
+        (CLOSED, "gg", REOPENED, "+", reopen),
+        (CLOSED, "gg", REOPENED, "-", reopen),
+        (REOPENED, "gd2030-01-01<CR>", REOPENED, ".", Some(DUE)),
     ] {
-        let dir = workdir(shown);
+        let dir = bound(shown, STOP_BOUND);
         let config = Config {
             lock_timeout: Duration::from_secs(10),
             ..alone()
@@ -376,38 +358,8 @@ fn a_refused_press_does_not_wait_for_a_held_lock() {
         assert!(start.elapsed() < Duration::from_secs(5), "{key}: waited");
         assert_eq!(model.message.as_deref(), says, "{key}");
         assert_eq!(model.rows.len(), rows, "{key}: the list as it was");
+        assert_eq!(files(dir.path())[0], to.as_bytes(), "{key}");
         held.release().unwrap_or_else(|e| panic!("{}", e.message()));
-    }
-}
-
-/// The one who holds the lock frees the task and lets go, after the read gave
-/// up or while it waits. Nothing follows the read that could still write.
-#[test]
-fn a_dim_press_that_cannot_read_writes_nothing_when_the_lock_comes_free() {
-    for millis in [450, 100] {
-        let dir = workdir(BLOCKED);
-        let config = Config {
-            lock_timeout: Duration::from_millis(300),
-            ..alone()
-        };
-        let mut model = started(deps(dir.path(), config));
-        keys(&mut model, "j");
-        let (holding, held) = std::sync::mpsc::channel();
-        let path = dir.path().to_owned();
-        let holder = thread::spawn(move || {
-            let mut lock = held_lock(&path);
-            fs::write(path.join("todo.txt"), FREED)
-                .unwrap_or_else(|e| panic!("{e}"));
-            holding.send(()).unwrap_or_else(|e| panic!("{e}"));
-            thread::sleep(Duration::from_millis(millis));
-            lock.release().unwrap_or_else(|e| panic!("{}", e.message()));
-        });
-        held.recv().unwrap_or_else(|e| panic!("{e}"));
-        keys(&mut model, "x");
-        holder
-            .join()
-            .unwrap_or_else(|_| panic!("the holder panicked"));
-        assert_eq!(files(dir.path())[0], FREED.as_bytes(), "{millis}");
     }
 }
 
