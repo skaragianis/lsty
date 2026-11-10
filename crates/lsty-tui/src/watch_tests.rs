@@ -26,7 +26,7 @@ use crate::{
 };
 
 /// How long the system's watch gets to report something.
-const PATIENCE: Duration = Duration::from_secs(10);
+const PATIENCE: Duration = Duration::from_secs(5);
 /// How long counts as nothing happening.
 const QUIET: Duration = Duration::from_millis(300);
 

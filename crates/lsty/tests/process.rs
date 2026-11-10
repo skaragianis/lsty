@@ -40,10 +40,11 @@ impl Work {
         let root = fs::canonicalize(tmp.path())?;
         fs::write(root.join("todo.txt"), todo)?;
         // Each write syncs to disk under the lock, which is slow on macOS,
-        // so eight busy processes can keep one out past the default 2 s.
+        // so eight busy processes can keep one out past a few seconds on a
+        // loaded machine; 15 s is still under the 20 s kill of a hang.
         let config = root.join(".config").join("lsty");
         fs::create_dir_all(&config)?;
-        fs::write(config.join("config.toml"), "lock_timeout = \"30s\"\n")?;
+        fs::write(config.join("config.toml"), "lock_timeout = \"15s\"\n")?;
         Ok(Self { _tmp: tmp, root })
     }
 
@@ -293,7 +294,7 @@ fn lock_timeout() -> Check {
 }
 
 /// How long a wait test may take before it fails.
-const LIMIT: Duration = Duration::from_secs(30);
+const LIMIT: Duration = Duration::from_secs(5);
 
 /// Whether the process holds an inotify instance: on Linux, a wait
 /// that has taken its snapshot and watches the files.
