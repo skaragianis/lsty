@@ -24,7 +24,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  todo.txt is busy (locked by another writer) — nothing changed, try again
+ NORMAL  todo.txt is busy (locked by another writer) — nothing changed, try again  todo.txt  manual
 -- a-file --
 A
 B

@@ -19,7 +19,6 @@ use crate::{
     field::{Field, filter_keys},
     layout::{BORDER, cells},
     line::{Line, LineKind},
-    messages::Tone,
     model::Model,
     motion::Step,
     output::prompt_cursor,
@@ -184,7 +183,7 @@ impl Model {
             theme::load(name, themes, cwd, no_config, profile);
         self.use_theme(theme);
         if let Some(w) = warnings.first() {
-            self.message = Some(format!("{}: {}", w.source, w.message));
+            self.warn(format!("{}: {}", w.source, w.message));
         }
     }
 
@@ -355,10 +354,7 @@ impl Model {
         let path = self.deps.cwd.join(file);
         match write_theme(&path, &name) {
             Ok(()) => self.message = Some(format!("theme {name} saved")),
-            Err(why) => {
-                self.tone = Tone::Alert;
-                self.message = Some(format!("can't save the theme: {why}"));
-            }
+            Err(why) => self.alert(format!("can't save the theme: {why}")),
         }
     }
 

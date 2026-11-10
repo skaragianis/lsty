@@ -57,7 +57,7 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  the list changed — look again  x done  t start  T wont  o new      9.9.9
+ NORMAL  the list changed — look again  todo.txt  manual  x done  t start  T wont  o new      9.9.9
 -- task-changed-not-seen --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Call +outside                                                                               │
@@ -65,7 +65,7 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  the list changed — look again  x done  t start  T wont  o new      9.9.9
+ NORMAL  the list changed — look again  todo.txt  manual  x done  t start  T wont  o new      9.9.9
 -- only-another-line-changed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   New line                                                                                    │

@@ -317,7 +317,7 @@ impl Model {
             Refusal::Changed => ops::LIST_CHANGED.to_owned(),
         };
         if matches!(why, Refusal::Sorted | Refusal::Says(_)) {
-            self.message = Some(text);
+            self.warn(text);
         } else {
             self.alert(text);
         }
@@ -326,6 +326,12 @@ impl Model {
     /// Shows a refusal of the keys in the error style.
     pub(crate) fn alert(&mut self, text: String) {
         self.tone = Tone::Alert;
+        self.message = Some(text);
+    }
+
+    /// Shows a warning, or a refusal that is no error.
+    pub(crate) fn warn(&mut self, text: String) {
+        self.tone = Tone::Warning;
         self.message = Some(text);
     }
 

@@ -28,7 +28,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the list changed — look again  <CR> commit  <C-w> del word         9.9.9
+ INSERT  the list changed — look again  todo.txt  manual  <CR> commit  <C-w> del word         9.9.9
 -- a-cursor --
 │    (A) 2026-09-20 Call client +work ! id:c1                                                      │
                                        ^
@@ -42,7 +42,7 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  the list changed — look again; <Esc> drops your edit  <CR> commit  9.9.9
+ INSERT  the list changed — look again; <Esc> drops your edit  todo.txt  manual  <CR> commit  9.9.9
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work @phone                                                             c1 │

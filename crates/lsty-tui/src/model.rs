@@ -544,7 +544,7 @@ impl Model {
         let text = format!("{}: {}", w.source, w.message);
         self.shown += 1;
         let total = self.warnings.len();
-        self.message = Some(if total > 1 {
+        self.warn(if total > 1 {
             format!("{text} ({} of {total})", self.shown)
         } else {
             text

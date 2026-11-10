@@ -56,7 +56,7 @@ x 2026-09-01 Plain done
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  Open one is done — x reopens it  x reopen  o new  a append         9.9.9
+ NORMAL  Open one is done — x reopens it  todo.txt  manual  x reopen  o new  a append         9.9.9
 -- x-reopens --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open one                                                                                    │

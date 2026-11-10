@@ -65,7 +65,7 @@ impl Model {
         n: usize,
     ) -> Vec<Cmd> {
         let Some(link) = n.checked_sub(1).and_then(|i| links.get(i)) else {
-            self.message = Some(format!(
+            self.warn(format!(
                 "this task has {}",
                 ops::counted(links.len(), "link")
             ));

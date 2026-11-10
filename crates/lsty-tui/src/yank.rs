@@ -16,7 +16,7 @@ use crate::{
     hints::dim,
     history::Again,
     insert::first_touched,
-    messages,
+    messages::{self, Tone},
     model::Model,
     msg::Cmd,
     press::{Refusal, decide},
@@ -181,6 +181,7 @@ impl Model {
     pub(crate) fn copy_out(&mut self, text: Vec<u8>) -> Vec<Cmd> {
         if let Err(e) = self.deps.clipboard.write(&text) {
             self.note(e.message());
+            self.tone = self.tone.max(Tone::Warning);
         }
         vec![Cmd::Copy(text)]
     }
@@ -246,6 +247,7 @@ impl Model {
         }
         if source.fell {
             self.note(messages::UNREADABLE);
+            self.tone = self.tone.max(Tone::Warning);
         }
         self.cursor_to(first);
     }

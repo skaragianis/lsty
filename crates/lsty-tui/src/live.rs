@@ -212,7 +212,7 @@ impl Model {
             return;
         }
         self.live.shown.unwatched = true;
-        self.message = Some(format!(
+        self.warn(format!(
             "can't watch {}: {why}; reloading every minute",
             self.base_name()
         ));
@@ -243,7 +243,7 @@ impl Model {
             Ok(clock) => clock,
             Err(e) => {
                 self.live.phase = Phase::Idle;
-                self.message = Some(e.message().to_owned());
+                self.alert(e.message().to_owned());
                 return None;
             }
         };
@@ -285,7 +285,7 @@ impl Model {
         if e.code() == Code::LockTimeout {
             self.live.shown.busy = true;
         } else {
-            self.message = Some(e.message().to_owned());
+            self.alert(e.message().to_owned());
         }
     }
 

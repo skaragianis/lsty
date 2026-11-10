@@ -1,7 +1,7 @@
 start
-status config\.toml: auto_archive: expected bool \(1 of 2\)$
+status config\.toml: auto_archive: expected bool \(1 of 2\)  todo\.txt
 keys j
-status config\.toml: keep_priority: expected bool \(2 of 2\)$
+status config\.toml: keep_priority: expected bool \(2 of 2\)  todo\.txt
 keys j
 frame none
 -- todo.txt --

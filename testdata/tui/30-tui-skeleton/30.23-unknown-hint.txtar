@@ -1,5 +1,5 @@
 start
-status config\.toml: hints\.normal: unknown action "frob"$
+status config\.toml: hints\.normal: unknown action "frob"  todo\.txt
 keys j
 frame cleared
 -- todo.txt --

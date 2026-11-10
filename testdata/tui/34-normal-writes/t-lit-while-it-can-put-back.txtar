@@ -67,4 +67,4 @@ NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyy
 │  2 ⧗ Stuck dep:b                                                                                 │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  task 2 is blocked by 1 (Blocker)  x done  t start  T wont  o new   9.9.9
+ NORMAL  task 2 is blocked by 1 (Blocker)  todo.txt  manual  x done  t start  T wont  o new   9.9.9

@@ -26,7 +26,7 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  todo.txt is busy (locked by another writer) — nothing changed
+ VISUAL  todo.txt is busy (locked by another writer) — nothing changed, try again  2 selected
 -- a-file --
 A
 B

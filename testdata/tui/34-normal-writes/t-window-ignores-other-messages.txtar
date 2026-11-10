@@ -49,7 +49,7 @@ Other +outside
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  todo.txt is busy; showing the last state read  1 stopped; 1 was claimed b
+ NORMAL  todo.txt is busy; showing the last state read  todo.txt  manual
 -- still-puts-back --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▶ Call                                                                                     1h │
@@ -65,7 +65,7 @@ Other +outside
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  todo.txt is busy; showing the last state read  x done  t start     9.9.9
+ NORMAL  todo.txt is busy; showing the last state read  todo.txt  manual  x done  t start     9.9.9
 -- not-extended --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▷ Call                                                                                     0m │

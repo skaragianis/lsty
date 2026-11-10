@@ -44,4 +44,4 @@ x 2026-09-01 F wontdo:true
 │  4 ✗ F wontdo:true                                                                   28d ago     │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  ▶ 1 in doing  all are done — x reopens them  x reopen  9.9.9
+ VISUAL  all are done — x reopens them  2 selected  todo.txt  manual  ▶ 1 in doing  x reopen  9.9.9

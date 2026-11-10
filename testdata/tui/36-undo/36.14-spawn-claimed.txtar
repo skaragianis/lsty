@@ -23,7 +23,7 @@ Z
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  can't undo: the list changed
+ NORMAL  can't undo: the list changed — look again  todo.txt  manual
 -- refused-todo --
 x 2026-09-29 Pay rec:1w due:2026-09-30
 2026-09-29 Pay rec:1w due:2026-10-06 started:2026-09-29T0900Z owner:agent1
