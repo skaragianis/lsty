@@ -154,7 +154,12 @@ impl Side {
                 assert_eq!(self.kept(), before, "dim {name}");
             }
             Some(_) if lost => self.said_look_again(&before.0, &name),
-            Some(_) if !stale && self.list() && writes => {
+            Some((a, _))
+                if !stale
+                    && self.list()
+                    && writes
+                    && !moved_in_place(&self.model, a) =>
+            {
                 assert_ne!(self.files(), before.0, "lit {name}");
                 assert_ne!(self.model.tone, Tone::Alert, "lit {name}");
             }
@@ -250,6 +255,16 @@ fn writes(model: &Model, action: Action) -> bool {
         || again.is_some_and(|a| a.action() == Action::ToggleStart);
     let history = matches!(action, Action::Undo | Action::Redo);
     (history || writes_line(action)) && !unsure
+}
+
+/// Whether `action` was a move, or `.` of one, that the core found had
+/// no task to change place: it went past lines equal to its own.
+fn moved_in_place(model: &Model, action: Action) -> bool {
+    let again = model.again.as_ref().filter(|_| action == Action::Repeat);
+    let moved = again.map_or(action, Again::action);
+    let said = model.message.as_deref().unwrap_or_default();
+    matches!(moved, Action::MoveTaskDown | Action::MoveTaskUp)
+        && said.ends_with(" is already there")
 }
 
 /// The lines under `key` in NORMAL mode, when it is lit and writes on them

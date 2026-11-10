@@ -51,37 +51,9 @@ impl Model {
         Some((self.cursor, self.cursor, (to != self.cursor).then_some(to)))
     }
 
-    /// Whether `J` or `K` (`action`) moves the rows of `move_span` only past
-    /// lines equal to them and next to them in the file, so no task changes
-    /// place.
-    pub(crate) fn moves_nothing(
-        &self,
-        action: Action,
-        block: bool,
-        count: usize,
-    ) -> bool {
-        let down = action == Action::MoveTaskDown;
-        if !down && action != Action::MoveTaskUp {
-            return false;
-        }
-        let Some((lo, hi, Some(past))) = self.move_span(down, block, count)
-        else {
-            return false;
-        };
-        let rows = self.rows.get(lo.min(past)..=hi.max(past)).unwrap_or(&[]);
-        // The line number plus the rows after it, one for lines in a run.
-        let mut lines =
-            rows.iter().zip((0..rows.len()).rev()).map(|(r, i)| {
-                let task = self.snap.task(r.id)?;
-                Some((self.snap.line(task).raw(), task.nr().index() + i))
-            });
-        let first = lines.next().flatten();
-        first.is_some() && lines.all(|line| line == first)
-    }
-
     /// `move_task_down` and `move_task_up`: moves the rows of `move_span`
-    /// past its row in one write, unless the rule refuses or no task would
-    /// change place; it then sets what `.` repeats. With a count the task
+    /// past its row in one write, unless the rule refuses; it then sets what
+    /// `.` repeats. With a count the task
     /// passes that many shown tasks, or as many as there are. In VISUAL
     /// mode the selection moves as a block and the count is dropped; with
     /// `block`, a `.` after a block move, `count` rows from the cursor move
@@ -112,9 +84,6 @@ impl Model {
             self.refuse(why, &tasks);
             return;
         }
-        if self.moves_nothing(action, block, count) {
-            return;
-        }
         let Some(past) = past.and_then(|i| self.rows.get(i)).map(|r| r.id)
         else {
             return;
@@ -130,7 +99,7 @@ impl Model {
             Placement::Before(anchor)
         };
         let result = self.attempt(|env| ops::reorder(env, &targets, &place));
-        if self.settle(result) {
+        if self.took(result).is_some() {
             self.again = Some(again);
         }
     }
