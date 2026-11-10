@@ -166,7 +166,7 @@ impl Model {
     ) -> errs::Result<Self> {
         let clock = live::clock_in(&deps.now, &deps.zone)?;
         let cancel = Cancel::new();
-        let snap = live::fetch(&start.found, &deps.config, &clock, &cancel)?;
+        let read = live::fetch(&start.found, &deps.config, &clock, &cancel)?;
         let styles = Styles::new(&deps.theme, deps.profile);
         let (catalog, more) = filters::catalog(&deps.config);
         let hints = hints::warnings(&deps.config.hints);
@@ -196,8 +196,8 @@ impl Model {
             path: title_path(&start.found.todo, deps.home.as_deref()),
             deps,
             clock,
-            live: Live::new(&snap),
-            snap,
+            live: Live::new(&read),
+            snap: read.0,
             pointer: Pointer::default(),
             cancel,
             clip: None,
@@ -418,6 +418,7 @@ impl Model {
 
     fn feed(&mut self, stroke: Stroke) -> Vec<Cmd> {
         if self.edit.is_some() {
+            self.read_if_moved();
             self.reveal();
             self.edit_press(stroke);
             return Vec::new();
@@ -448,9 +449,7 @@ impl Model {
         {
             return vec![Cmd::Quit];
         }
-        let lost = !matches!(fed.outcome, Outcome::Pending)
-            && std::mem::take(&mut self.keys_lost);
-        self.keys_lost |= lost && self.visual.is_some();
+        let again = self.looks_again(fed.outcome);
         if self.opening.is_some() {
             return self.picker_keys(stroke, &fed);
         }
@@ -466,17 +465,37 @@ impl Model {
             return self.prompt_keys(fed);
         }
         match fed.outcome {
-            Outcome::Matched { action, count }
-                if lost
-                    && writes_line(self.aimed(action))
-                    && !hints::dim(self.answers_at(count)(action)) =>
-            {
+            Outcome::Matched { .. } if again => {
                 self.say_changed();
                 Vec::new()
             }
             Outcome::Matched { action, count } => self.run(action, count),
             Outcome::Pending | Outcome::NoMatch => Vec::new(),
         }
+    }
+
+    /// Reads the files before a key not dim on the list drawn (see
+    /// [`Model::read_if_moved`]). Whether the key, lit there and writing on
+    /// its lines, must look again: a reading moved its lines (see
+    /// [`Model::check_typed`]) or what it would do.
+    fn looks_again(&mut self, outcome: Outcome) -> bool {
+        let answer = |m: &Self| match outcome {
+            Outcome::Matched { action, count } => {
+                Some(m.answers_at(count)(action))
+            }
+            Outcome::Pending | Outcome::NoMatch => None,
+        };
+        let drawn = answer(self);
+        let lit = !drawn.is_some_and(hints::dim);
+        if lit {
+            self.read_if_moved();
+        }
+        let lost = !matches!(outcome, Outcome::Pending)
+            && std::mem::take(&mut self.keys_lost);
+        self.keys_lost |= lost && self.visual.is_some();
+        let writes = matches!(outcome, Outcome::Matched { action, .. }
+            if writes_line(self.aimed(action)));
+        lit && writes && (lost || answer(self) != drawn)
     }
 
     /// Does an action of NORMAL or VISUAL mode. The actions of the other

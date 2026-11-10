@@ -84,6 +84,7 @@ fn a_field_whose_line_changed_refuses_then_drops_on_esc() {
                 );
             } else {
                 fs::write(dir.path().join("todo.txt"), disk).unwrap();
+                model.miss_change();
             }
             let cmds = keys(&mut model, first);
             if !read {
