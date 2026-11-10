@@ -20,12 +20,12 @@ Old task started:2026-09-29T0900Z owner:agent1
 -- refused --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
 │  1   Buy                                                           │
-│  2 ▶ Old task                                                   0m │
+│  2   Old task                                                      │
 │                                                                    │
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  can't undo: the list changed
+ NORMAL  todo.txt  manual  can't undo: the list changed — look again
 -- refused-todo --
 Buy
 Old task started:2026-09-29T0900Z owner:agent1

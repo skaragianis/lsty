@@ -107,7 +107,6 @@ fn a_move_that_cannot_go_writes_nothing() {
     let mut model = model_of(dir.path(), alone());
     fs::write(dir.path().join("todo.txt"), "A\nA\n")
         .unwrap_or_else(|e| panic!("{e}"));
-    model.miss_change();
     let before = modified(dir.path());
     keys(&mut model, "J");
     assert_eq!(modified(dir.path()), before);

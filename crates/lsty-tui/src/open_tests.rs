@@ -285,22 +285,21 @@ fn the_help_lists_every_command_of_the_screen() {
     }
 }
 
-/// A model on a URL whose opener fails and whose clipboard is `board`, and
-/// its folder.
-fn failing_opener(board: &Board) -> (tempfile::TempDir, Model) {
+/// A model on a URL whose opener fails and whose clipboard is `board`.
+fn failing_opener(board: &Board) -> Model {
     let dir = workdir("Read https://x.org/a.\n");
     let deps = Deps {
         clipboard: Box::new(board.clone()),
         opener: Box::new(|_| Err("nope".to_owned())),
         ..deps(dir.path(), alone())
     };
-    (dir, started(deps))
+    started(deps)
 }
 
 #[test]
 fn a_url_the_opener_cannot_open_is_copied_instead() {
     let board = Board::default();
-    let (_dir, mut model) = failing_opener(&board);
+    let mut model = failing_opener(&board);
     let cmds = keys(&mut model, "gx");
     assert_eq!(cmds[0], Cmd::Copy(b"https://x.org/a".to_vec()));
     assert!(expiry(&cmds).is_some(), "{cmds:?}");
@@ -315,7 +314,7 @@ fn a_url_the_opener_cannot_open_is_copied_instead() {
 fn a_failed_copy_after_a_failed_opener_is_said_too() {
     let board = Board::default();
     board.fail_writes("boom");
-    let (_dir, mut model) = failing_opener(&board);
+    let mut model = failing_opener(&board);
     press(&mut model, "gx");
     assert_eq!(
         model.message.as_deref(),

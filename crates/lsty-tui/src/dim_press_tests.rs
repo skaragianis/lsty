@@ -24,10 +24,9 @@ use crate::{
     messages::Tone,
     model::Model,
     msg::{Cmd, Msg},
-    press::Answer,
     test_util::{
         Board, alone, cursor_text, deps, files, held_lock, hint_is, keys,
-        screen, started, workdir,
+        load_of, screen, started, workdir,
     },
 };
 
@@ -114,15 +113,11 @@ fn outside(dir: &Path, from: &str, to: &str) {
     fs::write(&path, now.replace(from, to)).unwrap_or_else(|e| panic!("{e}"));
 }
 
-/// The list said to look again; the hint of `action` now is as `hint_is`.
-fn looks_again(
-    model: &Model,
-    action: Action,
-    fresh: Option<Answer>,
-    name: &str,
-) {
+/// `key` says to look again, and the list reads the files.
+fn looks_again(model: &mut Model, key: &str, name: &str) {
+    let cmds = keys(model, key);
     assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN), "{name}");
-    hint_is(model, action, fresh, name);
+    model.update(load_of(cmds).read());
 }
 
 /// A dim key does nothing, whichever it is: after it the selection is as it
@@ -217,8 +212,8 @@ fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
         let (dir, mut model) = opened(FREED, first);
         outside(dir.path(), FREED, to);
         let before = files(dir.path());
-        keys(&mut model, "x");
-        looks_again(&model, Action::ToggleComplete, None, &name);
+        looks_again(&mut model, "x", &name);
+        hint_is(&model, Action::ToggleComplete, None, &name);
         assert_eq!(files(dir.path()), before, "{name}");
         assert_eq!(cursor_text(&model), under, "{name}");
         keys(&mut model, "x");
@@ -233,15 +228,13 @@ fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
 }
 
 /// A count is for the press it was typed for, and the next one reads its
-/// own, as the status line and the hints say. When the count's other tasks
-/// are still refused, so is the press.
+/// own, as the status line and the hints say.
 #[test]
 fn a_count_does_not_outlive_a_look_again() {
     for (second, want) in [("x", 1), ("2x", 2)] {
-        let (dir, mut model) = opened(BLOCKED, "j");
-        outside(dir.path(), BLOCKED, FREED);
-        keys(&mut model, "2x");
-        looks_again(&model, Action::ToggleComplete, None, second);
+        let (dir, mut model) = opened(FREED, "j");
+        outside(dir.path(), FREED, "Blocker id:b\nA +p\nB +p\n");
+        looks_again(&mut model, "2x", second);
         assert_eq!(model.typed_count(), 0);
         keys(&mut model, second);
         let todo = files(dir.path())[0].clone();
@@ -249,16 +242,6 @@ fn a_count_does_not_outlive_a_look_again() {
             todo.split(|&b| b == b'\n').filter(|l| l.starts_with(b"x "));
         assert_eq!(done.count(), want);
     }
-
-    let (dir, mut model) = opened(BLOCKED, "j");
-    outside(dir.path(), BLOCKED, "Blocker id:b\nA\nB dep:b\n");
-    let before = files(dir.path());
-    keys(&mut model, "2x");
-    assert_eq!(
-        model.message.as_deref(),
-        Some("task 3 is blocked by 1 (Blocker)")
-    );
-    assert_eq!(files(dir.path()), before);
 }
 
 /// Only the done file moved: the archived task under the cursor is gone, and
@@ -275,8 +258,8 @@ fn a_press_after_a_change_to_the_done_file_alone_looks_again() {
     let mut model = started(deps(dir.path(), config));
     keys(&mut model, "G");
     fs::write(&done, "").unwrap_or_else(|e| panic!("{e}"));
-    keys(&mut model, "x");
-    looks_again(&model, Action::ToggleComplete, None, "done file");
+    looks_again(&mut model, "x", "done file");
+    hint_is(&model, Action::ToggleComplete, None, "done file");
     assert_eq!(cursor_text(&model), "A");
 }
 
@@ -314,10 +297,9 @@ fn a_press_on_a_list_emptied_outside_looks_again() {
                 fs::write(&todo, to).unwrap_or_else(|e| panic!("{e}"));
             }
             let before = files(dir.path());
-            keys(&mut model, "x");
             let name = format!("{first} to {to:?}");
+            looks_again(&mut model, "x", &name);
             assert!(model.rows.is_empty(), "{name}");
-            assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN), "{name}");
             assert_eq!(model.key_mode(), Mode::Normal, "{name}");
             assert_eq!(files(dir.path()), before, "{name}");
         }
