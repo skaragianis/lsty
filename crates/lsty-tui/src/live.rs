@@ -123,8 +123,7 @@ impl Eq for Reading {}
 /// Why a reload is due without a notice.
 #[derive(Clone, Copy, Debug)]
 struct Debt {
-    /// The watch is down: every minute reloads.
-    polling: bool,
+    unwatched: bool,
     /// The last reload did not get the files, or the folder is gone.
     owed: bool,
     /// The list said it changed: the input that said so reads at once.
@@ -159,7 +158,7 @@ impl Live {
             watcher: None,
             phase: Phase::Idle,
             debt: Debt {
-                polling: false,
+                unwatched: false,
                 owed: snap.found().state == FileState::DirMissing,
                 kick: false,
             },
@@ -216,7 +215,7 @@ impl Model {
         };
         match start(self.snap.found(), sink) {
             Ok(watcher) => self.live.watcher = Some(watcher),
-            Err(why) => self.poll_because(&why),
+            Err(why) => self.unwatched_because(&why),
         }
     }
 
@@ -225,7 +224,7 @@ impl Model {
         match notice {
             Notice::Changed => self.on_event().into_iter().collect(),
             Notice::Failed(why) => {
-                self.poll_because(&why);
+                self.unwatched_because(&why);
                 Vec::new()
             }
         }
@@ -233,11 +232,11 @@ impl Model {
 
     /// Says once that the watch is down and the list reloads every
     /// minute.
-    fn poll_because(&mut self, why: &str) {
-        if self.live.debt.polling {
+    fn unwatched_because(&mut self, why: &str) {
+        if self.live.debt.unwatched {
             return;
         }
-        self.live.debt.polling = true;
+        self.live.debt.unwatched = true;
         self.message = Some(format!(
             "can't watch {}: {why}; reloading every minute",
             self.base_name()
@@ -379,11 +378,18 @@ impl Model {
         self.reload_owed()
     }
 
-    /// Starts a reload now when one is owed or the watch is down.
+    /// Starts a reload now when one is owed.
     pub(crate) fn reload_owed(&mut self) -> Option<Cmd> {
-        if !self.live.debt.owed && !self.live.debt.polling {
+        if !self.live.debt.owed {
             return None;
         }
+        self.read_now()
+    }
+
+    /// Starts a reload now, or after the one under way. The minute does
+    /// this watched or not, since a watch can miss events (network and
+    /// shared folders).
+    pub(crate) fn read_now(&mut self) -> Option<Cmd> {
         match self.live.phase {
             Phase::Idle => self.reload(),
             Phase::Loading { .. } | Phase::Waiting => self.on_event(),
