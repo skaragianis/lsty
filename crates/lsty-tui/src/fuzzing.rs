@@ -240,13 +240,10 @@ fn writes(model: &Model, action: Action) -> bool {
 }
 
 /// The lines under `key` in NORMAL mode, when it is lit and writes on them
-/// (`.` on those it repeats over), that the todo file holds once: one
-/// changed, gone or twinned after that is one the key must look again for.
-fn under(model: &Model, key: &str, todo: &[u8]) -> Vec<Vec<u8>> {
+/// (`.` on those it repeats over).
+fn under(model: &Model, key: &str) -> Vec<Vec<u8>> {
     let count = aimed_count(model, key);
-    let mut lines = count.map_or_else(Vec::new, |n| row_lines(model, n));
-    lines.retain(|line| twins(todo, line) == 1);
-    lines
+    count.map_or_else(Vec::new, |n| row_lines(model, n))
 }
 
 /// The count `key` reads in NORMAL mode, when it is lit and writes on its
@@ -315,11 +312,12 @@ fn rewrite(dir: &Path, op: u8, arg: usize) {
 /// when `op` says the watcher reads between `count` and `key`, at the key's
 /// own check before it when `op` says so, else only after `key`, as when
 /// the rewrite lands between that check and the press. A stale press never
-/// writes what the twin's would not: it writes nothing or what the twin
-/// wrote, but for a paste beside another copy of its line (see
-/// [`beside_a_copy`]); and a lit key whose line changed writes nothing and
-/// says to look again. Once the list has read, the run goes on while it
-/// shows what the twin shows, and ends (`false`) otherwise.
+/// writes what the twin's would not: it writes nothing, what the twin
+/// wrote, or only on the lines it aimed at (see [`on_its_rows`]), but for a
+/// paste beside another copy of its line (see [`beside_a_copy`]); and a lit
+/// key whose line changed writes nothing and says to look again. Once the
+/// list has read, the run goes on while it shows what the twin shows, and
+/// ends (`false`) otherwise.
 fn behind(
     (main, twin): (&mut Side, &mut Side),
     (op, arg, count, key): (u8, usize, &str, &str),
@@ -343,8 +341,9 @@ fn behind(
     let under = if read && count.is_empty() {
         Vec::new()
     } else {
-        under(&main.model, key, &main.files()[0])
+        under(&main.model, key)
     };
+    let shown = main.files();
     rewrite(main.dir.path(), op, arg);
     rewrite(twin.dir.path(), op, arg);
     let moved_on = main.files();
@@ -362,15 +361,58 @@ fn behind(
     let fresh = twin.checked(key, false, trail);
     // A key the watcher's reading drew dim says its own words.
     let dim_now = read && fresh.is_some_and(|(_, answer)| dim(answer));
-    let lost = !dim_now && under.iter().any(|l| twins(&moved_on[0], l) != 1);
+    // A line the file held once that changed, went or got a twin.
+    let lost = !dim_now
+        && under
+            .iter()
+            .any(|l| twins(&shown[0], l) == 1 && twins(&moved_on[0], l) != 1);
     let wrote = main.files();
     assert!(!lost || looked && wrote == moved_on, "lost: {trail:?}");
     let beside = seen
-        .is_some_and(|s| beside_a_copy(&s, &moved_on, &wrote, &twin.files()));
-    let fresh_too = wrote == moved_on || wrote == twin.files() || beside;
+        .as_ref()
+        .is_some_and(|s| beside_a_copy(s, &moved_on, &wrote, &twin.files()));
+    let aimed = seen.is_none() && on_its_rows(&under, &moved_on, &wrote);
+    let fresh_too =
+        wrote == moved_on || wrote == twin.files() || beside || aimed;
     assert!(fresh_too, "wrote what a fresh press would not: {trail:?}");
     reload(&mut main.model);
     main.agrees(twin)
+}
+
+/// Whether a press wrote on no line of `before` but those `under` it: the
+/// others but blank ones are all still there, as many of each, in their
+/// order, and of those under it at most one copy each is gone. Where the
+/// lines it wrote went is not checked, nor what it wrote on them: a count or
+/// a cursor on the twin can take in a row the stale list never showed, a
+/// line another writer put among the counted rows or a refilter its reading
+/// applied.
+fn on_its_rows(
+    under: &[Vec<u8>],
+    before: &[Vec<u8>; 2],
+    wrote: &[Vec<u8>; 2],
+) -> bool {
+    let lines = |t: &[u8]| -> Vec<Vec<u8>> {
+        let lines = t.split(|b| *b == b'\n').filter(|l| !l.is_empty());
+        lines.map(<[u8]>::to_vec).collect()
+    };
+    let take = |from: &mut Vec<Vec<u8>>, line: &Vec<u8>| {
+        if let Some(at) = from.iter().position(|l| l == line) {
+            from.remove(at);
+        }
+    };
+    before.iter().zip(wrote).all(|(was, now)| {
+        let was = lines(was);
+        let now = lines(now).into_iter().filter(|l| was.contains(l));
+        let (mut gone, mut rest) = (was.clone(), was.iter());
+        let ordered = now.into_iter().all(|l| {
+            take(&mut gone, &l);
+            rest.any(|w| *w == l)
+        });
+        for line in under {
+            take(&mut gone, line);
+        }
+        ordered && gone.is_empty()
+    })
 }
 
 /// For a lit `p` or `P` (or a `.` of one), whether it pastes below, and the
