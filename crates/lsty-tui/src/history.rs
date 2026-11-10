@@ -203,7 +203,8 @@ impl Model {
             Way::Redo => &self.hist.redo,
         };
         // A step whose lines changed is refused by the write, which drops it;
-        // one whose lines changed on screen is refused without the lock.
+        // one whose lines changed on screen is refused without the lock and
+        // kept, to light again if the lines come back.
         let Some(top) = stack.last() else {
             self.refused(way.action(), 1);
             return;
@@ -225,15 +226,12 @@ impl Model {
                     Some(format!("{}: {}", way.past(), step.message));
                 self.rewound(outcome, clock, way, step);
             }
+            Err(e) if dry => self.alert(e.message().to_owned()),
             Err(e) => {
                 if e.code() == Code::ExpectMismatch {
                     self.hist.stack(way).pop();
                 }
-                if dry {
-                    self.alert(e.message().to_owned());
-                } else {
-                    self.fail(&e);
-                }
+                self.fail(&e);
             }
         }
     }

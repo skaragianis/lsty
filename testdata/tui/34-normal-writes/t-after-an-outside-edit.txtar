@@ -8,6 +8,9 @@ keys t
 frame task-changed-and-seen
 file todo.txt task-changed
 keys t
+file todo.txt task-changed
+tick 2s
+keys t
 file todo.txt task-changed-then-started
 write todo.txt todo.txt
 event
@@ -19,7 +22,7 @@ frame task-changed-not-seen
 file todo.txt task-changed
 write todo.txt todo.txt
 event
-tick 50ms
+tick 2s
 keys t
 write todo.txt line-above
 event
