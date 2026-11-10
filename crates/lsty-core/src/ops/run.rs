@@ -111,11 +111,17 @@ where
     Ok(sealed.report(env, action, &written))
 }
 
-/// Lets `plan` stage its changes and checks them.
+/// Checks that the lines the action was aimed at are there, lets `plan`
+/// stage its changes and checks them.
 fn planned<F>(env: &Env<'_>, tx: &mut Tx, rules: Rules, plan: F) -> Result<()>
 where
     F: FnOnce(&mut Tx) -> Result<()>,
 {
+    if let Some(landing) = &tx.landing {
+        for target in env.aimed {
+            target.landed(landing)?;
+        }
+    }
     plan(tx)?;
     if rules != Rules::Skip {
         tx.cascade();
