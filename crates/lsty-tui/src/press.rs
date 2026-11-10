@@ -247,9 +247,9 @@ fn puts_back(m: &Model, s: &Summary) -> bool {
             == Some(true)
 }
 
-/// `u`, `<C-r>` and the `t` that puts claims back: a step to apply, whose
-/// lines still stand in the reading as it left them. Over lines changed
-/// since, the press writes nothing and says so without the lock.
+/// The `t` that puts claims back: a step to apply, whose lines still stand
+/// in the reading as it left them. Over lines changed since, the press
+/// writes nothing and says so without the lock.
 fn rewinds(m: &Model, top: Option<&Step>) -> bool {
     top.is_some_and(|top| top.lands(&m.snap))
 }
@@ -434,18 +434,13 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             let lit = links >= wanted.max(1);
             return lit_if(lit, Refusal::Says(messages::NO_LINK));
         }
-        Action::Undo if m.kept.is_some() => return Answer::Applies,
-        Action::Undo if m.hist.undo.is_empty() => {
-            return Answer::Refused(Refusal::Says("nothing to undo"));
-        }
-        Action::Redo if m.hist.redo.is_empty() => {
-            return Answer::Refused(Refusal::Says("nothing to redo"));
-        }
         Action::Undo => {
-            return lit_if(rewinds(m, m.hist.undo.last()), Refusal::Quiet);
+            let lit = m.kept.is_some() || !m.hist.undo.is_empty();
+            return lit_if(lit, Refusal::Says("nothing to undo"));
         }
         Action::Redo => {
-            return lit_if(rewinds(m, m.hist.redo.last()), Refusal::Quiet);
+            let lit = !m.hist.redo.is_empty();
+            return lit_if(lit, Refusal::Says("nothing to redo"));
         }
         Action::Repeat => return repeat(m, m.typed_count()),
         Action::DeleteChar

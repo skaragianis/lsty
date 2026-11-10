@@ -275,12 +275,11 @@ fn edited_after(
     (dir, model)
 }
 
-/// A dim undo, redo or put-back in the gap kept its `steps` and the window
-/// of `t`: once its lines are read back, `key` is lit and writes.
+/// A dim put-back in the gap kept its `steps` and its window: once its
+/// lines are read back, `t` is lit and writes.
 fn lights_when_read(
     model: &mut Model,
     dir: &Path,
-    (key, action): (&str, Action),
     steps: Option<(usize, usize)>,
     name: &str,
 ) {
@@ -290,39 +289,42 @@ fn lights_when_read(
     assert_eq!(kept(model), steps, "{name}: step kept");
     let on_disk = todo_of(dir);
     reload(model);
-    assert!(!dim(model.answers()(action)), "{name}: lit again");
-    keys(model, key);
+    assert!(
+        !dim(model.answers()(Action::ToggleStart)),
+        "{name}: lit again"
+    );
+    keys(model, "t");
     assert_ne!(todo_of(dir), on_disk, "{name}: wrote");
-    if key == "t" {
-        assert_eq!(model.message.as_deref(), Some(PUT_BACK), "{name}");
-    }
+    assert_eq!(model.message.as_deref(), Some(PUT_BACK), "{name}");
 }
 
 // An undo or redo, or the `t` that puts claims back, that writes on a line
 // goes through a shift and refuses anything else, whether the reading has
-// drawn it or not; once drawn, its hint is dim, and it writes nothing though
-// the lines stand again on disk, keeping its step: read back, it lights and
-// writes. One that puts a line back always writes, its neighbours only
-// saying where.
+// drawn it or not; a refused undo or redo drops its step. Once drawn, the
+// hint of `t` is dim, and it writes nothing though the lines stand again on
+// disk, keeping its step: read back, it lights and writes. One that puts a
+// line back always writes, its neighbours only saying where.
 #[test]
 fn an_outside_edit_under_an_undo_or_redo() {
     for (name, first, edit, key, want) in OUTSIDE_EDITS {
-        let (action, refusal) = match *key {
-            "u" => (Action::Undo, format!("can't undo: {LIST_CHANGED}")),
-            "t" => (Action::ToggleStart, LIST_CHANGED.to_owned()),
-            _ => (Action::Redo, format!("can't redo: {LIST_CHANGED}")),
+        // A refused undo or redo drops its step; the put-back keeps it.
+        let (action, refusal, dropped) = match *key {
+            "u" => {
+                (Action::Undo, format!("can't undo: {LIST_CHANGED}"), (1, 0))
+            }
+            "t" => (Action::ToggleStart, LIST_CHANGED.to_owned(), (0, 0)),
+            _ => (Action::Redo, format!("can't redo: {LIST_CHANGED}"), (0, 1)),
         };
         for read in [false, true] {
             let name = format!("{name}, read {read}");
-            // Dim, it writes nothing though its lines stand again on disk.
-            let gap = read && want.is_none();
+            // Dim, `t` writes nothing though its lines stand again on disk.
+            let gap = read && want.is_none() && *key == "t";
             let (dir, mut model) = edited_after(first, edit, read, gap);
-            if read {
-                let hint = model.answers()(action);
-                assert_eq!(dim(hint), want.is_none(), "{name}: {hint:?}");
-            }
+            let hint = model.answers()(action);
+            assert_eq!(dim(hint), gap, "{name}: {hint:?}");
             let on_disk = todo_of(dir.path());
-            let steps = gap.then(|| kept(&model));
+            let (undo, redo) = kept(&model);
+            let steps = gap.then_some((undo, redo));
             keys(&mut model, key);
             assert_eq!(
                 todo_of(dir.path()),
@@ -331,12 +333,14 @@ fn an_outside_edit_under_an_undo_or_redo() {
             );
             let said = model.message.as_deref().unwrap_or_default();
             assert_eq!(said == refusal, want.is_none(), "{name}: {said}");
+            let left = (undo - dropped.0, redo - dropped.1);
+            let held = want.is_some() || kept(&model) == left;
+            assert!(held, "{name}: step dropped");
             if want.is_none() && !read {
                 let shown = model.snap.todo().to_bytes();
                 assert_eq!(shown, todo_of(dir.path()).as_bytes(), "{name}");
             }
-            let pressed = (*key, action);
-            lights_when_read(&mut model, dir.path(), pressed, steps, &name);
+            lights_when_read(&mut model, dir.path(), steps, &name);
         }
     }
 }
