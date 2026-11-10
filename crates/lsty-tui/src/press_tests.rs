@@ -1021,7 +1021,7 @@ fn t_takes_over_an_agents_claim_and_says_so() {
 /// `t` over blocked tasks in the 2 seconds after it stopped exactly them: the
 /// hint is lit and the key puts the claims back, and from when the window
 /// ends, or for any other tasks, dim and it writes nothing. A digit keeps the
-/// window open.
+/// window open, and so does a dim key.
 #[test]
 fn a_t_is_lit_while_it_can_put_a_claim_back() {
     const OPEN: u64 = 1_999;
@@ -1034,6 +1034,10 @@ fn a_t_is_lit_while_it_can_put_a_claim_back() {
         (CLAIMED, "jt1", SHUT, false),
         (CLAIMED, "jt2", OPEN, true),
         (CLAIMED, "jt2", SHUT, false),
+        (CLAIMED, "jtx", OPEN, true),
+        (CLAIMED, "jtx", SHUT, false),
+        (CLAIMED, "jt.", OPEN, true),
+        (CLAIMED, "jt.", SHUT, false),
         (CLAIMED, "jtkj", 0, false),
         (CLAIMED, "jt2<Esc>", 0, false),
         (CLAIMED_TWICE, "jt2", OPEN, false),
@@ -1064,8 +1068,8 @@ fn a_t_is_lit_while_it_can_put_a_claim_back() {
     }
 }
 
-/// `.` of `t`: the press itself ends the window, so its hint is that of a
-/// new start, dim over a blocked task, and the key says why not.
+/// `.` of `t`: the press starts anew, so its hint is that of a new start,
+/// dim over a blocked task, and the key says why not.
 #[test]
 fn a_repeat_of_t_in_the_window_is_dim_and_says_why_not() {
     let (dir, mut model, _opened) = watched((CLAIMED, ""), &Board::default());

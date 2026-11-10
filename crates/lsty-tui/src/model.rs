@@ -426,16 +426,7 @@ impl Model {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
-        self.hist.stopped = self.hist.stopped.take().filter(|_| {
-            matches!(
-                fed.outcome,
-                Outcome::Pending
-                    | Outcome::Matched {
-                        action: Action::ToggleStart,
-                        ..
-                    }
-            )
-        });
+        self.keep_stop_window(fed.outcome);
         let on_view = matches!(fed.outcome, Outcome::Matched { action, .. }
             if Step::of(action, 0, 0).is_some_and(Step::works_on_view));
         if !on_view {
