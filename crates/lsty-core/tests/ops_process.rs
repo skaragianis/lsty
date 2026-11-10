@@ -71,8 +71,8 @@ fn found(dir: &Path) -> Found {
     }
 }
 
-/// Runs `run` with an environment over `found` that waits a minute for
-/// the lock.
+/// Runs `run` with an environment over `found` that waits 5 s for the
+/// lock.
 fn with_env(
     found: &Found,
     run: impl FnOnce(&Env<'_>) -> errs::Result<()>,
@@ -80,7 +80,7 @@ fn with_env(
     let config = Config::default();
     let clock = test_clock()?;
     let mut env = Env::new(found, &config, &clock);
-    env.timeout = std::time::Duration::from_secs(60);
+    env.timeout = std::time::Duration::from_secs(5);
     run(&env)
 }
 
@@ -252,7 +252,7 @@ fn read_until_stopped(dir: &Path) -> errs::Result<bool> {
             dir.join("stop").exists() || std::time::Instant::now() > end;
         let snap = list::load(
             &found,
-            std::time::Duration::from_secs(60),
+            std::time::Duration::from_secs(5),
             &cancel,
             &params,
         )?;
@@ -307,7 +307,7 @@ fn move_back_and_forth(dir: &Path) -> errs::Result<()> {
     with_env(&found(dir), |env| {
         finish(env, &targets, opts)?;
         let end =
-            std::time::Instant::now() + std::time::Duration::from_secs(10);
+            std::time::Instant::now() + std::time::Duration::from_secs(5);
         while !dir.join("seen").exists() {
             if std::time::Instant::now() > end {
                 let e = io::Error::other("the reader saw no move");

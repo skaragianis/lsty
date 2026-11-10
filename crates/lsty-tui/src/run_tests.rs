@@ -111,7 +111,7 @@ impl Screen for Contended {
 fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     let dir = workdir(SAMPLE);
     let mut d = deps(dir.path(), Config::default());
-    d.config.lock_timeout = Duration::from_secs(30);
+    d.config.lock_timeout = Duration::from_secs(10);
     let slot: Arc<Mutex<Option<Sink>>> = Arc::default();
     let shared = Arc::clone(&slot);
     let mut s = start(dir.path());
@@ -168,9 +168,9 @@ fn keys_are_handled_while_a_reload_waits_for_a_lock() {
     let code = run_with(s, d, || Ok(screen), &mut stderr);
     let took = at.elapsed();
     release.send(()).unwrap_or_else(|e| panic!("{e}"));
-    // The reading would wait 30 s for the lock, which is held until
+    // The reading would wait 10 s for the lock, which is held until
     // now; the keys do not wait for it.
-    assert!(took < Duration::from_secs(10), "{took:?}");
+    assert!(took < Duration::from_secs(5), "{took:?}");
     assert_eq!(code, 0);
     assert_eq!(cursor.load(Ordering::Relaxed), 1, "j moved the cursor");
     helper.join().unwrap_or_else(|_| panic!("helper panicked"));

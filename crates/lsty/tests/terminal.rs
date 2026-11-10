@@ -28,7 +28,7 @@ type Check = Result<(), Failed>;
 
 const ENTER: &str = "\x1b[?1049h";
 const LEAVE: &str = "\x1b[?1049l";
-const LIMIT: Duration = Duration::from_secs(20);
+const LIMIT: Duration = Duration::from_secs(5);
 /// How long one read of the terminal waits.
 const SLICE: Timespec = Timespec {
     tv_sec: 0,
