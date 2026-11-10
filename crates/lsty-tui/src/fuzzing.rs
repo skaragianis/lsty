@@ -359,6 +359,11 @@ fn behind(
     let looked = main.model.message.as_deref() == Some(LIST_CHANGED);
     keys(&mut twin.model, &reach);
     let fresh = twin.checked(key, false, trail);
+    // The twin's count, cut to the rows shown, was not typed: a `.` after
+    // it repeats what the list keeps.
+    if reach != typed {
+        twin.model.again.clone_from(&main.model.again);
+    }
     // A key the watcher's reading drew dim says its own words.
     let dim_now = read && fresh.is_some_and(|(_, answer)| dim(answer));
     // A line the file held once that changed, went or got a twin.
