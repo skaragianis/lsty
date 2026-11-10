@@ -228,8 +228,9 @@ impl Model {
     /// Lists the rows again without the tasks that an earlier input kept
     /// in sight, the cursor on the first row at or after where its row
     /// was drawn and the view as it was.
-    /// A key keeps the row under the cursor for itself, so that a move
-    /// counts over the rows that stay and may step off it. What goes on from
+    /// A cursor motion keeps the row under the cursor for itself, so that
+    /// it counts over the rows that stay and may step off it; any other key
+    /// acts on the rows as drawn, as its hint read them. What goes on from
     /// that row keeps it for as long as it lasts, and a selection the row it
     /// started from.
     /// A refilter on its way does this itself, and the rows stay as drawn

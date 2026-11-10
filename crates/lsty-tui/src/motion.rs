@@ -162,6 +162,7 @@ impl Model {
 
     /// Moves the cursor row; a count on `gg` or `G` names a task.
     fn list_motion(&mut self, action: Action, count: usize) {
+        self.leave_sticky(self.cursor_place());
         let step = Step::of(action, count, self.pane_rows());
         // An end of the list or a task's number does not depend on the rows
         // drawn, so it is looked for in the list about to show.
