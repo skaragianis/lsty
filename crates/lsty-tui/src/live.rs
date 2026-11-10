@@ -123,7 +123,6 @@ impl Eq for Reading {}
 /// Why a reload is due without a notice.
 #[derive(Clone, Copy, Debug)]
 struct Debt {
-    unwatched: bool,
     /// The last reload did not get the files, or the folder is gone.
     owed: bool,
     /// The list said it changed: the input that said so reads at once.
@@ -137,6 +136,7 @@ struct Shown {
     deleted: bool,
     /// The last reload found the lock busy.
     busy: bool,
+    unwatched: bool,
 }
 
 /// What the model knows about the files beyond the list.
@@ -158,13 +158,13 @@ impl Live {
             watcher: None,
             phase: Phase::Idle,
             debt: Debt {
-                unwatched: false,
                 owed: snap.found().state == FileState::DirMissing,
                 kick: false,
             },
             shown: Shown {
                 deleted: false,
                 busy: false,
+                unwatched: false,
             },
             serial: 0,
         }
@@ -233,10 +233,10 @@ impl Model {
     /// Says once that the watch is down and the list reloads every
     /// minute.
     fn unwatched_because(&mut self, why: &str) {
-        if self.live.debt.unwatched {
+        if self.live.shown.unwatched {
             return;
         }
-        self.live.debt.unwatched = true;
+        self.live.shown.unwatched = true;
         self.message = Some(format!(
             "can't watch {}: {why}; reloading every minute",
             self.base_name()
