@@ -267,11 +267,29 @@ fn moved_in_place(model: &Model, action: Action) -> bool {
         && said.ends_with(" is already there")
 }
 
-/// The lines under `key` in NORMAL mode, when it is lit and writes on them
-/// (`.` on those it repeats over).
+/// The lines `key` writes on in NORMAL mode, when it is lit and writes on
+/// lines (`.` on those it repeats over).
 fn under(model: &Model, key: &str) -> Vec<Vec<u8>> {
-    let count = aimed_count(model, key);
-    count.map_or_else(Vec::new, |n| row_lines(model, n))
+    let (Some(count), Some((action, _))) =
+        (aimed_count(model, key), asked(model, key))
+    else {
+        return Vec::new();
+    };
+    // A count writes only the tasks its command changes.
+    let answer = model.answers_at(count)(model.aimed(action));
+    let command = if let Answer::Resolved(command) = answer {
+        Some(command)
+    } else {
+        None
+    };
+    let written = |id| {
+        let task = model.chosen(&[id]);
+        command.is_none_or(|c| task.iter().all(|t| t.changed_by(c)))
+    };
+    let rows = model.rows_of(count).iter().filter(|r| written(r.id));
+    rows.filter_map(|row| model.snap.task(row.id))
+        .map(|task| model.snap.line(task).raw().to_vec())
+        .collect()
 }
 
 /// The count `key` reads in NORMAL mode, when it is lit and writes on its

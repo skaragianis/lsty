@@ -2,10 +2,7 @@
 
 use std::{cell::Cell, time::Duration};
 
-use super::{
-    ids::{IdSource, OsIds},
-    refs::Target,
-};
+use super::ids::{IdSource, OsIds};
 use crate::{
     config::Config,
     dates::Clock,
@@ -124,9 +121,6 @@ pub struct Env<'a> {
     /// of its lines, and what it finds under the lock must still be that
     /// line. `None` takes a number as one of the file as it is.
     pub aim: Option<&'a Snapshot>,
-    /// The lines of `aim` a count or a selection took, written or not:
-    /// one that is not its line now writes nothing.
-    pub aimed: &'a [Target],
     /// Whether the operation plans on `aim` alone, without the lock, and
     /// writes nothing: what it would say of the list on screen. Without
     /// `aim` it reads under the lock; it never writes.
@@ -170,7 +164,6 @@ impl<'a> Env<'a> {
             hooks: &OsHooks,
             ids: &OsIds,
             aim: None,
-            aimed: &[],
             dry: false,
             read_back: None,
         }

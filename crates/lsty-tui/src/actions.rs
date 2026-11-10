@@ -39,7 +39,7 @@ impl Chosen {
 
     /// Whether `command` changes this task, rather than say it is already
     /// there.
-    const fn changed_by(&self, command: Command) -> bool {
+    pub(crate) const fn changed_by(&self, command: Command) -> bool {
         match command {
             Command::Do | Command::Wontdo => {
                 !matches!(self.state, State::Done)
@@ -108,10 +108,8 @@ impl Model {
         if there > 0 && matches!(command, Command::Do | Command::Wontdo) {
             self.cursor = (cursor + tasks.len()).min(self.rows.len() - 1);
         }
-        let aimed: Vec<Target> = tasks.iter().map(Chosen::target).collect();
         let result = self.attempt(|env| {
             let env = Env {
-                aimed: &aimed,
                 dry: !passes,
                 ..env.clone()
             };
