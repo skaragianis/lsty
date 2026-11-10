@@ -158,7 +158,7 @@ impl Side {
                 if !stale
                     && self.list()
                     && writes
-                    && !moved_in_place(&self.model, a) =>
+                    && !kept_as_is(&self.model, a) =>
             {
                 assert_ne!(self.files(), before.0, "lit {name}");
                 assert_ne!(self.model.tone, Tone::Alert, "lit {name}");
@@ -257,14 +257,25 @@ fn writes(model: &Model, action: Action) -> bool {
     (history || writes_line(action)) && !unsure
 }
 
-/// Whether `action` was a move, or `.` of one, that the core found had
-/// no task to change place: it went past lines equal to its own.
-fn moved_in_place(model: &Model, action: Action) -> bool {
+/// Whether `action`, or `.` of it, wrote nothing because the core found
+/// each line already as the key would leave it: a move past lines equal to
+/// its own, or a prompt's text each task has.
+fn kept_as_is(model: &Model, action: Action) -> bool {
     let again = model.again.as_ref().filter(|_| action == Action::Repeat);
-    let moved = again.map_or(action, Again::action);
     let said = model.message.as_deref().unwrap_or_default();
-    matches!(moved, Action::MoveTaskDown | Action::MoveTaskUp)
-        && said.ends_with(" is already there")
+    let action = again.map_or(action, Again::action);
+    let kept: &[&str] =
+        if matches!(action, Action::MoveTaskDown | Action::MoveTaskUp) {
+            &[" is already there"]
+        } else if matches!(
+            action,
+            Action::SetDue | Action::AddTag | Action::RemoveTag
+        ) {
+            &[" is already due ", " already has ", " has no "]
+        } else {
+            &[]
+        };
+    kept.iter().any(|kept| said.contains(kept))
 }
 
 /// The lines `key` writes on in NORMAL mode, when it is lit and writes on

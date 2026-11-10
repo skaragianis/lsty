@@ -326,13 +326,11 @@ impl Model {
             return Vec::new();
         };
         let count = again.count(typed);
-        let dry =
-            matches!(again, Again::Prompt { .. }) && self.keeps(&again, typed);
         match again {
             Again::Task { action, .. } => return self.run(action, count),
             Again::Block { action, .. } => self.move_by(action, true, count),
             Again::Prompt { kind, text, .. } => {
-                self.repeat_prompt(kind, count, text, dry);
+                self.repeat_prompt(kind, count, text);
             }
         }
         Vec::new()

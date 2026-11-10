@@ -310,8 +310,7 @@ const fn lit_if(lit: bool, why: Refusal) -> Answer {
 
 /// `.`: as the key it repeats over the tasks it stored or the count typed over
 /// them, whose word it does not take. `J` and `K` take a distance, not tasks.
-/// Nothing to repeat says nothing; a prompt whose text every task has
-/// already is dim, and the press says so. `typed` is the count typed.
+/// Nothing to repeat says nothing. `typed` is the count typed.
 fn repeat(m: &Model, typed: usize) -> Answer {
     let Some(again) = &m.again else {
         return Answer::Refused(Refusal::Quiet);
@@ -325,9 +324,6 @@ fn repeat(m: &Model, typed: usize) -> Answer {
         decide(again.action(), m, &s)
     };
     match answer {
-        Answer::Applies | Answer::Resolved(_) if m.keeps(again, typed) => {
-            Answer::Refused(Refusal::Quiet)
-        }
         Answer::Resolved(_) => Answer::Applies,
         answer @ (Answer::Applies
         | Answer::Refused(_)

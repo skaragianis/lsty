@@ -33,7 +33,6 @@ use crate::{
 const LOOK_AGAIN: &str = "the list changed — look again";
 
 const NOT_UNDERWAY: &str = "1 is not underway; 2 is not underway";
-const DUE: &str = "1 is already due 2030-01-01";
 
 /// `stop` has no default key.
 const STOP_BOUND: &str = "[normal]\nstop = [\"<F9>\"]\n\
@@ -324,7 +323,6 @@ fn a_refused_press_does_not_wait_for_a_held_lock() {
         (REOPENED, "ggVj", CLAIMS.1, "<F9>", Some(NOT_UNDERWAY)),
         (CLOSED, "gg", REOPENED, "+", reopen),
         (CLOSED, "gg", REOPENED, "-", reopen),
-        (REOPENED, "gd2030-01-01<CR>", REOPENED, ".", Some(DUE)),
     ] {
         let dir = bound(shown, STOP_BOUND);
         let config = Config {
