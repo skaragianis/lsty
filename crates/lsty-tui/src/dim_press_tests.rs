@@ -130,6 +130,7 @@ fn stale_against_fresh(
     let (fresh_dir, mut fresh) = opened(list, first);
     assert!(dim(stale.answers()(action)), "{name}: dim to start with");
     outside(stale_dir.path(), from, to);
+    stale.miss_change();
     outside(fresh_dir.path(), from, to);
     let moved_on = files(stale_dir.path());
     reload(&mut fresh);
@@ -314,6 +315,7 @@ fn the_press_after_a_look_again_is_on_the_task_under_the_cursor() {
         let name = format!("{first} to {to:?}");
         let (dir, mut model) = opened(BLOCKED, first);
         outside(dir.path(), BLOCKED, to);
+        model.miss_change();
         let before = files(dir.path());
         keys(&mut model, "x");
         looks_again(&model, Action::ToggleComplete, None, &name);
@@ -453,6 +455,7 @@ fn a_press_on_a_list_emptied_outside_looks_again() {
             } else {
                 fs::write(&todo, to).unwrap_or_else(|e| panic!("{e}"));
             }
+            model.miss_change();
             let before = files(dir.path());
             keys(&mut model, "x");
             let name = format!("{first} to {to:?}");

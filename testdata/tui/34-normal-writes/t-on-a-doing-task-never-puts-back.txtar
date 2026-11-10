@@ -10,6 +10,8 @@ frame task-changed-not-seen
 file todo.txt plain
 write todo.txt tagged
 keys t
+frame changed-again
+keys t
 frame an-ordinary-stop
 file todo.txt tagged-stopped
 -- config.toml --
@@ -25,12 +27,12 @@ Call started:2026-09-29T0800Z owner:agent1 +x
 Call +x
 -- task-changed-not-seen --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ▶ Call +x                                                                                  1h │
+│  1   Call                                                                                        │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  the list changed — look again  x done  t stop        9.9.9
+ NORMAL  todo.txt  manual  the list changed — look again  x done  t start  T wont  o new      9.9.9
 -- an-ordinary-stop --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Call +x                                                                                     │
@@ -39,3 +41,11 @@ Call +x
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t start  T wont        9.9.9
+-- changed-again --
+┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ▶ Call +x                                                                                  1h │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  ▶ 1 in doing  the list changed — look again  x done  t stop        9.9.9

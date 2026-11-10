@@ -14,7 +14,7 @@ show_detail = false
 (A) 2026-09-20 Call client +work id:c1 @phone
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   (A) Call client +work                                                                    c1 │
+│  1   (A) Call client +work @phone                                                             c1 │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -22,6 +22,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9
+ NORMAL  todo.txt  manual  the list changed — look again  x done  t start  T wont  o new      9.9.9
 -- a-file --
 (A) 2026-09-20 Call client +work id:c1 @phone

@@ -311,13 +311,14 @@ fn rewrite(dir: &Path, op: u8, arg: usize) {
 }
 
 /// The list and its twin read the same rewrite: the twin at once, the list
-/// when `op` says the watcher reads between `count` and `key`, else only
-/// after `key`. A stale press never writes what the twin's would not: it
-/// writes nothing or what the twin wrote, but for a paste beside another
-/// copy of its line (see [`beside_a_copy`]); and a lit key whose line
-/// changed writes nothing and says to look again. Once the list has read,
-/// the run goes on while it shows what the twin shows, and ends (`false`)
-/// otherwise.
+/// when `op` says the watcher reads between `count` and `key`, at the key's
+/// own check before it when `op` says so, else only after `key`, as when
+/// the rewrite lands between that check and the press. A stale press never
+/// writes what the twin's would not: it writes nothing or what the twin
+/// wrote, but for a paste beside another copy of its line (see
+/// [`beside_a_copy`]); and a lit key whose line changed writes nothing and
+/// says to look again. Once the list has read, the run goes on while it
+/// shows what the twin shows, and ends (`false`) otherwise.
 fn behind(
     (main, twin): (&mut Side, &mut Side),
     (op, arg, count, key): (u8, usize, &str, &str),
@@ -349,6 +350,8 @@ fn behind(
     reload(&mut twin.model);
     if read {
         reload(&mut main.model);
+    } else if op & 8 == 0 {
+        main.model.miss_change();
     }
     let reach = reach(&main.model, &twin.model, key, typed);
     let seen = pastes_beside(&main.model, key);

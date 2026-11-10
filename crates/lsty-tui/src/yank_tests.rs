@@ -213,6 +213,8 @@ fn a_kept_dependent_through_an_outside_change() {
             .unwrap_or_else(|e| panic!("{e}"));
         if *read {
             reload(&mut model);
+        } else {
+            model.miss_change();
         }
         keys(&mut model, "Gp");
         assert_eq!(todo_of(dir.path()), *want, "{name}");

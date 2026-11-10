@@ -1,7 +1,11 @@
 //! Keeping the list in step with the files: the watcher's notices, the
 //! debounce, the reload and what the status line says about it.
 
-use std::{collections::HashSet, time::Duration};
+use std::{
+    collections::HashSet,
+    fs,
+    time::{Duration, SystemTime},
+};
 
 use jiff::tz::TimeZone;
 use lsty_core::{
@@ -51,6 +55,20 @@ fn same_state(new: &Snapshot, shown: &Snapshot) -> bool {
         && new.done() == shown.done()
 }
 
+/// The size and modification time of the todo and done files, as a reading
+/// found them before it read; `None` for a file that is not there.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) struct Stamp([Option<(u64, SystemTime)>; 2]);
+
+impl Stamp {
+    fn of(found: &Found) -> Self {
+        Self([&found.todo, &found.done].map(|path| {
+            let meta = fs::metadata(path).ok()?;
+            Some((meta.len(), meta.modified().ok()?))
+        }))
+    }
+}
+
 /// Everything a reading of the files needs, so that it can run on
 /// another thread.
 #[derive(Debug)]
@@ -77,7 +95,7 @@ impl Load {
 pub(crate) fn answer(
     serial: u64,
     clock: Clock,
-    result: errs::Result<Snapshot>,
+    result: errs::Result<(Snapshot, Stamp)>,
 ) -> Msg {
     Msg::Loaded(Box::new(Reading {
         serial,
@@ -99,7 +117,7 @@ impl Eq for Load {}
 pub(crate) struct Reading {
     pub(crate) serial: u64,
     pub(crate) clock: Clock,
-    pub(crate) result: errs::Result<Snapshot>,
+    pub(crate) result: errs::Result<(Snapshot, Stamp)>,
 }
 
 impl std::fmt::Debug for Reading {
@@ -146,6 +164,8 @@ pub(crate) struct Live {
     phase: Phase,
     debt: Debt,
     shown: Shown,
+    /// The files as the last reading found them.
+    stamp: Stamp,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
     serial: u64,
@@ -154,7 +174,7 @@ pub(crate) struct Live {
 impl Live {
     /// The state after the first reading, `snap`. A reload is owed while
     /// the folder is gone.
-    pub(crate) fn new(snap: &Snapshot) -> Self {
+    pub(crate) fn new((snap, stamp): &(Snapshot, Stamp)) -> Self {
         Self {
             watcher: None,
             phase: Phase::Idle,
@@ -167,32 +187,30 @@ impl Live {
                 deleted: false,
                 busy: false,
             },
+            stamp: *stamp,
             serial: 0,
         }
     }
 }
 
-/// Reads both files under shared locks. A folder that is missing has
-/// nothing to lock: the list is empty.
+/// Reads both files under shared locks, with what they were before. A
+/// folder that is missing has nothing to lock: the list is empty.
 pub(crate) fn fetch(
     found: &Found,
     config: &Config,
     clock: &Clock,
     cancel: &Cancel,
-) -> errs::Result<Snapshot> {
+) -> errs::Result<(Snapshot, Stamp)> {
+    let stamp = Stamp::of(found);
     let mut found = found.clone();
     found.state = discover::locate(&found.todo)?.1;
     let params = Params::new(clock.clone(), config);
-    if found.state == FileState::DirMissing {
-        Ok(Snapshot::build(
-            found,
-            File::default(),
-            File::default(),
-            &params,
-        ))
+    let snap = if found.state == FileState::DirMissing {
+        Snapshot::build(found, File::default(), File::default(), &params)
     } else {
-        list::load(&found, config.lock_timeout, cancel, &params)
-    }
+        list::load(&found, config.lock_timeout, cancel, &params)?
+    };
+    Ok((snap, stamp))
 }
 
 /// The clock at the moment `now` gives, in `zone`.
@@ -296,7 +314,7 @@ impl Model {
         self.live.phase = Phase::Idle;
         if !stale {
             match reading.result {
-                Ok(snap) => self.accept(snap, reading.clock),
+                Ok(read) => self.accept(read, reading.clock),
                 Err(e) => self.failed(&e),
             }
         }
@@ -318,7 +336,8 @@ impl Model {
 
     /// Shows a reading. While the folder is gone a reload is owed for
     /// each tick, so that its return is noticed.
-    fn accept(&mut self, snap: Snapshot, clock: Clock) {
+    fn accept(&mut self, (snap, stamp): (Snapshot, Stamp), clock: Clock) {
+        self.live.stamp = stamp;
         self.live.debt.owed = snap.found().state == FileState::DirMissing;
         self.live.shown.busy = false;
         if !same_state(&snap, &self.snap) {
@@ -342,10 +361,44 @@ impl Model {
         if at_once {
             config.lock_timeout = Duration::ZERO;
         }
-        let snap = fetch(self.snap.found(), &config, &clock, &self.cancel)?;
-        let moved = !same_state(&snap, &self.snap);
-        self.accept(snap, clock);
+        let read = fetch(self.snap.found(), &config, &clock, &self.cancel)?;
+        let moved = !same_state(&read.0, &self.snap);
+        self.accept(read, clock);
         Ok(moved)
+    }
+
+    /// Before a key that is not dim on the list drawn: reads the files when
+    /// their size or time is not what the last reading found. It does not
+    /// wait for the lock; a held one leaves the list as it is, for the next
+    /// key to try. Keys typed, or the line under the cursor, that the
+    /// reading moved are lost (see [`Model::check_typed`]).
+    pub(crate) fn read_if_moved(&mut self) {
+        if Stamp::of(self.snap.found()) == self.live.stamp {
+            return;
+        }
+        let mut config = self.deps.config.clone();
+        config.lock_timeout = Duration::ZERO;
+        let Ok(clock) = self.clock_now() else {
+            return;
+        };
+        let Ok(read) = fetch(self.snap.found(), &config, &clock, &self.cancel)
+        else {
+            return;
+        };
+        let typed = self
+            .edit
+            .is_none()
+            .then(|| self.lines_under(self.typed_count()));
+        let landing = Landing::of(&self.snap, &read.0);
+        self.accept(read, clock);
+        self.check_typed(typed, Some(&landing));
+    }
+
+    /// Takes the files as the last reading found them, as when they change
+    /// between the check before a key and its press.
+    #[cfg(any(test, feature = "fuzzing"))]
+    pub(crate) fn miss_change(&mut self) {
+        self.live.stamp = Stamp::of(self.snap.found());
     }
 
     /// Reads the files before a key that writes on the line under the
@@ -353,25 +406,25 @@ impl Model {
     /// when so.
     pub(crate) fn row_changed(&mut self) -> bool {
         let read = self.clock_now().and_then(|clock| {
-            let snap = fetch(
+            let read = fetch(
                 self.snap.found(),
                 &self.deps.config,
                 &clock,
                 &self.cancel,
             )?;
-            Ok((snap, clock))
+            Ok((read, clock))
         });
-        let (snap, clock) = match read {
+        let (read, clock) = match read {
             Ok(read) => read,
             Err(e) => {
                 self.fail(&e);
                 return true;
             }
         };
-        let landing = Landing::of(&self.snap, &snap);
+        let landing = Landing::of(&self.snap, &read.0);
         let at = self.cursor_place();
         let changed = at.is_some_and(|at| landed_at(&landing, at).is_none());
-        self.accept(snap, clock);
+        self.accept(read, clock);
         if changed {
             self.alert(ops::LIST_CHANGED.to_owned());
         }

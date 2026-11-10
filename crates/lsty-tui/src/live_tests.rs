@@ -381,7 +381,9 @@ fn a_reading_and_find_agree_on_awkward_paths() {
         let read =
             live::fetch(&shown, &model.deps.config, &clock, &Cancel::new());
         match (found, read) {
-            (Ok(f), Ok(s)) => assert_eq!(f.state, s.found().state, "{name}"),
+            (Ok(f), Ok((s, _))) => {
+                assert_eq!(f.state, s.found().state, "{name}");
+            }
             (Err(f), Err(r)) => assert_eq!(f.message(), r.message(), "{name}"),
             (f, r) => panic!("{name}: {:?} / {:?}", f.is_ok(), r.is_ok()),
         }
