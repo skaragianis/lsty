@@ -1,6 +1,8 @@
 //! The keys that write: each one runs the single command it resolves to,
 //! as the human.
 
+use std::cell::Cell;
+
 use lsty_core::{
     dates::Clock,
     errs::{self, Code, Nr, Source},
@@ -194,7 +196,13 @@ impl Model {
         env.cancel = self.cancel.clone();
         env.ids = self.deps.ids.as_ref();
         env.aim = Some(&self.snap);
-        Ok((run(&env)?, clock))
+        let read = Cell::new(None);
+        env.read_back = Some(&read);
+        let ran = run(&env);
+        if let Some(snap) = read.take() {
+            self.live.read.set(Some((snap, clock.clone())));
+        }
+        Ok((ran?, clock))
     }
 
     /// Runs `command` over `tasks`.
@@ -239,11 +247,14 @@ impl Model {
     pub(crate) fn adopt(&mut self, mut outcome: Outcome, clock: Clock) {
         let said: Vec<String> =
             outcome.messages().iter().map(|m| errs::lossy(m)).collect();
+        // A key the list showed would change nothing read no files.
+        if outcome.read().serial() != self.snap.serial() {
+            self.accept(outcome.read().clone(), clock.clone());
+        }
         if outcome.no_op() {
             self.message = join(&said);
             return;
         }
-        self.catch_up(outcome.read(), clock.clone());
         let touched = touched(&outcome);
         let record = outcome.take_undo();
         let snap = outcome.into_after();
@@ -311,10 +322,10 @@ impl Model {
         self.message = Some(text);
     }
 
-    /// Shows why an operation did not run; nothing else changes.
+    /// Shows why an operation did not run; one refused on lines that
+    /// changed also ends a selection.
     pub(crate) fn fail(&mut self, e: &errs::Error) {
         if e.code() == Code::ExpectMismatch {
-            self.owe_reload();
             self.exit_visual();
         }
         let text = if e.code() == Code::LockTimeout {

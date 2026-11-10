@@ -13,8 +13,8 @@ use crate::{
     messages::{self, Tone},
     model::Model,
     test_util::{
-        alone, cursor_text, deps, held_lock, keys, load_of, press, reload,
-        started, todo_of, workdir,
+        alone, cursor_text, deps, held_lock, keys, press, started, todo_of,
+        workdir,
     },
 };
 
@@ -252,8 +252,6 @@ type Aimed = (&'static str, &'static str, &'static str, &'static str);
 const ALPHA_TAGGED: &str = "Alpha +outside\nB\n";
 /// A done task the count or selection takes and does not write.
 const DONE_B: &str = "x 2026-09-01 D\nB\n";
-/// A case whose reading is owed before the key: the lock was busy.
-const OWED: &str = "a reading owed";
 
 const REFUSED: &[Aimed] = &[
     ("A\nB\nC\n", "gdfri<CR>", "A2\nB\nC\n", "a prompt"),
@@ -282,7 +280,6 @@ const REFUSED: &[Aimed] = &[
         "what it goes past",
     ),
     ("Alpha\nB\n", ":do 1<CR>", ALPHA_TAGGED, "by its number"),
-    ("Alpha\nB\n", "x", ALPHA_TAGGED, OWED),
     ("Alpha\n", "x", "Alpha  \n", "white space"),
     ("(B) Alpha\n", "-", "(A) Alpha\n", "a stale priority"),
     ("(B) Alpha\n", "+", "(C) Alpha\n", "a stale priority"),
@@ -372,13 +369,8 @@ const WRITTEN: &[Aimed] = &[
     ),
 ];
 
-/// A model on the files `shown`, with `outside` written and not read; for
-/// `owed`, the read of it failed on a busy lock.
-fn ahead(
-    shown: &str,
-    outside: &str,
-    owed: bool,
-) -> (tempfile::TempDir, Model) {
+/// A model on the files `shown`, with `outside` written and not read.
+fn ahead(shown: &str, outside: &str) -> (tempfile::TempDir, Model) {
     let dir = workdir("");
     let write = |files: &str| {
         let (todo, done) = files.split_once('|').unwrap_or((files, ""));
@@ -390,16 +382,10 @@ fn ahead(
     write(shown);
     let config = Config {
         hidden_tasks: vec![Hidden::Later],
-        lock_timeout: Duration::from_millis(1),
         ..alone()
     };
-    let mut model = model_of(dir.path(), config);
+    let model = model_of(dir.path(), config);
     write(outside);
-    if owed {
-        let mut held = held_lock(dir.path());
-        reload(&mut model);
-        held.release().unwrap_or_else(|e| panic!("{}", e.message()));
-    }
     (dir, model)
 }
 
@@ -422,8 +408,8 @@ fn files_of(dir: &tempfile::TempDir) -> Vec<u8> {
 #[test]
 fn a_key_aims_from_the_list_it_was_pressed_on() {
     for (shown, typed, outside, name) in REFUSED {
-        let (dir, mut model) = ahead(shown, outside, *name == OWED);
-        let cmds = keys(&mut model, typed);
+        let (dir, mut model) = ahead(shown, outside);
+        keys(&mut model, typed);
         assert_eq!(files_of(&dir), latin(outside), "{name}");
         let said = (model.tone, model.message.as_deref());
         assert_eq!(said, (Tone::Alert, Some(LIST_CHANGED)), "{name}");
@@ -432,9 +418,9 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
         assert_eq!(model.focus == Focus::Detail, panel, "{name}");
         assert!(model.line.is_none(), "{name}: a prompt closes");
         assert!(model.visual.is_none(), "{name}: a selection ends");
-        let stays = !typed.starts_with('v') || model.cursor == 1;
-        assert!(stays, "{name}: the cursor stays");
-        model.update(load_of(cmds).read());
+        let stays =
+            !typed.starts_with('v') || cursor_text(&model).starts_with('B');
+        assert!(stays, "{name}: the cursor stays on its task");
         let read = |f| fs::read(dir.path().join(f)).unwrap_or_default();
         let shown =
             (model.snap.todo().to_bytes(), model.snap.done().to_bytes());
@@ -449,7 +435,7 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
 #[test]
 fn a_key_on_a_line_that_only_shifted_writes_where_it_stands() {
     for (shown, typed, outside, want) in WRITTEN {
-        let (dir, mut model) = ahead(shown, outside, false);
+        let (dir, mut model) = ahead(shown, outside);
         keys(&mut model, typed);
         let (want, says) = want.split_once(" says ").unwrap_or((want, ""));
         let said = model.message.as_deref().unwrap_or_default();

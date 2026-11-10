@@ -16,8 +16,8 @@ use crate::{
     messages::PUT_BACK,
     model::Model,
     test_util::{
-        alone, cursor_text, deps, held_lock, keys, load_of, press, reload,
-        started, todo_of, workdir, workdir_model,
+        alone, cursor_text, deps, held_lock, keys, press, reload, started,
+        todo_of, workdir, workdir_model,
     },
 };
 
@@ -323,7 +323,7 @@ fn an_outside_edit_under_an_undo_or_redo() {
             }
             let on_disk = todo_of(dir.path());
             let steps = gap.then(|| kept(&model));
-            let cmds = keys(&mut model, key);
+            keys(&mut model, key);
             assert_eq!(
                 todo_of(dir.path()),
                 want.unwrap_or(&on_disk),
@@ -332,7 +332,6 @@ fn an_outside_edit_under_an_undo_or_redo() {
             let said = model.message.as_deref().unwrap_or_default();
             assert_eq!(said == refusal, want.is_none(), "{name}: {said}");
             if want.is_none() && !read {
-                model.update(load_of(cmds).read());
                 let shown = model.snap.todo().to_bytes();
                 assert_eq!(shown, todo_of(dir.path()).as_bytes(), "{name}");
             }

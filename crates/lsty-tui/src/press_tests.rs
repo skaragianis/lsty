@@ -999,8 +999,11 @@ fn a_blocker_in_the_press_still_blocks() {
 #[test]
 fn a_failed_completion_keeps_the_cursor() {
     let (dir, mut model) = list(&[1, 7]);
-    fs::write(dir.path().join("todo.txt"), "Changed\n")
-        .unwrap_or_else(|e| panic!("{e}"));
+    fs::write(
+        dir.path().join("todo.txt"),
+        format!("{}\nChanged\n", KINDS[0]),
+    )
+    .unwrap_or_else(|e| panic!("{e}"));
     let cursor = model.cursor;
     press(&mut model, "2x");
     assert_eq!(model.tone, Tone::Alert);

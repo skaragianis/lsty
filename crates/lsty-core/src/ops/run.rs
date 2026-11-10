@@ -4,6 +4,7 @@ use super::{
     env::Env, landing::Landing, result::Outcome, staged::SealedFile, tx::Tx,
 };
 use crate::{
+    discover::{self, FileState},
     errs::{Code, Error, Result, Source},
     fsio,
     list::Snapshot,
@@ -86,17 +87,19 @@ fn run_locked<F>(
 where
     F: FnOnce(&mut Tx) -> Result<()>,
 {
-    let mut tx = match env.aim.filter(|_| env.dry) {
+    let held = env.aim.filter(|_| env.dry);
+    let mut tx = match held {
         Some(snap) => Tx::new(snap.clone(), false),
         None => open(env, done_mode)?,
     };
-    plan(&mut tx)?;
-    if rules != Rules::Skip {
-        tx.cascade();
-        tx.check_claims(env)?;
-        tx.check_stamps()?;
-        tx.check_ids()?;
-        tx.check_cycles(env, rules)?;
+    if let Err(e) = planned(env, &mut tx, rules, plan) {
+        if let Some(slot) = env.read_back
+            && held.is_none()
+            && e.code() == Code::ExpectMismatch
+        {
+            slot.set(Some(tx.snap));
+        }
+        return Err(e);
     }
     let sealed = tx.seal();
     sealed.check_done_lock(action, done_mode)?;
@@ -108,6 +111,28 @@ where
     Ok(sealed.report(env, action, &written))
 }
 
+/// Checks that the lines the action was aimed at are there, lets `plan`
+/// stage its changes and checks them.
+fn planned<F>(env: &Env<'_>, tx: &mut Tx, rules: Rules, plan: F) -> Result<()>
+where
+    F: FnOnce(&mut Tx) -> Result<()>,
+{
+    if let Some(landing) = &tx.landing {
+        for target in env.aimed {
+            target.landed(landing)?;
+        }
+    }
+    plan(tx)?;
+    if rules != Rules::Skip {
+        tx.cascade();
+        tx.check_claims(env)?;
+        tx.check_stamps()?;
+        tx.check_ids()?;
+        tx.check_cycles(env, rules)?;
+    }
+    Ok(())
+}
+
 /// Reads both files again and builds the snapshot the plan sees.
 fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
     let (todo, todo_exists) = read_file(&env.found.todo)?;
@@ -116,13 +141,15 @@ fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
     }
     let (done, _) = read_file(&env.found.done)?;
     clean(env, done_mode)?;
-    let snap = Snapshot::build(env.found.clone(), todo, done, &env.params());
+    let mut found = env.found.clone();
+    // The caller may show this reading: it says what is there now.
+    found.state = if todo_exists {
+        FileState::Exists
+    } else {
+        discover::locate(&found.todo)?.1
+    };
+    let snap = Snapshot::build(found, todo, done, &env.params());
     let landing = env.aim.map(|from| Landing::of(from, &snap));
-    if let Some(landing) = &landing {
-        for target in env.aimed {
-            target.landed(landing)?;
-        }
-    }
     let mut tx = Tx::new(snap, !todo_exists);
     tx.landing = landing;
     Ok(tx)

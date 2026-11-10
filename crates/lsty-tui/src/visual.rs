@@ -22,9 +22,8 @@ impl Model {
     }
 
     /// Says that the list changed under what was under way, which ends a
-    /// selection and reads the files again; the cursor stays.
+    /// selection; the cursor stays.
     pub(crate) fn say_changed(&mut self) {
-        self.owe_reload();
         self.exit_visual();
         self.alert(ops::LIST_CHANGED.to_owned());
     }

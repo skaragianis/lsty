@@ -248,7 +248,7 @@ impl Model {
         let Some(record) = outcome.take_undo() else {
             return;
         };
-        self.catch_up(outcome.read(), clock.clone());
+        self.accept(outcome.read().clone(), clock.clone());
         let touched = moves_of(&record, &step.pairs);
         let snap = outcome.into_after();
         let wrote = Wrote {

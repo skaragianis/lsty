@@ -26,7 +26,7 @@ use crate::{
     msg::{Cmd, Msg},
     test_util::{
         Board, alone, cursor_text, deps, files, held_lock, hint_is, keys,
-        load_of, screen, started, workdir,
+        screen, started, todo_of, workdir,
     },
 };
 
@@ -113,11 +113,12 @@ fn outside(dir: &Path, from: &str, to: &str) {
     fs::write(&path, now.replace(from, to)).unwrap_or_else(|e| panic!("{e}"));
 }
 
-/// `key` says to look again, and the list reads the files.
+/// `key` says to look again, over the files as they are.
 fn looks_again(model: &mut Model, key: &str, name: &str) {
-    let cmds = keys(model, key);
+    keys(model, key);
     assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN), "{name}");
-    model.update(load_of(cmds).read());
+    let shown = model.snap.todo().to_bytes();
+    assert_eq!(shown, todo_of(&model.deps.cwd).as_bytes(), "{name}");
 }
 
 /// A dim key does nothing, whichever it is: after it the selection is as it
@@ -302,6 +303,7 @@ fn a_press_on_a_list_emptied_outside_looks_again() {
             assert!(model.rows.is_empty(), "{name}");
             assert_eq!(model.key_mode(), Mode::Normal, "{name}");
             assert_eq!(files(dir.path()), before, "{name}");
+            assert_eq!(model.file_exists(), to != gone, "{name}");
         }
     }
 }
