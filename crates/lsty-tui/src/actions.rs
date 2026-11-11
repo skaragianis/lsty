@@ -70,8 +70,13 @@ impl Model {
         let stops = answer == Answer::Resolved(Command::Stop);
         let back = toggles && !stops && self.just_stopped(count);
         let selected = self.visual.is_some();
-        let ran =
-            self.ending(&ids, |m| m.answered(answer, back, &tasks, selected));
+        let ran = self.ending(&ids, |m| {
+            if back {
+                m.put_back()
+            } else {
+                m.answered(answer, &tasks, selected)
+            }
+        });
         if ran {
             self.again = Some(Again::Task {
                 action,
@@ -84,12 +89,10 @@ impl Model {
         ran
     }
 
-    /// Does what `answer` says over `tasks`, or, for `back`, puts back the
-    /// claims `t` just ended. Tells whether a write ran.
+    /// Does what `answer` says over `tasks`. Tells whether a write ran.
     fn answered(
         &mut self,
         answer: Answer,
-        back: bool,
         tasks: &[Chosen],
         selected: bool,
     ) -> bool {
@@ -98,9 +101,6 @@ impl Model {
             Answer::CoreRefuses(command) => (command, false),
             Answer::Resolved(command) => (command, true),
         };
-        if back {
-            return self.put_back();
-        }
         let changing: Vec<&Chosen> = tasks
             .iter()
             .filter(|task| !passes || task.changed_by(command))
