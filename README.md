@@ -10,6 +10,7 @@
 [![crates.io](https://img.shields.io/crates/v/lsty)](https://crates.io/crates/lsty)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/skaragianis/lsty/blob/main/LICENSE)
 [![Rust](https://img.shields.io/badge/rust-1.99%2B-orange)](https://github.com/skaragianis/lsty/blob/main/rust-toolchain.toml)
+[![CodeScene Average Code Health](https://codescene.io/projects/87415/status-badges/average-code-health)](https://codescene.io/projects/87415)
 
 Terminal lists for Humans and Agents.
 
