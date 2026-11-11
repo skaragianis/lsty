@@ -90,11 +90,11 @@ pub fn keys_property(data: &[u8]) {
     feed_any(&mut layered, data, &pool);
 }
 
-/// The entries of the file that rebind an action: a list of keys that is
-/// empty or has a key that parses. Each problem on the way must be among
-/// the `warnings`.
+/// The entries of the file that rebind an action, the last for each: a list
+/// of keys that is empty or has a key that parses. Each problem on the way
+/// must be among the `warnings`.
 fn rebinds(table: &Table<'_>, warnings: &[Warning]) -> Vec<Rebind> {
-    let mut out = Vec::new();
+    let mut out: Vec<Rebind> = Vec::new();
     for (name, value) in table {
         let Some(mode) = Mode::from_name(name.get_ref()) else {
             let name = quote(format!("[{}]", name.get_ref()));
@@ -108,11 +108,17 @@ fn rebinds(table: &Table<'_>, warnings: &[Warning]) -> Vec<Rebind> {
             );
             continue;
         };
-        out.extend(
-            entries
-                .iter()
-                .filter_map(|(k, v)| rebind(mode, k, v, warnings)),
-        );
+        let mut found: Vec<_> = entries
+            .iter()
+            .filter_map(|(k, v)| rebind(mode, k, v, warnings))
+            .collect();
+        // The map is in the order of the names, the loader in the file's.
+        found.sort_by_key(|r| r.start);
+        for r in found {
+            // The last entry for an action wins, whatever name it has.
+            out.retain(|o| o.mode != mode || o.action != r.action);
+            out.push(r);
+        }
     }
     out
 }
