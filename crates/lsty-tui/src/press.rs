@@ -339,6 +339,39 @@ pub(crate) fn repeats_over(again: &Again, typed: usize) -> usize {
     if one { 1 } else { again.count(typed) }
 }
 
+/// Whether `action` has nothing to move over, select or show: no task
+/// beside the list, or a panel with no entries.
+fn nothing_to_move(action: Action, m: &Model, s: &Summary) -> bool {
+    let beside_list = s.total == 0 && m.focus == Focus::List;
+    let empty = m.focused_panel().is_some_and(|p| p.entries.is_empty());
+    (beside_list && action == Action::EnterVisual)
+        || (action.is_motion() && (beside_list || empty))
+}
+
+/// `t` that puts a claim back: the step it rewinds must still be there.
+fn put_back_answer(m: &Model) -> Answer {
+    if rewinds(m, m.hist.undo.last()) {
+        Answer::Resolved(Command::Start)
+    } else {
+        Answer::Refused(Refusal::Changed)
+    }
+}
+
+/// `go`: lit when the task has as many links as the count typed; the panel
+/// opens the link it has selected.
+fn open_link(m: &Model, s: &Summary) -> Answer {
+    if s.total == 0 {
+        return Answer::Refused(Refusal::Quiet);
+    }
+    let wanted = if m.focus == Focus::Detail {
+        1
+    } else {
+        m.typed_count()
+    };
+    let lit = m.cursor_links().len() >= wanted.max(1);
+    lit_if(lit, Refusal::Says(messages::NO_LINK))
+}
+
 /// What a press of `action` over the tasks of `s` would do. Every action is
 /// named, so a new one does not compile until it is decided. An archived
 /// task refuses every key that writes or opens a field on it, except `x` on
@@ -346,19 +379,7 @@ pub(crate) fn repeats_over(again: &Again, typed: usize) -> usize {
 #[expect(clippy::too_many_lines, reason = "every action is listed")]
 pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
     let rule: fn(&Summary) -> Answer = match action {
-        // Nothing to move over, select or show beside the list.
-        action
-            if s.total == 0
-                && m.focus == Focus::List
-                && (action.is_motion() || action == Action::EnterVisual) =>
-        {
-            return Answer::Refused(Refusal::Quiet);
-        }
-        // A panel with no entries has nothing to move over.
-        action
-            if action.is_motion()
-                && m.focused_panel().is_some_and(|p| p.entries.is_empty()) =>
-        {
+        action if nothing_to_move(action, m, s) => {
             return Answer::Refused(Refusal::Quiet);
         }
         Action::ToggleEntry => {
@@ -388,13 +409,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::FocusFilters => {
             return lit_if(m.focus_after(action).is_some(), Refusal::Quiet);
         }
-        Action::ToggleStart if puts_back(m, s) => {
-            return if rewinds(m, m.hist.undo.last()) {
-                Answer::Resolved(Command::Start)
-            } else {
-                Answer::Refused(Refusal::Changed)
-            };
-        }
+        Action::ToggleStart if puts_back(m, s) => return put_back_answer(m),
         Action::ToggleComplete => complete,
         Action::ToggleStart => toggle_start,
         Action::Stop => stop,
@@ -420,20 +435,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         Action::Yank => return lit_if(s.total > 0, Refusal::Quiet),
         Action::MoveTaskDown => return moving(m, s, Some(s.lo + s.total)),
         Action::MoveTaskUp => return moving(m, s, s.lo.checked_sub(1)),
-        Action::OpenLink if s.total == 0 => {
-            return Answer::Refused(Refusal::Quiet);
-        }
-        Action::OpenLink => {
-            let links = m.cursor_links().len();
-            // The panel opens the link it has selected.
-            let wanted = if m.focus == Focus::Detail {
-                1
-            } else {
-                m.typed_count()
-            };
-            let lit = links >= wanted.max(1);
-            return lit_if(lit, Refusal::Says(messages::NO_LINK));
-        }
+        Action::OpenLink => return open_link(m, s),
         Action::Undo => {
             let lit = m.kept.is_some() || !m.hist.undo.is_empty();
             return lit_if(lit, Refusal::Says("nothing to undo"));
