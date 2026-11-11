@@ -1,9 +1,18 @@
 //! VISUAL mode: a selection of whole shown rows, from the anchor to the
 //! cursor, that an action takes as its tasks.
 
-use lsty_core::{keys::Mode, list::TaskId, ops};
+use lsty_core::{
+    keys::Mode,
+    list::TaskId,
+    ops::{self, Landing},
+};
 
-use crate::{counts::ids_of, model::Model, rows::Row, track::Place};
+use crate::{
+    counts::ids_of,
+    model::Model,
+    rows::Row,
+    track::{Place, landed_at},
+};
 
 impl Model {
     /// `enter_visual`: starts a selection at the cursor's row.
@@ -88,17 +97,18 @@ impl Model {
 
     /// Runs a write over `tasks`. In VISUAL mode the selection ends
     /// first, with the cursor on the first task, and comes back when
-    /// the write is refused for anything but a changed list. Tells whether
-    /// the write ran.
+    /// the write is refused for anything but a changed list: on the lines
+    /// it was on, which a newer reading it took moves. Tells whether the
+    /// write ran.
     pub(crate) fn ending(
         &mut self,
         tasks: &[TaskId],
         run: impl FnOnce(&mut Self) -> bool,
     ) -> bool {
-        let Some(anchor) = self.visual else {
+        let Some(ends) = self.selection_ends() else {
             return run(self);
         };
-        let cursor = self.cursor;
+        let (old, rows) = (self.snap.clone(), self.rows.clone());
         if let Some(i) = tasks.first().and_then(|id| self.row_of(*id)) {
             self.cursor = i;
         }
@@ -106,10 +116,12 @@ impl Model {
         if run(self) {
             return true;
         }
-        if self.message.as_deref() != Some(ops::LIST_CHANGED) {
-            self.visual = Some(anchor);
+        if self.message.as_deref() == Some(ops::LIST_CHANGED) {
+            self.cursor = ends.1;
+        } else {
+            let landing = Landing::of(&old, &self.snap);
+            self.resume(Some(ends), &rows, |at| landed_at(&landing, at));
         }
-        self.cursor = cursor;
         self.reset_keys();
         self.scroll();
         false

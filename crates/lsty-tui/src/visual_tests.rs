@@ -237,6 +237,19 @@ fn a_prompt_cancelled_keeps_the_selection_and_a_written_one_ends_it() {
 }
 
 #[test]
+fn a_prompt_that_changes_nothing_keeps_the_lines_selected_through_an_insert() {
+    let dir = workdir("A +x\nB +x\nC\n");
+    let mut model = model_of(dir.path());
+    press(&mut model, "vjgt+x");
+    fs::write(dir.path().join("todo.txt"), "N\nA +x\nB +x\nC\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    keys(&mut model, "<CR>");
+    assert_eq!(todo_of(dir.path()), "N\nA +x\nB +x\nC\n");
+    assert_eq!(model.selected_rows(), Some((1, 2)));
+    assert_eq!(model.mode(), Mode::Visual);
+}
+
+#[test]
 fn a_count_before_an_action_in_visual_mode_is_dropped() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
