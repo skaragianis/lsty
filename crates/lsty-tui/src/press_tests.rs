@@ -416,8 +416,8 @@ const LINKS: &str = "Read https://x.org/a https://x.org/b\n";
 const OLD_LINK: &str = "x 2026-09-01 Read https://x.org/a\n";
 const STUCK: &str = "Plain\nBlocker id:b\nStuck dep:b\n";
 const LATER: &str = "A t:2099-01-01\n";
-const CLAIMED: &str =
-    "Blocker id:b\nStuck dep:b started:2026-09-29T0800Z owner:agent2\n";
+const CLAIMED: &str = "Blocker id:b\n\
+    Stuck dep:b started:2026-09-29T0800Z owner:agent2 https://x.org\n";
 const CLAIMED_TWICE: &str = "Blocker id:b\n\
     Stuck dep:b started:2026-09-29T0800Z owner:agent2\n\
     Too dep:b started:2026-09-29T0800Z\n";
@@ -1021,7 +1021,7 @@ fn t_takes_over_an_agents_claim_and_says_so() {
 /// `t` over blocked tasks in the 2 seconds after it stopped exactly them: the
 /// hint is lit and the key puts the claims back, and from when the window
 /// ends, or for any other tasks, dim and it writes nothing. A digit keeps the
-/// window open, and so does a dim key.
+/// window open, and so does a dim key, `3gx` over one link included.
 #[test]
 fn a_t_is_lit_while_it_can_put_a_claim_back() {
     const OPEN: u64 = 1_999;
@@ -1038,6 +1038,7 @@ fn a_t_is_lit_while_it_can_put_a_claim_back() {
         (CLAIMED, "jtx", SHUT, false),
         (CLAIMED, "jt.", OPEN, true),
         (CLAIMED, "jt.", SHUT, false),
+        (CLAIMED, "jt3gx", OPEN, true),
         (CLAIMED, "jtkj", 0, false),
         (CLAIMED, "jt2<Esc>", 0, false),
         (CLAIMED_TWICE, "jt2", OPEN, false),

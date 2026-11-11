@@ -94,6 +94,8 @@ pub(crate) enum Answer {
 pub(crate) struct Summary {
     /// The row of the first task.
     lo: usize,
+    /// The count it was taken with.
+    count: usize,
     total: usize,
     archived: usize,
     todo: usize,
@@ -151,10 +153,11 @@ impl Model {
     /// What a press with `count` reads.
     pub(crate) fn summary(&self, count: usize) -> Summary {
         let snap = &self.snap;
-        match self.selected_rows() {
+        let s = match self.selected_rows() {
             Some((lo, hi)) => Summary::of(snap, lo, self.rows_between(lo, hi)),
             None => Summary::of(snap, self.cursor, self.picked_rows(count)),
-        }
+        };
+        Summary { count, ..s }
     }
 
     /// The count typed so far; 0 when none, or where a digit is no count.
@@ -371,11 +374,7 @@ fn open_link(m: &Model, s: &Summary) -> Answer {
     if s.total == 0 {
         return Answer::Refused(Refusal::Quiet);
     }
-    let wanted = if m.focus == Focus::Detail {
-        1
-    } else {
-        m.typed_count()
-    };
+    let wanted = if m.focus == Focus::Detail { 1 } else { s.count };
     let lit = m.cursor_links().len() >= wanted.max(1);
     lit_if(lit, Refusal::Says(messages::NO_LINK))
 }
@@ -452,7 +451,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             let lit = !m.hist.redo.is_empty();
             return lit_if(lit, Refusal::Says("nothing to redo"));
         }
-        Action::Repeat => return repeat(m, m.typed_count()),
+        Action::Repeat => return repeat(m, s.count),
         Action::DeleteChar
         | Action::DeleteWordBack
         | Action::DeleteWordForward
