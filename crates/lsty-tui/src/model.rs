@@ -35,7 +35,6 @@ use crate::{
     output::Output,
     panel::Panel,
     picker::Picker,
-    press::writes_line,
     prompt::Kind as PromptKind,
     reldate::Today,
     rows::{self, Context, Inline, Row, Shows},
@@ -458,9 +457,7 @@ impl Model {
         }
         match fed.outcome {
             Outcome::Matched { action, count }
-                if lost
-                    && writes_line(self.aimed(action))
-                    && !hints::dim(self.answers_at(count)(action)) =>
+                if lost && self.writes_lost(action, count) =>
             {
                 self.say_changed();
                 Vec::new()

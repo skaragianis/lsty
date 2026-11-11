@@ -12,6 +12,7 @@ use lsty_core::{
 use crate::{
     field::Field,
     focus::Focus,
+    hints,
     history::{Again, Step},
     messages,
     model::Model,
@@ -138,6 +139,13 @@ impl Model {
             Some(again) if action == Action::Repeat => again.action(),
             _ => action,
         }
+    }
+
+    /// Whether a press of `action` with `count` would write on lines: after
+    /// keys were lost, such a press says the list changed instead.
+    pub(crate) fn writes_lost(&self, action: Action, count: usize) -> bool {
+        writes_line(self.aimed(action))
+            && !hints::dim(self.answers_at(count)(action))
     }
 
     /// What a press with `count` reads.
