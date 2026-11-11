@@ -93,10 +93,9 @@ where
         None => open(env, done_mode)?,
     };
     if let Err(e) = planned(env, &mut tx, rules, plan) {
-        if let Some(slot) = env.read_back
-            && held.is_none()
-            && e.code() == Code::ExpectMismatch
-        {
+        // Only a reading made here is worth showing: it says what is there.
+        let slot = env.read_back.filter(|_| held.is_none());
+        if let Some(slot) = slot.filter(|_| e.code() == Code::ExpectMismatch) {
             slot.set(Some(tx.snap));
         }
         return Err(e);
