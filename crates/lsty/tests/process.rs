@@ -40,11 +40,12 @@ impl Work {
         let root = fs::canonicalize(tmp.path())?;
         fs::write(root.join("todo.txt"), todo)?;
         // Each write syncs to disk under the lock, which is slow on macOS,
-        // so eight busy processes can keep one out past a few seconds on a
-        // loaded machine; 15 s is still under the 20 s kill of a hang.
+        // so eight busy processes queue behind each other; waits are about
+        // a second at most on a loaded Linux machine, and 5 s stays under
+        // the 20 s kill of a hang.
         let config = root.join(".config").join("lsty");
         fs::create_dir_all(&config)?;
-        fs::write(config.join("config.toml"), "lock_timeout = \"15s\"\n")?;
+        fs::write(config.join("config.toml"), "lock_timeout = \"5s\"\n")?;
         Ok(Self { _tmp: tmp, root })
     }
 
