@@ -12,8 +12,7 @@ use std::{
 use super::{Flock, Mode};
 use crate::errs;
 
-const FIRST_PAUSE: Duration = Duration::from_millis(5);
-const MAX_PAUSE: Duration = Duration::from_millis(50);
+const PAUSE: Duration = Duration::from_millis(2);
 
 /// Stops a wait for a lock. Clones share one state: cancel any of them
 /// and every wait that holds one ends at once.
@@ -92,15 +91,15 @@ impl<'a> Waiter<'a> {
         Self { cancel, deadline }
     }
 
-    /// Takes one lock, trying again after a pause that starts at 5 ms and
-    /// doubles up to 50 ms.
+    /// Takes one lock, trying again every 2 ms. The pause is short so that
+    /// a waiter is rarely asleep when the holder lets go: a longer one lets
+    /// a writer that arrives in between take the lock again and again.
     pub(super) fn lock<F: Flock + ?Sized>(
         &self,
         flock: &F,
         file: &File,
         mode: Mode,
     ) -> Result<(), Failure> {
-        let mut pause = FIRST_PAUSE;
         loop {
             if self.cancel.is_cancelled() {
                 return Err(Failure::Cancelled);
@@ -110,25 +109,24 @@ impl<'a> Waiter<'a> {
                 Err(e) if e.kind() == io::ErrorKind::WouldBlock => {}
                 Err(e) => return Err(Failure::Io(e)),
             }
-            let nap = self.nap(pause)?;
+            let nap = self.nap()?;
             if self.cancel.sleep(nap) {
                 return Err(Failure::Cancelled);
             }
-            pause = (pause * 2).min(MAX_PAUSE);
         }
     }
 
     /// How long to sleep before the next attempt, or `Busy` when the
     /// deadline has passed.
-    fn nap(&self, pause: Duration) -> Result<Duration, Failure> {
+    fn nap(&self) -> Result<Duration, Failure> {
         let Some(at) = self.deadline else {
-            return Ok(pause);
+            return Ok(PAUSE);
         };
         let left = at.saturating_duration_since(Instant::now());
         if left.is_zero() {
             return Err(Failure::Busy);
         }
-        Ok(pause.min(left))
+        Ok(PAUSE.min(left))
     }
 }
 
@@ -167,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    fn the_pause_between_tries_doubles_up_to_the_cap() {
+    fn the_tries_are_a_pause_apart() {
         let file = tempfile::tempfile().expect("a file");
         let token = Cancel::new();
         let waiter = Waiter::new(&token, None);
@@ -177,12 +175,7 @@ mod tests {
         let tries = busy.0.borrow();
         let gaps: Vec<Duration> =
             tries.windows(2).map(|w| w[1] - w[0]).collect();
-        // 5, 10, 20, 40, then 50 ms: a gap is never shorter than its
-        // pause.
-        let least = [5, 10, 20, 40, 50, 50].map(Duration::from_millis);
         assert_eq!(gaps.len(), 6);
-        for (gap, least) in gaps.iter().zip(least) {
-            assert!(*gap >= least, "{gaps:?}");
-        }
+        assert!(gaps.iter().all(|g| *g >= PAUSE), "{gaps:?}");
     }
 }
