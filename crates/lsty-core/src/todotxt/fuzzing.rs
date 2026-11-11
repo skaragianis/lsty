@@ -26,10 +26,10 @@ fn stamps(l: &Line) -> Stamps<'_> {
     )
 }
 
-/// The input is a line, a NUL byte and a token (one that parses as a
-/// single token; the rest are skipped). A removal or an append is
-/// refused exactly when it changes a stamp, and an append is undone by
-/// removing the last token.
+/// The input is a line, a NUL byte and a token; an input whose token is
+/// empty, has a gap byte or parses as more than one token is skipped. A
+/// removal or an append is refused exactly when it changes a stamp, and an
+/// append is undone by removing the last token.
 ///
 /// # Panics
 ///

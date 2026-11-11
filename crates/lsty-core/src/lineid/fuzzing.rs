@@ -47,8 +47,9 @@ pub fn pairs_bytes(data: &[u8]) {
     pairs_property(&old[..old.len().min(300)], &new[..new.len().min(300)]);
 }
 
-/// [`remap_property`] over a pick byte and two lists of [`lines`], split
-/// at `|`.
+/// [`remap_property`] over two lists of [`lines`], the second and third
+/// parts of the input split at `|`; the first byte of the first part is
+/// the pick, the rest of it is skipped.
 pub fn remap_bytes(data: &[u8]) {
     let mut parts = data.splitn(3, |b| *b == b'|');
     let pick = parts.next().and_then(|p| p.first()).copied();

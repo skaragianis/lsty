@@ -400,10 +400,12 @@ fn but_deps(line: &[u8]) -> Vec<&[u8]> {
 /// file behind the list's back.
 ///
 /// The first byte picks the config, one bit each: the sidebar (1), the
-/// archived tasks (2), the width (4) and the detail panel (8); the second
-/// how many lines follow, one byte each. Each byte after them is a key,
-/// or at `0xF0` and above a rewrite: the next byte picks the line, the
-/// two after it the count and the key pressed then.
+/// archived tasks (2), the width (4) and the detail panel (8). The second,
+/// modulo 7 and capped at the bytes left, is how many bytes follow it, each
+/// picking a line of the file. Each byte after those is a key; one at `0xF0`
+/// and above is, while the list is shown, a rewrite instead, its low bits
+/// picking which (see `rewrite`, `behind`): the next byte picks the
+/// line, the two after it the count and the key pressed then.
 ///
 /// # Panics
 ///
