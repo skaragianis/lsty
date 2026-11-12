@@ -2,7 +2,10 @@
 //! `dep:` and the files for `file:`. The names and the open tasks are
 //! collected once for each reading of the files, not for each key.
 
-use std::{borrow::Cow, fs, os::unix::ffi::OsStrExt, path::Path};
+use std::{
+    borrow::Cow, collections::BTreeSet, fs, os::unix::ffi::OsStrExt,
+    path::Path,
+};
 
 use lsty_core::{
     case::lower,
@@ -49,8 +52,8 @@ pub(crate) struct Sources {
 
 impl Sources {
     fn of(snap: &Snapshot, today: Today) -> Self {
-        let mut projects = Vec::new();
-        let mut contexts = Vec::new();
+        let mut projects = BTreeSet::new();
+        let mut contexts = BTreeSet::new();
         let mut open = Vec::new();
         for task in snap.tasks() {
             let line = snap.line(task);
@@ -62,8 +65,8 @@ impl Sources {
         }
         Self {
             serial: snap.serial(),
-            projects: names(projects),
-            contexts: names(contexts),
+            projects: projects.into_iter().map(errs::lossy).collect(),
+            contexts: contexts.into_iter().map(errs::lossy).collect(),
             open,
         }
     }
@@ -73,17 +76,10 @@ impl Sources {
 pub(crate) fn tokens_of(
     line: &Line,
     kind: Kind,
-) -> impl Iterator<Item = String> {
+) -> impl Iterator<Item = &[u8]> {
     line.tokens()
         .filter(move |t| t.kind == kind)
-        .map(|t| errs::lossy(t.name_text()))
-}
-
-/// The names in byte order, each once.
-fn names(mut all: Vec<String>) -> Vec<String> {
-    all.sort();
-    all.dedup();
-    all
+        .map(|t| t.name_text())
 }
 
 fn open_task(snap: &Snapshot, task: &Task, line: &Line, today: Today) -> Open {
@@ -94,10 +90,10 @@ fn open_task(snap: &Snapshot, task: &Task, line: &Line, today: Today) -> Open {
         .map(|t| errs::lossy(t.name_text()))
         .collect();
     let due = date_cell(task, line, today).text;
-    let parts = [task.nr().to_string(), text.clone(), tags.join(" "), due];
+    let nr = task.nr().to_string();
+    let parts = [nr.as_str(), &text, &tags.join(" "), &due];
     let label = parts
-        .iter()
-        .map(String::as_str)
+        .into_iter()
         .filter(|p| !p.is_empty())
         .collect::<Vec<_>>()
         .join(GAP);
@@ -154,15 +150,14 @@ impl Model {
 
     /// The projects (for a word starting with `+`) or the contexts of
     /// both files, as written, each once.
-    pub(crate) fn name_pool(&mut self, word: &str) -> Vec<String> {
+    pub(crate) fn name_pool(&mut self, word: &str) -> &[String] {
         self.refresh_sources();
         self.sources.as_ref().map_or_default(|s| {
             if word.starts_with('+') {
-                &s.projects
+                s.projects.as_slice()
             } else {
-                &s.contexts
+                s.contexts.as_slice()
             }
-            .clone()
         })
     }
 

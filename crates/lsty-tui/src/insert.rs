@@ -314,7 +314,7 @@ impl Model {
         ] {
             for name in tokens_of(line, kind).filter(|_| on) {
                 out.push(' ');
-                out.push_str(&name);
+                out.push_str(&errs::lossy(name));
             }
         }
         out

@@ -1,6 +1,8 @@
 //! The prompts of `gd`, `gt` and `gT`: a line in the status line that
 //! asks for one thing and writes it to the tasks it was opened on.
 
+use std::borrow::Cow;
+
 use lsty_core::{
     case::lower,
     dates::Clock,
@@ -408,7 +410,7 @@ impl Model {
             }
             (LineKind::Command, None) => self.command_pool(&typed, &before),
         };
-        let cands = matching(pool, &typed);
+        let cands = matching(&pool, &typed);
         (!cands.is_empty()).then_some(Completion {
             from,
             to,
@@ -419,14 +421,14 @@ impl Model {
     }
 
     /// What can complete `word` in the prompt of `kind`.
-    fn pool(&mut self, kind: Kind, word: &str) -> Vec<String> {
+    fn pool(&mut self, kind: Kind, word: &str) -> Cow<'_, [String]> {
         match kind {
-            Kind::SetDue => Vec::new(),
+            Kind::SetDue => Cow::default(),
             Kind::AddTag => match word.chars().next() {
-                Some('+' | '@') => self.name_pool(word),
-                _ => KNOWN_KEYS.iter().map(|k| (*k).to_owned()).collect(),
+                Some('+' | '@') => self.name_pool(word).into(),
+                _ => Cow::Owned(KNOWN_KEYS.map(String::from).into()),
             },
-            Kind::RemoveTag => self.tokens_of_tasks(),
+            Kind::RemoveTag => self.tokens_of_tasks().into(),
         }
     }
 
@@ -480,12 +482,14 @@ impl Model {
 /// [`rank`]): the word itself first, then those that start with it,
 /// then names matched at a part, then those that hold it anywhere, each
 /// group in byte order, each candidate once.
-pub(crate) fn matching(pool: Vec<String>, word: &str) -> Vec<String> {
+pub(crate) fn matching(pool: &[String], word: &str) -> Vec<String> {
     let typed = word;
     let word = lower(word);
     let mut out: Vec<(bool, Rank, String)> = pool
-        .into_iter()
-        .filter_map(|c| rank(&lower(&c), &word).map(|r| (c != typed, r, c)))
+        .iter()
+        .filter_map(|c| {
+            rank(&lower(c), &word).map(|r| (c != typed, r, c.clone()))
+        })
         .collect();
     out.sort();
     out.dedup();

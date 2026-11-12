@@ -321,7 +321,7 @@ fn the_line_completes_names_files_and_set_options() {
         let got = model.command_pool(word, before);
         assert_eq!(got, *want, "{before}{word}");
     }
-    let dotted = model.command_pool("--", "\u{130}d ");
+    let dotted = model.command_pool("--", "\u{130}d ").into_owned();
     assert_eq!(dotted, model.command_pool("--", "id "));
     assert_ne!(dotted, Vec::<String>::new());
     let set = model.command_pool("", "set ");
@@ -334,7 +334,7 @@ fn the_line_completes_names_files_and_set_options() {
 fn the_line_completes_for_a_prefix_of_a_command() {
     let (_dir, mut model) = workdir_model(SAMPLE, alone());
     for (short, full, word) in [("so", "sort", ""), ("ap", "append", "--")] {
-        let pool = model.command_pool(word, &format!("{full} "));
+        let pool = model.command_pool(word, &format!("{full} ")).into_owned();
         assert_ne!(pool, Vec::<String>::new(), "{full}");
         assert_eq!(model.command_pool(word, &format!("{short} ")), pool);
     }
@@ -413,7 +413,7 @@ fn set_shows_the_value_of_every_option() {
 fn the_line_counts_its_words_as_the_command_reads_them() {
     let dir = workdir("A\n");
     let mut model = started(deps(dir.path(), alone()));
-    let sort = model.command_pool("", "sort ");
+    let sort = model.command_pool("", "sort ").into_owned();
     assert_ne!(sort, Vec::<String>::new());
     assert_eq!(model.command_pool("", "\"sort\" "), sort);
     assert_eq!(model.command_pool("", "add \"open "), Vec::<String>::new());

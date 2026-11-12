@@ -73,7 +73,7 @@ const MATCHES: [Row; 25] = [
 #[test]
 fn candidates_match_without_case_in_byte_order_once_each() {
     for (words, word, want) in MATCHES {
-        assert_eq!(matching(pool(words), word), pool(want), "{word}");
+        assert_eq!(matching(&pool(words), word), pool(want), "{word}");
     }
 }
 

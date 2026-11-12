@@ -1,6 +1,8 @@
 //! The text line of the status line: the search, whose list follows the
 //! text as it changes, and the prompts that share its keys.
 
+use std::borrow::Cow;
+
 use lsty_core::{
     case::lower,
     errs::Error,
@@ -299,20 +301,20 @@ impl Model {
         &mut self,
         word: &str,
         before: &str,
-    ) -> Vec<String> {
+    ) -> Cow<'_, [String]> {
         let low = lower(word);
         if before.matches('"').count() % 2 == 1 {
-            Vec::new()
+            Cow::default()
         } else if word.starts_with(['+', '@']) {
-            self.name_pool(word)
+            self.name_pool(word).into()
         } else if word.starts_with("file:") {
-            self.file_pool(word)
+            self.file_pool(word).into()
         } else if !word.is_empty()
             && ("is:".starts_with(&low) || low.starts_with("is:"))
         {
-            state_words().map(|w| format!("is:{w}")).collect()
+            Cow::Owned(state_words().map(|w| format!("is:{w}")).collect())
         } else {
-            Vec::new()
+            Cow::default()
         }
     }
 
