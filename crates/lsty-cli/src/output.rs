@@ -232,7 +232,17 @@ pub(crate) fn push_json_string(out: &mut String, text: &str) {
 }
 
 fn push_escaped(out: &mut String, text: &str) {
-    for c in text.chars() {
+    let mut rest = text;
+    loop {
+        // A byte that can start an escape: a control, a quote, a
+        // backslash, DEL, or the lead of U+0080..U+00BF or U+2000..U+2FFF.
+        let at = rest.bytes().position(|b| {
+            matches!(b, 0..=0x1f | b'"' | b'\\' | 0x7f | 0xc2 | 0xe2)
+        });
+        let (clean, tail) = rest.split_at(at.unwrap_or(rest.len()));
+        out.push_str(clean);
+        let mut chars = tail.chars();
+        let Some(c) = chars.next() else { break };
         match c {
             '"' => out.push_str("\\\""),
             '\\' => out.push_str("\\\\"),
@@ -249,6 +259,7 @@ fn push_escaped(out: &mut String, text: &str) {
             }
             c => out.push(c),
         }
+        rest = chars.as_str();
     }
 }
 

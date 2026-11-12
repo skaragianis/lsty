@@ -4,7 +4,7 @@ use super::output::{
     Field, Json, error_fields, json_object, write_lines, write_object,
 };
 
-const STRINGS: [(&str, &str); 16] = [
+const STRINGS: [(&str, &str); 18] = [
     ("plain", r#""plain""#),
     ("a\"b", r#""a\"b""#),
     ("a\\b", r#""a\\b""#),
@@ -18,6 +18,11 @@ const STRINGS: [(&str, &str); 16] = [
     ("\u{7f}", r#""\u007f""#),
     ("\u{80}\u{9b}\u{9f}", r#""\u0080\u009b\u009f""#),
     ("\u{a0}\u{a1}", "\"\u{a0}\u{a1}\""),
+    ("\u{a0}\u{2027}\u{202a}€", "\"\u{a0}\u{2027}\u{202a}€\""),
+    (
+        "ab\u{2028}é\u{85}cd\"e\\f\u{7f}g",
+        r#""ab\u2028é\u0085cd\"e\\f\u007fg""#,
+    ),
     ("café ☃ 😀", r#""café ☃ 😀""#),
     ("\u{fffd}", "\"\u{fffd}\""),
     ("", r#""""#),
