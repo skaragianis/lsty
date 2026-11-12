@@ -63,7 +63,7 @@ impl Model {
                 self.picker_action(action, count)
             }
             Outcome::NoMatch => {
-                digit(stroke).map_or_else(Vec::new, |n| self.choose_link(n))
+                digit(stroke).map_or_default(|n| self.choose_link(n))
             }
             Outcome::Pending => Vec::new(),
         }

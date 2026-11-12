@@ -441,9 +441,7 @@ fn hidden(c: &Config) -> String {
         .join(",")
 }
 fn default_priority(c: &Config) -> String {
-    c.default_priority
-        .map(|p| p.to_string())
-        .unwrap_or_default()
+    c.default_priority.map_or_default(|p| p.to_string())
 }
 fn priority_range(c: &Config) -> String {
     c.priority_range.to_string()
@@ -968,4 +966,6 @@ fn the_readme_names_the_pinned_rust_version() {
         "{minimum}"
     );
     assert!(readme.contains(&format!("pins Rust {pinned} ")), "{pinned}");
+    let need = format!("With Rust {minimum} or newer");
+    assert!(readme.contains(&need), "{need}");
 }

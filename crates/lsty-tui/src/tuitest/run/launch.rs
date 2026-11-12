@@ -90,9 +90,7 @@ impl Harness {
     /// The model asked for the editor: it is recorded, and it ends at
     /// once unless the script holds it.
     pub(super) fn edit(&mut self, words: &[OsString]) -> Done {
-        let path = words
-            .last()
-            .map_or_else(String::new, |w| lossy_path(Path::new(w)));
+        let path = words.last().map_or_default(|w| lossy_path(Path::new(w)));
         self.launch
             .started
             .borrow_mut()

@@ -250,7 +250,7 @@ impl Model {
         );
         let index = panel.top + line;
         let entry = panel.entries.get(index);
-        let spans = entry.map_or_else(Vec::new, |e| row_spans(e, inner));
+        let spans = entry.map_or_default(|e| row_spans(e, inner));
         let area = Rect::new(x + 1, y, cells(inner), 1);
         let focused = self.focus == Focus::of_panel(i);
         if focused && index == panel.cursor && index < panel.entries.len() {

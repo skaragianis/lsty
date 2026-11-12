@@ -177,11 +177,7 @@ impl Model {
     /// panels and the other terms are kept. Text that does not parse
     /// leaves the prompt open.
     fn keep_search(&mut self) {
-        let typed = self
-            .line
-            .as_ref()
-            .map(|l| l.field.text())
-            .unwrap_or_default();
+        let typed = self.line.as_ref().map_or_default(|l| l.field.text());
         let Ok(mut split) = self.split(&typed, true) else {
             return;
         };

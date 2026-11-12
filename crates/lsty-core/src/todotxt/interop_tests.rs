@@ -59,8 +59,7 @@ fn golden_of(file: &File) -> Value {
                 "done": line.is_done(),
                 "priority": line
                     .priority()
-                    .map(|p| p.to_string())
-                    .unwrap_or_default(),
+                    .map_or_default(|p| p.to_string()),
                 "completed": line.completed().unwrap_or_default(),
                 "created": line.created().unwrap_or_default(),
                 "description": lossy(line.description()),

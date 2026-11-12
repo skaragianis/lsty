@@ -287,9 +287,7 @@ impl<'a> Session<'a> {
 
     fn profile(&self) -> Profile {
         let var = |name| {
-            (self.env.vars)(name)
-                .map(|v| errs::lossy(v.as_bytes()))
-                .unwrap_or_default()
+            (self.env.vars)(name).map_or_default(|v| errs::lossy(v.as_bytes()))
         };
         Profile::detect(&var("TERM"), &var("COLORTERM"))
     }

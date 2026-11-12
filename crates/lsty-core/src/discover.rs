@@ -158,11 +158,7 @@ impl Input<'_> {
         else {
             return PathBuf::from(path);
         };
-        let mut full = self
-            .home
-            .map(Path::as_os_str)
-            .unwrap_or_default()
-            .to_owned();
+        let mut full = self.home.map_or_default(Path::as_os_str).to_owned();
         full.push(rest);
         PathBuf::from(full)
     }

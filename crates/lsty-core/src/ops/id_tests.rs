@@ -387,8 +387,7 @@ fn two_staged_lines_with_one_id() {
             let Picked::Task(task) = tx.target(&Target::todo(nr))? else {
                 continue;
             };
-            let raw =
-                tx.line(task).map(|l| l.raw().to_vec()).unwrap_or_default();
+            let raw = tx.line(task).map_or_default(|l| l.raw().to_vec());
             tx.set(task, [raw, b" id:same".to_vec()].concat(), Path::Action);
         }
         Ok(())

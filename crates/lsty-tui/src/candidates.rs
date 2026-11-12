@@ -156,7 +156,7 @@ impl Model {
     /// both files, as written, each once.
     pub(crate) fn name_pool(&mut self, word: &str) -> Vec<String> {
         self.refresh_sources();
-        self.sources.as_ref().map_or_else(Vec::new, |s| {
+        self.sources.as_ref().map_or_default(|s| {
             if word.starts_with('+') {
                 &s.projects
             } else {
@@ -179,8 +179,7 @@ impl Model {
         let folded = !typed.chars().any(is_upper);
         let waits = self.waits_for();
         let me = self.edited_task();
-        let waiting =
-            me.map(|me| self.snap.waiting_on(me)).unwrap_or_default();
+        let waiting = me.map_or_default(|me| self.snap.waiting_on(me));
         sources
             .open
             .iter()

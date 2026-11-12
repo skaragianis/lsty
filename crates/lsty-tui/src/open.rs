@@ -125,6 +125,6 @@ impl Model {
         } else {
             links.iter().find(|l| l.shown() == t.name)
         };
-        found.map_or_else(Vec::new, |link| self.launch(link))
+        found.map_or_default(|link| self.launch(link))
     }
 }

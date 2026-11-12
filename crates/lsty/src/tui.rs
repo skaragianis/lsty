@@ -28,7 +28,7 @@ fn real_now() -> Timestamp {
 }
 
 fn text(name: &str) -> String {
-    var(name).map(|v| lossy(v.as_bytes())).unwrap_or_default()
+    var(name).map_or_default(|v| lossy(v.as_bytes()))
 }
 
 /// The time of the moment: the real one, or the fixed one that

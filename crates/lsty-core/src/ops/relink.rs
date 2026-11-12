@@ -65,11 +65,7 @@ pub(super) fn relink(tx: &mut Tx, moved: &[Moved<'_>]) {
 
 /// The id of a line, or empty.
 fn id_text(raw: &[u8]) -> Vec<u8> {
-    Line::parse(raw)
-        .tags()
-        .id
-        .map(<[u8]>::to_vec)
-        .unwrap_or_default()
+    Line::parse(raw).tags().id.map_or_default(<[u8]>::to_vec)
 }
 
 fn graph_of(tx: &Tx) -> Graph {

@@ -115,8 +115,7 @@ const EDITS: &[(&str, Edit)] = &[
     }),
     ("move the first to done as read", |tx| {
         if let Some(id) = first(tx) {
-            let raw =
-                tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
+            let raw = tx.line(id).map_or_default(|l| l.raw().to_vec());
             tx.send_to(Source::Done, id, raw).expect("sent");
         }
     }),
@@ -164,10 +163,7 @@ fn lines_as_read_are_not_parsed_again() {
     let mut tx = Tx::new(snapshot(b"a\nb\nc\n", b"x d\n"), false);
     let ids = tasks(&tx);
     tx.set(ids[1], "changed", Path::Action);
-    let raw = tx
-        .line(ids[2])
-        .map(|l| l.raw().to_vec())
-        .unwrap_or_default();
+    let raw = tx.line(ids[2]).map_or_default(|l| l.raw().to_vec());
     tx.send_to(Source::Done, ids[2], raw).expect("sent");
     let todo = tx.todo.after_file(&tx.snap);
     let done = tx.done.after_file(&tx.snap);
@@ -376,7 +372,7 @@ fn assert_moved_in_order(tx: &Tx) {
 fn moving_many_done_lines_keeps_file_order_after_the_old_ones() {
     let mut tx = many_done();
     for id in done_ids(&tx) {
-        let raw = tx.line(id).map(|l| l.raw().to_vec()).unwrap_or_default();
+        let raw = tx.line(id).map_or_default(|l| l.raw().to_vec());
         tx.send_to(Source::Done, id, raw).expect("sent");
     }
     assert_moved_in_order(&tx);

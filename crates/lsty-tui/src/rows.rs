@@ -207,11 +207,10 @@ impl Row {
         let id_cell = snap
             .id_of(task)
             .filter(|_| ctx.inline.ids)
-            .map(|id| Cell {
+            .map_or_default(|id| Cell {
                 text: lossy(id),
                 slot: base.or(Some(Slot::Id)),
-            })
-            .unwrap_or_default();
+            });
         Self {
             id: task.task_id(),
             nr: task.nr(),
