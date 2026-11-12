@@ -96,7 +96,11 @@ pub fn acquire_with<F: Flock + ?Sized>(
     timeout: Duration,
     cancel: &Cancel,
 ) -> errs::Result<Held> {
-    let wait = Waiter::new(cancel, Instant::now().checked_add(timeout));
+    let wait = Waiter::new(
+        cancel,
+        Instant::now().checked_add(timeout),
+        &wait::HELPERS,
+    );
     let mut held = Held::default();
     for folder in folders::group(wants) {
         lock_folder(flock, &wait, &mut held, &folder)?;

@@ -15,6 +15,10 @@ use crate::errs::Code;
 
 const ONE_SECOND: Duration = Duration::from_secs(1);
 
+/// A wait that a loaded machine may stretch.
+#[cfg(target_os = "linux")]
+const LOADED: Duration = Duration::from_secs(5);
+
 fn root(dirs: &[&str]) -> (tempfile::TempDir, PathBuf) {
     let (tmp, real) = crate::fsio::test_util::dir();
     for dir in dirs {
@@ -121,12 +125,73 @@ fn a_busy_folder_is_a_lock_timeout() {
     // 05.13
     let (_tmp, root) = root(&["d"]);
     let file = root.join("d/todo.txt");
-    let _held = take(&file, Mode::Exclusive, ONE_SECOND).expect("held");
+    let held = take(&file, Mode::Exclusive, ONE_SECOND).expect("held");
     let err = take(&file, Mode::Exclusive, Duration::from_millis(50))
         .expect_err("busy");
     assert_eq!(err.code(), Code::LockTimeout);
     assert_eq!(err.exit(), 4);
     assert_eq!(err.message(), "todo.txt is busy (locked by another writer)");
+    // The wait that gave up leaves the lock free for the next.
+    drop(held);
+    assert!(take(&file, Mode::Exclusive, ONE_SECOND).is_ok());
+}
+
+/// How many waiters the system holds in its queue for the lock of `dir`.
+#[cfg(target_os = "linux")]
+fn queued(dir: &Path) -> usize {
+    let tail = format!(":{} 0 EOF", ino(dir));
+    let locks = fs::read_to_string("/proc/locks").expect("locks");
+    locks
+        .lines()
+        .filter(|l| l.contains("->") && l.ends_with(&tail))
+        .count()
+}
+
+#[cfg(target_os = "linux")]
+#[test]
+fn waiters_get_the_lock_in_the_order_they_came() {
+    // Its own count of helper threads, so that tests that leave helpers
+    // behind in this process cannot take the places it needs.
+    use std::sync::atomic::{AtomicUsize, Ordering};
+    static HELPERS: AtomicUsize = AtomicUsize::new(0);
+    let take = |dir: &Path, timeout| {
+        let open = File::open(dir).expect("open");
+        let at = Instant::now().checked_add(timeout);
+        Waiter::new(&Cancel::new(), at, &HELPERS)
+            .lock(&OsFlock, &open, Mode::Exclusive)
+            .is_ok()
+            .then_some(open)
+    };
+    let (_tmp, root) = root(&["d"]);
+    let file = root.join("d/todo.txt");
+    let dir = root.join("d");
+    let held = held_lock(&file, Mode::Exclusive);
+    let (taken, order) = std::sync::mpsc::channel();
+    let waiters: Vec<_> = (0..6)
+        .map(|i| {
+            let (at, taken) = (dir.clone(), taken.clone());
+            let waiter = thread::spawn(move || {
+                let _held = take(&at, LOADED).expect("held");
+                taken.send(i).expect("send");
+            });
+            let start = Instant::now();
+            while queued(&dir) <= i {
+                assert!(start.elapsed() < LOADED, "waiter {i} not queued");
+                thread::sleep(Duration::from_millis(1));
+            }
+            waiter
+        })
+        .collect();
+    // Waits that give up do not pile up threads behind a lock that stays held.
+    for _ in 0..wait::MOST_HELPERS {
+        assert!(take(&dir, Duration::from_millis(5)).is_none());
+    }
+    assert!(HELPERS.load(Ordering::SeqCst) <= wait::MOST_HELPERS);
+    drop(held);
+    for waiter in waiters {
+        assert!(waiter.join().is_ok());
+    }
+    assert_eq!(order.try_iter().collect::<Vec<_>>(), [0, 1, 2, 3, 4, 5]);
 }
 
 #[test]
@@ -135,9 +200,9 @@ fn the_timeout_is_for_the_whole_list() {
     // and so is tried once: its wait starts with the deadline gone.
     struct Slow(Cell<u32>);
     impl Flock for Slow {
-        fn try_lock(&self, _: &File, _: Mode) -> io::Result<()> {
+        fn try_lock(&self, file: &File, mode: Mode) -> io::Result<()> {
             if self.0.replace(self.0.get() + 1) > 0 {
-                return Err(io::ErrorKind::WouldBlock.into());
+                return OsFlock.try_lock(file, mode);
             }
             thread::sleep(Duration::from_millis(30));
             Ok(())
@@ -148,6 +213,7 @@ fn the_timeout_is_for_the_whole_list() {
         want(&root.join("a/x"), Mode::Shared),
         want(&root.join("b/x"), Mode::Shared),
     ];
+    let _busy = held_lock(&root.join("b/x"), Mode::Exclusive);
     let flock = Slow(Cell::new(0));
     let err = acquire_with(
         &flock,
