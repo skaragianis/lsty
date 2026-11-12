@@ -157,47 +157,60 @@ fn list_tasks(
     let sel = select(call, &snap, &query, all, set);
     let messages = messages(&query, &snap, &sel);
     let raw = call.has(Opt::Raw);
-    if call.json() {
-        let ids: Vec<_> = sel.shown.iter().map(|t| t.task_id()).collect();
-        let home = call.home.map(Path::to_path_buf);
-        return Ok(Output {
-            fields: vec![
-                Field::streamed("tasks"),
-                Field::strs("messages", &messages),
-            ],
-            stream: Some(Box::new(move |w| {
+    let json = call.json();
+    let ids: Vec<_> = sel.shown.iter().map(|t| t.task_id()).collect();
+    let home = call.home.map(Path::to_path_buf);
+    let paint = call.paint.clone();
+    let hide = call.parsed.hide;
+    let footer = format!("-- {} of {} shown", sel.shown.len(), sel.total);
+    let fields = if json {
+        vec![Field::streamed("tasks"), Field::strs("messages", &messages)]
+    } else {
+        Vec::new()
+    };
+    Ok(Output {
+        fields,
+        stream: Some(Box::new(move |w| {
+            let tasks = ids.iter().filter_map(|id| snap.task(*id));
+            let mut w = BufWriter::new(w);
+            if json {
                 let json = TaskJson {
                     snap: &snap,
                     home: home.as_deref(),
                 };
-                let tasks = ids.iter().filter_map(|id| snap.task(*id));
-                let mut w = BufWriter::new(w);
                 json.write_array(&mut w, tasks)?;
-                w.flush()
-            })),
-            ..Output::default()
-        });
-    }
-    let mut lines: Vec<Vec<u8>> = sel
-        .shown
-        .iter()
-        .map(|task| {
-            if raw {
-                snap.line(task).raw().to_vec()
             } else {
-                list_line(&call.paint, &snap, task, call.parsed.hide)
+                let body = tasks
+                    .map(|task| shown_line(&paint, &snap, task, raw, hide));
+                let tail = (!raw)
+                    .then(|| paint.paint(Slot::Muted, footer.as_bytes()));
+                let notes =
+                    text_lines(&paint, messages.iter().filter(|_| !raw));
+                for line in body.chain(tail).chain(notes) {
+                    w.write_all(&line)?;
+                    w.write_all(b"\n")?;
+                }
             }
-        })
-        .collect();
-    if !raw {
-        let footer = format!("-- {} of {} shown", sel.shown.len(), sel.total);
-        lines.push(call.paint.paint(Slot::Muted, footer.as_bytes()));
-        lines.extend(text_lines(&call.paint, messages.iter()));
-    }
-    Ok(Output {
-        lines,
+            w.flush()
+        })),
         ..Output::default()
     })
+}
+
+/// The line of a task in a list: as it is stored with `raw`, else made
+/// by [`list_line`].
+fn shown_line(
+    paint: &Painter,
+    snap: &Snapshot,
+    task: &Task,
+    raw: bool,
+    hide: Hide,
+) -> Vec<u8> {
+    if raw {
+        snap.line(task).raw().to_vec()
+    } else {
+        list_line(paint, snap, task, hide)
+    }
 }
 
 /// The number of a task, a space and the line as it is stored, with

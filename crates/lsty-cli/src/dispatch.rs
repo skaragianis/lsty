@@ -19,6 +19,7 @@ use crate::{
     help, identity, inline,
     output::{
         self, ENVELOPE_VERSION, Field, Json, Output, Streamer, write_object,
+        write_stream,
     },
     paint::Painter,
     parse::{self, Opt, Parsed},
@@ -445,6 +446,9 @@ impl<'a> Session<'a> {
         } else {
             self.env
                 .out(&output.lines)
+                .and_then(|()| {
+                    write_stream(self.env.stdout, "/dev/stdout", output.stream)
+                })
                 .and_then(|()| self.env.err(&output.notes))
         };
         written.map_or(errs::EXIT_IO, |()| 0)

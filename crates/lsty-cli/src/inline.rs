@@ -2,7 +2,7 @@
 //! line of the TUI does: the human acts, nothing is printed, and a write
 //! hands back what the operation did.
 
-use std::path::Path;
+use std::{io::BufRead, path::Path};
 
 use lsty_core::{
     errs::{Code, Error, Field, Result, quote},
@@ -12,6 +12,7 @@ use lsty_core::{
 use crate::{
     commands::{self, Call, Handler},
     identity,
+    output::Output,
     paint::Painter,
     parse::{self, Opt, Opts},
 };
@@ -117,7 +118,7 @@ pub fn run_inline(
     };
     let result = match command.handler {
         Handler::Read(handler) => {
-            handler(&call).map(|r| Inline::Read(r.lines))
+            handler(&call).map(|r| Inline::Read(lines_of(r)))
         }
         Handler::Write(handler) => {
             handler(&call).map(|w| Inline::Wrote(Box::new(w.outcome)))
@@ -153,4 +154,16 @@ pub(crate) fn unknown(name: &str) -> Error {
         format!("unknown command {}", quote(name)),
     )
     .with_field("command", Field::Str(name.to_owned()))
+}
+
+/// The lines of an output, with those of its stream read into memory.
+fn lines_of(output: Output) -> Vec<Vec<u8>> {
+    let mut lines = output.lines;
+    if let Some(stream) = output.stream {
+        let mut text = Vec::new();
+        // A vector takes every write.
+        stream(&mut text).ok();
+        lines.extend(BufRead::split(&text[..], b'\n').map_while(Result::ok));
+    }
+    lines
 }
