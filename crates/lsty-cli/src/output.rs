@@ -169,8 +169,8 @@ const STREAMED: &str = "\0";
 pub(crate) struct Output {
     /// The fields after `today`.
     pub fields: Vec<Field>,
-    /// Writes the value of the field made by [`Field::streamed`], if
-    /// there is one.
+    /// Writes the value of the field made by [`Field::streamed`] with
+    /// `--json`, and the lines without it, as they are produced.
     pub stream: Option<Streamer>,
     /// The lines printed without `--json`, without their newlines.
     pub lines: Vec<Vec<u8>>,
@@ -322,6 +322,18 @@ pub(crate) fn write_lines(
     let mut data = lines.join(&b'\n');
     data.push(b'\n');
     w.write_all(&data).map_err(|e| write_error(device, &e))
+}
+
+/// Runs `stream`, if any, on `w`, with `device` named in the message of a
+/// failed write.
+pub(crate) fn write_stream(
+    w: &mut dyn Write,
+    device: &str,
+    stream: Option<Streamer>,
+) -> errs::Result<()> {
+    stream
+        .map_or(Ok(()), |stream| stream(w))
+        .map_err(|e| write_error(device, &e))
 }
 
 /// Writes the fields as one JSON object and a newline. The value of the
