@@ -252,6 +252,7 @@ impl Model {
         };
         self.install(snap, clock, Some(&wrote));
         self.keep_sticky(&touched);
+        self.keep_links(&record);
         let next = Step::new(record, step.message, step.pairs);
         self.hist.stack(way.back()).push(next);
     }

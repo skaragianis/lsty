@@ -239,37 +239,58 @@ fn a_refused_delete_leaves_the_kept_dependents_to_follow_their_lines() {
     assert_eq!(todo_of(dir.path()), "X\nY\n\nB dep:a\nC\nA id:a\n");
 }
 
-// 43.41: what the cascade kept is used once
+// 43.41: what the cascade kept is used once; undoing its paste gives it back
+// and a redo takes it again.
 #[test]
 fn the_kept_links_are_used_by_one_paste() {
-    let dir = workdir("A id:a\nB dep:a\nC\n");
-    let board = Board::default();
-    let mut model = model_with(dir.path(), &board);
-    board.take(&press(&mut model, "dd"));
-    keys(&mut model, "jjpp");
-    assert_eq!(
-        todo_of(dir.path()),
-        "\nB dep:a\nC\nA id:a\n2026-09-29 A id:t001\n"
-    );
-    assert_eq!(model.message.as_deref(), Some("pasted 1 task"));
+    let linked = "\nB dep:a\nC\n2026-09-29 A id:a\n";
+    let copied = "\nB dep:a\nC\n2026-09-29 A id:a\n2026-09-29 A id:t001\n";
+    for (typed, file, said) in [
+        ("jjpp", copied, "pasted 1 task"),
+        ("Gpup", linked, "pasted 1 task (1 moved); relinked 2"),
+        ("Gpupup", linked, "pasted 1 task (1 moved); relinked 2"),
+        ("Gpupu<C-r>", linked, "redid: pasted 1 task (1 moved)"),
+        ("Gpu<C-r>p", copied, "pasted 1 task"),
+        // an add of the cut's text is not its paste coming back
+        (
+            "Go2026-09-29 A id:a<CR><Esc>uGp",
+            linked,
+            "pasted 1 task (1 moved); relinked 2",
+        ),
+    ] {
+        let dir = workdir("2026-09-29 A id:a\nB dep:a\nC\n");
+        let board = Board::default();
+        let mut model = model_with(dir.path(), &board);
+        board.take(&press(&mut model, "dd"));
+        keys(&mut model, typed);
+        assert_eq!(todo_of(dir.path()), file, "{typed}");
+        assert_eq!(model.message.as_deref(), Some(said), "{typed}");
+    }
 }
 
-// What the first paste took of the cascade is not given to the next.
+// What the first paste took of the cascade is not given to the next, also
+// when the first was undone and redone.
 #[test]
 fn a_second_paste_does_not_link_the_dependents_again() {
-    let dir = workdir("A id:a\nB dep:a\nC\n");
-    let board = Board::default();
-    let mut model = model_with(dir.path(), &board);
-    board.take(&press(&mut model, "dd"));
-    fs::write(dir.path().join("todo.txt"), "\nB\nC\n").unwrap();
-    reload(&mut model);
-    keys(&mut model, "Gp");
-    assert_eq!(todo_of(dir.path()), "\nB dep:a\nC\nA id:a\n");
-    fs::write(dir.path().join("todo.txt"), "\nB\nC\n").unwrap();
-    reload(&mut model);
-    keys(&mut model, "Gp");
-    assert_eq!(todo_of(dir.path()), "\nB\nC\nA id:a\n");
-    assert_eq!(model.message.as_deref(), Some("pasted 1 task (1 moved)"));
+    for first in ["Gp", "Gpu<C-r>"] {
+        let dir = workdir("A id:a\nB dep:a\nC\n");
+        let board = Board::default();
+        let mut model = model_with(dir.path(), &board);
+        board.take(&press(&mut model, "dd"));
+        fs::write(dir.path().join("todo.txt"), "\nB\nC\n").unwrap();
+        reload(&mut model);
+        keys(&mut model, first);
+        assert_eq!(todo_of(dir.path()), "\nB dep:a\nC\nA id:a\n", "{first}");
+        fs::write(dir.path().join("todo.txt"), "\nB\nC\n").unwrap();
+        reload(&mut model);
+        keys(&mut model, "Gp");
+        assert_eq!(todo_of(dir.path()), "\nB\nC\nA id:a\n", "{first}");
+        assert_eq!(
+            model.message.as_deref(),
+            Some("pasted 1 task (1 moved)"),
+            "{first}"
+        );
+    }
 }
 
 #[test]

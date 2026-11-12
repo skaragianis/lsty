@@ -2,7 +2,7 @@
 //! its dependents, and the keys that put lines on the clipboard and
 //! take them from it.
 
-use std::collections::{HashMap, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 use lsty_core::{
     errs::Source,
@@ -69,27 +69,23 @@ impl Yank {
     }
 
     /// Keeps with the blanked lines of `changes` that are in the yank
-    /// the dependents that the changes unlinked.
+    /// the dependents that the changes unlinked, and takes them from the
+    /// lines of the yank that the changes bring back with their
+    /// dependents linked.
     fn keep(&mut self, changes: &[Change]) {
         let unlinked = unlinked_by_id(changes);
-        if unlinked.is_empty() {
-            return;
-        }
-        let mut queued: HashMap<_, VecDeque<_>> = HashMap::new();
-        for change in changes {
-            if change.kind != ChangeKind::Blanked {
-                continue;
+        let relinked = relinked_ids(changes);
+        let back = |c: &&Change| {
+            c.kind == ChangeKind::Added
+                && id_of(&c.after).is_some_and(|id| relinked.contains(&id))
+        };
+        for change in changes.iter().filter(back) {
+            for line in self.lines.iter_mut().filter(|l| l.raw == change.after)
+            {
+                line.links.clear();
             }
-            let Some(links) =
-                id_of(&change.before).and_then(|id| unlinked.get(&id))
-            else {
-                continue;
-            };
-            queued
-                .entry(change.before.as_slice())
-                .or_default()
-                .push_back(links);
         }
+        let mut queued = queued(changes, &unlinked);
         for line in self.lines.iter_mut().filter(|l| l.links.is_empty()) {
             let next = queued
                 .get_mut(line.raw.as_slice())
@@ -120,25 +116,53 @@ impl Yank {
     }
 }
 
+/// The unlinked dependents of lines, by the text the lines had.
+type Queued<'a> = HashMap<&'a [u8], VecDeque<&'a Vec<Relink>>>;
+
+/// The dependents that `changes` unlinked from each blanked or removed line,
+/// by the text it had, in the order of the changes.
+fn queued<'a>(
+    changes: &'a [Change],
+    unlinked: &'a HashMap<Vec<u8>, Vec<Relink>>,
+) -> Queued<'a> {
+    let gone = |c: &&Change| {
+        matches!(c.kind, ChangeKind::Blanked | ChangeKind::Removed)
+    };
+    let mut queued = Queued::new();
+    for change in changes.iter().filter(gone) {
+        if let Some(links) =
+            id_of(&change.before).and_then(|id| unlinked.get(&id))
+        {
+            queued
+                .entry(change.before.as_slice())
+                .or_default()
+                .push_back(links);
+        }
+    }
+    queued
+}
+
 /// The id of the line `raw`, when it has one.
 fn id_of(raw: &[u8]) -> Option<Vec<u8>> {
     Line::parse(raw).tags().id.map(<[u8]>::to_vec)
+}
+
+/// The ids that `from` waits on and `to` does not.
+fn lost_deps(from: &[u8], to: &[u8]) -> Vec<Vec<u8>> {
+    let (from, to) = (Line::parse(from), Line::parse(to));
+    let (had, still) = (from.tags().deps, to.tags().deps);
+    had.into_iter()
+        .filter(|d| !still.contains(d))
+        .map(<[u8]>::to_vec)
+        .collect()
 }
 
 /// For each id, the lines that the changes took `dep:` of it from.
 fn unlinked_by_id(changes: &[Change]) -> HashMap<Vec<u8>, Vec<Relink>> {
     let mut by_id: HashMap<Vec<u8>, Vec<Relink>> = HashMap::new();
     for change in changes.iter().filter(|c| c.kind == ChangeKind::Changed) {
-        let before = Line::parse(&change.before);
-        let after = Line::parse(&change.after);
-        let still = after.tags().deps;
-        for id in before
-            .tags()
-            .deps
-            .into_iter()
-            .filter(|d| !still.contains(d))
-        {
-            by_id.entry(id.to_vec()).or_default().push(Relink {
+        for id in lost_deps(&change.before, &change.after) {
+            by_id.entry(id).or_default().push(Relink {
                 nr: change.nr_after,
                 lost: false,
                 before: change.before.clone(),
@@ -147,6 +171,15 @@ fn unlinked_by_id(changes: &[Change]) -> HashMap<Vec<u8>, Vec<Relink>> {
         }
     }
     by_id
+}
+
+/// The ids that the changes gave `dep:` of to a line.
+fn relinked_ids(changes: &[Change]) -> HashSet<Vec<u8>> {
+    changes
+        .iter()
+        .filter(|c| c.kind == ChangeKind::Changed)
+        .flat_map(|c| lost_deps(&c.after, &c.before))
+        .collect()
 }
 
 /// What a paste puts in.
