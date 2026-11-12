@@ -1,6 +1,8 @@
 use lsty_core::errs::{Code, Error, Field as ErrField, Nr, Ref, Source};
 
-use super::output::{Field, Json, error_fields, json_object, write_lines};
+use super::output::{
+    Field, Json, error_fields, json_object, write_lines, write_object,
+};
 
 const STRINGS: [(&str, &str); 16] = [
     ("plain", r#""plain""#),
@@ -177,5 +179,14 @@ fn a_failed_write_names_the_stream_in_the_system_s_words() {
     assert_eq!(
         err.message(),
         "write output: write /dev/stderr: broken pipe"
+    );
+    let fields = [Field::streamed("s")];
+    let stream = Box::new(|w: &mut dyn std::io::Write| w.write_all(b"[]"));
+    let mut out = Broken(std::io::ErrorKind::BrokenPipe);
+    let err = write_object(&mut out, "/dev/stdout", &fields, Some(stream))
+        .unwrap_err();
+    assert_eq!(
+        err.message(),
+        "write output: write /dev/stdout: broken pipe"
     );
 }

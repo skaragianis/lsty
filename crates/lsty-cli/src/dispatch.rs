@@ -17,7 +17,9 @@ use crate::{
     commands::{self, Bare, BareHandler, Call, Command, Handler},
     env::{Env, Stream, TuiArgs},
     help, identity, inline,
-    output::{self, ENVELOPE_VERSION, Field, Json, Output, json_object},
+    output::{
+        self, ENVELOPE_VERSION, Field, Json, Output, Streamer, write_object,
+    },
     paint::Painter,
     parse::{self, Opt, Parsed},
     settings,
@@ -151,7 +153,7 @@ impl<'a> Session<'a> {
             Handler::Watch(handler) => self.run_list(command, handler),
         };
         match result {
-            Ok(output) => self.emit(&output),
+            Ok(output) => self.emit(output),
             Err(e) => self.fail(&parse::with_generic_synopsis(e, command)),
         }
     }
@@ -437,9 +439,9 @@ impl<'a> Session<'a> {
         ]
     }
 
-    fn emit(&mut self, output: &Output) -> u8 {
+    fn emit(&mut self, output: Output) -> u8 {
         let written = if self.has(Opt::Json) {
-            self.write_envelope(&output.fields)
+            self.write_envelope(&output.fields, output.stream)
         } else {
             self.env
                 .out(&output.lines)
@@ -450,10 +452,13 @@ impl<'a> Session<'a> {
 
     fn fail(&mut self, err: &Error) -> u8 {
         let written = if self.has(Opt::Json) {
-            self.write_envelope(&[Field::new(
-                "error",
-                Json::object(&output::error_fields(err)),
-            )])
+            self.write_envelope(
+                &[Field::new(
+                    "error",
+                    Json::object(&output::error_fields(err)),
+                )],
+                None,
+            )
         } else {
             let lines = self.error_painter().error_lines(err);
             self.env.err(&lines)
@@ -461,10 +466,14 @@ impl<'a> Session<'a> {
         written.map_or(errs::EXIT_IO, |()| err.exit())
     }
 
-    fn write_envelope(&mut self, fields: &[Field]) -> Result<()> {
+    fn write_envelope(
+        &mut self,
+        fields: &[Field],
+        stream: Option<Streamer>,
+    ) -> Result<()> {
         let mut all = self.header();
         all.extend_from_slice(fields);
-        self.env.out(&[json_object(&all).into_bytes()])
+        write_object(self.env.stdout, "/dev/stdout", &all, stream)
     }
 }
 

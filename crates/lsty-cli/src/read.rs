@@ -1,5 +1,10 @@
 //! `ls`, `lsa`, `lsp`, `lsc` and `lsprj`: the commands that list.
 
+use std::{
+    io::{BufWriter, Write},
+    path::Path,
+};
+
 use lsty_core::{
     errs::{Result, Source},
     list::{Snapshot, SortField, Task},
@@ -13,6 +18,7 @@ use crate::{
     output::{Field, Json, Output},
     paint::Painter,
     parse::{Hide, Opt},
+    task_json::TaskJson,
 };
 
 /// The letters of a priority list such as `A-CF`.
@@ -151,35 +157,47 @@ fn list_tasks(
     let sel = select(call, &snap, &query, all, set);
     let messages = messages(&query, &snap, &sel);
     let raw = call.has(Opt::Raw);
-    Ok(Output::either(
-        call.json(),
-        || {
-            vec![
-                Field::new("tasks", call.task_json(&snap).objects(&sel.shown)),
+    if call.json() {
+        let ids: Vec<_> = sel.shown.iter().map(|t| t.task_id()).collect();
+        let home = call.home.map(Path::to_path_buf);
+        return Ok(Output {
+            fields: vec![
+                Field::streamed("tasks"),
                 Field::strs("messages", &messages),
-            ]
-        },
-        || {
-            let mut lines: Vec<Vec<u8>> = sel
-                .shown
-                .iter()
-                .map(|task| {
-                    if raw {
-                        snap.line(task).raw().to_vec()
-                    } else {
-                        list_line(&call.paint, &snap, task, call.parsed.hide)
-                    }
-                })
-                .collect();
-            if !raw {
-                let footer =
-                    format!("-- {} of {} shown", sel.shown.len(), sel.total);
-                lines.push(call.paint.paint(Slot::Muted, footer.as_bytes()));
-                lines.extend(text_lines(&call.paint, messages.iter()));
+            ],
+            stream: Some(Box::new(move |w| {
+                let json = TaskJson {
+                    snap: &snap,
+                    home: home.as_deref(),
+                };
+                let tasks = ids.iter().filter_map(|id| snap.task(*id));
+                let mut w = BufWriter::new(w);
+                json.write_array(&mut w, tasks)?;
+                w.flush()
+            })),
+            ..Output::default()
+        });
+    }
+    let mut lines: Vec<Vec<u8>> = sel
+        .shown
+        .iter()
+        .map(|task| {
+            if raw {
+                snap.line(task).raw().to_vec()
+            } else {
+                list_line(&call.paint, &snap, task, call.parsed.hide)
             }
-            lines
-        },
-    ))
+        })
+        .collect();
+    if !raw {
+        let footer = format!("-- {} of {} shown", sel.shown.len(), sel.total);
+        lines.push(call.paint.paint(Slot::Muted, footer.as_bytes()));
+        lines.extend(text_lines(&call.paint, messages.iter()));
+    }
+    Ok(Output {
+        lines,
+        ..Output::default()
+    })
 }
 
 /// The number of a task, a space and the line as it is stored, with

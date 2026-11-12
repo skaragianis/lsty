@@ -1,6 +1,10 @@
 //! The task object of the JSON output.
 
-use std::{os::unix::ffi::OsStrExt as _, path::Path};
+use std::{
+    io::{self, Write},
+    os::unix::ffi::OsStrExt as _,
+    path::Path,
+};
 
 use jiff::Timestamp;
 use lsty_core::{
@@ -26,13 +30,29 @@ pub(crate) struct TaskJson<'a> {
 impl TaskJson<'_> {
     /// The JSON objects of `tasks`, in order, written into one string.
     pub(crate) fn objects(&self, tasks: &[&Task]) -> Json {
-        let mut out = String::new();
-        jsonw::array(&mut out, |arr| {
-            for task in tasks {
-                arr.object(|obj| self.write(obj, task));
+        let mut out = Vec::new();
+        // Writing to memory cannot fail.
+        self.write_array(&mut out, tasks.iter().copied()).ok();
+        Json::raw(String::from_utf8(out).unwrap_or_default())
+    }
+
+    /// Writes the JSON array of `tasks` to `w`, one task at a time.
+    pub(crate) fn write_array<'t>(
+        &self,
+        w: &mut dyn Write,
+        tasks: impl Iterator<Item = &'t Task>,
+    ) -> io::Result<()> {
+        let mut text = String::new();
+        w.write_all(b"[")?;
+        for (i, task) in tasks.enumerate() {
+            text.clear();
+            if i > 0 {
+                text.push(',');
             }
-        });
-        Json::raw(out)
+            jsonw::object(&mut text, |obj| self.write(obj, task));
+            w.write_all(text.as_bytes())?;
+        }
+        w.write_all(b"]")
     }
 
     fn write(&self, obj: &mut Obj<'_>, task: &Task) {
