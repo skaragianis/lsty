@@ -1,8 +1,34 @@
 # Changelog
 
-Changes that a user of lsty can see, newest first.
+Changes a lsty user can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
+
+## 0.7.1 (2026-11-12)
+
+### Changed
+
+- **tui:** Answer a dim key from the list on screen, without reading the files first
+- **tui:** Show a warning, refusal or error first on the status line
+
+### Fixed
+
+- **tui:** Keep the cursor on its line after a write that reads a change made outside lsty
+- **tui:** Keep the row in sight when a key says to look again
+- **tui:** Keep a selection on its lines when it loses its anchor, or when a write that changes nothing reads a newer list
+- **tui:** Check every row a selection writes, and only the rows a count writes
+- **tui:** Say a prompt changed nothing when it did not, and leave what `.` repeats alone
+- **tui:** Keep the window of `t` through a dim key or a typed count
+- **tui:** Judge a key with a count, such as `3gx`, by its count
+- **tui:** Let a key other than a motion act on the sticky rows drawn
+- **core:** Say a move past an identical line moved nothing, and leave the file alone
+- **core:** Name the accepted forms of a refused value once, the same on the command line, in JSON and in the TUI
+- **core:** Warn when a completion key in keys.toml is hidden by an insert key
+- **core:** Let many writers at once wait their turn instead of saying the file is busy
+
+### Faster
+
+- **tui:** Show the list the core read at once after a look again
 
 ## 0.7.0 (2026-11-06)
 
