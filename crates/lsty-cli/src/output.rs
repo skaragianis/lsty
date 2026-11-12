@@ -102,6 +102,11 @@ impl Field {
         Self { key, value }
     }
 
+    /// A field whose value is written by the [`Streamer`] of the output.
+    pub(crate) fn streamed(key: &'static str) -> Self {
+        Self::new(key, Json::raw(STREAMED.to_owned()))
+    }
+
     /// A string field.
     pub(crate) fn string(key: &'static str, value: &str) -> Self {
         Self::new(key, Json::string(value))
@@ -149,13 +154,24 @@ impl Field {
     }
 }
 
+/// Writes a value of many parts straight to the output, for the value
+/// that [`Field::streamed`] stands for.
+pub(crate) type Streamer = Box<dyn FnOnce(&mut dyn Write) -> io::Result<()>>;
+
+/// The text that stands in the envelope for the value of a streamed field.
+/// No JSON text holds it: a NUL is escaped in a string.
+const STREAMED: &str = "\0";
+
 /// What a handler returns: the fields that follow `today` in the JSON
 /// envelope, and the lines printed without `--json`. Lines are bytes, so
 /// that text which is not UTF-8 prints as it is.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Default)]
 pub(crate) struct Output {
     /// The fields after `today`.
     pub fields: Vec<Field>,
+    /// Writes the value of the field made by [`Field::streamed`], if
+    /// there is one.
+    pub stream: Option<Streamer>,
     /// The lines printed without `--json`, without their newlines.
     pub lines: Vec<Vec<u8>>,
     /// Lines for standard error, printed after `lines`.
@@ -306,6 +322,27 @@ pub(crate) fn write_lines(
     let mut data = lines.join(&b'\n');
     data.push(b'\n');
     w.write_all(&data).map_err(|e| write_error(device, &e))
+}
+
+/// Writes the fields as one JSON object and a newline. The value of the
+/// streamed field, if any, is written by `stream` as it is produced.
+pub(crate) fn write_object(
+    w: &mut dyn Write,
+    device: &str,
+    fields: &[Field],
+    stream: Option<Streamer>,
+) -> errs::Result<()> {
+    let text = json_object(fields);
+    let (head, tail) = text.split_once(STREAMED).unwrap_or((&text, ""));
+    (|| {
+        w.write_all(head.as_bytes())?;
+        if let Some(stream) = stream {
+            stream(w)?;
+        }
+        w.write_all(tail.as_bytes())?;
+        w.write_all(b"\n")
+    })()
+    .map_err(|e| write_error(device, &e))
 }
 
 /// `write output: write /dev/stdout: broken pipe`.
