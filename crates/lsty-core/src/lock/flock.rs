@@ -6,7 +6,8 @@ use rustix::io::Errno;
 
 use super::Mode;
 
-/// The system call that takes a lock without waiting.
+/// The first try at a lock, without waiting. Tests replace it to refuse or
+/// record; a lock that is busy is then waited for in the system's queue.
 pub trait Flock {
     /// Takes the lock on `file`, or fails with
     /// [`io::ErrorKind::WouldBlock`] when another holder has it.

@@ -1,23 +1,42 @@
-//! Polling for a lock until it is free, the deadline passes or the wait
+//! Waiting for a lock until it is free, the deadline passes or the wait
 //! is cancelled.
 
 use std::{
     fs::File,
     io,
     path::Path,
-    sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError},
+    sync::{
+        Arc,
+        atomic::{AtomicBool, AtomicUsize, Ordering},
+        mpsc::{self, Receiver, RecvTimeoutError},
+    },
+    thread,
     time::{Duration, Instant},
 };
 
 use super::{Flock, Mode};
 use crate::errs;
 
+/// How often a wait looks at its deadline and its token.
 const PAUSE: Duration = Duration::from_millis(2);
 
+/// How many helper threads one process has at a time. A wait that gives up
+/// leaves its helper behind until the holder lets go, so a holder that
+/// hangs cannot make them pile up: past this many, a wait keeps trying
+/// every [`PAUSE`] instead.
+pub(super) const MOST_HELPERS: usize = 8;
+
+/// What a helper sends when it has the lock, or has failed.
+type Answer = Receiver<io::Result<()>>;
+
+/// The helper threads alive in this process; a wait may count its own
+/// instead (tests do).
+pub(super) static HELPERS: AtomicUsize = AtomicUsize::new(0);
+
 /// Stops a wait for a lock. Clones share one state: cancel any of them
-/// and every wait that holds one ends at once.
+/// and every wait that holds one ends.
 #[derive(Clone, Debug, Default)]
-pub struct Cancel(Arc<(Mutex<bool>, Condvar)>);
+pub struct Cancel(Arc<AtomicBool>);
 
 impl Cancel {
     /// A token that is not cancelled.
@@ -27,28 +46,12 @@ impl Cancel {
 
     /// Cancels every wait that holds this token.
     pub fn cancel(&self) {
-        *self.state() = true;
-        self.0.1.notify_all();
+        self.0.store(true, Ordering::SeqCst);
     }
 
     /// Whether [`cancel`](Self::cancel) was called.
     pub fn is_cancelled(&self) -> bool {
-        *self.state()
-    }
-
-    /// Sleeps for `d` or until cancelled; true when cancelled.
-    fn sleep(&self, d: Duration) -> bool {
-        let guard = self.state();
-        let (guard, _) = self
-            .0
-            .1
-            .wait_timeout_while(guard, d, |cancelled| !*cancelled)
-            .unwrap_or_else(PoisonError::into_inner);
-        *guard
-    }
-
-    fn state(&self) -> MutexGuard<'_, bool> {
-        self.0.0.lock().unwrap_or_else(PoisonError::into_inner)
+        self.0.load(Ordering::SeqCst)
     }
 }
 
@@ -84,40 +87,94 @@ pub(super) struct Waiter<'a> {
     cancel: &'a Cancel,
     /// None when the timeout is too long to be an instant: wait forever.
     deadline: Option<Instant>,
+    /// The count of helper threads this wait adds to.
+    helpers: &'static AtomicUsize,
 }
 
 impl<'a> Waiter<'a> {
-    pub(super) fn new(cancel: &'a Cancel, deadline: Option<Instant>) -> Self {
-        Self { cancel, deadline }
+    pub(super) fn new(
+        cancel: &'a Cancel,
+        deadline: Option<Instant>,
+        helpers: &'static AtomicUsize,
+    ) -> Self {
+        Self {
+            cancel,
+            deadline,
+            helpers,
+        }
     }
 
-    /// Takes one lock, trying again every 2 ms. The pause is short so that
-    /// a waiter is rarely asleep when the holder lets go: a longer one lets
-    /// a writer that arrives in between take the lock again and again.
+    /// Takes one lock. A lock that is busy is waited for in the system's
+    /// queue, on a thread of its own, so that a waiter is not overtaken
+    /// again and again by writers that keep trying. The descriptor is
+    /// shared with the thread, so a wait that gives up leaves the thread
+    /// to take the lock when it is free and let go of it by closing.
     pub(super) fn lock<F: Flock + ?Sized>(
         &self,
         flock: &F,
         file: &File,
         mode: Mode,
     ) -> Result<(), Failure> {
+        if self.tried(flock, file, mode)? {
+            return Ok(());
+        }
+        self.nap()?;
+        match helper(self.helpers, file, mode) {
+            Some(done) => self.wait_for(&done),
+            None => self.poll(flock, file, mode),
+        }
+    }
+
+    /// One try at the lock: whether it was taken.
+    fn tried<F: Flock + ?Sized>(
+        &self,
+        flock: &F,
+        file: &File,
+        mode: Mode,
+    ) -> Result<bool, Failure> {
+        if self.cancel.is_cancelled() {
+            return Err(Failure::Cancelled);
+        }
+        match flock.try_lock(file, mode) {
+            Ok(()) => Ok(true),
+            Err(e) if e.kind() == io::ErrorKind::WouldBlock => Ok(false),
+            Err(e) => Err(Failure::Io(e)),
+        }
+    }
+
+    /// Tries again every [`PAUSE`], for when no helper can be had.
+    fn poll<F: Flock + ?Sized>(
+        &self,
+        flock: &F,
+        file: &File,
+        mode: Mode,
+    ) -> Result<(), Failure> {
         loop {
+            thread::sleep(self.nap()?);
+            if self.tried(flock, file, mode)? {
+                return Ok(());
+            }
+        }
+    }
+
+    /// Waits for the helper to take the lock.
+    fn wait_for(&self, done: &Answer) -> Result<(), Failure> {
+        loop {
+            match done.recv_timeout(self.nap()?) {
+                Ok(taken) => return taken.map_err(Failure::Io),
+                Err(RecvTimeoutError::Timeout) => {}
+                Err(RecvTimeoutError::Disconnected) => {
+                    return Err(Failure::Io(io::Error::other("lock thread")));
+                }
+            }
             if self.cancel.is_cancelled() {
-                return Err(Failure::Cancelled);
-            }
-            match flock.try_lock(file, mode) {
-                Ok(()) => return Ok(()),
-                Err(e) if e.kind() == io::ErrorKind::WouldBlock => {}
-                Err(e) => return Err(Failure::Io(e)),
-            }
-            let nap = self.nap()?;
-            if self.cancel.sleep(nap) {
                 return Err(Failure::Cancelled);
             }
         }
     }
 
-    /// How long to sleep before the next attempt, or `Busy` when the
-    /// deadline has passed.
+    /// How long to wait before the next look, or `Busy` when the deadline
+    /// has passed.
     fn nap(&self) -> Result<Duration, Failure> {
         let Some(at) = self.deadline else {
             return Ok(PAUSE);
@@ -130,52 +187,41 @@ impl<'a> Waiter<'a> {
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use std::cell::RefCell;
+/// Starts a helper that waits for the lock on `file`, unless the process
+/// has [`MOST_HELPERS`] already or cannot start one (the wait then polls).
+/// The answer comes on the channel.
+fn helper(
+    helpers: &'static AtomicUsize,
+    file: &File,
+    mode: Mode,
+) -> Option<Answer> {
+    let queued = file.try_clone().ok()?;
+    let (taken, answer) = mpsc::channel();
+    if helpers.fetch_add(1, Ordering::SeqCst) < MOST_HELPERS
+        && thread::Builder::new()
+            .spawn(move || {
+                let result = block(&queued, mode);
+                helpers.fetch_sub(1, Ordering::SeqCst);
+                drop(taken.send(result));
+            })
+            .is_ok()
+    {
+        return Some(answer);
+    }
+    helpers.fetch_sub(1, Ordering::SeqCst);
+    None
+}
 
-    use super::*;
-
-    /// A lock that is busy for six tries, free on the seventh, and notes
-    /// when it was tried.
-    #[derive(Default)]
-    struct Busy(RefCell<Vec<Instant>>);
-
-    impl Flock for Busy {
-        fn try_lock(&self, _: &File, _: Mode) -> io::Result<()> {
-            let mut tries = self.0.borrow_mut();
-            tries.push(Instant::now());
-            if tries.len() == 7 {
-                return Ok(());
-            }
-            Err(io::ErrorKind::WouldBlock.into())
+/// Waits for the lock on `file` as long as it takes.
+fn block(file: &File, mode: Mode) -> io::Result<()> {
+    loop {
+        let locked = match mode {
+            Mode::Shared => file.lock_shared(),
+            Mode::Exclusive => file.lock(),
+        };
+        match locked {
+            Err(e) if e.kind() == io::ErrorKind::Interrupted => {}
+            done => return done,
         }
-    }
-
-    #[test]
-    fn a_sleep_lasts_until_the_time_or_the_cancel() {
-        let token = Cancel::new();
-        let start = Instant::now();
-        assert!(!token.sleep(Duration::from_millis(40)));
-        assert!(start.elapsed() >= Duration::from_millis(40));
-        token.cancel();
-        let start = Instant::now();
-        assert!(token.sleep(Duration::from_secs(5)));
-        assert!(start.elapsed() < Duration::from_secs(1));
-    }
-
-    #[test]
-    fn the_tries_are_a_pause_apart() {
-        let file = tempfile::tempfile().expect("a file");
-        let token = Cancel::new();
-        let waiter = Waiter::new(&token, None);
-        let busy = Busy::default();
-        let result = waiter.lock(&busy, &file, Mode::Exclusive);
-        assert!(result.is_ok());
-        let tries = busy.0.borrow();
-        let gaps: Vec<Duration> =
-            tries.windows(2).map(|w| w[1] - w[0]).collect();
-        assert_eq!(gaps.len(), 6);
-        assert!(gaps.iter().all(|g| *g >= PAUSE), "{gaps:?}");
     }
 }
