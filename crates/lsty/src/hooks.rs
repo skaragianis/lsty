@@ -45,7 +45,7 @@ fn command_on(program: &OsStr, path: &OsStr) -> Result<Command, String> {
 pub(crate) fn run_editor(words: &[OsString]) -> HookResult {
     let name = words
         .first()
-        .map_or_else(String::new, |program| lossy(program.as_bytes()));
+        .map_or_default(|program| lossy(program.as_bytes()));
     edit_on_terminal(words).map_err(|why| format!("editor {name}: {why}"))
 }
 

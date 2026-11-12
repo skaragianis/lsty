@@ -83,11 +83,7 @@ impl Dir {
     }
 
     pub(super) fn dir(&self) -> PathBuf {
-        self.found
-            .todo
-            .parent()
-            .map(PathBuf::from)
-            .unwrap_or_default()
+        self.found.todo.parent().map_or_default(PathBuf::from)
     }
 }
 

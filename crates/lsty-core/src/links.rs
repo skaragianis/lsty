@@ -131,7 +131,7 @@ fn read_head(path: &Path) -> io::Result<Vec<u8>> {
 /// The program and arguments that edit `path`: `EDITOR` split at ASCII
 /// white space, bytes untouched, or `vi` when it is unset or empty.
 pub fn editor_command(editor: Option<&OsStr>, path: &Path) -> Vec<OsString> {
-    let mut words = editor.map(split_words).unwrap_or_default();
+    let mut words = editor.map_or_default(split_words);
     if words.is_empty() {
         words.push("vi".into());
     }

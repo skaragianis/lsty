@@ -387,9 +387,8 @@ fn page_lines(env: &mut Env<'_>, lines: &[String]) -> Result<()> {
 }
 
 fn run_pager(env: &Env<'_>, lines: &[String]) -> bool {
-    let mut words = (env.vars)("PAGER")
-        .map(|v| links::split_words(&v))
-        .unwrap_or_default();
+    let mut words =
+        (env.vars)("PAGER").map_or_default(|v| links::split_words(&v));
     if words.is_empty() {
         words.push("less".into());
     }

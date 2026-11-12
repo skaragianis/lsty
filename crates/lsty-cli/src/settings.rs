@@ -65,8 +65,7 @@ pub(crate) fn apply(
             "1" => Some((true, set)),
             "0" => Some((false, set)),
             other => {
-                let line =
-                    set.line.map_or(String::new(), |n| format!("line {n}: "));
+                let line = set.line.map_or_default(|n| format!("line {n}: "));
                 let message =
                     format!("{line}{name}: expected 0 or 1, not \"{other}\"");
                 warnings.push(Warning::new(&set.source, message));

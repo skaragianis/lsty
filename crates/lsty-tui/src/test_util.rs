@@ -409,10 +409,9 @@ pub(crate) fn cursor_text(model: &Model) -> String {
         .rows
         .get(model.cursor)
         .and_then(|r| model.snap.task(r.id));
-    task.map(|i| {
+    task.map_or_default(|i| {
         String::from_utf8_lossy(model.snap.line(i).raw()).into_owned()
     })
-    .unwrap_or_default()
 }
 
 /// The message timer among `cmds`.

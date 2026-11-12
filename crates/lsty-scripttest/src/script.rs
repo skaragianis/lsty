@@ -338,8 +338,7 @@ impl<'a> Script<'a> {
         self.env
             .iter()
             .find(|(k, _)| k == key)
-            .map(|(_, v)| v.clone())
-            .unwrap_or_default()
+            .map_or_default(|(_, v)| v.clone())
     }
 
     fn setenv(&mut self, key: &str, value: &str) {

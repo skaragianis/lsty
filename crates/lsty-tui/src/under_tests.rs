@@ -135,11 +135,7 @@ fn a_cancelled_draft_comes_back_only_to_its_own_line() {
 }
 
 fn field_text(model: &Model) -> String {
-    model
-        .edit
-        .as_ref()
-        .map(|d| d.field.text())
-        .unwrap_or_default()
+    model.edit.as_ref().map_or_default(|d| d.field.text())
 }
 
 /// Ids that come in the order given, round and round.

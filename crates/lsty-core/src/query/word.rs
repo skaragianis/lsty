@@ -3,7 +3,7 @@ use crate::case::{lower, simple_lower};
 
 /// Characters that are upper case only by the `Other_Uppercase` property:
 /// letters in circles and roman numerals. They do not make a word exact.
-/// The table is exact for Unicode 17; a test fails when the standard
+/// The table is exact for Unicode 18; a test fails when the standard
 /// library moves to another version, and then the table is derived again.
 const OTHER_UPPERCASE: [(char, char); 5] = [
     ('\u{2160}', '\u{216F}'),
@@ -118,7 +118,7 @@ mod tests {
     /// derived for this version.
     #[test]
     fn the_tables_are_for_the_unicode_version_of_the_standard_library() {
-        assert_eq!(char::UNICODE_VERSION, (17, 0, 0));
+        assert_eq!(char::UNICODE_VERSION, (18, 0, 0));
     }
 
     #[test]

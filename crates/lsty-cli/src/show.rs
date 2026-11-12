@@ -127,8 +127,7 @@ fn claim_fact(
         State::Done => task.ended_text(clock).map(|end| {
             let began = task
                 .started_text(clock, false)
-                .map(|t| format!(", started {t}"))
-                .unwrap_or_default();
+                .map_or_default(|t| format!(", started {t}"));
             format!("{began}, ended {end}")
         }),
         State::Todo => None,

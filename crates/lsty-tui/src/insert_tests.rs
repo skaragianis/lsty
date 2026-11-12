@@ -241,8 +241,7 @@ fn a_failed_write_of_a_new_task_does_not_chain() {
 fn a_new_task_differing_from_its_prefill_by_a_no_break_space_is_kept() {
     let (_dir, mut model) = workdir_model("A +home\nB\n", keeping());
     keys(&mut model, "o");
-    let text = |m: &Model| m.edit.as_ref().map(|d| d.field.text());
-    let shown = text(&model).unwrap_or_default();
+    let shown = model.edit.as_ref().map_or_default(|d| d.field.text());
     assert!(shown.contains("+home"), "{shown:?}");
     keys(&mut model, "\u{a0}<Esc>");
     assert!(model.cursor_at().is_some(), "the draft was thrown away");
@@ -254,11 +253,7 @@ fn opened(config: Config, todo: &str, keys_: &str) -> String {
     for part in keys_.split('|') {
         settled(&mut model, part);
     }
-    model
-        .edit
-        .as_ref()
-        .map(|d| d.field.text())
-        .unwrap_or_default()
+    model.edit.as_ref().map_or_default(|d| d.field.text())
 }
 
 #[test]

@@ -403,7 +403,7 @@ impl Model {
                 .shown
                 .get(entry)
                 .and_then(|&n| picker.names.get(n))
-                .map_or_else(String::new, |n| format!(" {n}"));
+                .map_or_default(|n| format!(" {n}"));
             let mut spans =
                 fit(vec![Span::new(name, Some(Slot::Text))], inner);
             pad(&mut spans, inner, None);

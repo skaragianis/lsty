@@ -139,7 +139,7 @@ pub(super) fn apply_tag(
 
 /// Writes the value of `tag` over token `at`, unless it is the same.
 fn set_first(line: &Line, at: usize, tag: &Tag) -> Applied {
-    let old = line.token(at).map(|t| t.text.to_vec()).unwrap_or_default();
+    let old = line.token(at).map_or_default(|t| t.text.to_vec());
     if old == tag.text {
         return Applied::Kept;
     }

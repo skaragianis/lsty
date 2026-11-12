@@ -32,11 +32,7 @@ fn run_line(model: &mut Model, text: &str) {
 }
 
 fn text_of(model: &Model) -> String {
-    model
-        .line
-        .as_ref()
-        .map(|l| l.field.text())
-        .unwrap_or_default()
+    model.line.as_ref().map_or_default(|l| l.field.text())
 }
 
 fn history_file(dir: &Path) -> String {
@@ -219,8 +215,7 @@ fn the_state_folder_is_created_with_mode_0700() {
     assert!(!state_of(dir.path()).exists());
     run_line(&mut model, "sort manual");
     let mode = fs::metadata(state_of(dir.path()))
-        .map(|m| m.permissions().mode() & 0o777)
-        .unwrap_or_default();
+        .map_or_default(|m| m.permissions().mode() & 0o777);
     assert_eq!(mode, 0o700);
 }
 

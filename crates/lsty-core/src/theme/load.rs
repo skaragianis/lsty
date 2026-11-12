@@ -178,14 +178,12 @@ struct Reader<'a> {
 
 impl<'a> Reader<'a> {
     fn new(source: &'a str, top: &'a Table<'a>) -> Self {
-        let palette = table_in(top, "palette")
-            .map(string_entries)
-            .unwrap_or_default();
-        let slots = table_in(top, "slots").map(in_file_order);
+        let palette = table_in(top, "palette").map_or_default(string_entries);
+        let slots = table_in(top, "slots").map_or_default(in_file_order);
         Self {
             source,
             palette,
-            slots: slots.unwrap_or_default(),
+            slots,
         }
     }
 

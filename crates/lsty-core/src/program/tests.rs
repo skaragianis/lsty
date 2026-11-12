@@ -260,7 +260,7 @@ fn a_file_runs_when_any_of_its_execute_bits_is_set() {
 fn endings_read_as_exit_status_or_signal() {
     let ended = |script: &str| {
         let status = Command::new("sh").args(["-c", script]).status();
-        status.map(exit_text).unwrap_or_default()
+        status.map_or_default(exit_text)
     };
     assert_eq!(ended("exit 3"), "exit status 3");
     assert_eq!(ended("kill -9 $$"), "signal: killed");

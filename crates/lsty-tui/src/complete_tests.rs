@@ -39,8 +39,7 @@ fn listed() -> tempfile::TempDir {
 fn labels(model: &Model) -> Vec<String> {
     model
         .popup()
-        .map(|p| p.cands.iter().map(|c| c.label.clone()).collect())
-        .unwrap_or_default()
+        .map_or_default(|p| p.cands.iter().map(|c| c.label.clone()).collect())
 }
 
 /// The selected candidate of the popup; none when it is closed.
@@ -49,11 +48,7 @@ fn selected(model: &Model) -> Option<usize> {
 }
 
 fn text_of(model: &Model) -> String {
-    model
-        .edit
-        .as_ref()
-        .map(|d| d.field.text())
-        .unwrap_or_default()
+    model.edit.as_ref().map_or_default(|d| d.field.text())
 }
 
 /// The model with the field open on the last task and `typed` in it.

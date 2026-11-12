@@ -376,7 +376,7 @@ fn a_press_that_brings_focus_back_is_drawn_without_the_old_box_lit() {
         &mut stderr,
     );
     assert_eq!(code, 0);
-    let frames = frames.lock().map(|f| f.clone()).unwrap_or_default();
+    let frames = frames.lock().map_or_default(|f| f.clone());
     assert_eq!(
         frames,
         [

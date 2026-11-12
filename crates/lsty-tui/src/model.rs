@@ -402,8 +402,7 @@ impl Model {
             .found()
             .todo
             .file_name()
-            .map(errs::lossy_path)
-            .unwrap_or_default()
+            .map_or_default(errs::lossy_path)
     }
 
     fn press(&mut self, stroke: Stroke) -> Vec<Cmd> {

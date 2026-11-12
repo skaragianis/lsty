@@ -110,7 +110,7 @@ impl Tx {
         old_id: Option<&[u8]>,
         held: &Held,
     ) -> Result<()> {
-        let others = held.get(id).map(Vec::as_slice).unwrap_or_default();
+        let others = held.get(id).map_or_default(Vec::as_slice);
         let Some(&holder) = others.iter().find(|&&h| h != at) else {
             return Ok(());
         };

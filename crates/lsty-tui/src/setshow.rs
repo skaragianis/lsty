@@ -52,10 +52,9 @@ pub(crate) fn value_text(cfg: &Config, name: &str) -> String {
         "mouse" => return flag(name, cfg.mouse),
         "include_creation" => return flag(name, cfg.include_creation),
         "priority_range" => cfg.priority_range.to_string(),
-        "default_priority" => cfg
-            .default_priority
-            .map(|p| p.to_string())
-            .unwrap_or_default(),
+        "default_priority" => {
+            cfg.default_priority.map_or_default(|p| p.to_string())
+        }
         "upcoming_days" => cfg.upcoming_days.to_string(),
         "line_numbers" => cfg.line_numbers.as_str().to_owned(),
         "detail_position" => cfg.detail_position.as_str().to_owned(),

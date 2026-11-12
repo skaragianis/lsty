@@ -239,9 +239,7 @@ pub(super) fn explained(ctx: &Ctx<'_>) -> bool {
 
 /// The lines of a file with their line ends; the last may have none.
 fn split(bytes: Option<&Vec<u8>>) -> Vec<&[u8]> {
-    bytes
-        .map(|b| b.split_inclusive(|c| *c == b'\n').collect())
-        .unwrap_or_default()
+    bytes.map_or_default(|b| b.split_inclusive(|c| *c == b'\n').collect())
 }
 
 /// The line without its line end.

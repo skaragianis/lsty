@@ -20,11 +20,7 @@ fn model_of(dir: &Path) -> Model {
 }
 
 fn text_of(model: &Model) -> String {
-    model
-        .line
-        .as_ref()
-        .map(|l| l.field.text())
-        .unwrap_or_default()
+    model.line.as_ref().map_or_default(|l| l.field.text())
 }
 
 fn pool(words: &[&str]) -> Vec<String> {
@@ -209,7 +205,7 @@ fn offered(tabs: usize, w: usize) -> Vec<(String, Option<Slot>)> {
     let mut model = model_of(dir.path());
     keys(&mut model, &format!("gt+{}", "<Tab>".repeat(tabs)));
     let comp = model.line.as_ref().and_then(|l| l.comp.as_ref());
-    let spans = comp.map(|c| c.spans(w)).unwrap_or_default();
+    let spans = comp.map_or_default(|c| c.spans(w));
     spans
         .into_iter()
         .map(|s| (s.text.into_owned(), s.slot))
