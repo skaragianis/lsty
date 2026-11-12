@@ -59,10 +59,8 @@ impl Model {
         let before: Vec<_> = (self.panels.iter_mut().zip(rows))
             .map(|(p, rows)| (p.seen(rows), std::mem::take(&mut p.entries)))
             .collect();
-        let projects = self.snap.rolled_counts(Kind::Project);
-        let contexts = self.snap.rolled_counts(Kind::Context);
-        self.panels[PROJECTS].set_nodes(projects);
-        self.panels[CONTEXTS].set_nodes(contexts);
+        self.panels[PROJECTS].set_nodes(&self.snap, Kind::Project);
+        self.panels[CONTEXTS].set_nodes(&self.snap, Kind::Context);
         let entries = self.filter_entries();
         self.panels[FILTERS].set_entries(entries);
         let rows = self.panel_rows();

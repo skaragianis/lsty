@@ -5,9 +5,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use lsty_core::{
     config::Hidden,
     errs::lossy,
-    list::Count,
+    list::{Count, Snapshot},
     theme::Slot,
-    todotxt::{name_levels, name_parent},
+    todotxt::{self, name_levels, name_parent},
 };
 
 use crate::{
@@ -15,6 +15,9 @@ use crate::{
     motion::Step,
     text::{RULE, Span, fit, pad, scrolled, width, width_of, window},
 };
+
+/// The count of each project or context by name.
+type Counts = BTreeMap<Vec<u8>, Count>;
 
 /// The columns of the marker that stands before a label.
 const MARKER: usize = 1;
@@ -186,7 +189,7 @@ type Kids<'a> = BTreeMap<&'a [u8], Vec<&'a [u8]>>;
 struct Tree<'a> {
     sigil: &'static str,
     active: &'a [Term],
-    nodes: &'a BTreeMap<Vec<u8>, Count>,
+    nodes: &'a Counts,
     folded: &'a BTreeSet<Vec<u8>>,
     kids: Kids<'a>,
 }
@@ -195,7 +198,7 @@ impl<'a> Tree<'a> {
     fn new(
         sigil: &'static str,
         active: &'a [Term],
-        nodes: &'a BTreeMap<Vec<u8>, Count>,
+        nodes: &'a Counts,
         folded: &'a BTreeSet<Vec<u8>>,
     ) -> Self {
         let mut kids = Kids::new();
@@ -276,7 +279,10 @@ impl<'a> Tree<'a> {
 pub(crate) struct Panel {
     /// What stands before the projects or contexts of the top level.
     pub(crate) sigil: &'static str,
-    nodes: BTreeMap<Vec<u8>, Count>,
+    nodes: Counts,
+    /// The counts the tasks give, with the serial of the reading they
+    /// were made on.
+    counted: Option<(u32, Counts)>,
     folded: BTreeSet<Vec<u8>>,
     /// The projects and contexts that filter the list, in the order they
     /// were chosen.
@@ -302,6 +308,7 @@ impl Panel {
         Self {
             sigil: "",
             nodes: BTreeMap::new(),
+            counted: None,
             folded: BTreeSet::new(),
             active: Vec::new(),
             entries: Vec::new(),
@@ -311,10 +318,17 @@ impl Panel {
         }
     }
 
-    /// Replaces the projects or contexts of the tree and lays it out again.
+    /// Replaces the projects or contexts of the tree with those of `snap`
+    /// and lays it out again. The counts are made once for each reading.
     /// The active ones stay listed, with those above them, when no
     /// task has them.
-    pub(crate) fn set_nodes(&mut self, mut nodes: BTreeMap<Vec<u8>, Count>) {
+    pub(crate) fn set_nodes(&mut self, snap: &Snapshot, kind: todotxt::Kind) {
+        let serial = snap.serial();
+        self.counted.take_if(|c| c.0 != serial);
+        let (_, counts) = self
+            .counted
+            .get_or_insert_with(|| (serial, snap.rolled_counts(kind)));
+        let mut nodes = counts.clone();
         for name in self.active.iter().flat_map(|a| name_levels(&a.name)) {
             nodes.entry(name.to_vec()).or_default();
         }
