@@ -1,6 +1,8 @@
 //! What the word under the text cursor of the `:` line can be completed
 //! to.
 
+use std::borrow::Cow;
+
 use lsty_cli::{inline_names, inline_options};
 use lsty_core::{case::lower, list::SortField, theme};
 
@@ -20,25 +22,25 @@ impl Model {
         &mut self,
         word: &str,
         before: &str,
-    ) -> Vec<String> {
+    ) -> Cow<'_, [String]> {
         let Some(given) = split_words(before) else {
-            return Vec::new();
+            return Cow::default();
         };
         let Some(first) = given.first() else {
-            return command_names();
+            return command_names().into();
         };
         let Ok(command) = full_name(first) else {
-            return Vec::new();
+            return Cow::default();
         };
         let command = lower(&command);
         if word.starts_with("--") {
-            inline_options(&command)
+            inline_options(&command).into()
         } else if word.starts_with(['+', '@']) {
-            self.name_pool(word)
+            self.name_pool(word).into()
         } else if word.starts_with("file:") {
-            self.file_pool(word)
+            self.file_pool(word).into()
         } else {
-            self.argument_pool(&command, given.len())
+            self.argument_pool(&command, given.len()).into()
         }
     }
 
