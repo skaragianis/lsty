@@ -25,6 +25,63 @@ pub(crate) fn landed_at(landing: &Landing, at: Place) -> Option<Place> {
     Some((at.0, Nr::from_index(index)?))
 }
 
+/// Where the lines of the reading `old` went in the one after it, whoever
+/// moved them: a write of this session, which the remap follows, or an
+/// outside edit, which the landing compares.
+pub(crate) struct Moves<'a> {
+    pub(crate) remap: Remap,
+    pub(crate) landing: Option<Landing>,
+    pub(crate) old: &'a Snapshot,
+}
+
+impl<'a> Moves<'a> {
+    /// The moves from `old` to `new`, which a write of `record` made, or
+    /// an outside edit when there is none. `follow` are the lines to track
+    /// exactly (see [`Remap::new`]).
+    pub(crate) fn new(
+        old: &'a Snapshot,
+        new: &Snapshot,
+        record: Option<&UndoRecord>,
+        follow: &[Place],
+    ) -> Self {
+        Self {
+            remap: Remap::new(old, new, record, follow),
+            landing: record.is_none().then(|| Landing::of(old, new)),
+            old,
+        }
+    }
+
+    /// Whether an outside edit made the new reading.
+    pub(crate) const fn outside(&self) -> bool {
+        self.landing.is_some()
+    }
+
+    /// Where the line at `at` is now when it is the same line: by the
+    /// landing after an outside edit, else as the remap tracks it.
+    pub(crate) fn kept(&self, at: Place) -> Option<Place> {
+        match &self.landing {
+            Some(landing) => landed_at(landing, at),
+            None => self.remap.track(at),
+        }
+    }
+
+    /// Whether an outside edit changed the line at `at`.
+    pub(crate) fn changed_outside(&self, at: Place) -> bool {
+        self.landing
+            .as_ref()
+            .is_some_and(|landing| landed_at(landing, at).is_none())
+    }
+
+    /// Where an aim at the line at `at` goes: the line when it is the
+    /// same, after an outside edit; else the place the remap gives it.
+    pub(crate) fn aim(&self, at: Place) -> Option<Place> {
+        match &self.landing {
+            Some(landing) => landed_at(landing, at),
+            None => Some(self.remap.place(at)),
+        }
+    }
+}
+
 /// A line a write was about.
 #[derive(Clone, Copy, Debug)]
 pub(crate) struct Touched {
