@@ -267,12 +267,9 @@ impl Model {
     /// Shows an error above the prompt, which stays open with its text
     /// unless the list it was aimed at changed.
     fn fail_line(&mut self, e: &Error) {
-        self.fail(e);
+        self.fail_hinted(e);
         if e.message() == ops::LIST_CHANGED {
             self.close_input();
-        }
-        if e.hint().is_some() {
-            self.message = Some(messages::hinted(e));
         }
     }
 

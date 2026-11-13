@@ -470,7 +470,7 @@ impl Model {
                     Ok(false) => e,
                     Err(other) => other,
                 };
-                self.fail_edit(&e);
+                self.fail_hinted(&e);
                 let dep = e.text(ops::DEAD_DEP).is_some();
                 let said = if dep {
                     messages::DEP_REFUSED
@@ -489,18 +489,6 @@ impl Model {
                 self.cursor_to(first);
                 first
             }
-        }
-    }
-
-    /// Shows why a draft was refused, with what to do about it.
-    fn fail_edit(&mut self, e: &errs::Error) {
-        self.fail(e);
-        let Some(hint) = e.hint() else {
-            return;
-        };
-        if let Some(message) = &mut self.message {
-            message.push_str(" — ");
-            message.push_str(hint);
         }
     }
 
