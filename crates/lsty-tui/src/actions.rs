@@ -348,6 +348,15 @@ impl Model {
         };
         self.alert(text);
     }
+
+    /// `fail`, followed by what to do about it when the error says.
+    pub(crate) fn fail_hinted(&mut self, e: &errs::Error) {
+        self.fail(e);
+        if let (Some(message), Some(hint)) = (&mut self.message, e.hint()) {
+            message.push_str(" — ");
+            message.push_str(hint);
+        }
+    }
 }
 
 fn join(said: &[String]) -> Option<String> {
