@@ -116,7 +116,7 @@ impl Model {
         if run(self) {
             return true;
         }
-        if self.message.as_deref() == Some(ops::LIST_CHANGED) {
+        if self.message.text() == Some(ops::LIST_CHANGED) {
             self.cursor = ends.1;
         } else {
             let landing = Landing::of(&old, &self.snap);

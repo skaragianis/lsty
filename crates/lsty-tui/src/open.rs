@@ -111,7 +111,7 @@ impl Model {
         let started = (self.deps.opener)(path);
         let shown = lossy_path(path);
         match &started {
-            Ok(()) => self.message = Some(format!("opened {shown}")),
+            Ok(()) => self.message.say(format!("opened {shown}")),
             Err(reason) => self.alert(format!("can't open {shown}: {reason}")),
         }
         started.is_ok()

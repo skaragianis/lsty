@@ -55,7 +55,7 @@ fn a_yank_asks_the_terminal_to_copy_the_lines() {
         let dir = workdir(SAMPLE);
         let mut model = model_with(dir.path(), &Board::default());
         assert_eq!(press(&mut model, keys), copy(text), "{keys}");
-        assert_eq!(model.message.as_deref(), Some(message), "{keys}");
+        assert_eq!(model.message.text(), Some(message), "{keys}");
     }
 }
 
@@ -77,7 +77,7 @@ fn a_yank_writes_nothing_and_is_not_an_undo_step() {
     assert_eq!(model.mode(), Mode::Normal);
     assert_eq!(todo_of(dir.path()), SAMPLE);
     assert!(model.hist.undo.is_empty());
-    assert_eq!(model.message.as_deref(), Some("yanked 2 tasks"));
+    assert_eq!(model.message.text(), Some("yanked 2 tasks"));
 }
 
 #[test]
@@ -123,10 +123,10 @@ fn nothing_to_paste_without_text_or_yank() {
     let board = Board::default();
     let mut model = model_with(dir.path(), &board);
     press(&mut model, "p");
-    assert_eq!(model.message.as_deref(), Some("nothing to paste"));
+    assert_eq!(model.message.text(), Some("nothing to paste"));
     board.set(" \n\t ");
     press(&mut model, "p");
-    assert_eq!(model.message.as_deref(), Some("nothing to paste"));
+    assert_eq!(model.message.text(), Some("nothing to paste"));
     assert_eq!(todo_of(dir.path()), "A\n");
 }
 
@@ -136,7 +136,7 @@ fn an_unreadable_clipboard_pastes_the_last_yank() {
     let dir = workdir("A\nB\n");
     let mut model = model_with(dir.path(), &Board::default());
     keys(&mut model, "2yyjp");
-    let said = model.message.clone().unwrap_or_default();
+    let said = model.message.text().unwrap_or_default().to_owned();
     assert!(
         said.ends_with(
             "; clipboard not readable \u{2014} pasted the last yank"
@@ -217,7 +217,7 @@ fn a_kept_dependent_through_an_outside_change() {
         keys(&mut model, "Gp");
         assert_eq!(todo_of(dir.path()), *want, "{name}");
         let message = format!("pasted 1 task (1 moved); {said}");
-        assert_eq!(model.message.as_deref(), Some(message.as_str()), "{name}");
+        assert_eq!(model.message.text(), Some(message.as_str()), "{name}");
     }
 }
 
@@ -264,7 +264,7 @@ fn the_kept_links_are_used_by_one_paste() {
         board.take(&press(&mut model, "dd"));
         keys(&mut model, typed);
         assert_eq!(todo_of(dir.path()), file, "{typed}");
-        assert_eq!(model.message.as_deref(), Some(said), "{typed}");
+        assert_eq!(model.message.text(), Some(said), "{typed}");
     }
 }
 
@@ -286,7 +286,7 @@ fn a_second_paste_does_not_link_the_dependents_again() {
         keys(&mut model, "Gp");
         assert_eq!(todo_of(dir.path()), "\nB\nC\nA id:a\n", "{first}");
         assert_eq!(
-            model.message.as_deref(),
+            model.message.text(),
             Some("pasted 1 task (1 moved)"),
             "{first}"
         );
@@ -304,7 +304,7 @@ fn a_busy_lock_pastes_nothing() {
     model.deps.config.lock_timeout = std::time::Duration::from_millis(50);
     press(&mut model, "p");
     drop(held.release());
-    assert_eq!(model.message.as_deref(), Some(want.as_str()));
+    assert_eq!(model.message.text(), Some(want.as_str()));
     assert_eq!(todo_of(dir.path()), "A\n");
 }
 
@@ -330,7 +330,7 @@ fn a_failed_write_of_the_clipboard_is_noted_and_the_yank_stands() {
     let mut model = model_with(dir.path(), &board);
     assert_eq!(press(&mut model, "yy"), copy("(A) Call client +work"));
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("yanked 1 task; write the clipboard with mine: run mine: boom")
     );
 }

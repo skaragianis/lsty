@@ -116,7 +116,7 @@ fn a_refused_action_keeps_the_selection() {
     press(&mut model, "vjt");
     assert_eq!(model.mode(), Mode::Visual);
     assert_eq!(model.selected_rows(), Some((0, 1)));
-    assert_eq!(model.message.as_deref(), Some(messages::SOME_DONE));
+    assert_eq!(model.message.text(), Some(messages::SOME_DONE));
 }
 
 #[test]
@@ -139,7 +139,7 @@ fn a_counted_action_never_shows_visual() {
     let mut model = model_of(dir.path());
     press(&mut model, "2t");
     assert_eq!(model.mode(), Mode::Normal);
-    assert_eq!(model.message.as_deref(), Some(messages::SOME_DONE));
+    assert_eq!(model.message.text(), Some(messages::SOME_DONE));
 }
 
 #[test]
@@ -199,7 +199,7 @@ fn a_reload_that_empties_the_list_ends_the_selection() {
         reload(&mut model);
         keys(&mut model, "x");
         assert_eq!(todo_of(dir.path()), written);
-        assert_ne!(model.message.as_deref(), LOOK);
+        assert_ne!(model.message.text(), LOOK);
     }
 }
 
@@ -527,7 +527,7 @@ fn a_reading_taking_the_line_from_under_the_keys_typed_refuses_the_last() {
             file.lines().filter(|l| !l.is_empty()).collect();
         let name = format!("{typed} {outside} {then}");
         assert_eq!(lines.join("\n") + "\n", want, "{name}");
-        let said = model.message.as_deref();
+        let said = model.message.text();
         if says.is_some() {
             assert_eq!(said, says, "{name}");
             let open = model.line.is_some() || model.visual.is_some();

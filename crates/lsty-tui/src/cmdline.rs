@@ -258,7 +258,7 @@ impl Model {
                 }
                 self.close_input();
                 if none {
-                    self.tone = messages::Tone::Alert;
+                    self.message.tone = messages::Tone::Alert;
                 }
             }
         }
@@ -282,7 +282,7 @@ impl Model {
         } else {
             self.redo_last();
         }
-        if self.message == Some(messages::busy(&self.base_name())) {
+        if self.message.text() == Some(&*messages::busy(&self.base_name())) {
             self.start_line(text);
         }
     }

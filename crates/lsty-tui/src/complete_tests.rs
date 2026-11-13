@@ -544,7 +544,7 @@ fn an_id_that_cannot_be_made_leaves_the_word_and_says_why() {
     keys(&mut model, "Ga dep:docs<Tab>");
     assert_eq!(text_of(&model), "Call client dep:docs");
     assert_eq!(labels(&model), Vec::<String>::new());
-    assert_eq!(model.message.as_deref(), Some("no randomness"));
+    assert_eq!(model.message.text(), Some("no randomness"));
 }
 
 // No task that waits for the edited one, at any depth, is offered.

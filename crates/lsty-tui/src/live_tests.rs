@@ -187,7 +187,7 @@ fn a_folder_where_the_todo_file_was_is_told() {
     changed(&mut model);
     reload(&mut model);
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some(format!("{} is a folder", path.display()).as_str())
     );
     assert!(model.file_exists(), "the list shown stays");
@@ -229,8 +229,7 @@ fn every_minute_reads_the_files_watched_or_not() {
             Box::new(|_, _| Err("no inotify".to_owned()))
         });
         let mut model = started_from(s, deps(dir.path(), alone()));
-        let message = model.message.clone();
-        assert_eq!(message.as_deref(), (!watch).then_some(said), "{watch}");
+        assert_eq!(model.message.text(), (!watch).then_some(said), "{watch}");
         press(&mut model, "j");
         let shown = screen(&model, 80, 24);
         minute(&mut model);

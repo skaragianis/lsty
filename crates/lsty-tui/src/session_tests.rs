@@ -123,9 +123,10 @@ fn kept_after(name: &str, data: &[u8], why: &str, act: fn(&mut Model)) {
     assert_eq!(fs::read(&path).ok().as_deref(), Some(data), "{why}");
     let want =
         format!("can't save session state: {}: {why}", lossy_path(&path));
-    assert_eq!(model.message.take(), Some(want));
+    assert_eq!(model.message.text(), Some(want.as_str()));
+    model.message.put(None);
     act(&mut model);
-    assert_eq!(model.message, None, "{why}");
+    assert_eq!(model.message.text(), None, "{why}");
     assert_eq!(fs::read(&path).ok().as_deref(), Some(data), "{why}");
 }
 
@@ -167,7 +168,7 @@ fn a_folder_in_place_of_a_state_file_is_left_and_why_shown() {
         let mut model = model_in(dir.path(), Config::default());
         act(&mut model);
         assert!(path.is_dir(), "{name}");
-        let shown = model.message.unwrap_or_default();
+        let shown = model.message.text().unwrap_or_default();
         let want = format!("{}: is a directory", lossy_path(&path));
         assert!(shown.ends_with(&want), "{shown}");
     }
@@ -189,7 +190,7 @@ fn a_folds_file_without_read_permission_is_kept() {
     fs::set_permissions(&path, fs::Permissions::from_mode(0o600))
         .unwrap_or_default();
     assert_eq!(fs::read(&path).ok().as_deref(), Some(OTHER));
-    let shown = model.message.unwrap_or_default();
+    let shown = model.message.text().unwrap_or_default();
     let want = format!("{}: permission denied", lossy_path(&path));
     assert!(shown.ends_with(&want), "{shown}");
 }
@@ -201,10 +202,10 @@ fn a_failed_save_is_shown_once_and_the_screen_goes_on() {
         .unwrap_or_default();
     let mut model = model_in(dir.path(), alone());
     run_line(&mut model, "sort manual");
-    let shown = model.message.clone().unwrap_or_default();
+    let shown = model.message.text().unwrap_or_default().to_owned();
     assert!(shown.starts_with("can't save session state: "), "{shown}");
     run_line(&mut model, "sort due");
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
     assert_eq!(Some(model.sort), SortField::parse("due"));
 }
 

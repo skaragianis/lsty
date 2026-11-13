@@ -133,7 +133,8 @@ impl Model {
         }
         self.sync_shown(&forms);
         self.adopt_config(cfg);
-        self.message = Some(shown.join("; ")).filter(|m| !m.is_empty());
+        self.message
+            .put(Some(shown.join("; ")).filter(|m| !m.is_empty()));
         Ok(())
     }
 

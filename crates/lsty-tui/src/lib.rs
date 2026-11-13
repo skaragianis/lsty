@@ -57,6 +57,7 @@ mod prompt;
 mod reldate;
 mod rows;
 mod run;
+mod said;
 mod search;
 mod segments;
 mod session;

@@ -126,7 +126,7 @@ impl Model {
         let Err(why) = result else {
             return;
         };
-        if self.session.failed || self.message.is_some() {
+        if self.session.failed || self.message.text().is_some() {
             return;
         }
         self.session.failed = true;

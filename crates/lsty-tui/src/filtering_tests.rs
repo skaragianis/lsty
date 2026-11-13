@@ -339,7 +339,7 @@ fn clearing_after_gc_takes_nothing_back() {
     keys(&mut model, "/+work<CR>");
     let moved = std::mem::take(&mut model.panels[PROJECTS].active);
     keys(&mut model, "gc");
-    assert_eq!(model.message.as_deref(), Some("no filters to clear"));
+    assert_eq!(model.message.text(), Some("no filters to clear"));
     model.panels[PROJECTS].active = moved;
     keys(&mut model, "<Esc>");
     assert_eq!(model.panels[PROJECTS].active, [Term::and("home")]);
@@ -853,11 +853,11 @@ fn the_refilter_timer_leaves_the_message_alone() {
     let (_dir, mut model) = workdir_model(SPREAD, plain());
     let step = keys(&mut model, "<C-w>4x");
     model.update(Msg::Edited(Err("exit status 1".to_owned())));
-    let said = model.message.clone();
+    let said = model.message.text().map(str::to_owned);
     assert!(said.is_some());
     model.update(refiltering(&step).unwrap_or_else(|| panic!("no timer")));
     assert_eq!(nrs(&model), [1, 3]);
-    assert_eq!(model.message, said);
+    assert_eq!(model.message.text(), said.as_deref());
 }
 
 #[test]

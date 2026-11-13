@@ -183,7 +183,7 @@ impl Pressed<'_> {
     fn refused(&self) {
         let name = &self.name;
         assert_eq!(self.after, self.before, "{name}: refused, yet it wrote");
-        assert_eq!(self.model.tone, Tone::Alert, "{name}");
+        assert_eq!(self.model.message.tone, Tone::Alert, "{name}");
         assert_eq!(self.model.hist.undo.len(), 0, "{name}");
         assert_eq!(self.model.again, None, "{name}: took the repeat");
         let mode = match self.way {
@@ -199,7 +199,7 @@ impl Pressed<'_> {
         let (Err(e), expected) = self.on_a_copy(command) else {
             panic!("{name}: {command:?} did not refuse");
         };
-        assert_eq!(self.model.message.as_deref(), Some(e.message()), "{name}");
+        assert_eq!(self.model.message.text(), Some(e.message()), "{name}");
         assert_eq!(expected, self.before, "{name}: the command wrote");
     }
 
@@ -228,7 +228,7 @@ impl Pressed<'_> {
     fn written(&mut self, command: Command, there: usize) {
         if let Some((_, already)) = command.words().filter(|_| there > 0) {
             let tail = format!("; {there} {already}");
-            let said = self.model.message.as_deref().unwrap_or_default();
+            let said = self.model.message.text().unwrap_or_default();
             assert!(said.ends_with(&tail), "{}: {said}", self.name);
             assert!(!said.contains(" is "), "{}: {said}", self.name);
         }
@@ -767,7 +767,7 @@ fn pastes_or_says(
     keys(&mut model, key);
     assert_eq!(files(dir.path()) != before, pastes, "{name}");
     if !pastes {
-        let said = model.message.as_deref();
+        let said = model.message.text();
         assert_eq!(said, Some("nothing to paste"), "{name}");
     }
 }
@@ -791,7 +791,7 @@ fn a_repeat_of_a_paste_is_always_lit() {
         let before = files(dir.path());
         keys(&mut model, ".");
         assert_eq!(files(dir.path()), before, "blank text is not");
-        assert_eq!(model.message.as_deref(), Some("nothing to paste"));
+        assert_eq!(model.message.text(), Some("nothing to paste"));
     }
 }
 
@@ -837,8 +837,8 @@ fn a_refused_key_says_what_it_always_said() {
         keys(&mut model, first);
         let before = files(dir.path());
         keys(&mut model, key);
-        assert_eq!(model.message.as_deref(), Some(said), "{name}");
-        assert_eq!(model.tone == Tone::Alert, alert, "{name}");
+        assert_eq!(model.message.text(), Some(said), "{name}");
+        assert_eq!(model.message.tone == Tone::Alert, alert, "{name}");
         assert_eq!(files(dir.path()), before, "{name}");
     }
 }
@@ -852,13 +852,13 @@ fn a_key_with_nothing_to_work_on_says_nothing() {
     ] {
         let (_dir, mut model, _opened) = watched(("", ""), &Board::default());
         keys(&mut model, key);
-        assert_eq!(model.message, None, "{key}");
+        assert_eq!(model.message.text(), None, "{key}");
     }
     for key in ["J", "K"] {
         let (_dir, mut model, _opened) =
             watched((TODO, ""), &Board::default());
         keys(&mut model, key);
-        assert_eq!(model.message, None, "{key}");
+        assert_eq!(model.message.text(), None, "{key}");
     }
 }
 
@@ -985,7 +985,7 @@ fn a_blocker_in_the_press_still_blocks() {
     let (dir, mut model) = list(&[0, 2]);
     let before = files(dir.path());
     press(&mut model, "2x");
-    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.tone, Tone::Alert);
     assert_eq!(files(dir.path()), before);
 }
 
@@ -1000,7 +1000,7 @@ fn a_failed_completion_keeps_the_cursor() {
     .unwrap_or_else(|e| panic!("{e}"));
     let cursor = model.cursor;
     press(&mut model, "2x");
-    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.tone, Tone::Alert);
     assert_eq!(model.cursor, cursor);
 }
 
@@ -1013,7 +1013,7 @@ fn t_takes_over_an_agents_claim_and_says_so() {
         .unwrap_or_else(|e| panic!("{e}"));
     assert!(!todo.contains("owner:agent2"), "{todo}");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("2 started; 3 was claimed by agent2; now yours")
     );
 }
@@ -1060,7 +1060,7 @@ fn a_t_is_lit_while_it_can_put_a_claim_back() {
         let before = files(dir.path());
         keys(&mut model, "t");
         assert_eq!(files(dir.path()) != before, back, "{name}");
-        let said = model.message.as_deref();
+        let said = model.message.text();
         if back {
             assert_eq!(said, Some("put back as it was"), "{name}");
         } else {
@@ -1079,7 +1079,7 @@ fn a_repeat_of_t_in_the_window_is_dim_and_says_why_not() {
     let before = files(dir.path());
     keys(&mut model, ".");
     assert_eq!(files(dir.path()), before);
-    let said = model.message.as_deref().unwrap_or_default();
+    let said = model.message.text().unwrap_or_default();
     assert!(said.contains("blocked"), "{said}");
     assert!(dim(model.answers()(Action::Repeat)));
 }
@@ -1106,7 +1106,7 @@ fn a_doing_task_that_is_blocked() {
         let before = files(dir.path());
         let mut model = started(deps(dir.path(), config()));
         press(&mut model, typed);
-        let said = model.message.clone().unwrap_or_default();
+        let said = model.message.text().unwrap_or_default().to_owned();
         assert!(said.starts_with(says), "{typed}: {said}");
         assert_eq!(files(dir.path()) != before, writes, "{typed}");
     }

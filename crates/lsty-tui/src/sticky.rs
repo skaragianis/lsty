@@ -177,13 +177,11 @@ impl Model {
 
     /// Adds a notice to the status message, or shows it alone.
     pub(crate) fn note(&mut self, text: &str) {
-        match &mut self.message {
-            Some(message) => {
-                message.push_str("; ");
-                message.push_str(text);
-            }
-            None => self.message = Some(text.to_owned()),
-        }
+        let said = self.message.text().map_or_else(
+            || text.to_owned(),
+            |message| format!("{message}; {text}"),
+        );
+        self.message.say(said);
     }
 
     /// The row that shows the line at `at`.

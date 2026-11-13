@@ -28,7 +28,6 @@ use crate::{
     insert::Draft,
     line::Line,
     live::{self, Live},
-    messages::Tone,
     motion::{Step, View},
     mouse::Pointer,
     msg::{Cmd, Msg},
@@ -38,6 +37,7 @@ use crate::{
     prompt::Kind as PromptKind,
     reldate::Today,
     rows::{self, Context, Inline, Row, Shows},
+    said::Said,
     search::Taken,
     session::Session,
     sticky::Sticky,
@@ -86,12 +86,7 @@ pub(crate) struct Model {
     pub(crate) top: usize,
     pub(crate) width: u16,
     pub(crate) height: u16,
-    pub(crate) message: Option<String>,
-    /// How the message is drawn.
-    pub(crate) tone: Tone,
-    /// Counts the messages put up and cleared, so that a timer clears
-    /// only the message it was set for.
-    said: u64,
+    pub(crate) message: Said,
     /// The list that a panel key changed and that is not yet refiltered.
     pub(crate) refilter: Refilter,
     /// The list changed by itself and the screen has not shown it yet.
@@ -211,11 +206,9 @@ impl Model {
             top: 0,
             width: 0,
             height: 0,
-            message: None,
-            said: 0,
+            message: Said::default(),
             refilter: Refilter::default(),
             unseen: false,
-            tone: Tone::Notice,
             hist: History::default(),
             again: None,
             warnings: Vec::new(),
@@ -238,7 +231,7 @@ impl Model {
         self.start_folds();
         self.rebuild();
         self.start_watch(watch, sink);
-        if self.message.is_none() {
+        if self.message.text().is_none() {
             self.next_warning();
         }
     }
@@ -247,7 +240,7 @@ impl Model {
     /// for a launch warning to go.
     pub(crate) fn init(&self) -> Vec<Cmd> {
         let mut cmds = vec![self.next_minute()];
-        if self.message.is_some() {
+        if self.message.text().is_some() {
             cmds.push(self.life());
         }
         cmds
@@ -257,7 +250,7 @@ impl Model {
     fn life(&self) -> Cmd {
         Cmd::After {
             delay: MESSAGE_LIFE,
-            msg: Msg::Expire(self.said),
+            msg: Msg::Expire(self.message.count()),
         }
     }
 
@@ -268,11 +261,8 @@ impl Model {
         if matches!(msg, Msg::Mouse(_)) && !self.deps.config.mouse {
             return Vec::new();
         }
-        let input = matches!(
-            msg,
-            Msg::Key(_) | Msg::Mouse(_) | Msg::Paste(_) | Msg::Edited(_)
-        );
-        let (said, before) = (self.said, self.message.clone());
+        let input = msg.is_input();
+        let said = self.message.count();
         let typing = input && self.before_input();
         self.unseen |= msg.changes_the_list();
         if matches!(msg, Msg::Key(_)) {
@@ -287,13 +277,8 @@ impl Model {
             self.after_input(typing);
         }
         self.drop_peek();
-        if self.message.is_some()
-            && (self.said != said || self.message != before)
-        {
-            self.said += 1;
-            if self.line.is_none() {
-                cmds.push(self.life());
-            }
+        if self.message.is_new(said) && self.line.is_none() {
+            cmds.push(self.life());
         }
         cmds
     }
@@ -316,7 +301,7 @@ impl Model {
             self.catch_up_day();
         }
         // A press that says to look again leaves its row as it found it.
-        let looks = self.message.as_deref() == Some(ops::LIST_CHANGED);
+        let looks = self.message.text() == Some(ops::LIST_CHANGED);
         if !self.pointer.pressed() {
             self.leave_sticky(self.cursor_place().filter(|_| looks));
         }
@@ -324,15 +309,13 @@ impl Model {
 
     /// Clears the message line before a key or a gesture acts.
     pub(crate) fn clear_message(&mut self) {
-        self.said += 1;
-        self.message = None;
-        self.tone = Tone::Notice;
+        self.message.clear();
     }
 
     /// Clears the message the timer `said` was set for, unless another
     /// has been put up since.
     fn expire(&mut self, said: u64) {
-        if said == self.said {
+        if said == self.message.count() {
             self.clear_message();
             self.sticky.age();
             if !self.pointer.pressed() {
@@ -408,7 +391,7 @@ impl Model {
     fn press(&mut self, stroke: Stroke) -> Vec<Cmd> {
         self.clear_message();
         let cmds = self.feed(stroke);
-        if self.message.is_none() {
+        if self.message.text().is_none() {
             self.next_warning();
         }
         cmds

@@ -89,7 +89,7 @@ impl Model {
     fn acting<T>(&mut self, change: impl FnOnce(&mut Self) -> T) -> T {
         self.clear_message();
         let out = change(self);
-        if self.message.is_none() {
+        if self.message.text().is_none() {
             self.next_warning();
         }
         out

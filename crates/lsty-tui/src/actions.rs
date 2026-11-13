@@ -131,7 +131,7 @@ impl Model {
             },
         );
         if !self.settle(result) || !passes {
-            self.tone = Tone::Alert;
+            self.message.tone = Tone::Alert;
             self.cursor = cursor;
             return false;
         }
@@ -147,8 +147,7 @@ impl Model {
                 all.clone()
             };
             let short = format!("{head}; {there} {already}");
-            self.message =
-                self.message.take().map(|m| m.replacen(&all, &short, 1));
+            self.message.edit(|m| m.replacen(&all, &short, 1));
         }
         self.scroll();
         true
@@ -259,7 +258,7 @@ impl Model {
             self.accept(outcome.read().clone(), clock.clone());
         }
         if outcome.no_op() {
-            self.message = join(&said);
+            self.message.put(join(&said));
             return;
         }
         let touched = touched(&outcome);
@@ -275,7 +274,7 @@ impl Model {
         if let Some(record) = &record {
             self.keep_links(record);
         }
-        self.message = join(&said);
+        self.message.put(join(&said));
         if !landed {
             self.stick_cursor(&touched, from);
         }
@@ -325,14 +324,14 @@ impl Model {
 
     /// Shows a refusal of the keys in the error style.
     pub(crate) fn alert(&mut self, text: String) {
-        self.tone = Tone::Alert;
-        self.message = Some(text);
+        self.message.tone = Tone::Alert;
+        self.message.say(text);
     }
 
     /// Shows a warning, or a refusal that is no error.
     pub(crate) fn warn(&mut self, text: String) {
-        self.tone = Tone::Warning;
-        self.message = Some(text);
+        self.message.tone = Tone::Warning;
+        self.message.say(text);
     }
 
     /// Shows why an operation did not run; one refused on lines that
@@ -352,9 +351,8 @@ impl Model {
     /// `fail`, followed by what to do about it when the error says.
     pub(crate) fn fail_hinted(&mut self, e: &errs::Error) {
         self.fail(e);
-        if let (Some(message), Some(hint)) = (&mut self.message, e.hint()) {
-            message.push_str(" — ");
-            message.push_str(hint);
+        if let Some(hint) = e.hint() {
+            self.message.edit(|message| format!("{message} — {hint}"));
         }
     }
 }

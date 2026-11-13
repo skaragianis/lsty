@@ -55,7 +55,7 @@ fn a_draft_that_was_not_changed_writes_nothing() {
         let seen = fs::metadata(&path).unwrap().modified().unwrap();
         assert_eq!(seen, old, "{key}");
         assert_eq!(todo_of(dir.path()), LIST);
-        assert_eq!(model.tone, Tone::Notice, "{key}");
+        assert_eq!(model.message.tone, Tone::Notice, "{key}");
     }
 }
 
@@ -108,7 +108,7 @@ fn cancel_on_a_new_task_with_nothing_typed_keeps_no_draft() {
     let (dir, mut model) = workdir_model(LIST, keeping());
     keys(&mut model, "oOne<CR><Esc>");
     assert!(model.cursor_at().is_none());
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
     press(&mut model, "u");
     assert_eq!(todo_of(dir.path()), LIST);
 }
@@ -137,7 +137,7 @@ fn a_new_task_with_only_spaces_is_not_created() {
     let mut model = model_of(dir.path());
     keys(&mut model, "o<CR>o   <Esc>");
     assert_eq!(todo_of(dir.path()), LIST);
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
 }
 
 // 38.34 and 38.35: the draft comes back with `u`, once.
@@ -145,17 +145,14 @@ fn a_new_task_with_only_spaces_is_not_created() {
 fn u_brings_a_discarded_draft_back_once() {
     let (dir, mut model) = workdir_cancelling(LIST, alone());
     keys(&mut model, "izzz<C-x>");
-    assert_eq!(
-        model.message.as_deref(),
-        Some("edit discarded — u restores")
-    );
+    assert_eq!(model.message.text(), Some("edit discarded — u restores"));
     press(&mut model, "u");
     assert!(model.cursor_at().is_some());
     assert!(mode_of(&model).contains("INSERT"));
     keys(&mut model, "<Esc>");
     assert_eq!(todo_of(dir.path()), "zzzBuy\nCall\n");
     press(&mut model, "u");
-    assert_eq!(model.message.as_deref(), Some("undid: 1 zzzBuy"));
+    assert_eq!(model.message.text(), Some("undid: 1 zzzBuy"));
     assert_eq!(todo_of(dir.path()), LIST);
 }
 
@@ -167,10 +164,10 @@ fn a_kept_draft_of_a_deleted_task_says_so() {
     fs::write(dir.path().join("todo.txt"), "Call\n").unwrap();
     reload(&mut model);
     keys(&mut model, ":undo<CR>");
-    assert_eq!(model.message.as_deref(), Some(LIST_CHANGED));
+    assert_eq!(model.message.text(), Some(LIST_CHANGED));
     assert!(model.line.is_none());
     press(&mut model, "u");
-    assert_eq!(model.message.as_deref(), Some("nothing to undo"));
+    assert_eq!(model.message.text(), Some("nothing to undo"));
 }
 
 // 38.33: the edit actions do not open on an archive row.
@@ -185,10 +182,7 @@ fn an_archived_task_cannot_be_edited() {
     let mut model = started(deps(dir.path(), config));
     press(&mut model, "Gi");
     assert!(model.cursor_at().is_none());
-    assert_eq!(
-        model.message.as_deref(),
-        Some("Old is archived — x reopens it")
-    );
+    assert_eq!(model.message.text(), Some("Old is archived — x reopens it"));
 }
 
 // 38.48: a paste is one event, and breaks in it are spaces.
@@ -214,7 +208,7 @@ fn a_busy_lock_keeps_the_draft() {
     let mut held = held_lock(dir.path());
     keys(&mut model, "<CR>");
     assert!(model.cursor_at().is_some());
-    assert!(model.message.as_deref().unwrap_or("").contains("is busy"));
+    assert!(model.message.text().unwrap_or("").contains("is busy"));
     held.release().unwrap();
     keys(&mut model, "<CR>");
     assert_eq!(todo_of(dir.path()), "Buyx\nCall\n");
@@ -231,7 +225,7 @@ fn a_failed_write_of_a_new_task_does_not_chain() {
     keys(&mut model, "<CR>");
     let text = model.edit.as_ref().map(|d| d.field.text());
     assert_eq!(text.as_deref(), Some("x"), "the draft was not kept");
-    assert!(model.message.as_deref().unwrap_or("").contains("is busy"));
+    assert!(model.message.text().unwrap_or("").contains("is busy"));
     held.release().unwrap();
     assert_eq!(todo_of(dir.path()), LIST);
 }
@@ -494,7 +488,7 @@ fn a_dependent_task_of_an_archived_task_follows_dep() {
     keys(&mut model, "go");
     assert_eq!(field_of(&model), None);
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("Old is archived and has no id — x reopens it first")
     );
     assert_eq!(todo_of(dir.path()), "Open\n");
@@ -506,10 +500,7 @@ fn a_prerequisite_task_of_an_archived_task_is_refused() {
         with_archive("Open\n", "x 2026-09-01 Old id:o1d2\n", "j");
     keys(&mut model, "gO");
     assert_eq!(field_of(&model), None);
-    assert_eq!(
-        model.message.as_deref(),
-        Some("Old is archived — x reopens it")
-    );
+    assert_eq!(model.message.text(), Some("Old is archived — x reopens it"));
     assert_eq!(todo_of(dir.path()), "Open\n");
 }
 
@@ -537,13 +528,13 @@ fn an_archived_task_of_only_labels_is_named_by_its_line() {
         with_archive("Open\n", "x 2026-09-01 +p id:o1d2\n", "j");
     keys(&mut model, "gO");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("x 2026-09-01 +p id:o1d2 is archived — x reopens it")
     );
     let (_dir, mut model) = with_archive("Open\n", "x 2026-09-01 +p\n", "j");
     keys(&mut model, "go");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("x 2026-09-01 +p is archived and has no id — x reopens it first")
     );
 }

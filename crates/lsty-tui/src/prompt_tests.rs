@@ -129,7 +129,7 @@ fn a_count_over_an_archived_task_opens_no_prompt() {
     let lines = screen(&model, 80, 24);
     assert!(model.line.is_none(), "{lines:?}");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("some are archived — nothing changed")
     );
 }
@@ -254,7 +254,7 @@ fn said(w: u16, keys_typed: &str) -> Option<String> {
     let mut model = model_of(dir.path());
     model.update(Msg::Resize(w, 24));
     keys(&mut model, keys_typed);
-    model.message
+    model.message.text().map(str::to_owned)
 }
 
 #[test]

@@ -190,7 +190,7 @@ impl Model {
     /// Says so when `:theme NAME` chose a built-in at 16 colours.
     pub(crate) fn say_alike(&mut self) {
         if self.deps.profile == Profile::Ansi && !self.deps.theme.from_file() {
-            self.message = Some(ALIKE.trim().to_owned());
+            self.message.say(ALIKE.trim().to_owned());
         }
     }
 
@@ -348,12 +348,12 @@ impl Model {
             .as_ref()
             .filter(|_| !self.deps.config.no_config);
         let Some(file) = file else {
-            self.message = Some(format!("theme {name} for this session"));
+            self.message.say(format!("theme {name} for this session"));
             return;
         };
         let path = self.deps.cwd.join(file);
         match write_theme(&path, &name) {
-            Ok(()) => self.message = Some(format!("theme {name} saved")),
+            Ok(()) => self.message.say(format!("theme {name} saved")),
             Err(why) => self.alert(format!("can't save the theme: {why}")),
         }
     }

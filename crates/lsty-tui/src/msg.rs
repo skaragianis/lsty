@@ -77,6 +77,15 @@ pub(crate) enum Msg {
 }
 
 impl Msg {
+    /// Whether this is what the person did: a key, a gesture, a paste, or
+    /// an edit by the editor.
+    pub(crate) const fn is_input(&self) -> bool {
+        matches!(
+            self,
+            Self::Key(_) | Self::Mouse(_) | Self::Paste(_) | Self::Edited(_)
+        )
+    }
+
     /// Whether this can change the list with no input from the person.
     pub(crate) const fn changes_the_list(&self) -> bool {
         matches!(self, Self::Minute | Self::Loaded(_) | Self::Expire(_))

@@ -319,7 +319,7 @@ impl Model {
             Ok(_) | Err(_) => None,
         };
         if self.settle(result) && kept.is_none() {
-            self.tone = messages::Tone::Alert;
+            self.message.tone = messages::Tone::Alert;
         }
         kept
     }
@@ -327,13 +327,14 @@ impl Model {
     /// Replaces the messages of several tasks, `kept` of them left as
     /// they were, by a count when they do not fit the status line.
     fn summarize(&mut self, n: usize, kept: usize) {
-        let Some(shown) = self.message.take() else {
+        let Some(shown) = self.message.text().map(str::to_owned) else {
             return;
         };
+        self.message.put(None);
         let used = width(&self.status_base());
         let room = usize::from(self.width).saturating_sub(used + 2);
         let long = width_of(&shown) > room;
-        self.message = Some(if n > 1 && long {
+        self.message.say(if n > 1 && long {
             let changed =
                 format!("{} changed", ops::counted(n - kept, "task"));
             if kept == 0 {
@@ -455,9 +456,9 @@ impl Model {
             let message = messages::hinted(&error);
             return Some(vec![Span::new(message, Some(Slot::Error))]);
         }
-        let message = self.message.as_ref()?;
-        (self.tone == messages::Tone::Alert)
-            .then(|| vec![Span::new(message.as_str(), Some(Slot::Error))])
+        let message = self.message.text()?;
+        (self.message.tone == messages::Tone::Alert)
+            .then(|| vec![Span::new(message, Some(Slot::Error))])
     }
 
     /// Draws what the prompt has to say on row `y`, over the list.

@@ -146,7 +146,7 @@ fn without_a_config_the_theme_lasts_for_the_session() {
     assert!(model.choosing.is_none());
     let name = model.deps.config.theme.clone();
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some(format!("theme {name} for this session").as_str())
     );
     assert!(!dir.path().join("config.toml").exists());
@@ -165,7 +165,7 @@ fn a_config_that_is_not_toml_is_left_and_the_failure_shown() {
     keys(&mut model, "j<CR>");
     let want =
         format!("can't save the theme: {}: not valid TOML", file.display());
-    assert_eq!(model.message.as_deref(), Some(want.as_str()));
+    assert_eq!(model.message.text(), Some(want.as_str()));
     assert_eq!(
         fs::read_to_string(&file).ok().as_deref(),
         Some("theme = [\n")
@@ -468,7 +468,7 @@ fn naming_a_theme_at_16_colours_says_when_the_look_stays() {
         let (_dir, mut model) = with_mine(profile);
         press(&mut model, line);
         keys(&mut model, "<CR>");
-        model.message.clone()
+        model.message.text().map(str::to_owned)
     };
     let alike = Some("built-in themes look alike at 16 colours".to_owned());
     assert_eq!(says(Profile::Ansi, ":theme nord"), alike);
