@@ -58,35 +58,63 @@ impl Focus {
     }
 }
 
+/// The part of the screen that has the keys.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Keys {
+    /// The popup of links to open.
+    Picker,
+    /// The theme chooser.
+    Theme,
+    /// The output view, or the help.
+    Output,
+    /// The prompt line.
+    Line,
+    /// The field of a task being written.
+    Field,
+    /// The list and its panels.
+    List,
+}
+
 impl Model {
+    /// The part that has the keys now.
+    pub(crate) fn keys_to(&self) -> Keys {
+        if self.opening.is_some() {
+            Keys::Picker
+        } else if self.choosing.is_some() {
+            Keys::Theme
+        } else if self.output.is_some() {
+            Keys::Output
+        } else if self.line.is_some() {
+            Keys::Line
+        } else if self.edit.is_some() {
+            Keys::Field
+        } else {
+            Keys::List
+        }
+    }
+
     /// The key table that applies now.
     pub(crate) fn key_mode(&self) -> Mode {
-        if self.opening.is_some() {
-            Mode::Picker
-        } else if self.typing_theme() {
-            Mode::Command
-        } else if self.choosing.is_some() {
-            Mode::Picker
-        } else if self.typing_help() {
-            Mode::Command
-        } else if self.output.is_some() {
-            Mode::Help
-        } else if self.line.is_some() {
-            Mode::Command
-        } else if let Some(draft) = &self.edit {
-            if draft.comp.popup.is_some() {
-                Mode::Completion
-            } else {
-                Mode::Insert
-            }
-        } else {
-            match self.focus {
+        self.mode_of(self.keys_to())
+    }
+
+    /// The key table of the part that has the keys.
+    pub(crate) fn mode_of(&self, keys: Keys) -> Mode {
+        match keys {
+            Keys::Theme if self.typing_theme() => Mode::Command,
+            Keys::Picker | Keys::Theme => Mode::Picker,
+            Keys::Output if self.typing_help() => Mode::Command,
+            Keys::Output => Mode::Help,
+            Keys::Line => Mode::Command,
+            Keys::Field if self.popup().is_some() => Mode::Completion,
+            Keys::Field => Mode::Insert,
+            Keys::List => match self.focus {
                 Focus::List => self.mode(),
                 Focus::Detail => Mode::Detail,
                 Focus::Projects | Focus::Contexts | Focus::Filters => {
                     Mode::Panel
                 }
-            }
+            },
         }
     }
 

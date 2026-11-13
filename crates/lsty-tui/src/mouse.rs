@@ -5,7 +5,7 @@ use lsty_core::{keys::Action, query::DOING};
 
 use crate::{
     connective::{self, Term},
-    focus::Focus,
+    focus::{Focus, Keys},
     hit::{Kind, Pane, Target},
     model::Model,
     motion::Step,
@@ -68,10 +68,7 @@ impl Pointer {
 impl Model {
     /// Does what a mouse event asks for. Only the left button acts.
     pub(crate) fn mouse(&mut self, event: Mouse) -> Vec<Cmd> {
-        if self.line.is_some()
-            || self.opening.is_some()
-            || self.choosing.is_some()
-        {
+        if matches!(self.keys_to(), Keys::Line | Keys::Picker | Keys::Theme) {
             return Vec::new();
         }
         if matches!(event.gesture, Gesture::Down(_)) {
