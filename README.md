@@ -9,7 +9,7 @@
 [![CI](https://github.com/skaragianis/lsty/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/skaragianis/lsty/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/lsty)](https://crates.io/crates/lsty)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue)](https://github.com/skaragianis/lsty/blob/main/LICENSE)
-[![Rust](https://img.shields.io/badge/rust-1.99%2B-orange)](https://github.com/skaragianis/lsty/blob/main/rust-toolchain.toml)
+[![Rust](https://img.shields.io/badge/rust-1.100%2B-orange)](https://github.com/skaragianis/lsty/blob/main/rust-toolchain.toml)
 [![CodeScene Average Code Health](https://codescene.io/projects/87415/status-badges/average-code-health)](https://codescene.io/projects/87415)
 
 Terminal lists for Humans and Agents.
@@ -63,7 +63,7 @@ brew install skaragianis/lsty/lsty
 
 ### From crates.io
 
-With Rust 1.99 or newer (`rustup update`):
+With Rust 1.100 or newer (`rustup update`):
 
 ```sh
 cargo install lsty --locked
@@ -86,7 +86,7 @@ just install
 lsty --version
 ```
 
-The repository pins Rust 1.99.0 in `rust-toolchain.toml`. With rustup
+The repository pins Rust 1.100.0 in `rust-toolchain.toml`. With rustup
 installed Cargo uses that toolchain automatically. `just install` puts `lsty`
 in `~/.cargo/bin`, which rustup adds to your `PATH`.
 
