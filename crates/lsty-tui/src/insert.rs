@@ -104,7 +104,12 @@ impl Draft {
     /// Whether a commit has to refuse: it would write on a line that
     /// changed.
     pub(crate) const fn refuses(&self) -> bool {
-        self.lost.is_some() && (self.is_task() || self.blocks())
+        self.lost.is_some() && self.bound()
+    }
+
+    /// Whether a write of the field depends on its line.
+    const fn bound(&self) -> bool {
+        self.is_task() || self.blocks()
     }
 
     /// Whether the anchor of a new task is to wait for it.
@@ -144,39 +149,52 @@ impl Draft {
 
     /// Takes the draft to a later reading. A line that is not kept is lost
     /// until the rule keeps it again from the last reading it stood in; a new
-    /// task goes about where its anchor was.
-    fn follow(
-        &mut self,
-        moved: &Remap,
-        landing: &Landing,
-        old: &Snapshot,
-        now: &Snapshot,
-    ) {
+    /// task goes about where its anchor was. Says what became of the line.
+    fn follow(&mut self, r: &Moves<'_>) -> Change {
         for grant in &mut self.comp.grants {
-            grant.land(landing);
+            grant.land(r.landing);
         }
         let Some(at) = self.at else {
-            return;
+            return Change::Same;
         };
         let kept = match &self.lost {
-            Some((known, was)) => landed_at(&Landing::of(known, now), *was),
-            None => landed_at(landing, at),
+            Some((known, was)) => landed_at(&Landing::of(known, r.now), *was),
+            None => landed_at(r.landing, at),
         };
-        match (kept, &self.lost) {
-            (Some(_), Some(_)) => {
-                self.lost = None;
-                self.refused = None;
+        let change = match (self.lost.is_some(), kept.is_some()) {
+            (true, true) => {
+                (self.lost, self.refused) = (None, None);
+                Change::Found
             }
-            (None, None) => self.lost = Some((old.clone(), at)),
-            _ => {}
-        }
-        if moved.track(at).is_none()
+            (false, false) => {
+                self.lost = Some((r.old.clone(), at));
+                Change::Lost
+            }
+            _ => Change::Same,
+        };
+        if r.moved.track(at).is_none()
             && let Subject::New { below, .. } = &mut self.subject
         {
             *below = false;
         }
-        self.at = kept.or_else(|| Some(moved.place(at)));
+        self.at = kept.or_else(|| Some(r.moved.place(at)));
+        change
     }
+}
+
+/// What a later reading did to the line a draft stands on.
+enum Change {
+    Same,
+    Lost,
+    Found,
+}
+
+/// How the lines of one reading reached the next.
+pub(crate) struct Moves<'a> {
+    pub(crate) moved: &'a Remap,
+    pub(crate) landing: &'a Landing,
+    pub(crate) old: &'a Snapshot,
+    pub(crate) now: &'a Snapshot,
 }
 
 /// The place of the first line an operation wrote.
@@ -543,19 +561,23 @@ impl Model {
             self.kept = None;
             return;
         };
-        if self.edit.is_none() && self.kept.is_none() {
-            return;
+        let since = Moves {
+            moved,
+            landing,
+            old,
+            now: &self.snap,
+        };
+        if let Some(draft) = &mut self.kept {
+            draft.follow(&since);
         }
-        let warned = self.edit.as_ref().is_some_and(Draft::refuses);
-        for draft in self.edit.iter_mut().chain(self.kept.iter_mut()) {
-            draft.follow(moved, landing, old, &self.snap);
-        }
-        let refuses = self.edit.as_ref().is_some_and(Draft::refuses);
-        let armed = self.edit.as_ref().is_some_and(|d| d.refused.is_some());
-        if refuses && !warned && !armed {
-            self.alert(ops::LIST_CHANGED.to_owned());
-        } else if warned && !refuses {
-            self.message = None;
+        if let Some(draft) = &mut self.edit {
+            match draft.follow(&since) {
+                Change::Lost if draft.bound() && draft.refused.is_none() => {
+                    self.alert(ops::LIST_CHANGED.to_owned());
+                }
+                Change::Found if draft.bound() => self.message = None,
+                Change::Lost | Change::Found | Change::Same => {}
+            }
         }
         self.refresh_popup();
     }
