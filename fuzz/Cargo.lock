@@ -534,7 +534,7 @@ dependencies = [
 
 [[package]]
 name = "lsty-cli"
-version = "0.7.1"
+version = "0.7.2"
 dependencies = [
  "jiff",
  "lsty-core",
@@ -542,7 +542,7 @@ dependencies = [
 
 [[package]]
 name = "lsty-core"
-version = "0.7.1"
+version = "0.7.2"
 dependencies = [
  "getrandom",
  "jiff",
@@ -561,7 +561,7 @@ dependencies = [
 
 [[package]]
 name = "lsty-tui"
-version = "0.7.1"
+version = "0.7.2"
 dependencies = [
  "jiff",
  "lsty-cli",

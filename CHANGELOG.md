@@ -4,6 +4,24 @@ Changes a lsty user can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.7.2 (2026-11-13)
+
+### Changed
+
+- **install:** Need Rust 1.100 or newer to build from crates.io
+
+### Fixed
+
+- **tui:** Give a yank its links back when its paste is undone
+
+### Faster
+
+- **tui:** Borrow the name pool and the distinct names
+- **tui:** Count projects and contexts once per reading
+- **cli:** Stream the tasks of ls --json to the output
+- **cli:** Write the lines of ls as they are made
+- **cli:** Escape json strings by runs
+
 ## 0.7.1 (2026-11-12)
 
 ### Changed
