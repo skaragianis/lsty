@@ -100,7 +100,7 @@ fn a_move_that_cannot_go_writes_nothing() {
     keys(&mut model, "KjJ");
     assert_eq!(modified(dir.path()), before);
     assert_eq!(model.hist.undo.len(), 0);
-    assert!(model.message.is_none());
+    assert!(model.message.text().is_none());
     // Past an identical line it is lit, and the core says why, as an alert
     // that leaves what `.` repeats alone.
     let dir = workdir("A\nA\nB\n");
@@ -108,8 +108,8 @@ fn a_move_that_cannot_go_writes_nothing() {
     let before = modified(dir.path());
     keys(&mut model, "J");
     assert_eq!(modified(dir.path()), before);
-    assert_eq!(model.message.as_deref(), Some("1 is already there"));
-    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.text(), Some("1 is already there"));
+    assert_eq!(model.message.tone, Tone::Alert);
     assert!(model.again.is_none());
 }
 
@@ -149,7 +149,7 @@ fn moving_a_claimed_task_warns() {
         todo_of(dir.path()),
         "B\nA started:2026-09-29T0800Z owner:agent1\n"
     );
-    let said = model.message.clone().unwrap_or_default();
+    let said = model.message.text().unwrap_or_default().to_owned();
     assert!(said.contains("is claimed by agent1"), "{said}");
 }
 
@@ -162,15 +162,15 @@ fn archive_rows_are_not_moved_or_passed() {
     let mut model = model_of(dir.path(), config(&[]));
     press(&mut model, "jJ");
     assert_eq!(todo_of(dir.path()), "A\nB\n");
-    assert!(model.message.is_none());
+    assert!(model.message.text().is_none());
     press(&mut model, "j");
     assert_eq!(model.rows[model.cursor].source, Source::Done);
     press(&mut model, "J");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some(messages::archived_task("Old").as_str())
     );
-    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.tone, Tone::Alert);
 }
 
 // 34a.12: a sorted view does not move, and does not write.
@@ -181,13 +181,13 @@ fn a_sorted_view_refuses_to_move() {
     let before = modified(dir.path());
     press(&mut model, "sJ");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("sorted by priority — press s for manual order")
     );
     press(&mut model, "K");
     press(&mut model, "sssJ");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("sorted by done, newest first — press s for manual order")
     );
     assert_eq!(todo_of(dir.path()), "A\n(A) B\n");
@@ -276,7 +276,7 @@ fn a_completed_task_stays_until_what_the_next_key_starts_is_over() {
     let mut model = model_of(dir.path(), config(&hidden));
     press(&mut model, "x");
     assert_eq!(rows_of(&model), ["x 2026-09-29 A*", "B", "C"]);
-    let said = model.message.clone().unwrap_or_default();
+    let said = model.message.text().unwrap_or_default().to_owned();
     assert!(said.ends_with(
         "; hidden by current filters in 2 seconds or at the next key"
     ));
@@ -340,7 +340,7 @@ fn a_press_over_a_done_row_is_the_same_with_auto_archive() {
             let mut model = model_of(dir.path(), config);
             press(&mut model, "Gxvk");
             press(&mut model, key);
-            assert_eq!(model.message.as_deref(), Some(said), "{name}");
+            assert_eq!(model.message.text(), Some(said), "{name}");
             let on = &rows_of(&model)[model.cursor];
             assert_eq!(on, "x 2026-09-29 C", "{name}");
         }
@@ -462,7 +462,7 @@ fn a_priority_that_leaves_the_filter_stays() {
     // and the next press is on it.
     fs::write(dir.path().join("todo.txt"), "(B) X +r\nY\n").unwrap();
     press(&mut model, "gp");
-    assert_eq!(model.message.as_deref(), Some(LIST_CHANGED));
+    assert_eq!(model.message.text(), Some(LIST_CHANGED));
     reload(&mut model);
     assert_eq!(rows_of(&model), ["(B) X +r*"]);
     press(&mut model, "gp");

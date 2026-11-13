@@ -122,7 +122,8 @@ impl Model {
     /// first, and drops what does not fit after it.
     fn warned(&self) -> bool {
         !self.notices().is_empty()
-            || self.message.is_some() && self.tone != Tone::Notice
+            || self.message.text().is_some()
+                && self.message.tone != Tone::Notice
     }
 
     /// The status line before the hints.
@@ -182,11 +183,11 @@ impl Model {
             .into_iter()
             .map(|notice| vec![Span::new(notice, Some(Slot::Warning))])
             .collect();
-        if let Some(m) = &self.message {
-            let alert = self.tone == Tone::Alert;
+        if let Some(m) = self.message.text() {
+            let alert = self.message.tone == Tone::Alert;
             let slot = if alert { Slot::Error } else { Slot::Warning };
-            let m = vec![Span::new(m.as_str(), Some(slot))];
-            if self.tone == Tone::Notice {
+            let m = vec![Span::new(m, Some(slot))];
+            if self.message.tone == Tone::Notice {
                 parts.push(m);
             } else {
                 head.insert(0, m);

@@ -157,10 +157,12 @@ impl Side {
         keys(&mut self.model, key);
         screen(&self.model, self.model.width, self.model.height);
         let m = &self.model;
-        let name =
-            format!("{key} {asked:?} said {:?} after {trail:?}", m.message);
+        let name = format!(
+            "{key} {asked:?} said {:?} after {trail:?}",
+            m.message.text()
+        );
         let wrote = self.files();
-        let named = named(m.message.as_deref());
+        let named = named(m.message.text());
         assert!(
             history || kept_lines(&before.0, &wrote, &seen, &named, !moves),
             "wrote on lines not seen: {name}"
@@ -178,7 +180,8 @@ impl Side {
                 assert_eq!(kept, before, "dim {name}");
             }
             Some(_) if writes && self.list() => {
-                let alert = m.tone == Tone::Alert && m.message.is_some();
+                let alert = m.message.tone == Tone::Alert
+                    && m.message.text().is_some();
                 assert!(alert || wrote != before.0, "lit {name}");
             }
             _ => {}

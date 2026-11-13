@@ -56,7 +56,7 @@ fn a_task_without_links_only_says_so() {
     let before = screen(&model, 80, 24);
     let cmds = press(&mut model, "gx");
     assert_eq!(cmds.len(), 0);
-    assert_eq!(model.message.as_deref(), Some("no link on this task"));
+    assert_eq!(model.message.text(), Some("no link on this task"));
     let after = screen(&model, 80, 24);
     assert_eq!(after.get(..23), before.get(..23));
     assert_eq!(todo_of(dir.path()), SAMPLE);
@@ -379,11 +379,11 @@ fn a_message_is_cleared_two_seconds_after_it_is_put_up() {
     let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     let before = screen(&model, 80, 24).pop();
     let timer = no_link(&mut model);
-    model.tone = Tone::Alert;
+    model.message.tone = Tone::Alert;
     assert_ne!(screen(&model, 80, 24).pop(), before);
     let cmds = model.update(timer);
-    assert_eq!(model.message, None);
-    assert_eq!(model.tone, Tone::Notice);
+    assert_eq!(model.message.text(), None);
+    assert_eq!(model.message.tone, Tone::Notice);
     assert_eq!(expiry(&cmds), None);
     assert_eq!(screen(&model, 80, 24).pop(), before);
 }
@@ -395,9 +395,9 @@ fn a_timer_clears_only_the_message_it_was_set_for() {
     let second = no_link(&mut model);
     assert_ne!(first, second);
     model.update(first);
-    assert!(model.message.is_some());
+    assert!(model.message.text().is_some());
     model.update(second);
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
 }
 
 #[test]
@@ -410,9 +410,9 @@ fn a_message_put_up_again_by_the_next_key_gets_its_own_timer() {
     };
     assert_ne!(first, second);
     model.update(first);
-    assert!(model.message.is_some());
+    assert!(model.message.text().is_some());
     model.update(second);
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
 }
 
 #[test]
@@ -424,22 +424,22 @@ fn a_message_that_input_did_not_cause_is_cleared_too() {
         panic!("no timer in {cmds:?}")
     };
     model.update(timer);
-    let shown = model.message.as_deref().unwrap_or_default();
+    let shown = model.message.text().unwrap_or_default();
     assert!(shown.starts_with("can't watch"), "{shown}");
     model.update(later);
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
 }
 
 #[test]
 fn an_error_is_cleared_after_two_seconds_like_a_notice() {
     let (_dir, mut model) = workdir_model("Read file:gone.md\n", alone());
     let cmds = keys(&mut model, "gx");
-    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.tone, Tone::Alert);
     let Some(timer) = expiry(&cmds) else {
         panic!("no timer in {cmds:?}")
     };
     model.update(timer);
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
 }
 
 #[test]
@@ -463,9 +463,9 @@ fn a_warning_shown_at_launch_is_cleared_after_two_seconds() {
         panic!("no timer")
     };
     assert_eq!(expiry(&model.update(Msg::Resize(80, 24))), None);
-    assert_eq!(model.message.as_deref(), Some("config.toml: one"));
+    assert_eq!(model.message.text(), Some("config.toml: one"));
     model.update(timer);
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
 }
 
 /// The probe of a minute tick that brings a hidden task into the list:

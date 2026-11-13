@@ -217,8 +217,8 @@ impl Model {
                 let Some(step) = self.hist.stack(way).pop() else {
                     return;
                 };
-                self.message =
-                    Some(format!("{}: {}", way.past(), step.message));
+                self.message
+                    .say(format!("{}: {}", way.past(), step.message));
                 self.rewound(outcome, clock, way, step);
             }
             Err(e) => {
@@ -319,7 +319,7 @@ impl Model {
         if !self.settle(result) {
             return false;
         }
-        self.message = Some(messages::PUT_BACK.to_owned());
+        self.message.say(messages::PUT_BACK.to_owned());
         if let Some(step) = self.hist.undo.last_mut() {
             messages::PUT_BACK.clone_into(&mut step.message);
         }

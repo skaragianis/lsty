@@ -44,7 +44,7 @@ fn typing(dir: &Path) -> Model {
 
 fn stays_open(model: &Model, text: &str, name: &str) {
     assert!(field_text(model).contains(text), "{name}");
-    assert_eq!(model.message.as_deref(), Some(REFUSED), "{name}");
+    assert_eq!(model.message.text(), Some(REFUSED), "{name}");
 }
 
 // What can become of a line under a field, on a task and on `gO`, whose link
@@ -77,11 +77,7 @@ fn a_field_whose_line_changed_refuses_then_drops_on_esc() {
             keys(&mut model, start);
             if read {
                 outside(&mut model, dir.path(), disk);
-                assert_eq!(
-                    model.message.as_deref(),
-                    Some(LIST_CHANGED),
-                    "{name}"
-                );
+                assert_eq!(model.message.text(), Some(LIST_CHANGED), "{name}");
             } else {
                 fs::write(dir.path().join("todo.txt"), disk).unwrap();
             }
@@ -130,7 +126,7 @@ fn a_cancelled_draft_comes_back_only_to_its_own_line() {
     outside(&mut model, dir.path(), LINE_CHANGED);
     keys(&mut model, "u");
     assert!(model.edit.is_none());
-    assert_eq!(model.message.as_deref(), Some(LIST_CHANGED));
+    assert_eq!(model.message.text(), Some(LIST_CHANGED));
     assert_eq!(todo_of(dir.path()), LINE_CHANGED);
 }
 
@@ -228,7 +224,7 @@ fn a_refused_grant_goes_once_its_dep_is_taken_out() {
         fs::write(dir.path().join("todo.txt"), disk).unwrap();
         keys(&mut model, "<CR>");
         assert_eq!(todo_of(dir.path()), disk, "{name}");
-        assert_eq!(model.message.as_deref(), Some(DEP_REFUSED), "{name}");
+        assert_eq!(model.message.text(), Some(DEP_REFUSED), "{name}");
         assert!(!field_text(&model).is_empty(), "{name}");
         keys(&mut model, "<C-w><CR>");
         assert_eq!(todo_of(dir.path()), want, "{name}");
@@ -253,7 +249,7 @@ fn a_picked_id_goes_while_a_line_holds_it() {
     keys(&mut model, "gonew<End>");
     outside(&mut model, dir.path(), "Alpha again id:a1\nBravo\n");
     keys(&mut model, "<CR>");
-    assert_eq!(model.message.as_deref(), Some(DEP_REFUSED));
+    assert_eq!(model.message.text(), Some(DEP_REFUSED));
     keys(&mut model, "<C-w>dep:Alp<Tab><CR>");
     let want = "Alpha again id:a1\n2026-09-29 new dep:a1 id:t001\nBravo\n";
     assert_eq!(todo_of(dir.path()), want);
@@ -266,7 +262,7 @@ fn a_picked_id_goes_while_a_line_holds_it() {
     outside(&mut model, dir.path(), disk);
     keys(&mut model, " dep:Bra<Tab><CR>");
     assert_eq!(todo_of(dir.path()), disk);
-    assert_eq!(model.message.as_deref(), Some(DEP_REFUSED));
+    assert_eq!(model.message.text(), Some(DEP_REFUSED));
 }
 
 // A line that reads as the field opened on it again differs in nothing, even
@@ -283,9 +279,9 @@ fn a_line_that_comes_back_lets_the_field_write() {
         let mut model = typing(dir.path());
         outside(&mut model, dir.path(), between);
         keys(&mut model, "<CR>");
-        assert_eq!(model.message.as_deref(), Some(REFUSED), "{name}");
+        assert_eq!(model.message.text(), Some(REFUSED), "{name}");
         outside(&mut model, dir.path(), back);
-        assert_eq!(model.message, None, "{name}");
+        assert_eq!(model.message.text(), None, "{name}");
         keys(&mut model, "<Esc>");
         assert!(model.edit.is_none(), "{name}");
         let want = back.replace("+work", "+work more");
@@ -303,7 +299,7 @@ fn a_line_that_comes_back_lets_the_field_write() {
         outside(&mut model, dir.path(), end);
         keys(&mut model, "<CR>");
         assert_eq!(todo_of(dir.path()), end);
-        assert_eq!(model.message.as_deref(), Some(REFUSED));
+        assert_eq!(model.message.text(), Some(REFUSED));
     }
 }
 
@@ -319,7 +315,7 @@ fn go_on_a_changed_row_keeps_what_was_typed() {
         keys(&mut model, key);
         keys(&mut model, "New<CR>");
         assert!(field_text(&model).contains("New"), "{key}");
-        assert_eq!(model.message.as_deref(), Some(says), "{key}");
+        assert_eq!(model.message.text(), Some(says), "{key}");
         assert_eq!(todo_of(dir.path()), LINE_CHANGED, "{key}");
     }
 }
@@ -387,7 +383,7 @@ fn a_field_writes_beside_its_line_or_about_where_it_was() {
         let mut model = model_of(dir.path());
         keys(&mut model, start);
         outside(&mut model, dir.path(), &disk);
-        assert_eq!(model.message, None, "{start} {disk}");
+        assert_eq!(model.message.text(), None, "{start} {disk}");
         keys(&mut model, "<CR>");
         assert_eq!(todo_of(dir.path()), want, "{start} {disk}");
     }

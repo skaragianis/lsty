@@ -115,7 +115,7 @@ fn outside(dir: &Path, from: &str, to: &str) {
 /// `key` says to look again, over the files as they are.
 fn looks_again(model: &mut Model, key: &str, name: &str) {
     keys(model, key);
-    assert_eq!(model.message.as_deref(), Some(LOOK_AGAIN), "{name}");
+    assert_eq!(model.message.text(), Some(LOOK_AGAIN), "{name}");
     let shown = model.snap.todo().to_bytes();
     assert_eq!(shown, todo_of(&model.deps.cwd).as_bytes(), "{name}");
 }
@@ -135,7 +135,7 @@ fn a_dim_press_leaves_the_selection_and_the_repeat_alone() {
         let before = files(dir.path());
         keys(&mut model, key);
         assert_eq!(files(dir.path()), before, "{name}");
-        assert_eq!(model.tone, Tone::Alert, "{name}");
+        assert_eq!(model.message.tone, Tone::Alert, "{name}");
         assert_eq!(model.key_mode(), mode, "{name}");
         assert_eq!(model.selected_rows(), selected, "{name}");
         keys(&mut model, next);
@@ -277,7 +277,7 @@ fn a_press_on_an_empty_list_says_nothing() {
             .unwrap_or_else(|e| panic!("{e}"));
         keys(&mut model, "x");
         assert!(model.rows.is_empty(), "{to}");
-        assert_eq!(model.message, None, "{to}");
+        assert_eq!(model.message.text(), None, "{to}");
         assert_eq!(files(dir.path())[0], to.as_bytes());
     }
 }
@@ -338,7 +338,7 @@ fn a_refused_press_does_not_wait_for_a_held_lock() {
         let start = Instant::now();
         keys(&mut model, key);
         assert!(start.elapsed() < Duration::from_secs(5), "{key}: waited");
-        assert_eq!(model.message.as_deref(), says, "{key}");
+        assert_eq!(model.message.text(), says, "{key}");
         assert_eq!(model.rows.len(), rows, "{key}: the list as it was");
         assert_eq!(files(dir.path())[0], to.as_bytes(), "{key}");
         held.release().unwrap_or_else(|e| panic!("{}", e.message()));
@@ -443,10 +443,11 @@ fn walk(place: &Place, action: Action) -> Option<(bool, bool, bool)> {
     }
     let size = (place.1, 24);
     let is_dim = dim(model.answers()(action));
-    model.message = None;
+    model.message.put(None);
     let before = seen(dir.path(), &model, size, opened.get());
     let cmds = keys(&mut model, "<F9>");
-    let said = model.message.take().is_some();
+    let said = model.message.text().is_some();
+    model.message.put(None);
     let after = seen(dir.path(), &model, size, opened.get());
     let ran = cmds.iter().any(|cmd| {
         !matches!(

@@ -437,7 +437,7 @@ impl Model {
         let added = self.finish(result);
         if let Some(at) = added.filter(|_| self.deps.config.keep_adding) {
             self.open_new_at(Some(at), true);
-            self.message = self.message.take().map(|said| {
+            self.message.edit(|said| {
                 said.replace(messages::STICKY, messages::STICKY_IN_FIELD)
             });
         }
@@ -455,7 +455,7 @@ impl Model {
     /// Keeps the refusal on the status line while the field stays open.
     pub(crate) fn keep_refusal(&mut self) {
         let refused = self.edit.as_ref().and_then(|d| d.refused);
-        if let Some(said) = refused.filter(|_| self.message.is_none()) {
+        if let Some(said) = refused.filter(|_| self.message.text().is_none()) {
             self.refuse_field(said);
         }
     }
@@ -524,7 +524,7 @@ impl Model {
         self.kept = self.edit.take();
         self.reset_keys();
         self.scroll();
-        self.message = Some(DISCARDED.to_owned());
+        self.message.say(DISCARDED.to_owned());
     }
 
     /// `u` with a draft kept: opens the field again as it was.
@@ -561,7 +561,7 @@ impl Model {
                 Change::Lost if draft.bound() && draft.refused.is_none() => {
                     self.alert(ops::LIST_CHANGED.to_owned());
                 }
-                Change::Found if draft.bound() => self.message = None,
+                Change::Found if draft.bound() => self.message.put(None),
                 Change::Lost | Change::Found | Change::Same => {}
             }
         }

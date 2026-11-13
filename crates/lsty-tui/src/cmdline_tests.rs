@@ -257,7 +257,7 @@ fn undo_and_redo_run_from_the_line() {
     let data = todo_of(dir.path());
     assert!(data.starts_with("x "), "{data}");
     line(&mut model, "do 1");
-    let said = (model.tone, model.message.as_deref());
+    let said = (model.message.tone, model.message.text());
     assert_eq!(said, (Tone::Alert, Some("1 is already done")));
 }
 
@@ -573,7 +573,7 @@ fn a_line_that_cannot_run_is_refused() {
         assert!(model.line.is_some(), "{text}");
         let shown = format!("{} {}", above(&model), status(&model));
         assert!(shown.contains(says), "{text}: {shown}");
-        let said = model.message.as_deref().unwrap_or_default();
+        let said = model.message.text().unwrap_or_default();
         let lists = |s: &str| s.matches(" — ").count();
         assert_eq!(lists(said), lists(says), "values once: {said}");
         assert_eq!(todo_of(dir.path()), before, "{text}");

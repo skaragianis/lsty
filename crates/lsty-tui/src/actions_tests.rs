@@ -177,7 +177,7 @@ fn a_write_keeps_the_undo_record_and_the_cursor_on_its_task() {
     press(&mut model, "jjgp");
     assert_eq!(model.hist.undo.len(), 1);
     assert_eq!(model.cursor, 2);
-    assert_eq!(model.tone, Tone::Notice);
+    assert_eq!(model.message.tone, Tone::Notice);
     press(&mut model, "dd");
     assert_eq!(model.hist.undo.len(), 2);
     assert_eq!(model.cursor, 2, "the next shown task");
@@ -412,7 +412,7 @@ fn a_key_aims_from_the_list_it_was_pressed_on() {
         let (dir, mut model) = ahead(shown, outside);
         keys(&mut model, typed);
         assert_eq!(files_of(&dir), latin(outside), "{name}");
-        let said = (model.tone, model.message.as_deref());
+        let said = (model.message.tone, model.message.text());
         assert_eq!(said, (Tone::Alert, Some(LIST_CHANGED)), "{name}");
         assert_eq!(model.hist.undo.len(), 0, "{name}");
         let panel = typed.contains("<C-w>2");
@@ -439,7 +439,7 @@ fn a_key_on_a_line_that_only_shifted_writes_where_it_stands() {
         let (dir, mut model) = ahead(shown, outside);
         keys(&mut model, typed);
         let (want, says) = want.split_once(" says ").unwrap_or((want, ""));
-        let said = model.message.as_deref().unwrap_or_default();
+        let said = model.message.text().unwrap_or_default();
         assert!(said.contains(says), "{typed} {outside}: {said}");
         let want = latin(&want.replace("{D}", "x 2026-09-29 "));
         assert_eq!(files_of(&dir), want, "{typed} {outside}");
@@ -459,14 +459,14 @@ fn a_refused_write_changes_nothing_and_records_nothing() {
     let before = todo_of(dir.path());
     let mut model = model_of(dir.path(), alone());
     press(&mut model, "3t");
-    assert_eq!(model.message.as_deref(), Some(messages::SOME_DONE));
-    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.text(), Some(messages::SOME_DONE));
+    assert_eq!(model.message.tone, Tone::Alert);
     keys(&mut model, "jjjx");
-    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.tone, Tone::Alert);
     assert_eq!(todo_of(dir.path()), before);
     assert_eq!(model.hist.undo.len(), 0);
     press(&mut model, "k");
-    assert_eq!(model.tone, Tone::Notice, "a key clears the tone");
+    assert_eq!(model.message.tone, Tone::Notice, "a key clears the tone");
 }
 
 #[test]
@@ -480,13 +480,13 @@ fn a_busy_lock_changes_nothing_and_records_nothing() {
     let mut held = held_lock(dir.path());
     press(&mut model, "x");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some(
             "todo.txt is busy (locked by another writer) \
              — nothing changed, try again"
         )
     );
-    assert_eq!(model.tone, Tone::Alert);
+    assert_eq!(model.message.tone, Tone::Alert);
     assert_eq!(model.hist.undo.len(), 0);
     held.release().unwrap_or_else(|e| panic!("{}", e.message()));
     press(&mut model, "x");
@@ -521,8 +521,8 @@ fn the_state_decides_what_t_does() {
             "x 2026-09-29 A started:2026-09-29T0900Z ended:2026-09-29T0900Z\n",
         ]
     );
-    assert_eq!(model.tone, Tone::Alert);
-    assert_eq!(model.message.as_deref(), Some("A is done — x reopens it"));
+    assert_eq!(model.message.tone, Tone::Alert);
+    assert_eq!(model.message.text(), Some("A is done — x reopens it"));
     assert_eq!(model.hist.undo.len(), 4, "the refused t records nothing");
 }
 

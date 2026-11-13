@@ -38,7 +38,7 @@ fn repeat_with_nothing_to_repeat_does_nothing() {
     let mut model = model_of(dir.path());
     press(&mut model, "j.");
     assert_eq!(todo_of(dir.path()), LIST);
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
     press(&mut model, "s.");
     assert_eq!(todo_of(dir.path()), LIST);
     assert_eq!(kept(&model), (0, 0));
@@ -111,7 +111,7 @@ fn nothing_to_undo_or_redo() {
     let dir = workdir(LIST);
     let mut model = model_of(dir.path());
     press(&mut model, "u");
-    assert_eq!(model.message.as_deref(), Some("nothing to undo"));
+    assert_eq!(model.message.text(), Some("nothing to undo"));
     press(&mut model, "xu");
     assert_eq!(kept(&model), (0, 1));
     press(&mut model, "gp");
@@ -141,7 +141,7 @@ fn a_busy_lock_keeps_the_record_and_a_changed_line_drops_it() {
     assert_eq!(kept(&model), (0, 0));
     assert!(model.line.is_none(), "the line closes");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("can't undo: the list changed — look again")
     );
 }
@@ -295,7 +295,7 @@ fn lights_when_read(
     );
     keys(model, "t");
     assert_ne!(todo_of(dir), on_disk, "{name}: wrote");
-    assert_eq!(model.message.as_deref(), Some(PUT_BACK), "{name}");
+    assert_eq!(model.message.text(), Some(PUT_BACK), "{name}");
 }
 
 // An undo or redo, or the `t` that puts claims back, that writes on a line
@@ -331,7 +331,7 @@ fn an_outside_edit_under_an_undo_or_redo() {
                 want.unwrap_or(&on_disk),
                 "{name}"
             );
-            let said = model.message.as_deref().unwrap_or_default();
+            let said = model.message.text().unwrap_or_default();
             assert_eq!(said == refusal, want.is_none(), "{name}: {said}");
             let left = (undo - dropped.0, redo - dropped.1);
             let held = want.is_some() || kept(&model) == left;

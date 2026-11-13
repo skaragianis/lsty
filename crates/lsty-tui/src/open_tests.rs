@@ -68,7 +68,7 @@ fn a_text_link_asks_for_one_editor_and_changes_no_state() {
     let cmds = press(&mut model, "gx");
     assert_eq!(cmds.len(), 1);
     assert!(matches!(cmds.first(), Some(Cmd::Edit(_))));
-    assert_eq!(model.message, None);
+    assert_eq!(model.message.text(), None);
     assert!(model.opening.is_none());
 }
 
@@ -76,16 +76,10 @@ fn a_text_link_asks_for_one_editor_and_changes_no_state() {
 fn a_failed_editor_is_an_error_message() {
     let (_dir, mut model) = linked(None);
     model.update(Msg::Edited(Err("exit status 1".to_owned())));
-    assert_eq!(
-        model.message.as_deref(),
-        Some("editor exited: exit status 1")
-    );
-    assert_eq!(model.tone, crate::messages::Tone::Alert);
+    assert_eq!(model.message.text(), Some("editor exited: exit status 1"));
+    assert_eq!(model.message.tone, crate::messages::Tone::Alert);
     model.update(Msg::Edited(Ok(())));
-    assert_eq!(
-        model.message.as_deref(),
-        Some("editor exited: exit status 1")
-    );
+    assert_eq!(model.message.text(), Some("editor exited: exit status 1"));
 }
 
 #[test]
@@ -132,7 +126,7 @@ fn a_link_past_the_last_counts_them() {
     ] {
         let (_dir, mut model) = workdir_model(todo, alone());
         keys(&mut model, "9gx");
-        assert_eq!(model.message.as_deref(), Some(want));
+        assert_eq!(model.message.text(), Some(want));
     }
 }
 
@@ -212,8 +206,8 @@ fn a_missing_target_is_an_error_message() {
     let (_dir, mut model) = workdir_model("Read file:gone.md\n", alone());
     let cmds = press(&mut model, "gx");
     assert_eq!(cmds, Vec::new());
-    assert!(model.message.is_some());
-    assert_eq!(model.tone, crate::messages::Tone::Alert);
+    assert!(model.message.text().is_some());
+    assert_eq!(model.message.tone, crate::messages::Tone::Alert);
 }
 
 #[test]
@@ -305,7 +299,7 @@ fn a_url_the_opener_cannot_open_is_copied_instead() {
     assert!(expiry(&cmds).is_some(), "{cmds:?}");
     assert_eq!(board.written(), vec![b"https://x.org/a".to_vec()]);
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("can't open https://x.org/a: nope; copied it instead")
     );
 }
@@ -317,10 +311,10 @@ fn a_failed_copy_after_a_failed_opener_is_said_too() {
     let mut model = failing_opener(&board);
     press(&mut model, "gx");
     assert_eq!(
-        model.message.as_deref(),
+        model.message.text(),
         Some("can't open https://x.org/a: nope; copied it instead; boom")
     );
-    assert_eq!(model.tone, crate::messages::Tone::Alert);
+    assert_eq!(model.message.tone, crate::messages::Tone::Alert);
 }
 
 /// A URL word with a C1 control character (as UTF-8) and one with the

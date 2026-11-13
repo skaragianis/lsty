@@ -146,7 +146,7 @@ impl Model {
             panel.active.clear();
         }
         self.refresh();
-        self.message = Some("filters cleared".to_owned());
+        self.message.say("filters cleared".to_owned());
     }
 
     /// Lists the rows again for the panel steps that wait for it. Only
