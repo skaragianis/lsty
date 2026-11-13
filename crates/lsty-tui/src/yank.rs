@@ -8,7 +8,7 @@ use lsty_core::{
     errs::Source,
     keys::Action,
     list::{Snapshot, TaskId},
-    ops::{self, Change, ChangeKind, Landing, PasteLine, Place, Relink, Seen},
+    ops::{self, Change, ChangeKind, PasteLine, Place, Relink, Seen},
     todotxt::{Line, trim},
 };
 
@@ -20,7 +20,7 @@ use crate::{
     model::Model,
     msg::Cmd,
     press::{Refusal, decide},
-    track::{Remap, landed_at},
+    track::Moves,
 };
 
 /// A line of the last yank, and the dependents a delete of it unlinked.
@@ -102,16 +102,14 @@ impl Yank {
         }
     }
 
-    /// Follows the kept dependents to their lines in a new reading. `outside`
-    /// compares it with the one before, when no write of this session made
-    /// it: what that moved or twinned is not written on any more.
-    fn follow(&mut self, moved: &Remap, outside: Option<&Landing>) {
+    /// Follows the kept dependents to their lines in a new reading. What an
+    /// outside edit moved or twinned is not written on any more.
+    fn follow(&mut self, moves: &Moves<'_>) {
         for link in self.lines.iter_mut().flat_map(|l| &mut l.links) {
             let at = link.nr.map(|nr| (Source::Todo, nr));
-            link.lost |= outside
-                .zip(at)
-                .is_some_and(|(l, at)| landed_at(l, at).is_none());
-            link.nr = at.and_then(|at| moved.track(at)).map(|(_, nr)| nr);
+            link.lost |= at.is_some_and(|at| moves.changed_outside(at));
+            link.nr =
+                at.and_then(|at| moves.remap.track(at)).map(|(_, nr)| nr);
         }
     }
 }
@@ -247,13 +245,9 @@ impl Model {
     }
 
     /// Follows the kept dependents to their lines in a new reading.
-    pub(crate) fn remap_clip(
-        &mut self,
-        moved: &Remap,
-        outside: Option<&Landing>,
-    ) {
+    pub(crate) fn remap_clip(&mut self, moves: &Moves<'_>) {
         if let Some(yank) = &mut self.clip {
-            yank.follow(moved, outside);
+            yank.follow(moves);
         }
     }
 

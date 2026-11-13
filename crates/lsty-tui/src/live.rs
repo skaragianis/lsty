@@ -12,7 +12,7 @@ use lsty_core::{
     errs::{self, Code},
     list::{self, Params, Snapshot},
     lock::Cancel,
-    ops::{Change, Landing},
+    ops::{Change, UndoRecord},
     todotxt::File,
 };
 
@@ -24,7 +24,7 @@ use crate::{
     motion::View,
     msg::{Cmd, Msg},
     rows::Row,
-    track::{Place, Remap, Wrote, landed_at},
+    track::{Moves, Place, Wrote},
     watch::{Notice, Sink, Watch, Watcher},
 };
 
@@ -334,22 +334,21 @@ impl Model {
         let typed = self.typed_lines();
         let old = std::mem::replace(&mut self.snap, snap);
         let record = wrote.map(|w| w.record);
-        let moved = Remap::new(&old, &self.snap, record, place.as_slice());
-        let landing = wrote.is_none().then(|| Landing::of(&old, &self.snap));
-        self.live.shown.deleted = !self.file_exists()
-            && (old.found().state == FileState::Exists
-                || self.live.shown.deleted);
+        let moves = Moves::new(&old, &self.snap, record, place.as_slice());
+        let was = old.found().state == FileState::Exists;
+        let gone = was || self.live.shown.deleted;
+        self.live.shown.deleted = gone && !self.file_exists();
         self.live.serial += 1;
         self.clock = clock;
-        self.hist.follow(&moved);
-        self.remap_clip(&moved, landing.as_ref());
-        self.sticky.remap(&moved);
-        self.remap_peek(&moved);
-        self.remap_pointer(&moved);
+        self.hist.follow(&moves.remap);
+        self.remap_clip(&moves);
+        self.sticky.remap(&moves.remap);
+        self.remap_peek(&moves.remap);
+        self.remap_pointer(&moves.remap);
         self.land_prompt(&old);
-        self.remap_drafts(&moved, &old, landing.as_ref());
+        self.remap_drafts(&moves);
         if let Some(w) = wrote {
-            self.stick(&moved, w.touched);
+            self.stick(&moves.remap, w.touched);
         }
         // An open field aims at its place. That is in the coordinates of
         // the reading before a write, which is right because the line the
@@ -358,14 +357,18 @@ impl Model {
         let old_rows = std::mem::take(&mut self.rows);
         self.rebuild_rows();
         self.rebuild_panels();
-        let aim = spot.or_else(|| match &landing {
-            Some(landing) => place
-                .and_then(|at| landed_at(landing, at))
-                .filter(|at| self.row_at(*at).is_some()),
-            None => place.map(|at| moved.place(at)),
+        let aim = spot.or_else(|| {
+            let aim = place.and_then(|at| moves.aim(at));
+            aim.filter(|at| !moves.outside() || self.row_at(*at).is_some())
         });
-        let landed =
-            wrote.and_then(|w| self.landing(&old_rows, &moved, w, place));
+        let landed = wrote.and_then(|wrote| {
+            self.landing(&AfterWrite {
+                old: &old_rows,
+                moves: &moves,
+                wrote,
+                cursor: place,
+            })
+        });
         let chose = landed.is_some();
         let (aim, offset, reveal) = match landed {
             // The top of the view stays; the cursor is shown by the
@@ -377,11 +380,8 @@ impl Model {
             Some(_) => self.follow(aim, offset),
             None => self.stay_on_row(),
         }
-        self.resume(ends, &old_rows, |at| match &landing {
-            Some(landing) => landed_at(landing, at),
-            None => moved.track(at),
-        });
-        self.check_typed(typed, landing.as_ref());
+        self.resume(ends, &old_rows, |at| moves.kept(at));
+        self.check_typed(typed, &moves);
         if ends.is_some() && self.visual.is_none() {
             self.reset_keys();
         }
@@ -406,85 +406,66 @@ impl Model {
     /// Notes that the keys typed, or the selection, are no longer about
     /// the same lines. They stay, for a motion to go on; the first key that
     /// would write refuses (see [`crate::press::writes_line`]).
-    fn check_typed(
-        &mut self,
-        typed: Option<Vec<Place>>,
-        landing: Option<&Landing>,
-    ) {
-        let (Some(typed), Some(landing)) = (typed, landing) else {
+    fn check_typed(&mut self, typed: Option<Vec<Place>>, moves: &Moves<'_>) {
+        let Some(typed) = typed.filter(|_| moves.outside()) else {
             return;
         };
         let now = self.lines_under(self.typed_count());
         let same = typed
             .iter()
-            .map(|at| landed_at(landing, *at))
+            .map(|at| moves.kept(*at))
             .eq(now.into_iter().map(Some));
         self.keys_lost |= !same;
     }
 
     /// Where a write sends the cursor, when it takes it off its task. It
-    /// goes by the action's own lines (see [`Change::own`]). A delete or
-    /// a completion of the cursor's task sends it to the first row below
-    /// the cursor that the write did not act on; a delete with none
-    /// below takes the nearest above. An undo or redo sends it to the
-    /// first row of the lines it made appear, else the nearest row left
-    /// below the topmost line it removed, else the topmost row of the
-    /// lines it changed.
-    fn landing(
-        &self,
-        old: &[Row],
-        moved: &Remap,
-        wrote: &Wrote<'_>,
-        cursor: Option<Place>,
-    ) -> Option<Place> {
-        let record = wrote.record;
-        let own: Vec<_> = record
-            .files
-            .iter()
-            .flat_map(|f| f.changes.iter().map(|c| (f.source, c)))
-            .filter(|(_, c)| c.own)
-            .collect();
-        let places = |keep: fn(&Change) -> bool,
-                      nr: fn(&Change) -> Option<_>| {
-            let at = own.iter().filter(|(_, c)| keep(c));
-            at.filter_map(|&(s, c)| Some((s, nr(c)?)))
-                .collect::<HashSet<Place>>()
-        };
-        let appeared = places(|c| c.before.is_empty(), |c| c.nr_after);
-        let vanished = places(|c| c.after.is_empty(), |c| c.nr_before);
-        let acted = places(|_| true, |c| c.nr_before);
-        let from = if wrote.undone {
-            let present = places(|_| true, |c| c.nr_after);
-            let mut rows =
-                self.rows.iter().filter(|r| present.contains(&r.place()));
-            let new = rows.clone().find(|r| appeared.contains(&r.place()));
-            if let Some(row) = new {
-                return Some(row.place());
-            }
-            match old.iter().position(|r| vanished.contains(&r.place())) {
-                Some(at) => at,
-                None => return rows.next().map(Row::place),
-            }
+    /// goes by the action's own lines (see [`Change::own`]): an undo or
+    /// redo by [`Self::undo_landing`], a delete or a completion of the
+    /// cursor's task by [`Self::removal_landing`].
+    fn landing(&self, w: &AfterWrite<'_>) -> Option<Place> {
+        let acts = Acts::of(w.wrote.record);
+        if w.wrote.undone {
+            self.undo_landing(w, &acts)
         } else {
-            if !matches!(record.action.as_str(), "del" | "do" | "wontdo")
-                || !acted.contains(&cursor?)
-            {
-                return None;
-            }
-            self.cursor
-        };
-        let left = |r: &&Row| {
-            moved.track(r.place()).is_some()
-                && (wrote.undone || !acted.contains(&r.place()))
-        };
-        let below = old.iter().skip(from + 1).find(left);
-        // A completion that leaves no row below stays on its task.
-        let up = wrote.undone || record.action == "del";
-        let above = old.iter().take(from).rev().find(left).filter(|_| up);
-        let stay = wrote.touched.iter().find(|t| !up && t.was == cursor);
-        let stay = stay.map(|t| t.now);
-        let at = below.or(above).map(|r| moved.place(r.place()));
-        at.or(stay)
+            self.removal_landing(w, &acts)
+        }
+    }
+
+    /// An undo or redo sends the cursor to the first row of the lines it
+    /// made appear, else the nearest row left below the topmost line it
+    /// removed, else the topmost row of the lines it changed.
+    fn undo_landing(&self, w: &AfterWrite<'_>, acts: &Acts) -> Option<Place> {
+        let mut rows = self
+            .rows
+            .iter()
+            .filter(|r| acts.present.contains(&r.place()));
+        if let Some(row) =
+            rows.clone().find(|r| acts.appeared.contains(&r.place()))
+        {
+            return Some(row.place());
+        }
+        let vanished = w
+            .old
+            .iter()
+            .position(|r| acts.vanished.contains(&r.place()));
+        match vanished {
+            Some(at) => w.beside(&HashSet::new(), at),
+            None => rows.next().map(Row::place),
+        }
+    }
+
+    /// A delete or a completion of the cursor's task sends the cursor to
+    /// the first row below it that the write did not act on; a delete with
+    /// none below takes the nearest above.
+    fn removal_landing(
+        &self,
+        w: &AfterWrite<'_>,
+        acts: &Acts,
+    ) -> Option<Place> {
+        let removal =
+            matches!(w.wrote.record.action.as_str(), "del" | "do" | "wontdo");
+        let ours = removal && acts.acted.contains(&w.cursor?);
+        ours.then(|| w.beside(&acts.acted, self.cursor))?
     }
 
     /// What the status line says about the files.
@@ -498,5 +479,68 @@ impl Model {
             out.push(format!("{name} is busy; showing the last state read"));
         }
         out
+    }
+}
+
+/// What a write did, and what the cursor was on before it.
+struct AfterWrite<'a> {
+    /// The rows before the write.
+    old: &'a [Row],
+    moves: &'a Moves<'a>,
+    wrote: &'a Wrote<'a>,
+    cursor: Option<Place>,
+}
+
+impl AfterWrite<'_> {
+    /// Where the cursor goes from the row `from` of the rows before: the
+    /// first row below that is still there and not in `acted`; an undo or
+    /// redo, or a delete with none below, takes the nearest above. A
+    /// completion that leaves no row below stays on its task.
+    fn beside(&self, acted: &HashSet<Place>, from: usize) -> Option<Place> {
+        let (wrote, remap) = (self.wrote, &self.moves.remap);
+        let left = |r: &&Row| {
+            remap.track(r.place()).is_some() && !acted.contains(&r.place())
+        };
+        let below = self.old.iter().skip(from + 1).find(left);
+        let up = wrote.undone || wrote.record.action == "del";
+        let above = self.old.iter().take(from).rev().find(left).filter(|_| up);
+        let stay = wrote.touched.iter().find(|t| !up && t.was == self.cursor);
+        let at = below.or(above).map(|r| remap.place(r.place()));
+        at.or_else(|| stay.map(|t| t.now))
+    }
+}
+
+/// The places of the lines that the own changes of a write acted on.
+struct Acts {
+    /// Lines that appeared, now.
+    appeared: HashSet<Place>,
+    /// Lines that went, as they were.
+    vanished: HashSet<Place>,
+    /// Every line, as it was.
+    acted: HashSet<Place>,
+    /// Every line, now.
+    present: HashSet<Place>,
+}
+
+impl Acts {
+    fn of(record: &UndoRecord) -> Self {
+        let own: Vec<_> = record
+            .files
+            .iter()
+            .flat_map(|f| f.changes.iter().map(|c| (f.source, c)))
+            .filter(|(_, c)| c.own)
+            .collect();
+        let places = |keep: fn(&Change) -> bool,
+                      nr: fn(&Change) -> Option<_>| {
+            let at = own.iter().filter(|(_, c)| keep(c));
+            at.filter_map(|&(s, c)| Some((s, nr(c)?)))
+                .collect::<HashSet<Place>>()
+        };
+        Self {
+            appeared: places(|c| c.before.is_empty(), |c| c.nr_after),
+            vanished: places(|c| c.after.is_empty(), |c| c.nr_before),
+            acted: places(|_| true, |c| c.nr_before),
+            present: places(|_| true, |c| c.nr_after),
+        }
     }
 }

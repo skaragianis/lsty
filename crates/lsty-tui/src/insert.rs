@@ -22,7 +22,7 @@ use crate::{
     rows::Row,
     segments::{at_end, cleared, described, line_field},
     text::head,
-    track::{Place, Remap, landed_at},
+    track::{Moves, Place, landed_at},
 };
 
 /// What the status line says after a draft was thrown away.
@@ -150,16 +150,21 @@ impl Draft {
     /// Takes the draft to a later reading. A line that is not kept is lost
     /// until the rule keeps it again from the last reading it stood in; a new
     /// task goes about where its anchor was. Says what became of the line.
-    fn follow(&mut self, r: &Moves<'_>) -> Change {
+    fn follow(
+        &mut self,
+        moves: &Moves<'_>,
+        landing: &Landing,
+        now: &Snapshot,
+    ) -> Change {
         for grant in &mut self.comp.grants {
-            grant.land(r.landing);
+            grant.land(landing);
         }
         let Some(at) = self.at else {
             return Change::Same;
         };
         let kept = match &self.lost {
-            Some((known, was)) => landed_at(&Landing::of(known, r.now), *was),
-            None => landed_at(r.landing, at),
+            Some((known, was)) => landed_at(&Landing::of(known, now), *was),
+            None => moves.kept(at),
         };
         let change = match (self.lost.is_some(), kept.is_some()) {
             (true, true) => {
@@ -167,17 +172,17 @@ impl Draft {
                 Change::Found
             }
             (false, false) => {
-                self.lost = Some((r.old.clone(), at));
+                self.lost = Some((moves.old.clone(), at));
                 Change::Lost
             }
             _ => Change::Same,
         };
-        if r.moved.track(at).is_none()
+        if moves.remap.track(at).is_none()
             && let Subject::New { below, .. } = &mut self.subject
         {
             *below = false;
         }
-        self.at = kept.or_else(|| Some(r.moved.place(at)));
+        self.at = kept.or_else(|| Some(moves.remap.place(at)));
         change
     }
 }
@@ -187,14 +192,6 @@ enum Change {
     Same,
     Lost,
     Found,
-}
-
-/// How the lines of one reading reached the next.
-pub(crate) struct Moves<'a> {
-    pub(crate) moved: &'a Remap,
-    pub(crate) landing: &'a Landing,
-    pub(crate) old: &'a Snapshot,
-    pub(crate) now: &'a Snapshot,
 }
 
 /// The place of the first line an operation wrote.
@@ -551,27 +548,16 @@ impl Model {
     /// Takes the drafts to a new reading, and says so once when the line
     /// being edited changed. A write of the session drops the kept draft,
     /// and the field it wrote from is about to end.
-    pub(crate) fn remap_drafts(
-        &mut self,
-        moved: &Remap,
-        old: &Snapshot,
-        outside: Option<&Landing>,
-    ) {
-        let Some(landing) = outside else {
+    pub(crate) fn remap_drafts(&mut self, moves: &Moves<'_>) {
+        let Some(landing) = &moves.landing else {
             self.kept = None;
             return;
         };
-        let since = Moves {
-            moved,
-            landing,
-            old,
-            now: &self.snap,
-        };
         if let Some(draft) = &mut self.kept {
-            draft.follow(&since);
+            draft.follow(moves, landing, &self.snap);
         }
         if let Some(draft) = &mut self.edit {
-            match draft.follow(&since) {
+            match draft.follow(moves, landing, &self.snap) {
                 Change::Lost if draft.bound() && draft.refused.is_none() => {
                     self.alert(ops::LIST_CHANGED.to_owned());
                 }
