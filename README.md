@@ -18,11 +18,11 @@ Terminal lists for Humans and Agents.
 
 ![lsty navigating, adding, filtering, and completing tasks while an agent works](https://raw.githubusercontent.com/skaragianis/lsty/main/assets/demo.gif)
 
-lsty is a Vim-inspired [todo.txt](http://todotxt.org/) TUI written in Rust,
-and a [todo.sh](https://github.com/todotxt/todo.txt-cli)-inspired CLI with
+lsty is a Vim-inspired [todo.txt](http://todotxt.org/) TUI and a
+[todo.sh](https://github.com/todotxt/todo.txt-cli)-inspired CLI, with
 extensions for safe concurrent use by humans, scripts, and LLM agents.
 
-## What It's For
+## What's It For?
 
 - Personal todo list that includes recurring tasks
 - Human in the loop with agents posting decisions for approval
@@ -33,11 +33,11 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 
 ## Features
 
-- Watch agents work lists in "real-time"
-- Vim-inspired TUI with configurable key bindings and themes. Normal, insert,
-  visual and command-line modes. `u` for undo and `<C-r>` for redo
+- Watch agents work on lists in "real-time"
+- Configurable key bindings and themes. Normal, insert, visual and command-line
+  modes. `u` for undo and `<C-r>` for redo
 - Priorities, projects, contexts, dependencies, dates, and links
-- Extensive filtering combined with and (a space), or (`|`) and not (`-`)
+- Extensive filtering with and (a space), or (`|`) and not (`-`)
 - Auto-completion of commands, filters, projects and contexts
 - Nesting of projects and contexts with `.` or `/`
 - A CLI for listing, adding, editing, waiting on, and completing tasks
