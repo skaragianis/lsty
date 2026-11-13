@@ -10,6 +10,7 @@ use lsty_core::{
 use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
+    focus::Keys,
     hints::{cancelling, dim, hints, label},
     messages::Tone,
     model::Model,
@@ -93,7 +94,7 @@ impl Model {
     fn hidden_hints(&self) -> &'static [Action] {
         if self.typing_help() || self.typing_theme() {
             &[Action::CompleteNext]
-        } else if self.opening.is_some()
+        } else if self.keys_to() == Keys::Picker
             || self.output.as_ref().is_some_and(|o| o.help.is_none())
         {
             &[Action::Search]

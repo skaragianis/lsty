@@ -22,7 +22,7 @@ use crate::{
     deps::{Deps, Start},
     filters,
     filters::Refilter,
-    focus::Focus,
+    focus::{Focus, Keys},
     hints,
     history::{Again, History},
     insert::Draft,
@@ -415,12 +415,13 @@ impl Model {
     }
 
     fn feed(&mut self, stroke: Stroke) -> Vec<Cmd> {
-        if self.edit.is_some() {
+        let keys = self.keys_to();
+        if keys == Keys::Field {
             self.reveal();
             self.edit_press(stroke);
             return Vec::new();
         }
-        let Some(matcher) = self.matchers.get_mut(&self.key_mode()) else {
+        let Some(matcher) = self.matchers.get_mut(&self.mode_of(keys)) else {
             return Vec::new();
         };
         let fed = matcher.feed(stroke);
@@ -437,24 +438,39 @@ impl Model {
         {
             return vec![Cmd::Quit];
         }
-        let lost = !matches!(fed.outcome, Outcome::Pending)
-            && std::mem::take(&mut self.keys_lost);
-        self.keys_lost |= lost && self.visual.is_some();
-        if self.opening.is_some() {
-            return self.picker_keys(stroke, &fed);
+        let lost = self.lost_keys(fed.outcome);
+        match keys {
+            Keys::Picker => self.picker_keys(stroke, &fed),
+            Keys::Theme => {
+                self.theme_keys(&fed);
+                Vec::new()
+            }
+            Keys::Output => {
+                self.output_keys(&fed);
+                Vec::new()
+            }
+            Keys::Line => self.prompt_keys(fed),
+            Keys::List => self.list_keys(fed.outcome, lost),
+            Keys::Field => Vec::new(),
         }
-        if self.choosing.is_some() {
-            self.theme_keys(&fed);
-            return Vec::new();
+    }
+
+    /// Whether the keys typed before this press were lost: the lines they
+    /// were about changed. A press that ends the keys ends that, but a
+    /// selection carries it on.
+    fn lost_keys(&mut self, outcome: Outcome) -> bool {
+        if matches!(outcome, Outcome::Pending) {
+            return false;
         }
-        if self.output.is_some() {
-            self.output_keys(&fed);
-            return Vec::new();
-        }
-        if self.line.is_some() {
-            return self.prompt_keys(fed);
-        }
-        match fed.outcome {
+        let lost = std::mem::take(&mut self.keys_lost);
+        self.keys_lost = lost && self.visual.is_some();
+        lost
+    }
+
+    /// Does what the list does with a press; one that would write on lines
+    /// after keys were `lost` says the list changed instead.
+    fn list_keys(&mut self, outcome: Outcome, lost: bool) -> Vec<Cmd> {
+        match outcome {
             Outcome::Matched { action, count }
                 if lost && self.writes_lost(action, count) =>
             {
