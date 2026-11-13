@@ -89,6 +89,18 @@ pub(crate) enum Answer {
     CoreRefuses(Command),
 }
 
+impl Answer {
+    /// The command a press runs, and whether it writes: none when the key
+    /// does its own work or refuses.
+    pub(crate) const fn runs(self) -> Option<(Command, bool)> {
+        match self {
+            Self::Applies | Self::Refused(_) => None,
+            Self::CoreRefuses(command) => Some((command, false)),
+            Self::Resolved(command) => Some((command, true)),
+        }
+    }
+}
+
 /// What the rule reads of the tasks of a press.
 #[derive(Clone, Copy, Debug, Default)]
 pub(crate) struct Summary {

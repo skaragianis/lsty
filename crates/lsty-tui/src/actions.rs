@@ -96,16 +96,14 @@ impl Model {
         tasks: &[Chosen],
         selected: bool,
     ) -> bool {
-        let (command, passes) = match answer {
-            Answer::Applies | Answer::Refused(_) => return false,
-            Answer::CoreRefuses(command) => (command, false),
-            Answer::Resolved(command) => (command, true),
+        let Some((command, passes)) = answer.runs() else {
+            return false;
         };
         let changing: Vec<&Chosen> = tasks
             .iter()
             .filter(|task| !passes || task.changed_by(command))
             .collect();
-        let (change, there) = (changing.len(), tasks.len() - changing.len());
+        let there = tasks.len() - changing.len();
         // A completion goes on below its press, not to a task it passed over.
         let cursor = self.cursor;
         if there > 0 && matches!(command, Command::Do | Command::Wontdo) {
@@ -124,30 +122,21 @@ impl Model {
             };
             self.perform(&env, command, &changing)
         });
-        let said: Vec<String> = result.as_ref().map_or_else(
-            |_| Vec::new(),
-            |(outcome, _)| {
-                outcome.messages().iter().map(|m| errs::lossy(m)).collect()
-            },
-        );
-        if !self.settle(result) || !passes {
+        let said: Vec<String> = result
+            .iter()
+            .flat_map(|(outcome, _)| outcome.messages())
+            .map(|m| errs::lossy(m))
+            .collect();
+        let settled = self.settle(result) && passes;
+        if !settled {
             self.message.tone = Tone::Alert;
             self.cursor = cursor;
             return false;
         }
-        if let Some((did, already)) = command.words().filter(|_| there > 0) {
-            let all = said.join("; ");
-            // Taking a claim over has one line, which the count would lose.
-            let plain =
-                !changing.iter().any(|t| matches!(t.claim, Claim::Agent));
-            let lines = said.iter().filter(|l| !l.starts_with("archived to "));
-            let head = if plain && lines.count() == change {
-                format!("{change} {did}")
-            } else {
-                all.clone()
-            };
-            let short = format!("{head}; {there} {already}");
-            self.message.edit(|m| m.replacen(&all, &short, 1));
+        if let Some(words) = command.words().filter(|_| there > 0) {
+            let short = shortened(&said, &changing, there, words);
+            self.message
+                .edit(|m| m.replacen(&said.join("; "), &short, 1));
         }
         self.scroll();
         true
@@ -355,6 +344,27 @@ impl Model {
             self.message.edit(|message| format!("{message} — {hint}"));
         }
     }
+}
+
+/// What `said` becomes when `there` tasks were already as asked: a count of
+/// the `changing` ones where one line says each, then the count of those
+/// there. `words` are how the command says each.
+fn shortened(
+    said: &[String],
+    changing: &[&Chosen],
+    there: usize,
+    (did, already): (&str, &str),
+) -> String {
+    let change = changing.len();
+    // Taking a claim over has one line, which the count would lose.
+    let plain = !changing.iter().any(|t| matches!(t.claim, Claim::Agent));
+    let lines = said.iter().filter(|l| !l.starts_with("archived to "));
+    let head = if plain && lines.count() == change {
+        format!("{change} {did}")
+    } else {
+        said.join("; ")
+    };
+    format!("{head}; {there} {already}")
 }
 
 fn join(said: &[String]) -> Option<String> {
