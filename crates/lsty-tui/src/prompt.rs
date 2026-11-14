@@ -11,7 +11,7 @@ use lsty_core::{
     list::{Snapshot, Task, TaskId},
     ops::{self, Env, Landing, Outcome, Target},
     query::Query,
-    theme::Slot,
+    theme::{Parts, Slot},
     todotxt::{Kind as TokenKind, SEPARATORS},
 };
 use ratatui::layout::Rect;
@@ -127,7 +127,7 @@ impl Completion {
             let slot = if i + 1 == self.at {
                 Slot::Selection
             } else {
-                Slot::Text
+                Parts::default().word(cand)
             };
             out.push(Span::new(cand.as_str(), Some(slot)));
         }

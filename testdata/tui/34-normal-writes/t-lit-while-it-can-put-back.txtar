@@ -22,7 +22,7 @@ Stuck dep:b started:2026-09-29T0800Z owner:agent1
 -- doing-colour --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttttt...............................................................................i.....E
-E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.E
+E.tt.bbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..D.DDDD..k.yyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy...mmmmm.
@@ -36,14 +36,14 @@ NNNNNNNN.tttttttt..mmmmmm..gggggggggggg..D.DDDD..k.yyyy..k.yyyy..k.yyy..k.yyyyyy
 -- stopped-colour --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttttt...................................................................................i.E
-E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+E.tt.bbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww..D.DDDD..k.yyyyy..k.yyyy........mmmmm.
 -- a-count-keeps-it-colour --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttttt...................................................................................i.E
-E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+E.tt.bbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..D.DDDD..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy...........mmmmm.
@@ -57,7 +57,7 @@ NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..D.DDDD..k.yyyyy..k.yyyy..k.yyy..k.yyy
 -- window-over-colour --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttttttt...................................................................................i.E
-E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
+E.tt.bbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyyyyy...........mmmmm.

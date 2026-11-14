@@ -4,7 +4,7 @@
 use std::rc::Rc;
 
 use lsty_core::{
-    theme::Slot,
+    theme::{Parts, Slot},
     todotxt::{Kind, Line},
 };
 
@@ -182,8 +182,12 @@ impl Tall<'_> {
             return vec![Vec::new()];
         };
         let inline = Inline::new(&m.deps.config);
-        let mut lines =
-            lay_out(m.snap.line(task), row.base, inline, self.width);
+        let mut lines = lay_out(
+            m.snap.line(task),
+            (row.base, row.parts),
+            inline,
+            self.width,
+        );
         if lines.is_empty() {
             lines.push(Vec::new());
         }
@@ -197,11 +201,12 @@ impl Tall<'_> {
 /// instead.
 pub(crate) fn lay_out(
     line: &Line,
-    base: Option<Slot>,
+    paint: (Option<Slot>, Parts),
     inline: Inline,
     (first, later): (usize, usize),
 ) -> Vec<Vec<Span<'static>>> {
-    let spans = text_spans(line, base, inline);
+    let spans = text_spans(line, paint, inline);
+    let base = paint.0;
     let row = move |r| if r == 0 { first } else { later };
     // three rows hold their cells and two break spaces: the spans that
     // start by the cell after lay out the three rows as the whole text

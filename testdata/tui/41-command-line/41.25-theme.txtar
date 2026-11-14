@@ -6,6 +6,9 @@ type theme probe2
 keys <CR>
 frame after-frame
 fg after
+keys :
+type ls +work due:2026-09-29
+fg typing
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -39,3 +42,12 @@ E...............................................................................
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.mmmmmmmm..tttttt..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..D.DDDD........ttttt.
+-- typing --
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.mm...mmmmmcccccmppppp............................................................................E
+E.tt...mmmmccccc.............................................................................TTTTT.E
+E..................................................................................................E
+E..................................................................................................E
+E..................................................................................................E
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+MMMMMMMMM.mmmmcccccmTTTTTTTTTTTTTT..kkkk.yyy..DDDDD.DDDD..kkkkk.yyyyyy..............................

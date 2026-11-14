@@ -11,7 +11,7 @@ use lsty_core::{
     list::{Params, Snapshot, SortField},
     lock::Cancel,
     ops,
-    theme::Theme,
+    theme::{Parts, Theme},
     todotxt::File,
 };
 
@@ -615,12 +615,25 @@ impl Model {
         self.natural = Natural::of(&self.rows);
     }
 
+    /// Today and the days that count as soon.
+    pub(crate) fn today(&self) -> Today {
+        Today {
+            date: self.clock.today(),
+            soon: self.deps.config.upcoming_days,
+        }
+    }
+
+    /// The parts of a task a field in the making can tell.
+    pub(crate) fn typed(&self) -> Parts {
+        Parts {
+            today: Some(self.today()),
+            ..Parts::default()
+        }
+    }
+
     pub(crate) fn context(&self) -> Context {
         Context {
-            today: Today {
-                date: self.clock.today(),
-                soon: self.deps.config.upcoming_days,
-            },
+            today: self.today(),
             now: self.clock.now(),
             inline: Inline::new(&self.deps.config),
         }

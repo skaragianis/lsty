@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use lsty_core::{
     config::{Config, LineNumbers},
-    theme::Slot,
+    theme::{Parts, Slot},
     todotxt::Line,
 };
 use ratatui::layout::Position;
@@ -463,10 +463,15 @@ fn placing_the_view_and_the_cursor_counts_the_rows_of_the_tasks() {
 /// `later` after.
 fn laid(text: &str, (first, later): (usize, usize)) -> Vec<String> {
     let inline = Inline::new(&Config::default());
-    lay_out(&Line::parse(text.as_bytes()), None, inline, (first, later))
-        .iter()
-        .map(|row| row.iter().map(|s| s.text.as_ref()).collect())
-        .collect()
+    lay_out(
+        &Line::parse(text.as_bytes()),
+        (None, Parts::default()),
+        inline,
+        (first, later),
+    )
+    .iter()
+    .map(|row| row.iter().map(|s| s.text.as_ref()).collect())
+    .collect()
 }
 
 /// (text, rows at 14 then 12 cells): how projects and contexts the last row
@@ -589,8 +594,12 @@ const STYLED: [Styled; 2] = [
 fn the_tags_that_follow_the_ellipsis_keep_their_style() {
     let inline = Inline::new(&Config::default());
     for (text, widths, want) in STYLED {
-        let rows =
-            lay_out(&Line::parse(text.as_bytes()), None, inline, widths);
+        let rows = lay_out(
+            &Line::parse(text.as_bytes()),
+            (None, Parts::default()),
+            inline,
+            widths,
+        );
         let last: Vec<_> =
             rows[2].iter().map(|s| (s.text.as_ref(), s.slot)).collect();
         let want: Vec<_> = want.iter().map(|&(t, s)| (t, Some(s))).collect();
@@ -606,7 +615,12 @@ fn a_muted_task_keeps_its_slot_on_the_last_row() {
         "+p @c aaaa bbbb cccc dddd eeee ffff gggg",
     ] {
         let line = Line::parse(text.as_bytes());
-        let rows = lay_out(&line, Some(Slot::Muted), inline, (12, 12));
+        let rows = lay_out(
+            &line,
+            (Some(Slot::Muted), Parts::default()),
+            inline,
+            (12, 12),
+        );
         assert!(
             rows[2].iter().all(|s| s.slot == Some(Slot::Muted)),
             "{text}"

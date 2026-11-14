@@ -188,6 +188,8 @@ type Kids<'a> = BTreeMap<&'a [u8], Vec<&'a [u8]>>;
 /// How an entry of a tree is labelled, indented and counted.
 struct Tree<'a> {
     sigil: &'static str,
+    /// The slot of the names: `project` or `context`.
+    slot: Slot,
     active: &'a [Term],
     nodes: &'a Counts,
     folded: &'a BTreeSet<Vec<u8>>,
@@ -205,8 +207,14 @@ impl<'a> Tree<'a> {
         for name in nodes.keys() {
             kids.entry(name_parent(name)).or_default().push(name);
         }
+        let slot = if sigil == "@" {
+            Slot::Context
+        } else {
+            Slot::Project
+        };
         Self {
             sigil,
+            slot,
             active,
             nodes,
             folded,
@@ -251,7 +259,7 @@ impl<'a> Tree<'a> {
         if has_kids {
             spans.push(Span::new(self.chevron(name), Some(Slot::Muted)));
         }
-        spans.push(Span::new(label, Some(Slot::Text)));
+        spans.push(Span::new(label, Some(self.slot)));
         let mark = connective::mark(self.active, name);
         let count = self.nodes.get(name).copied().unwrap_or_default();
         Entry {

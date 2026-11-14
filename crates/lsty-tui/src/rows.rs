@@ -6,10 +6,9 @@ use jiff::Timestamp;
 use lsty_core::{
     config::{Config, Hidden},
     errs::{Nr, Source, lossy},
-    links::link_in,
     list::{Claim, Snapshot, SortField, State, Task, TaskId},
     query::Category,
-    theme::Slot,
+    theme::{Parts, Slot, state_slot},
     todotxt::{Kind, Line, TokenView, inside_span, is_claim_key},
 };
 
@@ -41,6 +40,8 @@ pub(crate) struct Row {
     pub(crate) source: Source,
     /// The slot that styles the whole row, when there is one.
     pub(crate) base: Option<Slot>,
+    /// What the colour of the task's words depends on.
+    pub(crate) parts: Parts,
     pub(crate) marker: Span<'static>,
     /// The priority column of the row, if it has one.
     pub(crate) priority: Option<Span<'static>>,
@@ -200,7 +201,7 @@ impl Row {
         let line = snap.line(task);
         let base = base_slot(task);
         let mut date = date_cell(task, line, ctx.today);
-        if base.is_some() && !date.text.is_empty() {
+        if whole(base).is_some() && !date.text.is_empty() {
             date.slot = base;
         }
         let duration = claim_cell(task, ctx.now);
@@ -209,13 +210,14 @@ impl Row {
             .filter(|_| ctx.inline.ids)
             .map_or_default(|id| Cell {
                 text: lossy(id),
-                slot: base.or(Some(Slot::Id)),
+                slot: whole(base).or(Some(Slot::Id)),
             });
         Self {
             id: task.task_id(),
             nr: task.nr(),
             source: task.source(),
             base,
+            parts: Parts::of(task, Some(ctx.today)),
             marker: marker(snap, task, base),
             priority: priority_span(task, line, base),
             date,
@@ -252,15 +254,8 @@ impl Row {
 }
 
 pub(crate) fn base_slot(task: &Task) -> Option<Slot> {
-    if task.source() == Source::Done {
-        Some(Slot::Muted)
-    } else if task.state() == State::Done {
-        Some(Slot::Done)
-    } else if task.blocked() {
-        Some(Slot::Blocked)
-    } else {
-        None
-    }
+    Some(state_slot(task))
+        .filter(|slot| [Slot::Muted, Slot::Done, Slot::Blocked].contains(slot))
 }
 
 pub(crate) fn marker(
@@ -295,20 +290,28 @@ fn priority_span(
     base: Option<Slot>,
 ) -> Option<Span<'static>> {
     let pri = line.priority().filter(|_| task.state() != State::Done)?;
-    let slot = base.unwrap_or_else(|| Slot::of_priority(pri));
+    let slot = whole(base).unwrap_or_else(|| Slot::of_priority(pri));
     let text = format!("({pri})");
     Some(Span::new(text, Some(slot)))
 }
 
-pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
-    match (tok.kind, base) {
-        (_, Some(slot)) => slot,
-        (_, None) if link_in(tok).is_some() => Slot::Link,
-        (Kind::Project, None) => Slot::Project,
-        (Kind::Context, None) => Slot::Context,
-        (Kind::Word, None) if tok.quoted => Slot::Code,
-        (Kind::Word, None) => Slot::Text,
-        (Kind::Tag, None) => Slot::Muted,
+/// The slot that styles the whole row: a blocked row only styles its
+/// plain words.
+pub(crate) fn whole(base: Option<Slot>) -> Option<Slot> {
+    base.filter(|&slot| slot != Slot::Blocked)
+}
+
+/// The slot of a word of a row: the rule's, unless the row is done or
+/// muted whole; the plain words of a blocked row are `blocked`.
+pub(crate) fn token_slot(
+    tok: &TokenView<'_>,
+    base: Option<Slot>,
+    parts: Parts,
+) -> Slot {
+    match (base, parts.slot(tok)) {
+        (Some(Slot::Blocked), Slot::Text) => Slot::Blocked,
+        (Some(Slot::Blocked) | None, slot) => slot,
+        (Some(whole), _) => whole,
     }
 }
 
@@ -316,13 +319,13 @@ pub(crate) fn token_slot(tok: &TokenView<'_>, base: Option<Slot>) -> Slot {
 /// hidden, one space between tokens.
 pub(crate) fn text_spans(
     line: &Line,
-    base: Option<Slot>,
+    (base, parts): (Option<Slot>, Parts),
     inline: Inline,
 ) -> Vec<Span<'_>> {
     let mut out = Vec::new();
     let plain = base.or(Some(Slot::Text));
     for tok in line.tokens().filter(|t| inline.in_text(t)) {
-        let slot = Some(token_slot(&tok, base));
+        let slot = Some(token_slot(&tok, base, parts));
         if !out.is_empty() {
             // only a blank inside a backtick span takes its style
             let within = tok.quoted && inside_span(line.raw(), tok.start);

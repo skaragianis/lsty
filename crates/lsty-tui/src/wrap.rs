@@ -1,7 +1,10 @@
 //! A field that wraps softly: where each character falls on the rows,
 //! the rows as drawn, and moves between the rows.
 
-use lsty_core::theme::Slot;
+use lsty_core::{
+    theme::{Parts, Slot},
+    todotxt::Line,
+};
 use unicode_segmentation::UnicodeSegmentation;
 use unicode_width::{UnicodeWidthChar, UnicodeWidthStr};
 
@@ -123,16 +126,31 @@ impl Field {
         Layout { at, rows }
     }
 
-    /// The rows as drawn, the read-only characters muted.
-    pub(crate) fn lines(&self, w: usize) -> Vec<Vec<Span<'static>>> {
+    /// The rows as drawn, the read-only characters muted and the rest
+    /// in the colours of the parts of a task.
+    pub(crate) fn lines(
+        &self,
+        w: usize,
+        parts: Parts,
+    ) -> Vec<Vec<Span<'static>>> {
         let layout = self.layout(w);
         let mut out: Vec<Vec<(String, Slot)>> = vec![Vec::new(); layout.rows];
+        let line = Line::parse(self.text().into_bytes());
+        let parts = Parts {
+            closed: parts.closed || line.is_done(),
+            ..parts
+        };
+        let runs = parts.runs(&line);
+        let (mut byte, mut runs) = (0, runs.into_iter().peekable());
         for (i, &c) in self.text.iter().enumerate() {
+            while runs.next_if(|r| r.1 <= byte).is_some() {}
+            let run = runs.peek().filter(|r| r.0 <= byte);
             let slot = if self.is_locked(i) {
                 Slot::Muted
             } else {
-                Slot::Text
+                run.map_or(Slot::Text, |r| r.2)
             };
+            byte += c.len_utf8();
             let Some(row) = out.get_mut(layout.cell(i).row) else {
                 continue;
             };

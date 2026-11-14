@@ -47,16 +47,16 @@ x 2026-09-01 Old task +work
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  <Tab> next  h fold  l unfold                                  9.9.9
 -- dimmed --
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttt....mmmee.tt...AAA.ttttttttttttppppptcccccc....................TTTTT...............ee.ttttttttttttppppptcccccc............e
-e.ttttttt..mmmee.mm...BBB.tttttttttttttpppppppppptcccccc..............OOOOOOO.............ee.mmmmmmmmmmmmmm......................e
-e.mttttt...mmmee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
-e...ttttt..mmmee.mm.......tttttttttttttppppppp.................................iiiiii.....ee.mmmmmmmmmmtttt......................e
-e.............ee.mm.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.ee.mmmmmmmmmmt.........................e
-e.............ee.mm.......tttttttttttt................................SSS.................ee.mmmmmmmmmmt.........................e
-e.............ee.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.ee.mmmmmmmmmmtttttttttt................e
+e.ppppp....mmmee.tt...AAA.ttttttttttttppppptcccccc....................TTTTT...............ee.ttttttttttttppppptcccccc............e
+e.ppppppp..mmmee.mm...BBB.tttttttttttttpppppppppptcccccc..............OOOOOOO.............ee.TTTTTTTTTTTTTT......................e
+e.mppppp...mmmee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e...ppppp..mmmee.mm.......tttttttttttttppppppp.................................iiiiii.....ee.mmmmmmmmmmtttt......................e
+e.............ee.mm.bbbbbbbbbbbbbbbbbpppppppbmmmmmmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.ee.mmmmmmmmmmt.........................e
+e.............ee.mm.......tttttttttttt................................SSS.................ee.mmmmmmmmmmA.........................e
+e.............ee.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.ee.mmmmmmmmmmTTTTTTTTTT................e
 emmmmmmmmmmmmeee..........................................................................ee.mmmmmmmmmmTTTTTTT...................e
-e.tttttt...mmmee..........................................................................ee.....................................e
-e.tttttt...mmmee..........................................................................ee.....................................e
+e.cccccc...mmmee..........................................................................ee.....................................e
+e.cccccc...mmmee..........................................................................ee.....................................e
 e.............ee..........................................................................ee.....................................e
 e.............ee..........................................................................ee.....................................e
 e.............ee..........................................................................ee.....................................e

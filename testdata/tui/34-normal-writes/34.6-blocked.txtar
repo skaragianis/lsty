@@ -1,4 +1,4 @@
-size 100 8
+size 130 16
 start
 keys j
 keys t
@@ -10,40 +10,63 @@ frame b-frame
 file todo.txt b-file
 -- config.toml --
 show_sidebar = false
-show_detail = false
 -- todo.txt --
-Write parser id:p
-(B) Add CLI dep:p
+Write `the parser` id:p
+(B) Add CLI dep:p id:q due:2026-09-28
 -- a-frame --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       Write parser                                                                          p │
-│  2 ⧗ (B) Add CLI dep:p                                                                           │
-│                                                                                                  │
-│                                                                                                  │
-│                                                                                                  │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  task 2 is blocked by 1 (Write parser)  todo.txt  manual  x done  t start  T wont     9.9.9
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1       Write `the parser`                                                           p ││ Add CLI dep:p id:q due:2026-09-28   │
+│  2 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ ─────────────────────────────────── │
+│                                                                                         ││ state       todo                    │
+│                                                                                         ││ nr          2                       │
+│                                                                                         ││ priority    B                       │
+│                                                                                         ││ due         2026-09-28              │
+│                                                                                         ││             (1d overdue)            │
+│                                                                                         ││ id          q                       │
+│                                                                                         ││ blocked by  Write `the parser` (1)  │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  task 2 is blocked by 1 (Write `the parser`)  todo.txt  manual  x done  t start  T wont  o new  a append            9.9.9
 -- a-file --
-Write parser id:p
-(B) Add CLI dep:p
+Write `the parser` id:p
+(B) Add CLI dep:p id:q due:2026-09-28
 -- b-frame --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1       Write parser                                                                          p │
-│  2 ⧗ (B) Add CLI dep:p                                                                           │
-│                                                                                                  │
-│                                                                                                  │
-│                                                                                                  │
-└──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  task 2 is blocked by 1 (Write parser)  todo.txt  manual  x done  t start  T wont     9.9.9
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+│  1       Write `the parser`                                                           p ││ Add CLI dep:p id:q due:2026-09-28   │
+│  2 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ ─────────────────────────────────── │
+│                                                                                         ││ state       todo                    │
+│                                                                                         ││ nr          2                       │
+│                                                                                         ││ priority    B                       │
+│                                                                                         ││ due         2026-09-28              │
+│                                                                                         ││             (1d overdue)            │
+│                                                                                         ││ id          q                       │
+│                                                                                         ││ blocked by  Write `the parser` (1)  │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+│                                                                                         ││                                     │
+└─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
+ NORMAL  task 2 is blocked by 1 (Write `the parser`)  todo.txt  manual  x done  t start  T wont  o new  a append            9.9.9
 -- b-file --
-Write parser id:p
-(B) Add CLI dep:p
+Write `the parser` id:p
+(B) Add CLI dep:p id:q due:2026-09-28
 -- a-fg --
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm.......tttttttttttt..........................................................................i.E
-E.tt.bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb.E
-E..................................................................................................E
-E..................................................................................................E
-E..................................................................................................E
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..tttttttt..mmmmmm..D.DDDD..D.DDDDD..k.yyyy.....mmmmm.
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
+E.mm.......ttttttqqqqqqqqqqqq...........................................................i.Ee.ttttttttmmmmmtmmmmtOOOOOOOOOOOOOO...e
+E.tt.bbBBBbbbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbOOOOOOObbi.Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+E.........................................................................................Ee.mmmmmmmmmmmmbbbb....................e
+E.........................................................................................Ee.mmmmmmmmmmmmt.......................e
+E.........................................................................................Ee.mmmmmmmmmmmmB.......................e
+E.........................................................................................Ee.mmmmmmmmmmmmOOOOOOOOOO..............e
+E.........................................................................................Ee.mmmmmmmmmmmmOOOtOOOOOOOO............e
+E.........................................................................................Ee.mmmmmmmmmmmmi.......................e
+E.........................................................................................Ee.mmmmmmmmmmmmttttttqqqqtqqqqqqqtttt..e
+E.........................................................................................Ee.....................................e
+E.........................................................................................Ee.....................................e
+E.........................................................................................Ee.....................................e
+E.........................................................................................Ee.....................................e
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..tttttttt..mmmmmm..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyyyyy............mmmmm.

@@ -8,8 +8,8 @@ use lsty_core::{
     dates::Date,
     errs::Error,
     list::{State, Task},
-    theme::{Colour, Profile, Slot, Style, Theme},
-    todotxt::{Kind, Line, TokenView, inside_span, is_claim_key, trim_range},
+    theme::{Colour, Parts, Profile, Slot, Style, Theme, Today},
+    todotxt::{Line, trim_range},
     visible::visible_bytes,
 };
 
@@ -29,8 +29,8 @@ struct On {
     /// The sequence that starts each slot's style, in the order of
     /// [`Slot::ALL`]; empty when the style changes nothing.
     sequences: [Vec<u8>; Slot::ALL.len()],
-    /// Today and the number of days that count as soon.
-    dates: Option<(Date, i64)>,
+    /// Today and the number of days that count as soon, for due dates.
+    today: Option<Today>,
 }
 
 impl Painter {
@@ -45,7 +45,7 @@ impl Painter {
         Self {
             on: Some(On {
                 sequences,
-                dates: None,
+                today: None,
             }),
         }
     }
@@ -59,8 +59,10 @@ impl Painter {
         upcoming_days: u64,
     ) -> Self {
         if let Some(on) = &mut self.on {
-            let days = i64::try_from(upcoming_days).unwrap_or(i64::MAX);
-            on.dates = Some((today, days));
+            on.today = Some(Today {
+                date: today,
+                soon: upcoming_days,
+            });
         }
         self
     }
@@ -100,10 +102,9 @@ impl Painter {
         }
     }
 
-    /// The line of `task` with its parts coloured: the priority,
-    /// projects, contexts, due dates, links and claims in their own
-    /// slots, the rest in `text`, or `blocked` for a blocked task. A done
-    /// line is one `done` run.
+    /// The line of `task` with its parts coloured by the rule of
+    /// [`Parts`], the other words in `text`, or `blocked` for a blocked
+    /// task. A done line is one `done` run.
     pub(crate) fn task(&self, out: &mut Vec<u8>, line: &Line, task: &Task) {
         // the drawn line has nothing left to draw, so its parts are put
         // out as they are
@@ -124,32 +125,14 @@ impl Painter {
         } else {
             Slot::Text
         };
+        let today = self.on.as_ref().and_then(|on| on.today);
+        let parts = Parts::of(task, today);
         let mut at = 0;
-        let mut part = |start: usize, end: usize, slot| {
+        for (start, end, slot) in parts.runs(line) {
             let from = at.min(start);
             self.gap(out, base, raw.get(from..start).unwrap_or_default());
             self.put(out, slot, raw.get(start..end).unwrap_or_default());
             at = end;
-        };
-        if let Some(priority) = line.priority() {
-            part(0, "(A)".len(), Slot::of_priority(priority));
-        }
-        // a quoted run is one part, the blanks inside the span included
-        let mut parts: Vec<(usize, usize, Slot)> = Vec::new();
-        for token in line.tokens() {
-            let end = token.start + token.text.len();
-            match (self.token_slot(task, &token), parts.last_mut()) {
-                (Some(Slot::Code), Some(last))
-                    if last.2 == Slot::Code && inside_span(raw, last.1) =>
-                {
-                    last.1 = end;
-                }
-                (Some(slot), _) => parts.push((token.start, end, slot)),
-                (None, _) => {}
-            }
-        }
-        for (start, end, slot) in parts {
-            part(start, end, slot);
         }
         self.gap(out, base, raw.get(at..).unwrap_or_default());
     }
@@ -161,33 +144,6 @@ impl Painter {
         out.extend_from_slice(text.get(..start).unwrap_or_default());
         self.put(out, base, text.get(start..end).unwrap_or_default());
         out.extend_from_slice(text.get(end..).unwrap_or_default());
-    }
-
-    fn token_slot(&self, task: &Task, token: &TokenView<'_>) -> Option<Slot> {
-        match token.kind {
-            Kind::Project => Some(Slot::Project),
-            Kind::Context => Some(Slot::Context),
-            Kind::Word if token.quoted => Some(Slot::Code),
-            Kind::Word => None,
-            Kind::Tag => match token.key {
-                b"due" => self.due_slot(token.value),
-                b"file" => Some(Slot::Link),
-                b"started" | b"owner" if task.stale() => Some(Slot::Warning),
-                key if is_claim_key(key) => Some(Slot::Doing),
-                _ => None,
-            },
-        }
-    }
-
-    fn due_slot(&self, value: &[u8]) -> Option<Slot> {
-        let (today, upcoming) = self.on.as_ref()?.dates?;
-        let due = Date::parse(std::str::from_utf8(value).ok()?)?;
-        match i64::from(today.days_until(due)) {
-            ..0 => Some(Slot::DueOverdue),
-            0 => Some(Slot::DueToday),
-            days if days <= upcoming => Some(Slot::DueSoon),
-            _ => None,
-        }
     }
 
     /// The line of an error for people: `lsty: message`, then the hint,
