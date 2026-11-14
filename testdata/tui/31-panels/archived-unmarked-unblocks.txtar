@@ -12,6 +12,6 @@ Draft id:draft
 -- view --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Write the report dep:draft                          │
-│    ✓ Draft                                         draft │
+│  1 ✓ Draft                                         draft │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont    9.9.9

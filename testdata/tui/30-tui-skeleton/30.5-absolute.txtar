@@ -1,5 +1,5 @@
 start
-keys j
+keys G
 frame absolute
 -- todo.txt --
 (B) 2026-09-20 Send invoice +work due:2026-09-27 started:2026-09-29T0700Z
@@ -9,9 +9,12 @@ Buy milk +home
 x 2026-09-29 2026-09-20 Fix bug +work pri:B
 Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
+-- done.txt --
+x 2026-09-28 Old task +work
 -- config.toml --
 show_sidebar = false
 show_detail = false
+hidden_tasks = ["later"]
 line_numbers = "absolute"
 -- absolute --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
@@ -21,7 +24,7 @@ line_numbers = "absolute"
 │  5 ✓     Fix bug +work                                                       │
 │  6 ⧗     Draft report +work dep:c1                                           │
 │  7 ▶     Review PR                                                       !8h │
-│                                                                              │
+│    ✓     Old task +work                                    1d ago            │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -37,4 +40,4 @@ line_numbers = "absolute"
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t start        9.9.9
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x reopen  o new        9.9.9

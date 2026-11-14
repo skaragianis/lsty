@@ -1,5 +1,5 @@
 start
-keys j
+keys G
 frame relative
 -- todo.txt --
 (B) 2026-09-20 Send invoice +work due:2026-09-27 started:2026-09-29T0700Z
@@ -9,19 +9,22 @@ Buy milk +home
 x 2026-09-29 2026-09-20 Fix bug +work pri:B
 Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
+-- done.txt --
+x 2026-09-28 Old task +work
 -- config.toml --
 show_sidebar = false
 show_detail = false
+hidden_tasks = ["later"]
 line_numbers = "relative"
 -- relative --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
-│  1 ▷ (B) Send invoice +work                                2d late       2h  │
-│  0   (A) Call client +work @phone                          tomorrow  c1      │
-│  1       Buy milk +home                                                      │
-│  2 ✓     Fix bug +work                                                       │
-│  3 ⧗     Draft report +work dep:c1                                           │
-│  4 ▶     Review PR                                                       !8h │
-│                                                                              │
+│  6 ▷ (B) Send invoice +work                                2d late       2h  │
+│  5   (A) Call client +work @phone                          tomorrow  c1      │
+│  4       Buy milk +home                                                      │
+│  3 ✓     Fix bug +work                                                       │
+│  2 ⧗     Draft report +work dep:c1                                           │
+│  1 ▶     Review PR                                                       !8h │
+│  0 ✓     Old task +work                                    1d ago            │
 │                                                                              │
 │                                                                              │
 │                                                                              │
@@ -37,4 +40,4 @@ line_numbers = "relative"
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t start        9.9.9
+ NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x reopen  o new        9.9.9

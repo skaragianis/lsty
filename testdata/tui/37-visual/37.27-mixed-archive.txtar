@@ -23,7 +23,7 @@ x 2026-09-02 Old two
 │  2   A                                                                                           │
 │  1   B                                                                                           │
 │    ✓ Old one                                                                             28d ago │
-│    ✓ Old two                                                                             27d ago │
+│  1 ✓ Old two                                                                             27d ago │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -36,7 +36,7 @@ x 2026-09-02 Old two
 │  2   A                                                                                           │
 │  1   B                                                                                           │
 │    ✓ Old one                                                                             28d ago │
-│    ✓ Old two                                                                             27d ago │
+│  1 ✓ Old two                                                                             27d ago │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -51,7 +51,7 @@ B
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  3   A                                                                                           │
 │  2 ✓ B                                                                                           │
-│    ✓ Old one                                                                             28d ago │
+│  1 ✓ Old one                                                                             28d ago │
 │    ✓ Old two                                                                             27d ago │
 │                                                                                                  │
 │                                                                                                  │
