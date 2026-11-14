@@ -425,8 +425,8 @@ const CLAIMED_TWICE: &str = "Blocker id:b\n\
 const CLAIMED_RANKED: &str = "Blocker id:b\n\
     (B) Stuck dep:b started:2026-09-29T0800Z owner:agent2\n\
     (A) Too dep:b started:2026-09-29T0800Z\n";
-/// Hides what `done` holds and any done task of `todo`.
-const HIDE_DONE: &str = ":set hidden_tasks=done<CR>";
+/// Hides the done tasks of `todo` and the done file.
+const HIDE_DONE: &str = ":set hidden_tasks=done,archive<CR>";
 
 /// A state of a key: its files, what is typed first, whether its hint is dim.
 type Case = (&'static str, &'static str, &'static str, bool);
