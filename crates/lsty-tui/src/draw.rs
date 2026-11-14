@@ -3,7 +3,10 @@
 use std::borrow::Cow;
 
 use lsty_core::{
-    config::LineNumbers, errs::Source, query::Category, theme::Slot,
+    config::{Hidden, LineNumbers},
+    errs::Source,
+    query::Category,
+    theme::Slot,
 };
 use ratatui::{buffer::Buffer, layout::Rect};
 
@@ -264,17 +267,18 @@ impl Model {
     /// stands in the place of, or blanks.
     fn field_number(&self, first: bool) -> Span<'static> {
         let left = self.field_box().0;
+        let gutter = self.gutter_width();
         let numbered = self
             .edit
             .as_ref()
             .is_some_and(super::insert::Draft::replacing);
         self.rows
             .get(self.cursor)
-            .filter(|_| first && numbered && self.gutter_width() > 0)
+            .filter(|_| first && numbered && gutter > 0)
             .map_or_else(
                 || Span::blanks(left - 1, None),
                 |row| {
-                    let span = self.number(row, self.cursor);
+                    let span = self.number(row, self.cursor, gutter);
                     Span::new(format!("{} ", span.text), span.slot)
                 },
             )
@@ -296,7 +300,12 @@ impl Model {
         if self.deps.config.line_numbers == LineNumbers::Off {
             return 0;
         }
-        let lines = self.snap.todo().lines.len();
+        let mut lines = self.snap.todo().lines.len();
+        let archived = self.shows.on(Hidden::Archive)
+            || self.scope().asked.contains(&Category::Archived);
+        if archived {
+            lines += self.snap.file(Source::Done).lines.len();
+        }
         lines.to_string().len().max(MIN_GUTTER)
     }
 
@@ -324,8 +333,7 @@ impl Model {
 
     /// The number of a row: the line of a todo file task, the distance to
     /// the current row, or blank; a done-file row has no line.
-    fn number(&self, row: &Row, index: usize) -> Span<'static> {
-        let gutter = self.gutter_width();
+    fn number(&self, row: &Row, index: usize, gutter: usize) -> Span<'static> {
         let style = self.deps.config.line_numbers;
         let nr = (row.source != Source::Done).then(|| row.nr.get() as usize);
         let (n, slot) = if self.is_current(index) {
@@ -362,7 +370,7 @@ impl Model {
         let gap = Span::new(" ", row.base);
         let mut out = vec![Span::new(" ", None)];
         if layout.gutter > 0 {
-            out.push(self.number(row, index));
+            out.push(self.number(row, index, layout.gutter));
             out.push(Span::new(" ", None));
         }
         out.push(row.marker.clone());
