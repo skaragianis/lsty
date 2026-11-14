@@ -165,6 +165,16 @@ impl Task {
         self.cycle || !self.blockers.is_empty()
     }
 
+    /// The state as a person reads it: `blocked` for a blocked task,
+    /// whatever its state, else its state. The JSON keeps the state.
+    pub fn state_word(&self) -> &'static str {
+        if self.blocked() {
+            "blocked"
+        } else {
+            self.state.as_str()
+        }
+    }
+
     /// Whether a `dep:` names an id found in neither file.
     pub(crate) fn has_dangling(&self) -> bool {
         !self.dangling.is_empty()

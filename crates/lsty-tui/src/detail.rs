@@ -259,7 +259,7 @@ impl Model {
         let tags = line.tags();
         let mut fields = vec![Field::new(
             "state",
-            Span::new(task.state().as_str(), Some(state_slot(task))),
+            Span::new(task.state_word(), Some(state_slot(task))),
         )];
         if task.source() == Source::Todo {
             fields.push(Field::text("nr", task.nr().to_string()));

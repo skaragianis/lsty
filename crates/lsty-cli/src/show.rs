@@ -90,7 +90,7 @@ fn facts(call: &Call<'_>, snap: &Snapshot, task: &Task) -> Vec<Vec<u8>> {
     let tags = line.tags();
     let mut facts = vec![
         labelled("text", &line.text()),
-        labelled("state", task.state().as_str().as_bytes()),
+        labelled("state", task.state_word().as_bytes()),
     ];
     let mut maybe = |label: &str, value: Option<&[u8]>| {
         if let Some(value) = value {

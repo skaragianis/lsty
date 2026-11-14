@@ -17,7 +17,7 @@ Write `the parser` id:p
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │  1       Write `the parser`                                                           p ││ Add CLI dep:p id:q due:2026-09-28   │
 │  2 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ ─────────────────────────────────── │
-│                                                                                         ││ state       todo                    │
+│                                                                                         ││ state       blocked                 │
 │                                                                                         ││ nr          2                       │
 │                                                                                         ││ priority    B                       │
 │                                                                                         ││ due         2026-09-28              │
@@ -37,7 +37,7 @@ Write `the parser` id:p
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │  1       Write `the parser`                                                           p ││ Add CLI dep:p id:q due:2026-09-28   │
 │  2 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ ─────────────────────────────────── │
-│                                                                                         ││ state       todo                    │
+│                                                                                         ││ state       blocked                 │
 │                                                                                         ││ nr          2                       │
 │                                                                                         ││ priority    B                       │
 │                                                                                         ││ due         2026-09-28              │
@@ -57,7 +57,7 @@ Write `the parser` id:p
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
 E.mm.......ttttttqqqqqqqqqqqq...........................................................i.Ee.ttttttttmmmmmtmmmmtOOOOOOOOOOOOOO...e
 E.tt.bbBBBbbbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbOOOOOOObbi.Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
-E.........................................................................................Ee.mmmmmmmmmmmmbbbb....................e
+E.........................................................................................Ee.mmmmmmmmmmmmbbbbbbb.................e
 E.........................................................................................Ee.mmmmmmmmmmmmt.......................e
 E.........................................................................................Ee.mmmmmmmmmmmmB.......................e
 E.........................................................................................Ee.mmmmmmmmmmmmOOOOOOOOOO..............e

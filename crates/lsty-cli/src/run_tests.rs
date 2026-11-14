@@ -851,7 +851,7 @@ fn show_prints_every_fact_in_local_time() {
     let second = show("2");
     let want = [
         "  text: Fix thing",
-        "  state: doing",
+        "  state: blocked",
         "  priority: B",
         "  created: 2026-09-21",
         "  due: 2026-09-30",
@@ -874,7 +874,7 @@ fn show_prints_every_fact_in_local_time() {
     assert!(!done.contains("tag:"), "{done}");
     assert_eq!(
         show("5"),
-        "5 Ask id:ask dep:tell\n  text: Ask\n  state: todo\n  id: ask\n  \
+        "5 Ask id:ask dep:tell\n  text: Ask\n  state: blocked\n  id: ask\n  \
         blocked by: 6 Tell (id:tell)\n  dependency cycle: 5 → 6 → 7 → 5\n"
     );
     let archived = show("done:1");

@@ -10,7 +10,7 @@ show_sidebar = false
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────┐
 │  1 ⧗ First dep:b                                                               a ││ First id:a dep:b                 │
 │  1 ⧗ Second dep:a                                                              b ││ ──────────────────────────────── │
-│                                                                                  ││ state       todo                 │
+│                                                                                  ││ state       blocked              │
 │                                                                                  ││ nr          1                    │
 │                                                                                  ││ id          a                    │
 │                                                                                  ││ blocked by  Second (2)           │
