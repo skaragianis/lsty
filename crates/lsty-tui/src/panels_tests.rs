@@ -582,7 +582,10 @@ fn gone_cases() -> Vec<(&'static str, Gone)> {
         ..plain()
     };
     let hidden_done = Config {
-        hidden_tasks: vec![lsty_core::config::Hidden::Done],
+        hidden_tasks: vec![
+            lsty_core::config::Hidden::Done,
+            lsty_core::config::Hidden::Archive,
+        ],
         ..plain()
     };
     let auto = Config {
@@ -738,7 +741,10 @@ fn a_move_after_a_row_is_held_counts_over_the_rows_that_stay() {
         for archive in [false, true] {
             let config = Config {
                 auto_archive: archive,
-                hidden_tasks: vec![lsty_core::config::Hidden::Done],
+                hidden_tasks: vec![
+                    lsty_core::config::Hidden::Done,
+                    lsty_core::config::Hidden::Archive,
+                ],
                 ..plain()
             };
             let (_dir, mut m) = model(config, (130, 30), "A\nB\nC\nD\nE\n");

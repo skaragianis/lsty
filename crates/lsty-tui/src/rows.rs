@@ -136,8 +136,11 @@ impl Shows {
         let on = |flag: bool, cat: Category, member: bool| {
             !member || flag || asked.contains(&cat)
         };
+        // the done switch is for the todo file; the archive has its own
+        let done =
+            task.state() == State::Done && task.source() != Source::Done;
         self.lists(task, asked.contains(&Category::Archived))
-            && on(self.done, Category::Done, task.state() == State::Done)
+            && on(self.done, Category::Done, done)
             && on(self.later, Category::Later, task.later())
             && on(self.blocked, Category::Blocked, task.blocked())
     }

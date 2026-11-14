@@ -4,6 +4,8 @@ keys <C-w>5 j j j x
 tick 50ms
 frame archive
 fg dimmed
+-- config.toml --
+hidden_tasks = ["later", "done", "archive"]
 -- todo.txt --
 (A) Call client +work @phone due:2026-09-29
 (B) Send Invoice +work.acme @email due:2026-09-27
@@ -18,11 +20,11 @@ x 2026-09-01 Old task +work
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                    today               ││ Call client +work @phone            │
 │ +spec01  2/2││  1   (B) Send Invoice +work.acme @email              2d late             ││ due:2026-09-29                      │
-│ ▾+work   2/4││  2 ✓     Fix bug +work                               1d ago              ││ ─────────────────────────────────── │
-│   .acme  1/1││  3       Write parser +spec01                                 parser     ││ state     todo                      │
-│             ││  4 ⧗     Add CLI ls +spec01 dep:parser                                1h ││ nr        1                         │
-│             ││  5       Plan offsite                                sat                 ││ priority  A                         │
-│             ││  6 ✓     Old task +work                              28d ago             ││ due       2026-09-29                │
+│ ▾+work   2/4││  2       Write parser +spec01                                 parser     ││ ─────────────────────────────────── │
+│   .acme  1/1││  3 ⧗     Add CLI ls +spec01 dep:parser                                1h ││ state     todo                      │
+│             ││  4       Plan offsite                                sat                 ││ nr        1                         │
+│             ││  5 ✓     Old task +work                              28d ago             ││ priority  A                         │
+│             ││                                                                          ││ due       2026-09-29                │
 ├[4]─Contexts─┤│                                                                          ││           (today)                   │
 │ @email   1/1││                                                                          ││                                     │
 │ @phone   1/1││                                                                          ││                                     │
@@ -31,7 +33,7 @@ x 2026-09-01 Old task +work
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
-│ [x] Done    ││                                                                          ││                                     │
+│ [ ] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
 │ [x] Blocked ││                                                                          ││                                     │
 │ [x] Archive ││                                                                          ││                                     │
@@ -49,11 +51,11 @@ x 2026-09-01 Old task +work
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.tt...AAA.ttttttttttttppppptcccccc....................TTTTT...............ee.ttttttttttttppppptcccccc............e
 e.ppppppp..mmmee.mm...BBB.tttttttttttttpppppppppptcccccc..............OOOOOOO.............ee.TTTTTTTTTTTTTT......................e
-e.mppppp...mmmee.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
-e...ppppp..mmmee.mm.......tttttttttttttppppppp.................................iiiiii.....ee.mmmmmmmmmmtttt......................e
-e.............ee.mm.bbbbbbbbbbbbbbbbbpppppppbmmmmmmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.ee.mmmmmmmmmmt.........................e
-e.............ee.mm.......tttttttttttt................................SSS.................ee.mmmmmmmmmmA.........................e
-e.............ee.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.ee.mmmmmmmmmmTTTTTTTTTT................e
+e.mppppp...mmmee.mm.......tttttttttttttppppppp.................................iiiiii.....ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e...ppppp..mmmee.mm.bbbbbbbbbbbbbbbbbpppppppbmmmmmmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbgg.ee.mmmmmmmmmmtttt......................e
+e.............ee.mm.......tttttttttttt................................SSS.................ee.mmmmmmmmmmt.........................e
+e.............ee.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.ee.mmmmmmmmmmA.........................e
+e.............ee..........................................................................ee.mmmmmmmmmmTTTTTTTTTT................e
 emmmmmmmmmmmmeee..........................................................................ee.mmmmmmmmmmTTTTTTT...................e
 e.cccccc...mmmee..........................................................................ee.....................................e
 e.cccccc...mmmee..........................................................................ee.....................................e

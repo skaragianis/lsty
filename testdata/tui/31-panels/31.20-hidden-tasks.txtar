@@ -32,10 +32,10 @@ show_detail = false
 │             ││  5       Buy milk +home                                       │
 ├[4]─Contexts─┤│  6       Fix tap +home                                        │
 │ @phone   2/4││  7       Mow lawn +home                                       │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
+│             ││  8 ✓     Old task one +work @phone           28d ago          │
+│             ││  9 ✓     Old task two +work @phone           27d ago          │
+│             ││ 10 ✓     Old task three +work                26d ago          │
+│             ││ 11 ✓     Old task four +work                 25d ago          │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [ ] Done    ││                                                               │

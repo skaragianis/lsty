@@ -11,6 +11,8 @@ tick 50ms
 frame archive_on
 keys 7 j x <CR>
 tick 50ms
+keys k
+tick 50ms
 frame filter_off_again
 -- todo.txt --
 Open task
@@ -117,8 +119,8 @@ x 2026-09-01 Old decided wontdo:true
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  1   Open task                                                           ││ Tagged but open wontdo:true         │
 │             ││  2   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
-│             ││                                                                          ││ state   todo                        │
-│             ││                                                                          ││ nr      2                           │
+│             ││  1 ✓ Old plain                                                   28d ago ││ state   todo                        │
+│             ││  2 ✗ Old decided wontdo:true                                     28d ago ││ nr      2                           │
 │             ││                                                                          ││ wontdo  true                        │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
