@@ -1,7 +1,7 @@
 use lsty_core::{dates::Date, list::Snapshot, theme::Slot};
 
 use crate::{
-    reldate::{Today, claim_cell, date_cell, due_slot},
+    reldate::{Today, claim_cell, date_cell},
     test_util::snapshot,
 };
 
@@ -129,19 +129,4 @@ fn done_tasks_keep_their_duration() {
 fn a_claim_that_started_later_than_now_is_zero() {
     let future = "Task started:2026-09-29T1000Z\n";
     assert_eq!(first_claim(future).0, "0m");
-}
-
-#[test]
-fn a_due_date_is_soon_within_a_week_or_the_days_set() {
-    for (days, soon, slot) in [
-        (-1, 0, Slot::DueOverdue),
-        (0, 0, Slot::DueToday),
-        (1, 0, Slot::DueSoon),
-        (6, 0, Slot::DueSoon),
-        (7, 0, Slot::Text),
-        (7, 7, Slot::DueSoon),
-        (8, 7, Slot::Text),
-    ] {
-        assert_eq!(due_slot(days, soon), slot, "{days} {soon}");
-    }
 }

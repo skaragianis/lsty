@@ -36,7 +36,8 @@ impl Picker {
         }
     }
 
-    fn lines(&self) -> Vec<String> {
+    /// The lines: the number and mark, then the link.
+    fn lines(&self) -> Vec<(String, String)> {
         self.links
             .iter()
             .enumerate()
@@ -45,7 +46,7 @@ impl Picker {
                     Link::File(file) => exists_mark(file.path.exists()),
                     Link::Url(_) => " ",
                 };
-                format!(" {} {mark} {}", i + 1, lossy(link.shown()))
+                (format!(" {} {mark} ", i + 1), lossy(link.shown()))
             })
             .collect()
     }
@@ -132,7 +133,11 @@ impl Model {
             return;
         };
         let text = picker.lines();
-        let widest = text.iter().map(|l| width_of(l)).max().unwrap_or(0);
+        let widest = text
+            .iter()
+            .map(|(a, b)| width_of(a) + width_of(b))
+            .max()
+            .unwrap_or(0);
         let at = self.picker_box(text.len(), widest);
         crate::draw::clear(buf, at, &self.styles);
         let w = usize::from(at.width);
@@ -144,9 +149,15 @@ impl Model {
         self.put_at(buf, (at.x, at.y), w, &top);
         let first = window(picker.top, picker.at, picker.links.len(), rows);
         for i in 0..rows {
-            let line = text.get(first + i).map_or("", String::as_str);
-            let mut spans =
-                fit(vec![Span::new(line, Some(Slot::Text))], inner);
+            let (head, link) =
+                text.get(first + i).map_or(("", ""), |(a, b)| (a, b));
+            let mut spans = fit(
+                vec![
+                    Span::new(head, Some(Slot::Text)),
+                    Span::new(link, Some(Slot::Link)),
+                ],
+                inner,
+            );
             pad(&mut spans, inner, None);
             let mut row = vec![Span::new("│", slot)];
             row.extend(spans);

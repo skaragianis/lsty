@@ -7,8 +7,8 @@ use lsty_core::{
     errs::{Source, lossy},
     links::{self, Link},
     list::{State, Task},
-    theme::Slot,
-    todotxt::{Kind, Line, Tags, TokenView, is_structural},
+    theme::{Parts, Slot, Today, claim_slot, due_slot, state_slot},
+    todotxt::{Kind, Line, Tags, is_structural},
 };
 use ratatui::{buffer::Buffer, layout::Rect};
 
@@ -17,8 +17,6 @@ use crate::{
     layout::{BORDER, FRAME, cells},
     model::Model,
     open::exists_mark,
-    reldate::due_slot,
-    rows::{base_slot, token_slot},
     text::{ELLIPSIS, RULE, Span, cut, pad, put, titled_spans, width_of},
     wrap::wrap_words,
 };
@@ -28,19 +26,32 @@ const TITLE: &str = "[2]─Detail";
 pub(crate) const PADDING: usize = 1;
 const LABEL_GAP: usize = 2;
 
-/// One line of the metadata: a label and a value. A wide field has no
-/// label column.
+/// One line of the metadata: a label and the words of a value. A wide
+/// field has no label column.
 struct Field<'a> {
     label: Cow<'a, str>,
-    value: Span<'a>,
+    words: Vec<Span<'static>>,
     wide: bool,
 }
 
 impl<'a> Field<'a> {
-    fn new(label: impl Into<Cow<'a, str>>, value: Span<'a>) -> Self {
+    /// A field whose value is `value` split at white space.
+    fn new(label: impl Into<Cow<'a, str>>, value: Span<'_>) -> Self {
+        let Span { text, slot, .. } = value;
+        let words = text
+            .split_whitespace()
+            .map(|word| Span::new(word.to_owned(), slot))
+            .collect();
+        Self::words(label, words)
+    }
+
+    fn words(
+        label: impl Into<Cow<'a, str>>,
+        words: Vec<Span<'static>>,
+    ) -> Self {
         Self {
             label: label.into(),
-            value,
+            words,
             wide: false,
         }
     }
@@ -50,11 +61,10 @@ impl<'a> Field<'a> {
     }
 
     fn warning(message: impl Into<String>) -> Self {
-        Self {
-            label: Cow::Borrowed(""),
-            value: Span::new(message.into(), Some(Slot::Warning)),
-            wide: true,
-        }
+        let mut field =
+            Self::new("", Span::new(message.into(), Some(Slot::Warning)));
+        field.wide = true;
+        field
     }
 }
 
@@ -73,8 +83,8 @@ fn relative(days: i32) -> String {
 }
 
 /// The words with a breakable space between each two.
-fn spaced(words: Vec<Span<'_>>) -> Vec<Span<'_>> {
-    let mut out = Vec::with_capacity(2 * words.len());
+fn spaced<'a>(words: impl IntoIterator<Item = Span<'a>>) -> Vec<Span<'a>> {
+    let mut out = Vec::new();
     for word in words {
         if !out.is_empty() {
             out.push(Span::new(" ", Some(Slot::Text)));
@@ -84,14 +94,9 @@ fn spaced(words: Vec<Span<'_>>) -> Vec<Span<'_>> {
     out
 }
 
-/// A value split at white space into words of its slot, wrapped.
-fn wrap_value(value: &Span<'_>, w: usize) -> Vec<Vec<Span<'static>>> {
-    let words: Vec<_> = value
-        .text
-        .split_whitespace()
-        .map(|word| Span::new(word, value.slot))
-        .collect();
-    wrap_words(&spaced(words), |_| w)
+/// The words of a value, wrapped.
+fn wrap_value(f: &Field<'_>, w: usize) -> Vec<Vec<Span<'static>>> {
+    wrap_words(&spaced(f.words.iter().cloned()), |_| w)
 }
 
 fn field_lines<'a>(
@@ -100,9 +105,9 @@ fn field_lines<'a>(
     w: usize,
 ) -> Vec<Vec<Span<'a>>> {
     if f.wide {
-        return wrap_value(&f.value, w);
+        return wrap_value(f, w);
     }
-    let mut lines = wrap_value(&f.value, w.saturating_sub(column).max(1));
+    let mut lines = wrap_value(f, w.saturating_sub(column).max(1));
     for (i, line) in lines.iter_mut().enumerate() {
         let label = if i == 0 {
             let pad = column.saturating_sub(width_of(&f.label));
@@ -231,7 +236,8 @@ impl Model {
             return doc;
         }
         let line = self.snap.line(task);
-        doc.lines = wrap_words(&spaced(description(task, line)), |_| w);
+        let words = description(task, line, self.today());
+        doc.lines = wrap_words(&spaced(words), |_| w);
         doc.desc = doc.lines.len();
         doc.lines
             .push(vec![Span::new(RULE.repeat(w), Some(Slot::Muted))]);
@@ -251,12 +257,19 @@ impl Model {
         w: usize,
     ) -> Vec<Vec<Span<'a>>> {
         let tags = line.tags();
-        let mut fields = vec![Field::text("state", task.state().as_str())];
+        let mut fields = vec![Field::new(
+            "state",
+            Span::new(task.state().as_str(), Some(state_slot(task))),
+        )];
         if task.source() == Source::Todo {
             fields.push(Field::text("nr", task.nr().to_string()));
         }
         if let Some(pri) = line.effective_priority() {
-            fields.push(Field::text("priority", pri.to_string()));
+            let slot = Some(Slot::of_priority(pri));
+            fields.push(Field::new(
+                "priority",
+                Span::new(pri.to_string(), slot),
+            ));
         }
         fields.extend(self.date_fields(task, line, &tags));
         fields.extend(claim_fields(task, &tags));
@@ -298,19 +311,23 @@ impl Model {
         let Some(date) = Date::parse(due) else {
             return Vec::new();
         };
-        let field = Field::text("due", due);
         if !open {
-            return vec![field];
+            return vec![Field::text("due", due)];
         }
         let days = self.clock.today().days_until(date);
-        let soon = self.deps.config.upcoming_days;
-        let slot = Some(due_slot(days, soon));
-        vec![field, Field::new("", Span::new(relative(days), slot))]
+        let slot = Some(due_slot(days, self.deps.config.upcoming_days));
+        vec![
+            Field::new("due", Span::new(due.to_owned(), slot)),
+            Field::new("", Span::new(relative(days), slot)),
+        ]
     }
 
     fn started_field<'a>(&self, task: &Task) -> Option<Field<'a>> {
         let value = task.started_text(&self.clock, false)?;
-        Some(Field::text("started", value))
+        Some(Field::new(
+            "started",
+            Span::new(value, Some(claim_slot(task))),
+        ))
     }
 
     fn relation_fields<'a>(&self, task: &Task) -> Vec<Field<'a>> {
@@ -319,10 +336,19 @@ impl Model {
             let Some(other) = self.snap.task(*blocker) else {
                 continue;
             };
-            let text = self.snap.line(other).text();
-            let text = lossy(&text);
-            let nr = other.nr();
-            out.push(Field::text("blocked by", format!("{text} ({nr})")));
+            let parts = Parts::of(other, Some(self.today()));
+            let mut words: Vec<_> = self
+                .snap
+                .line(other)
+                .tokens()
+                .filter(|t| t.kind == Kind::Word)
+                .map(|t| Span::new(lossy(t.text), Some(parts.slot(&t))))
+                .collect();
+            words.push(Span::new(
+                format!("({})", other.nr()),
+                Some(Slot::Text),
+            ));
+            out.push(Field::words("blocked by", words));
         }
         for id in self.snap.dangling(task) {
             let id = lossy(id);
@@ -364,14 +390,16 @@ fn label_column(fields: &[Field<'_>]) -> usize {
     longest.max().unwrap_or(0) + LABEL_GAP
 }
 
-/// Every token of the description, in the colours of the list.
-fn description<'a>(task: &Task, line: &'a Line) -> Vec<Span<'a>> {
-    let base = base_slot(task);
+/// Every token of the description, in the colours of its parts: the
+/// task's state does not colour it.
+fn description<'a>(
+    task: &Task,
+    line: &'a Line,
+    today: Today,
+) -> Vec<Span<'a>> {
+    let parts = Parts::of(task, Some(today));
     line.tokens()
-        .map(|tok: TokenView<'a>| {
-            let slot = Some(token_slot(&tok, base));
-            Span::new(lossy(tok.text), slot)
-        })
+        .map(|tok| Span::new(lossy(tok.text), Some(parts.slot(&tok))))
         .collect()
 }
 
@@ -386,9 +414,12 @@ fn claim_fields<'a>(task: &Task, tags: &Tags<'_>) -> Vec<Field<'a>> {
         let stale = if task.stale() { ", stale" } else { "" };
         format!("{}{stale}", lossy(&text))
     });
-    let id = tags.id.map(|id| Field::text("id", lossy(id)));
+    let id = tags
+        .id
+        .map(|id| Field::new("id", Span::new(lossy(id), Some(Slot::Id))));
+    let slot = Some(claim_slot(task));
     claim
-        .map(|claim| Field::text("claim", claim))
+        .map(|claim| Field::new("claim", Span::new(claim, slot)))
         .into_iter()
         .chain(id)
         .collect()

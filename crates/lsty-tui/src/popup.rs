@@ -1,6 +1,6 @@
 //! Where the popup is on the screen, and drawing it over the list.
 
-use lsty_core::theme::Slot;
+use lsty_core::theme::{Parts, Slot};
 use ratatui::{buffer::Buffer, layout::Rect};
 
 use crate::{
@@ -65,8 +65,8 @@ impl Model {
             } else {
                 Slot::StatusBg
             };
-            let mut line =
-                fit(vec![Span::new(cand.label.as_str(), Some(Slot::Text))], w);
+            let word = Some(Parts::default().word(&cand.label));
+            let mut line = fit(vec![Span::new(cand.label.as_str(), word)], w);
             pad(&mut line, w, Some(Slot::Text));
             if y >= self.height.min(buf.area.height) {
                 break;

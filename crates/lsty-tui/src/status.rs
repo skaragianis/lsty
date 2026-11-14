@@ -162,8 +162,10 @@ impl Model {
     /// message comes last of the rest.
     fn status_parts(&self) -> Vec<Vec<Span<'_>>> {
         if let Some(line) = &self.line {
-            let text = format!("{}{}", line.kind.label(), line.field.text());
-            return vec![vec![Span::new(text, Some(Slot::Text))]];
+            let mut spans =
+                vec![Span::new(line.kind.label(), Some(Slot::Text))];
+            spans.extend(line.field.lines(usize::MAX, self.typed()).concat());
+            return vec![spans];
         }
         let mut parts = Vec::new();
         if let Some((lo, hi)) = self.selected_rows() {

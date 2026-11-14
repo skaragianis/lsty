@@ -214,7 +214,7 @@ fn offered(tabs: usize, w: usize) -> Vec<(String, Option<Slot>)> {
 
 #[test]
 fn the_candidate_in_the_text_is_marked_among_those_offered() {
-    let (text, selected) = (Some(Slot::Text), Some(Slot::Selection));
+    let (text, selected) = (Some(Slot::Project), Some(Slot::Selection));
     let gap = || ("  ".to_owned(), None);
     let name = |n: &str, slot| (n.to_owned(), slot);
     let want = vec![

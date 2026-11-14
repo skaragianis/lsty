@@ -2,10 +2,11 @@
 //! claim read like.
 
 use jiff::Timestamp;
+pub(crate) use lsty_core::theme::Today;
 use lsty_core::{
     dates::{Date, format_elapsed},
     list::{State, Task},
-    theme::Slot,
+    theme::{Slot, WEEK, due_slot},
     todotxt::Line,
 };
 
@@ -26,15 +27,6 @@ impl Cell {
     }
 }
 
-/// What the date column needs from the clock.
-#[derive(Clone, Copy, Debug)]
-pub(crate) struct Today {
-    pub(crate) date: Date,
-    /// `upcoming_days` of the config.
-    pub(crate) soon: u64,
-}
-
-const WEEK: i32 = 7;
 const WEEKDAYS: [&str; 7] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
 /// The date column of a task: its due date, or for a done task its
@@ -70,18 +62,6 @@ fn far(due: Date, today: Date) -> String {
     let full = due.to_string();
     let year = &today.to_string()[..5];
     full.strip_prefix(year).unwrap_or(&full).to_owned()
-}
-
-/// The slot of a due date that is `days` from today.
-pub(crate) fn due_slot(days: i32, soon: u64) -> Slot {
-    match days {
-        ..=-1 => Slot::DueOverdue,
-        0 => Slot::DueToday,
-        _ if days < WEEK || i128::from(days) <= i128::from(soon) => {
-            Slot::DueSoon
-        }
-        _ => Slot::Text,
-    }
 }
 
 fn weekday(date: Date) -> &'static str {

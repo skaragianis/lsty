@@ -213,7 +213,7 @@ impl Model {
         let Some(draft) = &self.edit else {
             return;
         };
-        let lines = draft.field.lines(self.field_box().1);
+        let lines = draft.field.lines(self.field_box().1, self.typed());
         for n in 0..shown {
             let spans =
                 lines.get(draft.window + n).cloned().unwrap_or_default();
@@ -374,7 +374,7 @@ impl Model {
         }
         let inline = Inline::new(&self.deps.config);
         let mut text = text.unwrap_or_else(|| {
-            fit(text_spans(line, row.base, inline), layout.text)
+            fit(text_spans(line, (row.base, row.parts), inline), layout.text)
         });
         pad(&mut text, layout.text, row.base);
         out.extend(text);

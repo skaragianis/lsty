@@ -1,4 +1,7 @@
-use lsty_core::keys::{Action, Mods, Named, Stroke};
+use lsty_core::{
+    keys::{Action, Mods, Named, Stroke},
+    theme::Parts,
+};
 
 use super::Field;
 use crate::{
@@ -768,12 +771,37 @@ fn replacing_a_word_moves_the_read_only_part() {
 
 #[test]
 fn a_row_is_drawn_in_one_span_for_each_run_of_one_style() {
-    use lsty_core::theme::Slot;
+    use lsty_core::{
+        dates::Date,
+        theme::{Slot, Today},
+    };
     let field = Field::locked("A +w id:c1 B", vec![(5, 10)], 0, 0);
-    let rows = field.lines(40);
+    let rows = field.lines(40, Parts::default());
     assert_eq!(rows.len(), 1);
     let spans: Vec<_> =
         rows[0].iter().map(|s| (s.text.as_ref(), s.slot)).collect();
     let (text, muted) = (Some(Slot::Text), Some(Slot::Muted));
-    assert_eq!(spans, [("A +w ", text), ("id:c1", muted), (" B", text)]);
+    let project = Some(Slot::Project);
+    let want = [
+        ("A ", text),
+        ("+w", project),
+        (" ", text),
+        ("id:c1", muted),
+        (" B", text),
+    ];
+    assert_eq!(spans, want);
+    // a done task shows no overdue date
+    let date = Date::parse("2026-01-01").expect("date");
+    let parts = Parts {
+        today: Some(Today { date, soon: 3 }),
+        ..Parts::default()
+    };
+    for (text, want) in [
+        ("A due:2020-01-01", Slot::DueOverdue),
+        ("x 2025-12-31 A due:2020-01-01", Slot::Text),
+    ] {
+        let rows = Field::locked(text, vec![], 0, 0).lines(60, parts);
+        let due = rows[0].iter().find(|s| s.text.contains("due:"));
+        assert_eq!(due.and_then(|s| s.slot), Some(want), "{text}");
+    }
 }
