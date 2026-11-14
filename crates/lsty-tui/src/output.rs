@@ -198,7 +198,7 @@ impl Model {
             return;
         };
         if let Some(area) = at.rect() {
-            crate::draw::clear(buf, area);
+            crate::draw::clear(buf, area, &self.styles);
         }
         let rows = at.rows();
         let inner = at.w.saturating_sub(BORDER);

@@ -79,6 +79,8 @@ slots! {
     PanelBorder => "panel_border";
     /// Border of the panel with focus
     PanelBorderActive => "panel_border_active";
+    /// Fill of the whole screen, under everything else
+    Background => "background";
     /// Fill of the selected row or choice
     Selection => "selection";
     /// Fill of the row under the cursor

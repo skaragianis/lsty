@@ -407,7 +407,7 @@ fn the_filter_keeps_the_selected_name_and_shows_a_range_only_when_cut() {
     let foot = screen(&model, 60, 24)[14].clone();
     assert_eq!(
         foot,
-        "│                └ /  8-12 of 14 ─────────┘                │"
+        "│                └ /  9-13 of 15 ─────────┘                │"
     );
 }
 

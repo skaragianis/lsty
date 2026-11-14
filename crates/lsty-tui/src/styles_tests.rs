@@ -92,3 +92,44 @@ fn the_rows_at_16_colours_are_marked_without_a_background() {
     assert!(row(&model, 2).contains(Modifier::UNDERLINED));
     assert_eq!(row(&model, 3), Modifier::empty());
 }
+
+/// With a `background` theme, no cell of the screen shows the terminal's
+/// colour: not under the sidebar overlay, the theme chooser, a popup or the
+/// line above the prompt, which blank the cells they cover.
+#[test]
+fn the_background_fill_reaches_every_cell_under_every_overlay() {
+    let dir = workdir("A +pa +pb @c\nB\nC\n");
+    let mut with = deps(dir.path(), alone());
+    with.profile = Profile::TrueColor;
+    let mut model = started(with);
+    model.update(Msg::Resize(70, 24));
+    model.show_theme("lsty-80s");
+    let blue = Color::Rgb(0, 0, 0xaa);
+    let check = |model: &Model, what: &str| -> Buffer {
+        let mut buf = Buffer::empty(Rect::new(0, 0, 70, 24));
+        model.draw(&mut buf);
+        for (i, cell) in buf.content.iter().enumerate() {
+            let at = (i % 70, i / 70);
+            assert_ne!(cell.bg, Color::Reset, "{what} {at:?}");
+        }
+        assert_eq!(buf[(0, 0)].bg, blue, "{what}");
+        buf
+    };
+    // The status line is drawn over the fill, not the other way round.
+    let status = check(&model, "list")[(60, 23)].bg;
+    assert_eq!(status, Color::Rgb(0, 0, 0));
+    keys(&mut model, "<C-w>3");
+    assert!(model.overlay);
+    check(&model, "overlay");
+    keys(&mut model, "<Tab>:theme<CR>");
+    assert!(model.choosing.is_some());
+    check(&model, "chooser");
+    keys(&mut model, "<Esc>/a |b");
+    check(&model, "prompt");
+    keys(&mut model, "<Esc>/+<Tab>");
+    assert!(model.line.as_ref().is_some_and(|l| l.comp.is_some()));
+    check(&model, "popup");
+    keys(&mut model, "<Esc><Esc>");
+    model.open_output("out", &[b"text".to_vec()]);
+    check(&model, "output");
+}

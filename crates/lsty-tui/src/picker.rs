@@ -134,7 +134,7 @@ impl Model {
         let text = picker.lines();
         let widest = text.iter().map(|l| width_of(l)).max().unwrap_or(0);
         let at = self.picker_box(text.len(), widest);
-        crate::draw::clear(buf, at);
+        crate::draw::clear(buf, at, &self.styles);
         let w = usize::from(at.width);
         let rows = usize::from(at.height).saturating_sub(BORDER);
         let inner = w.saturating_sub(BORDER);

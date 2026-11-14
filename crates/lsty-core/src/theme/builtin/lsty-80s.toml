@@ -1,0 +1,54 @@
+# lsty-80s: light gray text on EGA blue, a black cursor row and status line.
+
+[palette]
+black        = "#000000"
+blue         = "#0000aa"
+green        = "#00aa00"
+cyan         = "#00aaaa"
+red          = "#aa0000"
+magenta      = "#aa00aa"
+brown        = "#aa5500"
+lightgray    = "#aaaaaa"
+darkgray     = "#555555"
+lightblue    = "#5555ff"
+lightgreen   = "#55ff55"
+lightcyan    = "#55ffff"
+lightred     = "#ff5555"
+lightmagenta = "#ff55ff"
+yellow       = "#ffff55"
+white        = "#ffffff"
+
+[slots]
+priority_a          = { fg = "lightred", bold = true }
+priority_b          = "yellow"
+priority_c          = "lightgreen"
+priority_other      = "lightgray"
+project             = "lightmagenta"
+context             = "lightcyan"
+link                = { fg = "lightcyan", underline = true }
+text                = "lightgray"
+muted               = "cyan"
+id                  = "lightgray"
+due_overdue         = { fg = "lightred", bold = true }
+due_today           = { fg = "yellow", bold = true }
+due_soon            = "lightcyan"
+code                = "white"
+done                = { fg = "cyan", strike = true, faint = true }
+doing               = "lightgreen"
+blocked             = "brown"
+mode_normal         = { fg = "black", bg = "lightgray", bold = true }
+mode_insert         = { fg = "black", bg = "green", bold = true }
+mode_visual         = { fg = "black", bg = "magenta", bold = true }
+mode_command        = { fg = "black", bg = "brown", bold = true }
+panel_border        = "lightgray"
+panel_border_active = { fg = "white", bold = true }
+background          = { bg = "blue" }
+selection           = { bg = "darkgray" }
+cursorline          = { bg = "black" }
+chip                = { fg = "black", bg = "cyan" }
+status_bg           = { bg = "black" }
+hint_key            = { fg = "white", bold = true }
+hint_desc           = "lightgray"
+hint_dim            = "darkgray"
+warning             = { fg = "yellow", bold = true }
+error               = { fg = "lightred", bold = true }

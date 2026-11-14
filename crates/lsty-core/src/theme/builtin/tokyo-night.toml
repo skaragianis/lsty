@@ -42,6 +42,7 @@ mode_visual         = { fg = "bg_dark", bg = "magenta", bold = true }
 mode_command        = { fg = "bg_dark", bg = "orange", bold = true }
 panel_border        = "fg_gutter"
 panel_border_active = "blue1"
+background          = {}
 selection           = { bg = "bg_visual" }
 cursorline          = { bg = "bg_highlight" }
 chip                = { fg = "fg", bg = "bg_visual" }
