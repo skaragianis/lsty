@@ -28,7 +28,7 @@ x 2026-09-28 Write parser id:parser
 -- want-text --
 2 (C) Add CLI ls +spec dep:parser
   text: Add CLI ls
-  state: todo
+  state: blocked
   priority: C
   blocked by: 1 Write parser (id:parser)
 

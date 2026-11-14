@@ -3,7 +3,7 @@ env LSTY_OWNER=agent1
 exec lsty next --no-config
 cmp stdout want
 exec lsty next --json --no-config
-stdout '"blocked":true,"blockers":\[\{"nr":4,"source":"todo","id":"parser"\}\]'
+stdout '"state":"doing","blocked":true,"blockers":\[\{"nr":4,"source":"todo","id":"parser"\}\]'
 
 -- todo.txt --
 Buy milk +home

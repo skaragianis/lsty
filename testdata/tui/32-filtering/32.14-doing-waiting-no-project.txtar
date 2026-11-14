@@ -24,7 +24,7 @@ x 2026-09-01 Old task +work
 │ +home    1/1││  6 ⧗ Add CLI ls +spec01 dep:parser                                    1h ││ Add CLI ls +spec01 dep:parser       │
 │ +spec01  2/2││                                                                          ││ started:2026-09-29T0800Z            │
 │ ▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
-│   .acme  1/1││                                                                          ││ state       doing                   │
+│   .acme  1/1││                                                                          ││ state       blocked                 │
 │             ││                                                                          ││ nr          6                       │
 │             ││                                                                          ││ started     2026-09-29 08:00 (1h)   │
 │             ││                                                                          ││ claim       claimed (by you)        │
@@ -55,7 +55,7 @@ x 2026-09-01 Old task +work
 │ +home    1/1││  6 ⧗ Add CLI ls +spec01 dep:parser                                    1h ││ Add CLI ls +spec01 dep:parser       │
 │ +spec01  2/2││                                                                          ││ started:2026-09-29T0800Z            │
 │ ▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
-│   .acme  1/1││                                                                          ││ state       doing                   │
+│   .acme  1/1││                                                                          ││ state       blocked                 │
 │             ││                                                                          ││ nr          6                       │
 │             ││                                                                          ││ started     2026-09-29 08:00 (1h)   │
 │             ││                                                                          ││ claim       claimed (by you)        │
