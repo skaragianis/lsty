@@ -39,6 +39,7 @@ mode_visual         = { fg = "nord0", bg = "nord15", bold = true }
 mode_command        = { fg = "nord0", bg = "nord12", bold = true }
 panel_border        = "nord3"
 panel_border_active = "nord8"
+background          = {}
 selection           = { bg = "nord2" }
 cursorline          = { bg = "nord1" }
 chip                = { fg = "nord6", bg = "nord2" }

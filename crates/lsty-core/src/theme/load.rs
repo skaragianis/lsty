@@ -124,7 +124,11 @@ fn is_file(cwd: &Path, path: &Path) -> bool {
 /// The styles of a built-in theme over those of `ansi`; `ansi` for a
 /// name that is no built-in theme, and for any name at 16 colours.
 fn builtin_styles(name: &str, profile: Profile) -> Styles {
-    let (base, _) = parse(FALLBACK, ANSI.as_bytes(), &Styles::default());
+    let (base, _) = parse(
+        FALLBACK,
+        ANSI.as_bytes(),
+        &[Style::default(); Slot::ALL.len()],
+    );
     match builtin(name) {
         Some(text) if profile != Profile::Ansi && name != FALLBACK => {
             parse(name, text.as_bytes(), &base).0

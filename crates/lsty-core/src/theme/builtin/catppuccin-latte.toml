@@ -50,6 +50,7 @@ mode_visual         = { fg = "crust", bg = "mauve", bold = true }
 mode_command        = { fg = "crust", bg = "peach", bold = true }
 panel_border        = "surface1"
 panel_border_active = "lavender"
+background          = {}
 selection           = { bg = "surface1" }
 cursorline          = { bg = "surface0" }
 chip                = { fg = "text", bg = "surface1" }

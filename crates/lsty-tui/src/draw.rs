@@ -14,6 +14,7 @@ use crate::{
     model::Model,
     reldate::Cell,
     rows::{Inline, Row, text_spans},
+    styles::Styles,
     tall::{Entry, Tall},
     text::{RULE, Span, fit, pad, prefix, put, width},
 };
@@ -61,6 +62,10 @@ impl Model {
         if width == 0 || height == 0 {
             return;
         }
+        buf.set_style(
+            Rect::new(0, 0, width, height),
+            self.styles.fill(Slot::Background),
+        );
         if width < MIN_WIDTH || height < MIN_HEIGHT {
             let text = prefix(TOO_SMALL, usize::from(width));
             buf.set_string(0, 0, text, ratatui::style::Style::default());
@@ -77,7 +82,7 @@ impl Model {
         }
         if let Some(side) = panes.sidebar {
             if side.overlay {
-                clear(buf, side.rect);
+                clear(buf, side.rect, &self.styles);
             }
             self.draw_sidebar(buf, side.rect);
         }
@@ -421,13 +426,14 @@ fn push_columns<'a>(out: &mut Vec<Span<'a>>, row: &'a Row, layout: Layout) {
     }
 }
 
-/// Wipes the cells of `area`, so that what is drawn over them does not
-/// inherit their style.
-pub(crate) fn clear(buf: &mut Buffer, area: Rect) {
+/// Wipes the cells of `area` to the screen fill, so that what is drawn
+/// over them does not inherit their style.
+pub(crate) fn clear(buf: &mut Buffer, area: Rect, styles: &Styles) {
     for y in area.top()..area.bottom() {
         for x in area.left()..area.right() {
             if let Some(cell) = buf.cell_mut((x, y)) {
                 cell.reset();
+                cell.set_style(styles.fill(Slot::Background));
             }
         }
     }

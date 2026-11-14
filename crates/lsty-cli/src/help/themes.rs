@@ -65,8 +65,8 @@ are its own 16), or a palette name. A number without quotes is a bad colour.";
 const SLOTS: &str = "[slots] gives a slot a colour, its foreground: text = \
 \"ink\"; or a table of keys: priority_a = { fg = \"alert\", bold = true }. \
 Either replaces the look the slot would have had, so a key left out is off. \
-The slots selection, cursorline and status_bg are fills: they paint their bg, \
-or their fg when there is no bg. The keys:";
+The slots background, selection, cursorline and status_bg are fills: they \
+paint their bg, or their fg when there is no bg. The keys:";
 
 const WARNINGS: &str = "A bad value does not stop a theme from loading. A \
 slot with a bad colour, or a key that is not true or false, keeps the look it \

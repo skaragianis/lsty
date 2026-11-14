@@ -386,7 +386,7 @@ impl Model {
         else {
             return;
         };
-        crate::draw::clear(buf, at);
+        crate::draw::clear(buf, at, &self.styles);
         let w = usize::from(at.width);
         let rows = usize::from(at.height).saturating_sub(BORDER);
         let inner = w.saturating_sub(BORDER);

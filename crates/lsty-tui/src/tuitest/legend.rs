@@ -30,6 +30,7 @@ const fn letter(slot: Slot) -> char {
         Slot::ModeCommand => 'M',
         Slot::PanelBorder => 'e',
         Slot::PanelBorderActive => 'E',
+        Slot::Background => 'a',
         Slot::Selection => 's',
         Slot::Cursorline => 'u',
         Slot::Chip => 'h',

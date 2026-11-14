@@ -14,7 +14,7 @@ use lsty_core::{
     theme::Slot,
     todotxt::{Kind as TokenKind, SEPARATORS},
 };
-use ratatui::{layout::Rect, style::Style};
+use ratatui::layout::Rect;
 
 use crate::{
     actions::{Chosen, places},
@@ -474,7 +474,7 @@ impl Model {
         let w = usize::from(cells);
         let mut line = fit(spans, w);
         pad(&mut line, w, None);
-        buf.set_style(Rect::new(0, y, cells, 1), Style::reset());
+        crate::draw::clear(buf, Rect::new(0, y, cells, 1), &self.styles);
         put(buf, (0, y), w, &line, &self.styles);
     }
 }

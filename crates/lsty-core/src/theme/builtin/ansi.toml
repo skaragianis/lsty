@@ -22,6 +22,7 @@ mode_visual         = { fg = "5", bold = true }
 mode_command        = { bold = true }
 panel_border        = { faint = true }
 panel_border_active = { fg = "12", bold = true }
+background          = {}
 selection           = { bold = true, underline = true }
 cursorline          = { bold = true }
 chip                = { bold = true }

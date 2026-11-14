@@ -4,7 +4,7 @@
 pub(super) const ANSI: &str = include_str!("builtin/ansi.toml");
 
 /// The built-in themes, sorted by name, with the text of their files.
-pub(super) const BUILTIN: [(&str, &str); 14] = [
+pub(super) const BUILTIN: [(&str, &str); 15] = [
     ("ansi", ANSI),
     (
         "catppuccin-frappe",
@@ -24,6 +24,7 @@ pub(super) const BUILTIN: [(&str, &str); 14] = [
     ),
     ("gruvbox-dark", include_str!("builtin/gruvbox-dark.toml")),
     ("gruvbox-light", include_str!("builtin/gruvbox-light.toml")),
+    ("lsty-80s", include_str!("builtin/lsty-80s.toml")),
     ("monokai", include_str!("builtin/monokai.toml")),
     ("nord", include_str!("builtin/nord.toml")),
     ("one-dark", include_str!("builtin/one-dark.toml")),

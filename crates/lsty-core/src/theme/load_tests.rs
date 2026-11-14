@@ -8,7 +8,7 @@ use super::{
 };
 use crate::{config::Warning, ops::test_util::strings};
 
-const BUILTIN_NAMES: [&str; 14] = [
+const BUILTIN_NAMES: [&str; 15] = [
     "ansi",
     "catppuccin-frappe",
     "catppuccin-latte",
@@ -16,6 +16,7 @@ const BUILTIN_NAMES: [&str; 14] = [
     "catppuccin-mocha",
     "gruvbox-dark",
     "gruvbox-light",
+    "lsty-80s",
     "monokai",
     "nord",
     "one-dark",
@@ -595,7 +596,8 @@ fn no_built_in_colour_equals_its_background_above_16_colours() {
                 (style.fg.is_some() && style.fg == under)
                     .then(|| format!("{name} {profile:?} {slot:?} {under:?}"))
             };
-            lost.extend(Slot::ALL.into_iter().filter_map(|s| on(s, None)));
+            let screen = fill(&theme, Slot::Background, profile);
+            lost.extend(Slot::ALL.into_iter().filter_map(|s| on(s, screen)));
             for (place, slots) in places {
                 let under = fill(&theme, place, profile);
                 lost.extend(slots.iter().filter_map(|&s| on(s, under)));
