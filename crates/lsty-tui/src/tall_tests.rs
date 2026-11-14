@@ -1,7 +1,7 @@
 use std::rc::Rc;
 
 use lsty_core::{
-    config::{Config, LineNumbers},
+    config::{Config, Hidden, LineNumbers},
     theme::{Parts, Slot},
     todotxt::Line,
 };
@@ -13,7 +13,7 @@ use crate::{
     msg::{Gesture, Mouse, Msg},
     rows::Inline,
     tall::{Entry, MAX_ROWS, lay_out},
-    test_util::{alone, keys, screen, workdir_model},
+    test_util::{alone, deps, keys, screen, started, workdir, workdir_model},
     text::Span,
     wrap::wrap_words,
 };
@@ -345,17 +345,31 @@ fn later_rows_start_two_cells_in_without_a_number_column() {
 
 #[test]
 fn a_field_starts_after_the_number_column_only_when_there_is_one() {
-    for (numbers, want) in [
-        (LineNumbers::Off, (1, 26)),
-        (LineNumbers::Absolute, (4, 23)),
+    // The done file is 99 lines: the column is wider when archived rows
+    // can be listed, by the switch or by a filter asking for them.
+    let dir = workdir("one\n");
+    std::fs::write(dir.path().join("done.txt"), "x old\n".repeat(99))
+        .unwrap_or_else(|e| panic!("{e}"));
+    for (numbers, archive, search, want) in [
+        (LineNumbers::Off, false, "", (1, 26)),
+        (LineNumbers::Absolute, false, "", (4, 23)),
+        (LineNumbers::Absolute, true, "", (5, 22)),
+        (LineNumbers::Absolute, false, "/is:archived<CR>", (5, 22)),
     ] {
+        let hidden = if archive {
+            vec![]
+        } else {
+            vec![Hidden::Archive]
+        };
         let config = Config {
             line_numbers: numbers,
+            hidden_tasks: hidden,
             ..alone()
         };
-        let (_dir, mut model) = workdir_model("one\n", config);
+        let mut model = started(deps(dir.path(), config));
         model.update(Msg::Resize(30, 8));
-        assert_eq!(model.field_box(), want, "{numbers:?}");
+        keys(&mut model, search);
+        assert_eq!(model.field_box(), want, "{numbers:?} {archive} {search}");
     }
 }
 
