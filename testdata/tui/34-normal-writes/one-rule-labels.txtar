@@ -62,8 +62,8 @@ x 2026-09-01 Old skip wontdo:true
 │  6 ✗ Skip wontdo:true                                                                                              28d ago     │
 │  1 ✗ Skip two wontdo:true                                                                                          28d ago     │
 │  2 ✓ Plain three                                                                                                   28d ago     │
-│    ✓ Old                                                                                                           28d ago     │
-│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│  3 ✓ Old                                                                                                           28d ago     │
+│  4 ✗ Old skip wontdo:true                                                                                          28d ago     │
 │                                                                                                                                │
 │                                                                                                                                │
 │                                                                                                                                │
@@ -79,8 +79,8 @@ x 2026-09-01 Old skip wontdo:true
 │  1 ✗ Skip wontdo:true                                                                                              28d ago     │
 │  7 ✗ Skip two wontdo:true                                                                                          28d ago     │
 │  1 ✓ Plain three                                                                                                   28d ago     │
-│    ✓ Old                                                                                                           28d ago     │
-│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│  2 ✓ Old                                                                                                           28d ago     │
+│  3 ✗ Old skip wontdo:true                                                                                          28d ago     │
 │                                                                                                                                │
 │                                                                                                                                │
 │                                                                                                                                │
@@ -96,8 +96,8 @@ x 2026-09-01 Old skip wontdo:true
 │  2 ✗ Skip wontdo:true                                                                                              28d ago     │
 │  1 ✗ Skip two wontdo:true                                                                                          28d ago     │
 │  8 ✓ Plain three                                                                                                   28d ago     │
-│    ✓ Old                                                                                                           28d ago     │
-│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│  1 ✓ Old                                                                                                           28d ago     │
+│  2 ✗ Old skip wontdo:true                                                                                          28d ago     │
 │                                                                                                                                │
 │                                                                                                                                │
 │                                                                                                                                │
@@ -114,7 +114,7 @@ x 2026-09-01 Old skip wontdo:true
 │  2 ✗ Skip two wontdo:true                                                                                          28d ago     │
 │  1 ✓ Plain three                                                                                                   28d ago     │
 │    ✓ Old                                                                                                           28d ago     │
-│    ✗ Old skip wontdo:true                                                                                          28d ago     │
+│  1 ✗ Old skip wontdo:true                                                                                          28d ago     │
 │                                                                                                                                │
 │                                                                                                                                │
 │                                                                                                                                │
@@ -130,7 +130,7 @@ x 2026-09-01 Old skip wontdo:true
 │  4 ✗ Skip wontdo:true                                                                                              28d ago     │
 │  3 ✗ Skip two wontdo:true                                                                                          28d ago     │
 │  2 ✓ Plain three                                                                                                   28d ago     │
-│    ✓ Old                                                                                                           28d ago     │
+│  1 ✓ Old                                                                                                           28d ago     │
 │    ✗ Old skip wontdo:true                                                                                          28d ago     │
 │                                                                                                                                │
 │                                                                                                                                │

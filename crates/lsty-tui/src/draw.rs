@@ -322,16 +322,15 @@ impl Model {
         }
     }
 
+    /// The number of a row: the line of a todo file task, the distance to
+    /// the current row, or blank; a done-file row has no line.
     fn number(&self, row: &Row, index: usize) -> Span<'static> {
         let gutter = self.gutter_width();
-        if row.source == Source::Done {
-            return Span::blanks(gutter, Some(Slot::Muted));
-        }
         let style = self.deps.config.line_numbers;
-        let nr = row.nr.get() as usize;
+        let nr = (row.source != Source::Done).then(|| row.nr.get() as usize);
         let (n, slot) = if self.is_current(index) {
             let n = if style == LineNumbers::Relative {
-                0
+                Some(0)
             } else {
                 nr
             };
@@ -339,9 +338,12 @@ impl Model {
         } else if style == LineNumbers::Absolute {
             (nr, Slot::Muted)
         } else {
-            (self.distance(index), Slot::Muted)
+            (Some(self.distance(index)), Slot::Muted)
         };
-        Span::new(format!("{n:>gutter$}"), Some(slot))
+        match n {
+            Some(n) => Span::new(format!("{n:>gutter$}"), Some(slot)),
+            None => Span::blanks(gutter, Some(Slot::Muted)),
+        }
     }
 
     /// The spans of one row, with `text` in the task's column instead of
