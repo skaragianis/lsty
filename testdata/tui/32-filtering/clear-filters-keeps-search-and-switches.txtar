@@ -20,7 +20,7 @@ x 2026-09-01 Old task +work
 ┌[3]─Projects─┐┌ [1]─+work  /cl ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                                           today │
 │ +spec01  2/2││                                                                                   │
-│>▾+work   2/4││                                                                                   │
+│=▾+work   2/4││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @email   1/1││                                                                                   │
 │ @phone   1/1││                                                                                   │

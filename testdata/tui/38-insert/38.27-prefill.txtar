@@ -20,9 +20,9 @@ C +work @phone
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
-│>+work    2/2││  1   C +work @phone                                                               │
+│=+work    2/2││  1   C +work @phone                                                               │
 ├[4]─Contexts─┤│                                                                                   │
-│>@phone   2/2││                                                                                   │
+│=@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
@@ -31,23 +31,23 @@ C +work @phone
 -- b-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
-│>+work    2/2││     +work                                                                         │
+│=+work    2/2││     +work                                                                         │
 ├[4]─Contexts─┤│  1   C +work @phone                                                               │
-│>@phone   2/2││                                                                                   │
+│=@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                    9.9.9
 -- b-cursor --
-│>+work    2/2││     +work                                                                         │
+│=+work    2/2││     +work                                                                         │
                     ^
 -- c-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
-│>+work    3/3││  2   Call +work                                                    filtered  t001 │
+│=+work    3/3││  2   Call +work                                                    filtered  t001 │
 ├[4]─Contexts─┤│  1   C +work @phone                                                               │
-│>@phone   2/2││                                                                                   │
+│=@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │

@@ -6,7 +6,7 @@ frame today
 clickon "Overdue"
 tick 50ms
 frame overdue
-clickon ">Overdue"
+clickon "=Overdue"
 tick 50ms
 frame frame
 bg frame-bg
@@ -41,7 +41,7 @@ F started:2026-09-29T0900Z
 │ [x] Blocked ││                                                                                                                 │
 │ [ ] Archive ││                                                                                                                 │
 │ ─────────── ││                                                                                                                 │
-│>Today       ││                                                                                                                 │
+│=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
 │ Upcoming    ││                                                                                                                 │
 │ Doing       ││                                                                                                                 │
@@ -73,7 +73,7 @@ F started:2026-09-29T0900Z
 │ [ ] Archive ││                                                                                                                 │
 │ ─────────── ││                                                                                                                 │
 │ Today       ││                                                                                                                 │
-│>Overdue     ││                                                                                                                 │
+│=Overdue     ││                                                                                                                 │
 │ Upcoming    ││                                                                                                                 │
 │ Doing       ││                                                                                                                 │
 │ Waiting     ││                                                                                                                 │

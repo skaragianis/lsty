@@ -102,7 +102,7 @@ fn the_sigil_stands_before_every_name() {
 fn the_marks_follow_the_connectives() {
     let active = of(&[("a", And), ("b", Or), ("c", And), ("d", Not)]);
     let marks: Vec<_> = "abcdz".bytes().map(|n| mark(&active, &[n])).collect();
-    assert_eq!(marks, [Some(">"), Some("|"), Some("&"), Some("-"), None]);
+    assert_eq!(marks, [Some("="), Some("|"), Some("&"), Some("-"), None]);
     let lone = of(&[("a", Not)]);
     assert_eq!(mark(&lone, b"a"), Some("-"));
 }
@@ -114,14 +114,14 @@ fn a_name_off_hands_its_connective_to_the_alternative_after_it() {
     let table = [
         (of(&[("a", Not), ("b", Or)]), "a", "-@b", "-"),
         (of(&[("a", Not), ("b", Or), ("c", Or)]), "a", "-@b|@c", "-"),
-        (of(&[("a", And), ("b", Or), ("c", Or)]), "b", "@a -@c", ">"),
-        (of(&[("a", Not), ("b", And)]), "a", "@b", ">"),
+        (of(&[("a", And), ("b", Or), ("c", Or)]), "b", "@a -@c", "="),
+        (of(&[("a", Not), ("b", And)]), "a", "@b", "="),
         (of(&[("a", And), ("b", Not)]), "a", "-@b", "-"),
         (
             of(&[("a", And), ("b", Or), ("c", And), ("d", Not)]),
             "b",
             "@a @c -@d",
-            ">",
+            "=",
         ),
     ];
     for (before, gone, shown, first) in table {

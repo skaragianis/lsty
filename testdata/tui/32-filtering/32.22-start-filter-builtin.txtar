@@ -37,7 +37,7 @@ start_filter = "Upcoming"
 │ ─────────── ││                                                                          ││                                     │
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
-│>Upcoming    ││                                                                          ││                                     │
+│=Upcoming    ││                                                                          ││                                     │
 │ Doing       ││                                                                          ││                                     │
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │

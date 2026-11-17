@@ -21,7 +21,7 @@ x 2026-09-01 Old task +work
 │ +home    1/1││  2   (B) Send Invoice +work.acme @email                          2d late ││ Send Invoice +work.acme @email      │
 │ +spec01  2/2││                                                                          ││ due:2026-09-27                      │
 │ ▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
-│>  .acme  1/1││                                                                          ││ state     todo                      │
+│=  .acme  1/1││                                                                          ││ state     todo                      │
 │             ││                                                                          ││ nr        2                         │
 │             ││                                                                          ││ priority  B                         │
 │             ││                                                                          ││ due       2026-09-27                │

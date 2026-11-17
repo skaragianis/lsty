@@ -35,7 +35,7 @@ x 2026-09-01 Old task +work
 │ [x] Blocked ││                                                                          ││                                     │
 │ [ ] Archive ││                                                                          ││                                     │
 │ ─────────── ││                                                                          ││                                     │
-│>Today       ││                                                                          ││                                     │
+│=Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 │ Upcoming    ││                                                                          ││                                     │
 │ Doing       ││                                                                          ││                                     │

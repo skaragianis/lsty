@@ -34,7 +34,7 @@ Buy milk +home t:2026-10-05
 -- kept --
 ┌[3]─Projects─┐┌ [1]─+work|+home  -@email  /-+gone  /"call client" ───────────────────────┐┌[2]─Detail───────────────────────────┐
 │|+home    2/2││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
-│>▾+work   2/2││                                                                          ││ due:2026-09-29                      │
+│=▾+work   2/2││                                                                          ││ due:2026-09-29                      │
 │   .acme  1/1││                                                                          ││ ─────────────────────────────────── │
 │             ││                                                                          ││ state     todo                      │
 ├[4]─Contexts─┤│                                                                          ││ nr        1                         │

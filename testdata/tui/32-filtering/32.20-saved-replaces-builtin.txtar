@@ -38,7 +38,7 @@ Today = "due:today"
 │ [x] Blocked ││                                                                          ││                                     │
 │ [ ] Archive ││                                                                          ││                                     │
 │ ─────────── ││                                                                          ││                                     │
-│>Today       ││                                                                          ││                                     │
+│=Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 │ Upcoming    ││                                                                          ││                                     │
 │ Doing       ││                                                                          ││                                     │

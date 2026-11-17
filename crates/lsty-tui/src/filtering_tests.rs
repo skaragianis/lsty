@@ -472,7 +472,7 @@ fn an_active_name_that_leaves_the_file_stays_listed_with_no_tasks() {
         .unwrap_or_else(|e| panic!("{e}"));
     reload(&mut model);
     let lines = screen(&model, 80, 24);
-    assert!(lines.iter().any(|l| l.contains('>')), "{lines:?}");
+    assert!(lines.iter().any(|l| l.contains("│=  .y")), "{lines:?}");
     let text = lines.join("\n");
     assert!(text.contains("+x"), "{text}");
     assert!(text.contains("0/0"), "{text}");
