@@ -1,7 +1,7 @@
 //! The text line of the status line: the search, whose list follows the
 //! text as it changes, and the prompts that share its keys.
 
-use std::borrow::Cow;
+use std::{borrow::Cow, mem::replace};
 
 use lsty_core::{
     case::lower,
@@ -12,7 +12,7 @@ use lsty_core::{
 };
 
 use crate::{
-    connective::{Conn, Term},
+    connective::{Conn, Term, terms},
     field::Field,
     line::{Line, LineKind},
     model::Model,
@@ -57,11 +57,24 @@ impl Split {
 }
 
 impl Model {
-    /// `search`: opens the prompt with the kept search filled in.
+    /// `search`: opens the prompt with the selected projects and
+    /// contexts and then the kept search filled in.
     pub(crate) fn open_search(&mut self) {
-        let kind = LineKind::Search(self.search.clone());
-        self.line = Some(Line::new(kind, &self.search));
-        self.session.prefill(!self.search.is_empty());
+        let text = self.search_fill();
+        let kind = LineKind::Search(text.clone());
+        self.line = Some(Line::new(kind, &text));
+        self.session.prefill(!text.is_empty());
+    }
+
+    /// What the search prompt opens with: each word ends in a space, so
+    /// that the next word typed is a term of its own.
+    fn search_fill(&self) -> String {
+        let panels = [PROJECTS, CONTEXTS]
+            .into_iter()
+            .flat_map(|i| terms(self.panels[i].sigil, &self.panels[i].active))
+            .map(|(_, word)| word);
+        let kept = Some(self.search.clone()).filter(|s| !s.is_empty());
+        panels.chain(kept).map(|word| word + " ").collect()
     }
 
     /// Drops the kept search and gives each panel the last search moved,
@@ -129,9 +142,13 @@ impl Model {
     }
 
     /// The terms of `text`; when `moving`, those that [`Model::take`]
-    /// moves into a panel do not stay.
+    /// moves into a panel do not stay, and a panel with a selection that
+    /// the text names nothing for is cleared.
     fn split(&self, text: &str, moving: bool) -> Result<Split, Error> {
-        let mut split = Split::default();
+        let mut split = Split {
+            moved: [moving; 2].map(|m| m.then(Vec::new)),
+            ..Split::default()
+        };
         for (written, query) in Query::parse_terms(text)? {
             if !(moving && self.take(&query, &mut split.moved)) {
                 split.stays.push((written.to_owned(), query));
@@ -183,14 +200,17 @@ impl Model {
         let Ok(mut split) = self.split(&typed, true) else {
             return;
         };
-        self.remember_search(&typed);
+        if typed != self.search_fill() {
+            self.remember_search(&typed);
+        }
         let moved = std::mem::take(&mut split.moved);
-        for ((panel, moved), taken) in
-            self.panels.iter_mut().zip(moved).zip(&mut self.taken)
-        {
-            *taken = moved.map(|moved| {
-                (std::mem::replace(&mut panel.active, moved.clone()), moved)
-            });
+        let panels = self.panels.iter_mut().zip(moved).zip(&mut self.taken);
+        for ((panel, moved), taken) in panels {
+            // a panel the search leaves as it is keeps what is taken back
+            if moved.as_ref() != Some(&panel.active) {
+                *taken =
+                    moved.map(|m| (replace(&mut panel.active, m.clone()), m));
+            }
         }
         self.search = split.text();
         self.close_input();

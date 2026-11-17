@@ -3,7 +3,7 @@ start
 keys /
 type inv
 keys <CR>
-keys /
+keys / <BS>
 type oice
 frame typing
 keys <Esc>

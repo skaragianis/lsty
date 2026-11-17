@@ -323,6 +323,18 @@ fn the_prompts_of_tasks_have_no_history() {
 }
 
 #[test]
+fn a_search_is_kept_in_the_history_only_when_changed_from_what_was_filled_in()
+{
+    let dir = workdir(LIST);
+    let mut model = model_in(dir.path(), alone());
+    keys(&mut model, "<C-w>3<Space>/<CR>/A<CR>/<CR>");
+    assert_eq!(
+        history_file(dir.path()),
+        "command = []\nsearch = [\"+home A\"]\n"
+    );
+}
+
+#[test]
 fn quoted_lines_and_keys_read_back_as_written() {
     let dir = workdir(LIST);
     let store = Store::new(Some(state_of(dir.path())));
