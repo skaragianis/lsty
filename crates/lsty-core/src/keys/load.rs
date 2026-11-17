@@ -30,6 +30,8 @@ struct Written {
 struct Claim {
     action: Action,
     keys: Vec<Written>,
+    /// Whether the user's file made it, not the defaults.
+    user: bool,
 }
 
 /// The claims of every mode, in the order of `Mode::ALL`.
@@ -98,6 +100,7 @@ fn default_claims() -> Tables {
             .iter()
             .map(|&(action, written)| Claim {
                 action,
+                user: false,
                 keys: written
                     .iter()
                     .filter_map(|&text| {
@@ -218,7 +221,11 @@ fn merge_entry(
     }
     let claims = &mut tables[mode.index()];
     claims.retain(|c| c.action != action);
-    claims.push(Claim { action, keys });
+    claims.push(Claim {
+        action,
+        keys,
+        user: true,
+    });
 }
 
 fn parse_entry(
@@ -315,8 +322,18 @@ fn take_key(
     key: &Written,
 ) -> Option<Warning> {
     let len = owner.keys.len();
+    // The arrows came to the priority actions later than users could bind
+    // them: losing one of them is no news.
+    let arrow = owner.keys.iter().any(|o| {
+        o.strokes == key.strokes
+            && matches!(o.text.as_str(), "<Left>" | "<Right>")
+    }) && !owner.user
+        && matches!(
+            owner.action,
+            Action::CyclePriority | Action::CyclePriorityBack
+        );
     owner.keys.retain(|o| o.strokes != key.strokes);
-    (owner.keys.len() < len).then(|| {
+    (owner.keys.len() < len && !arrow).then(|| {
         warn(format!(
             "[{}] {} is bound to {} and {winner}; {winner} wins",
             mode.as_str(),

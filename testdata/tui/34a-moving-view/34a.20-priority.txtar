@@ -15,13 +15,13 @@ Top = "pri:A"
 (A) Y
 -- a-frame --
 ┌ [1]─Top ─────────────────────────────────────────────────────────────────────────────────────────┐
-│  1   (B) X                                                                              filtered │
+│  1       X                                                                              filtered │
 │  1   (A) Y                                                                                       │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 re-prioritized from (A) to (B); hidden by current filters in 2 seconds
+ NORMAL  todo.txt  manual  1 deprioritized; hidden by current filters in 2 seconds or at the next ke
 -- a-file --
-(B) X
+X
 (A) Y

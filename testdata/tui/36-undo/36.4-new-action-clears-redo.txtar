@@ -13,7 +13,7 @@ show_detail = false
 Buy
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1   (A) Buy                                                       │
+│  1   (D) Buy                                                       │
 │                                                                    │
 │                                                                    │
 │                                                                    │
@@ -21,4 +21,4 @@ Buy
 └────────────────────────────────────────────────────────────────────┘
  NORMAL  nothing to redo  todo.txt  manual  x done  t start     9.9.9
 -- after-todo --
-(A) Buy
+(D) Buy

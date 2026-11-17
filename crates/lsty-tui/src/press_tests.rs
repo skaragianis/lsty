@@ -332,8 +332,8 @@ fn delete_does_what_the_rule_says() {
 
 #[test]
 fn a_priority_step_does_what_the_rule_says() {
-    every_press((Action::CyclePriority, "-", "-"));
-    every_press((Action::CyclePriorityBack, "+", "+"));
+    every_press((Action::CyclePriority, "+", "+"));
+    every_press((Action::CyclePriorityBack, "-", "-"));
 }
 
 /// `stop` has no key by default and is asked of `act`.

@@ -386,24 +386,17 @@ fn the_configured_hints_are_dim_by_the_same_rule() {
     const BOUND: &str = "[normal]\nstop = [\"S\"]\n[visual]\nstop = [\"S\"]\n[detail]\nstop = [\"S\"]\n";
     let rows = [
         ("todo", "normal", "A\n", "", "", "S stop"),
-        ("done", "normal", DONE, "", "", "gp priority S stop"),
-        (
-            "archived",
-            "normal",
-            "",
-            OLD,
-            "",
-            "gp priority S stop gd due",
-        ),
+        ("done", "normal", DONE, "", "", "gp raise S stop"),
+        ("archived", "normal", "", OLD, "", "gp raise S stop gd due"),
         (
             "detail done",
             "detail",
             DONE,
             "",
             "<C-w>2",
-            "gp priority S stop",
+            "gp raise S stop",
         ),
-        ("visual done", "visual", DONE, "", "v", "gp priority S stop"),
+        ("visual done", "visual", DONE, "", "v", "gp raise S stop"),
     ];
     for (name, mode, todo, done, typed, want) in rows {
         let hints = Some((mode, STEPS));

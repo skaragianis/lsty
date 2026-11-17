@@ -21,37 +21,37 @@ show_detail = false
 Buy
 -- three --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1   (C) Buy                                                       │
-│                                                                    │
-│                                                                    │
-│                                                                    │
-│                                                                    │
-└────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 re-prioritized from (B) to (C)     9.9.9
--- three-todo --
-(C) Buy
--- u1 --
-┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
 │  1   (B) Buy                                                       │
 │                                                                    │
 │                                                                    │
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 re-prioritized from (B) to (C)
--- u1-todo --
+ NORMAL  todo.txt  manual  1 re-prioritized from (C) to (B)     9.9.9
+-- three-todo --
 (B) Buy
--- u2 --
+-- u1 --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
-│  1   (A) Buy                                                       │
+│  1   (C) Buy                                                       │
 │                                                                    │
 │                                                                    │
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 re-prioritized from (A) to (B)
+ NORMAL  todo.txt  manual  undid: 1 re-prioritized from (C) to (B)
+-- u1-todo --
+(C) Buy
+-- u2 --
+┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
+│  1   (D) Buy                                                       │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  undid: 1 re-prioritized from (D) to (C)
 -- u2-todo --
-(A) Buy
+(D) Buy
 -- u3 --
 ┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
 │  1   Buy                                                           │
@@ -60,6 +60,6 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 prioritized (A)  x done     9.9.9
+ NORMAL  todo.txt  manual  undid: 1 prioritized (D)  x done     9.9.9
 -- u3-todo --
 Buy

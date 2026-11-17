@@ -340,13 +340,13 @@ actions! {
     MoveTaskUp => ("move_task_up", Tasks, "Move the task up", "move up", Move);
     CyclePriority => (
         "cycle_priority", Tasks,
-        "Raise or lower the priority",
-        "priority", TaskAction
+        "Raise the priority",
+        "raise", TaskAction
     );
     CyclePriorityBack => (
         "cycle_priority_back", Tasks,
-        "Cycle the priority back",
-        "pri back", TaskAction
+        "Lower the priority",
+        "lower", TaskAction
     );
     SetDue => ("set_due", Tasks, "Set the due date", "due", TaskAction);
     AddTag => ("add_tag", Tasks, "Add a tag", "tag", TaskAction);

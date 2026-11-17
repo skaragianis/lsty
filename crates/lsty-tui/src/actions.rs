@@ -404,8 +404,9 @@ fn named(tasks: &[Chosen], one: fn(&str) -> String, many: &str) -> String {
     }
 }
 
-/// The priority after `cur` in the cycle none, A, … `last`, none, or
-/// the other way round.
+/// The priority after `cur` in the cycle none, `last`, … A, none when
+/// `forward` (raising), or the other way round (lowering). One past
+/// `last` goes to `last` when raised and to none when lowered.
 pub(crate) fn stepped(
     cur: Option<Priority>,
     last: Priority,
@@ -413,12 +414,12 @@ pub(crate) fn stepped(
 ) -> Option<Priority> {
     let letter = cur.map(Priority::letter);
     let next = match (letter, forward) {
-        (None, true) => Some(Priority::A.letter()),
-        (Some(c), true) if c >= last.letter() => None,
-        (Some(c), true) => Some(c + 1),
-        (None, false) => Some(last.letter()),
-        (Some(c), false) if c > last.letter() => Some(last.letter()),
-        (Some(c), false) => Some(c - 1),
+        (None, true) => Some(last.letter()),
+        (Some(c), true) if c > last.letter() => Some(last.letter()),
+        (Some(c), true) => Some(c - 1),
+        (None, false) => Some(Priority::A.letter()),
+        (Some(c), false) if c >= last.letter() => None,
+        (Some(c), false) => Some(c + 1),
     };
     next.and_then(Priority::new)
 }

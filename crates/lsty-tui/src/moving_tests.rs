@@ -456,7 +456,7 @@ fn a_priority_that_leaves_the_filter_stays() {
         ..alone()
     };
     let mut model = model_of(dir.path(), config);
-    press(&mut model, "gp");
+    press(&mut model, "gP");
     assert_eq!(rows_of(&model), ["(B) X*"]);
     // Changed outside, it stays through a press that says to look again,
     // and the next press is on it.
@@ -465,7 +465,7 @@ fn a_priority_that_leaves_the_filter_stays() {
     assert_eq!(model.message.text(), Some(LIST_CHANGED));
     reload(&mut model);
     assert_eq!(rows_of(&model), ["(B) X +r*"]);
-    press(&mut model, "gp");
+    press(&mut model, "gP");
     assert_eq!(todo_of(dir.path()), "(C) X +r\nY\n");
 }
 

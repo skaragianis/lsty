@@ -67,8 +67,8 @@ const KEYS: [Key; 7] = [
     (Action::ToggleStart, "t", "j", BLOCKS),
     (Action::ToggleStart, "t", "gg", CLOSES),
     (Action::Wontdo, "T", "gg", CLOSES),
-    (Action::CyclePriority, "-", "gg", CLOSES),
-    (Action::CyclePriorityBack, "+", "gg", CLOSES),
+    (Action::CyclePriority, "+", "gg", CLOSES),
+    (Action::CyclePriorityBack, "-", "gg", CLOSES),
     (Action::Stop, "<F9>", "gg", CLAIMS),
 ];
 
