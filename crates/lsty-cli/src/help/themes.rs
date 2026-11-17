@@ -68,6 +68,16 @@ Either replaces the look the slot would have had, so a key left out is off. \
 The slots background, selection, cursorline and status_bg are fills: they \
 paint their bg, or their fg when there is no bg. The keys:";
 
+const CURSORLINE: &str = "[cursorline_slots] takes the same slots and keys as \
+[slots]: each slot it names replaces that slot's look on the highlighted row \
+(in the list, the detail panel and the panels), and one it leaves out keeps \
+the built-in theme's look there if it has one, else its look elsewhere. The \
+fill of the row is [slots].cursorline; a cursorline entry here changes \
+nothing. A theme with a light cursorline darkens its colours \
+there; lsty-80s does. A file that sets cursorline starts with none of the \
+built-in theme's. A problem in it is a warning that names the slot as \
+cursorline_slots.NAME.";
+
 const WARNINGS: &str = "A bad value does not stop a theme from loading. A \
 slot with a bad colour, or a key that is not true or false, keeps the look it \
 would have had; an unknown slot or key is skipped; a file that is not valid \
@@ -101,8 +111,10 @@ pub(super) fn themes_page() -> Vec<String> {
     lines.extend(wrap("  ", "  ", &themes, GUIDE_WIDTH));
     lines.extend([String::new(), "example, themes/mine.toml:".to_owned()]);
     lines.extend(EXAMPLE.map(|l| format!("  {l}").trim_end().to_owned()));
-    lines.push(String::new());
-    lines.extend(prose(WARNINGS));
+    for text in [CURSORLINE, WARNINGS] {
+        lines.push(String::new());
+        lines.extend(prose(text));
+    }
     lines
 }
 

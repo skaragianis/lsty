@@ -60,6 +60,10 @@ fn the_page_says_what_a_theme_is_and_where_a_name_falls_back() {
         "and COLORTERM does not say true colour)".to_owned(),
         "choosing one changes nothing on screen.".to_owned(),
         "COLORTERM=truecolor brings the themes back.".to_owned(),
+        "[cursorline_slots] takes the same slots and keys as [slots]:"
+            .to_owned(),
+        "keeps the built-in theme's look there if it has one,".to_owned(),
+        "a cursorline entry here changes nothing.".to_owned(),
     ] {
         assert!(text.contains(&want), "{want}");
     }

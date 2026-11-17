@@ -26,7 +26,14 @@ pub const DEFAULT_NAME: &str = "catppuccin-frappe";
 pub const FALLBACK: &str = "ansi";
 const EXTENSION: &str = ".toml";
 
-type Styles = [Style; Slot::ALL.len()];
+/// A theme with no look at all: what a file is read over first.
+fn blank() -> Theme {
+    Theme {
+        styles: [Style::default(); Slot::ALL.len()],
+        cursor: [None; Slot::ALL.len()],
+        from_file: false,
+    }
+}
 
 /// The field of a style that a key of a slot table sets.
 type Field<T> = fn(&mut Style) -> &mut T;
@@ -82,8 +89,9 @@ fn user_names(dir: &Path) -> Vec<String> {
 ///
 /// A file in `themes_dir` with a built-in theme's name overrides it; a
 /// slot it leaves out takes the built-in theme's, or `ansi`'s when there
-/// is no built-in theme of that name. One slot differs: a file that sets
-/// `muted` and not `hint_dim` dims with its `muted`.
+/// is no built-in theme of that name. Two things follow from another: a
+/// file that sets `muted` and not `hint_dim` dims with its `muted`, and a
+/// file that sets `cursorline` starts its `[cursorline_slots]` clean.
 ///
 /// `profile` is the terminal's. At 16 colours every built-in theme is
 /// `ansi`, and so is what a file leaves out, whatever its name: the
@@ -110,27 +118,23 @@ pub fn load(
         name = DEFAULT_NAME;
         user = user_file(name);
     }
-    let mut styles = builtin_styles(name, profile);
-    let from_file = user.is_some();
+    let mut theme = builtin_theme(name, profile);
     if let Some(path) = user {
         let source = format!("themes/{name}{EXTENSION}");
-        styles = read_user(&source, cwd, &path, &styles, &mut warnings);
+        theme = read_user(&source, cwd, &path, &theme, &mut warnings);
+        theme.from_file = true;
     }
-    (Theme { styles, from_file }, warnings)
+    (theme, warnings)
 }
 
 fn is_file(cwd: &Path, path: &Path) -> bool {
     fs::metadata(cwd.join(path)).is_ok_and(|m| !m.is_dir())
 }
 
-/// The styles of a built-in theme over those of `ansi`; `ansi` for a
-/// name that is no built-in theme, and for any name at 16 colours.
-fn builtin_styles(name: &str, profile: Profile) -> Styles {
-    let (base, _) = parse(
-        FALLBACK,
-        ANSI.as_bytes(),
-        &[Style::default(); Slot::ALL.len()],
-    );
+/// A built-in theme over `ansi`; `ansi` for a name that is no built-in
+/// theme, and for any name at 16 colours.
+fn builtin_theme(name: &str, profile: Profile) -> Theme {
+    let (base, _) = parse(FALLBACK, ANSI.as_bytes(), &blank());
     match builtin(name) {
         Some(text) if profile != Profile::Ansi && name != FALLBACK => {
             parse(name, text.as_bytes(), &base).0
@@ -143,19 +147,19 @@ fn read_user(
     source: &str,
     cwd: &Path,
     path: &Path,
-    base: &Styles,
+    base: &Theme,
     warnings: &mut Vec<Warning>,
-) -> Styles {
+) -> Theme {
     match fsio::read_in(cwd, path) {
         Ok(Some(data)) => {
-            let (styles, more) = parse(source, &data, base);
+            let (theme, more) = parse(source, &data, base);
             warnings.extend(more);
-            styles
+            theme
         }
-        Ok(None) => *base,
+        Ok(None) => base.clone(),
         Err(e) => {
             warnings.push(Warning::new(source, e.message().to_owned()));
-            *base
+            base.clone()
         }
     }
 }
@@ -165,11 +169,11 @@ fn read_user(
 pub(super) fn parse(
     source: &str,
     data: &[u8],
-    base: &Styles,
-) -> (Styles, Vec<Warning>) {
+    base: &Theme,
+) -> (Theme, Vec<Warning>) {
     match parse_table(data) {
         Ok(table) => Reader::new(source, table.get_ref()).apply_all(base),
-        Err(message) => (*base, vec![Warning::new(source, message)]),
+        Err(message) => (base.clone(), vec![Warning::new(source, message)]),
     }
 }
 
@@ -180,16 +184,21 @@ struct Reader<'a> {
     palette: HashMap<&'a str, &'a str>,
     /// The entries of `[slots]`, in file order.
     slots: Vec<(&'a str, &'a DeValue<'a>)>,
+    /// The entries of `[cursorline_slots]`, in file order.
+    cursor: Vec<(&'a str, &'a DeValue<'a>)>,
 }
 
 impl<'a> Reader<'a> {
     fn new(source: &'a str, top: &'a Table<'a>) -> Self {
         let palette = table_in(top, "palette").map_or_default(string_entries);
         let slots = table_in(top, "slots").map_or_default(in_file_order);
+        let cursor =
+            table_in(top, "cursorline_slots").map_or_default(in_file_order);
         Self {
             source,
             palette,
             slots,
+            cursor,
         }
     }
 
@@ -197,24 +206,51 @@ impl<'a> Reader<'a> {
         Warning::new(self.source, message)
     }
 
-    fn apply_all(&self, base: &Styles) -> (Styles, Vec<Warning>) {
-        let mut styles = *base;
+    fn apply_all(&self, base: &Theme) -> (Theme, Vec<Warning>) {
+        let mut theme = base.clone();
         let mut warnings = Vec::new();
-        for &(name, value) in &self.slots {
+        let sets = |slot: Slot| self.slots.iter().any(|s| s.0 == slot.name());
+        let mut moved = false;
+        self.apply(&self.slots, "", &mut warnings, |slot, style| {
+            theme.styles[slot.index()] = style;
+            moved |= slot == Slot::Cursorline;
+        });
+        if moved {
+            theme.cursor = [None; Slot::ALL.len()];
+        }
+        self.apply(
+            &self.cursor,
+            "cursorline_slots.",
+            &mut warnings,
+            |slot, style| theme.cursor[slot.index()] = Some(style),
+        );
+        if sets(Slot::Muted) && !sets(Slot::HintDim) {
+            theme.styles[Slot::HintDim.index()] =
+                theme.styles[Slot::Muted.index()];
+        }
+        (theme, warnings)
+    }
+
+    /// Reads the `entries` of a slot table, naming them `prefix` and their
+    /// names in warnings, and hands each good one to `set`.
+    fn apply(
+        &self,
+        entries: &[(&str, &DeValue<'_>)],
+        prefix: &str,
+        warnings: &mut Vec<Warning>,
+        mut set: impl FnMut(Slot, Style),
+    ) {
+        for &(name, value) in entries {
+            let named = format!("{prefix}{name}");
             let Some(slot) = Slot::parse(name) else {
-                let message = format!("unknown slot {}", quote(name));
+                let message = format!("unknown slot {}", quote(&named));
                 warnings.push(self.warn(message));
                 continue;
             };
-            if let Some(style) = self.style(name, value, &mut warnings) {
-                styles[slot.index()] = style;
+            if let Some(style) = self.style(&named, value, warnings) {
+                set(slot, style);
             }
         }
-        let sets = |slot: Slot| self.slots.iter().any(|s| s.0 == slot.name());
-        if sets(Slot::Muted) && !sets(Slot::HintDim) {
-            styles[Slot::HintDim.index()] = styles[Slot::Muted.index()];
-        }
-        (styles, warnings)
     }
 
     fn style(

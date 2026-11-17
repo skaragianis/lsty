@@ -28,10 +28,12 @@ pub use profile::Profile;
 pub use slot::Slot;
 pub use style::{Colour, Style};
 
-/// A named set of styles, one for each slot.
+/// A named set of styles, one for each slot, and the few that differ on
+/// the highlighted row.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Theme {
     styles: [Style; Slot::ALL.len()],
+    cursor: [Option<Style>; Slot::ALL.len()],
     from_file: bool,
 }
 
@@ -44,5 +46,11 @@ impl Theme {
     /// How `slot` looks.
     pub fn style(&self, slot: Slot) -> Style {
         self.styles[slot.index()]
+    }
+
+    /// How `slot` looks on the highlighted row: the style the theme gives
+    /// it there, else the one it has elsewhere.
+    pub fn cursor_style(&self, slot: Slot) -> Style {
+        self.cursor[slot.index()].unwrap_or_else(|| self.style(slot))
     }
 }

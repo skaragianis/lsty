@@ -184,10 +184,17 @@ impl Tall<'_> {
         }
     }
 
-    /// The rows the longest task needs for its whole text.
+    /// Row `n` of task `i` after the first, from the left edge of the list.
+    pub(crate) fn later(&self, i: usize, n: usize) -> Vec<Span<'static>> {
+        let mut spans = vec![Span::blanks(self.lead, None)];
+        spans.extend(self.lines(i).get(n).into_iter().flatten().cloned());
+        spans
+    }
+
+    /// The rows the longest task needs for its whole text, counted up to
+    /// the rows of the pane.
     pub(crate) fn most(&self) -> usize {
-        // no more than the rows of the pane count, and none after a task
-        // that reaches them
+        // none are counted after a task that reaches them
         let cap = Shape {
             rows: self.model.pane_rows().max(1),
             ..self.shape
