@@ -1,6 +1,6 @@
 //! Where the sidebar, the list and the detail panel go.
 
-use lsty_core::config::DetailPosition;
+use lsty_core::config::{Config, DetailPosition};
 use ratatui::layout::Rect;
 
 use crate::model::Model;
@@ -61,6 +61,12 @@ fn rect(x: usize, y: usize, size: Size) -> Rect {
     Rect::new(cells(x), cells(y), cells(size.w), cells(size.h))
 }
 
+/// The place the detail panel starts at: where `detail_position` says, or
+/// nowhere while `show_detail` is off.
+pub(crate) fn shown_detail(config: &Config) -> Option<DetailPosition> {
+    config.show_detail.then_some(config.detail_position)
+}
+
 impl Model {
     /// The size of the terminal as the model was told.
     pub(crate) fn dims(&self) -> Size {
@@ -112,18 +118,37 @@ impl Model {
                 g.list.w -= g.sidebar;
             }
         }
-        if self.detail_on {
-            self.place_detail(&mut g, dims);
+        if let Some(want) = self.detail {
+            self.place_detail(&mut g, dims, want);
         }
         g
     }
 
-    fn place_detail(&self, g: &mut Geometry, dims: Size) {
+    /// Where the detail panel is drawn now, after any fall-back.
+    pub(crate) fn detail_place(&self) -> Option<DetailPosition> {
+        let g = self.geometry(self.dims());
+        (g.detail.w > 0).then_some(if g.below {
+            DetailPosition::Bottom
+        } else {
+            DetailPosition::Right
+        })
+    }
+
+    /// Puts the detail panel at `want`: beside the list if that is wanted
+    /// and fits, else below if the list keeps its lines, else nowhere.
+    fn place_detail(
+        &self,
+        g: &mut Geometry,
+        dims: Size,
+        want: DetailPosition,
+    ) {
         let w = (dims.w * TENTHS / 10).clamp(MIN_DETAIL_SIDE, MAX_DETAIL_SIDE);
         let min = self.deps.config.detail_min_width;
         let wide = u64::try_from(dims.w).is_ok_and(|n| n >= min);
-        let right = self.deps.config.detail_position == DetailPosition::Right;
-        if wide && right && g.list.w.saturating_sub(w) >= MIN_LIST_WIDTH {
+        if wide
+            && want == DetailPosition::Right
+            && g.list.w.saturating_sub(w) >= MIN_LIST_WIDTH
+        {
             g.detail = Size { w, h: g.list.h };
             g.list.w -= w;
             return;

@@ -1,7 +1,11 @@
 use std::fs;
 
 use lsty_core::{
-    config::{Config, DetailPosition, Filter},
+    config::{
+        Config,
+        DetailPosition::{self, Bottom, Right},
+        Filter,
+    },
     errs::Source,
     theme::Slot,
 };
@@ -306,6 +310,118 @@ fn the_parts_of_the_screen_have_the_sizes_of_the_layout() {
     }
 }
 
+/// `R`ight, `B`elow or `-` for hidden: where the detail panel is drawn.
+fn place_letter(m: &Model) -> char {
+    match m.detail_place() {
+        Some(Right) => 'R',
+        Some(Bottom) => 'B',
+        None => '-',
+    }
+}
+
+/// (what, `detail_position`, size, steps, the place at the start and
+/// after each step): a step is a `gi` (`None`) or a resize
+type Place = (
+    &'static str,
+    DetailPosition,
+    (u16, u16),
+    &'static [Option<(u16, u16)>],
+    &'static str,
+);
+const GI: Option<(u16, u16)> = None;
+const NARROW: Option<(u16, u16)> = Some((100, 30));
+const WIDE: Option<(u16, u16)> = Some((130, 30));
+const TINY: Option<(u16, u16)> = Some((60, 6));
+const PLACES: [Place; 11] = [
+    ("wide", Right, (130, 30), &[GI; 4], "RB-RB"),
+    (
+        "narrow: right is skipped",
+        Right,
+        (100, 30),
+        &[GI; 4],
+        "B-B-B",
+    ),
+    ("too short for any place", Right, (60, 6), &[GI; 4], "-----"),
+    (
+        "too short for below, right first",
+        Right,
+        (130, 6),
+        &[GI; 4],
+        "R-R-R",
+    ),
+    (
+        "too short for below, bottom first",
+        Bottom,
+        (130, 6),
+        &[GI; 4],
+        "-R-R-",
+    ),
+    ("bottom first, wide", Bottom, (130, 30), &[GI; 4], "BR-BR"),
+    ("bottom first, narrow", Bottom, (100, 30), &[GI; 4], "B-B-B"),
+    (
+        "right falls to below and back",
+        Right,
+        (130, 30),
+        &[NARROW, WIDE, TINY],
+        "RBR-",
+    ),
+    (
+        "below stays below",
+        Right,
+        (130, 30),
+        &[GI, NARROW, WIDE, TINY],
+        "RBBB-",
+    ),
+    (
+        "bottom does not fall to right",
+        Bottom,
+        (130, 30),
+        &[NARROW, WIDE, TINY],
+        "BBB-",
+    ),
+    (
+        "chosen right falls to below",
+        Bottom,
+        (130, 30),
+        &[GI, NARROW, WIDE, TINY],
+        "BRBR-",
+    ),
+];
+
+#[test]
+fn gi_cycles_the_detail_panel_and_a_resize_keeps_the_place_while_it_fits() {
+    for (what, position, size, steps, want) in PLACES {
+        let config = Config {
+            detail_position: position,
+            detail_min_width: 120,
+            ..plain()
+        };
+        let (_dir, mut m) = model(config, size, LIST);
+        let mut got = String::from(place_letter(&m));
+        for step in steps {
+            match step {
+                None => {
+                    keys(&mut m, "gi");
+                }
+                Some((w, h)) => {
+                    m.update(Msg::Resize(*w, *h));
+                }
+            }
+            got.push(place_letter(&m));
+        }
+        assert_eq!(got, want, "{what}");
+    }
+    // the focused panel still shows the selected link in its new place
+    let (_dir, mut m) = model(plain(), (130, 20), "Read https://x.org/a\n");
+    keys(&mut m, "<C-w>2gi");
+    assert_eq!(m.focus, Focus::Detail);
+    let lines = screen(&m, 130, 20);
+    assert!(
+        lines.iter().any(|l| l.contains("│   https://x.org/a")),
+        "{lines:?}"
+    );
+}
+
 #[test]
 fn names_and_details_draw_control_characters_as_pictures() {
     let todo = "Fix \u{1b}[31mred +pro\u{1b}j @c\u{7}x key\u{1}:v\u{2}\n";
@@ -544,11 +660,11 @@ fn down_and_up(config: Config, size: (u16, u16)) -> (Focus, Focus) {
 #[test]
 fn ctrl_w_j_and_k_move_between_the_list_and_a_detail_panel_below_it() {
     let bottom = Config {
-        detail_position: DetailPosition::Bottom,
+        detail_position: Bottom,
         ..plain()
     };
     let hidden = Config {
-        detail_position: DetailPosition::Bottom,
+        detail_position: Bottom,
         ..no_detail()
     };
     for (name, config, size, want) in [
@@ -582,7 +698,7 @@ fn sideways(config: Config, size: (u16, u16)) -> [Focus; 4] {
 #[test]
 fn ctrl_w_h_and_l_reach_the_detail_panel_only_beside_the_list() {
     let under = |sidebar| Config {
-        detail_position: DetailPosition::Bottom,
+        detail_position: Bottom,
         show_sidebar: sidebar,
         ..plain()
     };
