@@ -10,10 +10,12 @@ use crate::{
     model::Model,
     msg::Msg,
     prompt::matching,
-    test_util::{alone, deps, keys, press, screen, started, todo_of, workdir},
+    test_util::{
+        alone, deps, keys, press, reload, screen, started, todo_of, workdir,
+    },
 };
 
-const LIST: &str = "A +home @phone\nB +work\nC +work.acme @email\n";
+const LIST: &str = "A +home @phone\nB +work\nC +work.acme @email\nD owner:bob dep:a1\nE id:a1 owner:amy dep:a1\n";
 
 fn model_of(dir: &Path) -> Model {
     started(deps(dir, alone()))
@@ -159,6 +161,23 @@ fn the_untag_candidates_are_the_tokens_of_the_prompts_tasks() {
     assert_eq!(text_of(&model), "");
     keys(&mut model, "<S-Tab>");
     assert_eq!(text_of(&model), "@phone");
+    // A `dep:` word shows its task (a done one without a number), and is
+    // still what the text takes.
+    let dir = workdir("A id:a1\nB dep:a1 dep:o1\n");
+    fs::write(dir.path().join("done.txt"), "x Old id:o1\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    let mut model = model_of(dir.path());
+    keys(&mut model, "jgT<Tab>");
+    assert_eq!(text_of(&model), "dep:a1");
+    let comp = model.line.as_ref().and_then(|l| l.comp.as_ref());
+    let shown = comp.map_or_default(|c| c.spans(80));
+    let texts: Vec<&str> = shown.iter().map(|s| s.text.as_ref()).collect();
+    assert_eq!(texts, ["1  A", "  ", "Old"]);
+    // A reload that changes a task closes the menu, which shows its old text.
+    fs::write(dir.path().join("todo.txt"), "A2 id:a1\nB dep:a1 dep:o1\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    reload(&mut model);
+    assert!(model.line.as_ref().is_some_and(|l| l.comp.is_none()));
 }
 
 #[test]
@@ -279,7 +298,7 @@ fn one_task_keeps_its_message_however_long() {
 }
 
 /// The keys typed in the search, and its text after them.
-const SEARCH_COMPLETES: [(&str, &str); 20] = [
+const SEARCH_COMPLETES: [(&str, &str); 26] = [
     ("/-file:to<Tab>", "-file:todo.txt"),
     ("/+a|file:to<Tab>", "+a|file:todo.txt"),
     ("/+w<Tab>", "+work"),
@@ -290,6 +309,12 @@ const SEARCH_COMPLETES: [(&str, &str); 20] = [
     ("/ope<Tab>", "ope"),
     ("/i<Tab>", "is:archived"),
     ("/IS:LA<Tab>", "is:later"),
+    ("/owner:<Tab>", "owner:amy"),
+    ("/owner:<Tab><Tab>", "owner:bob"),
+    ("/-owner:b<Tab>", "-owner:bob"),
+    ("/+a|OWNER:b<Tab>", "+a|owner:bob"),
+    ("/DEP:<Tab>", "dep:a1"),
+    ("/\"owner:<Tab>", "\"owner:"),
     ("/<Tab>", ""),
     ("/-+h<Tab>", "-+home"),
     ("/-+h<Home><Tab>", "-+home"),
@@ -313,7 +338,7 @@ fn the_search_completes_the_alternative_under_the_cursor() {
 }
 
 /// The keys typed on the `:` line, and its text after them.
-const COMMAND_COMPLETES: [(&str, &str); 23] = [
+const COMMAND_COMPLETES: [(&str, &str); 26] = [
     (":ls file:to<Tab>", "ls file:todo.txt"),
     (":ls --filter=-file:to<Tab>", "ls --filter=-file:todo.txt"),
     (":ls +a|file:to<Tab>", "ls +a|file:todo.txt"),
@@ -322,6 +347,9 @@ const COMMAND_COMPLETES: [(&str, &str); 23] = [
     (":ls +h<Tab>", "ls +home"),
     (":ls is:do<Tab>", "ls is:doing"),
     (":ls i<Tab>", "ls is:archived"),
+    (":ls owner:b<Tab>", "ls owner:bob"),
+    (":ls --filter=+a|owner:b<Tab>", "ls --filter=+a|owner:bob"),
+    (":ls --filter='x owner:b<Tab>", "ls --filter='x owner:b"),
     (":ls ope<Tab>", "ls ope"),
     (":ls -+h<Tab>", "ls -+home"),
     (":ls +home|+w<Tab>", "ls +home|+work"),

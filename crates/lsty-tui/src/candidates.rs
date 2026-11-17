@@ -84,27 +84,37 @@ pub(crate) fn tokens_of(
 
 fn open_task(snap: &Snapshot, task: &Task, line: &Line, today: Today) -> Open {
     let text = errs::lossy(&line.text());
+    Open {
+        id: task.task_id(),
+        nr: task.nr(),
+        given: snap.id_of(task).map(errs::lossy),
+        lower: lower(&text),
+        label: label_of(task, line, &text, today),
+        text,
+    }
+}
+
+/// The label of a task in the popup: number (of a todo-file task), text,
+/// tags, due.
+fn label_of(task: &Task, line: &Line, text: &str, today: Today) -> String {
     let tags: Vec<String> = line
         .tokens()
         .filter(|t| matches!(t.kind, Kind::Project | Kind::Context))
         .map(|t| errs::lossy(t.name_text()))
         .collect();
     let due = date_cell(task, line, today).text;
-    let nr = task.nr().to_string();
-    let parts = [nr.as_str(), &text, &tags.join(" "), &due];
-    let label = parts
+    // A done-file task has no number in the list.
+    let nr = if task.source() == Source::Todo {
+        task.nr().to_string()
+    } else {
+        String::new()
+    };
+    let parts = [nr.as_str(), text, &tags.join(" "), &due];
+    parts
         .into_iter()
         .filter(|p| !p.is_empty())
         .collect::<Vec<_>>()
-        .join(GAP);
-    Open {
-        id: task.task_id(),
-        nr: task.nr(),
-        given: snap.id_of(task).map(errs::lossy),
-        lower: lower(&text),
-        text,
-        label,
-    }
+        .join(GAP)
 }
 
 impl Model {
@@ -116,7 +126,7 @@ impl Model {
             .as_ref()
             .is_some_and(|s| s.serial == self.snap.serial());
         if !fresh {
-            let today = self.context().today;
+            let today = self.today();
             self.sources = Some(Sources::of(&self.snap, today));
         }
     }
@@ -159,6 +169,47 @@ impl Model {
                 s.contexts.as_slice()
             }
         })
+    }
+
+    /// The `key:value` words of the tasks of both files whose key is
+    /// `key`, whatever the case, as written. A repeat is left to
+    /// `matching`.
+    pub(crate) fn value_pool(&self, key: &str) -> Vec<String> {
+        let key = key.as_bytes();
+        self.snap
+            .tasks()
+            .iter()
+            .flat_map(|task| self.snap.line(task).tokens())
+            .filter(|t| t.kind == Kind::Tag && t.key.eq_ignore_ascii_case(key))
+            .map(|t| errs::lossy(t.text))
+            .collect()
+    }
+
+    /// The popup lines for the words `texts`: a `dep:` word shows the
+    /// task that has its id, as `dep:` candidates do, any other word
+    /// (or an id with no one task) shows itself.
+    pub(crate) fn labelled(&self, texts: Vec<String>) -> Vec<Candidate> {
+        let today = self.today();
+        texts
+            .into_iter()
+            .map(|text| {
+                let label = text
+                    .strip_prefix("dep:")
+                    .and_then(|id| self.snap.by_id(id).ok())
+                    .map_or_else(
+                        || text.clone(),
+                        |task| {
+                            let line = self.snap.line(task);
+                            let own = errs::lossy(&line.text());
+                            label_of(task, line, &own, today)
+                        },
+                    );
+                Candidate {
+                    label,
+                    put: Put::Text(text),
+                }
+            })
+            .collect()
     }
 
     /// The open tasks whose text holds `typed`, as far as they can be

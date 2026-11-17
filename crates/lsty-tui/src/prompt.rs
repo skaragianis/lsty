@@ -19,7 +19,7 @@ use ratatui::layout::Rect;
 use crate::{
     actions::{Chosen, places},
     cmdpool::filter_span,
-    complete::ring,
+    complete::{Candidate, Put, ring},
     counts::ids_of,
     field::{Field, is_sep},
     history::Again,
@@ -91,7 +91,7 @@ pub(crate) struct Completion {
     from: usize,
     to: usize,
     typed: String,
-    cands: Vec<String>,
+    cands: Vec<Candidate>,
     at: usize,
 }
 
@@ -107,7 +107,10 @@ impl Completion {
     /// The candidate in the text, if one is.
     pub(crate) fn chosen(&self) -> Option<&str> {
         let i = self.at.checked_sub(1)?;
-        self.cands.get(i).map(String::as_str)
+        let Put::Text(text) = &self.cands.get(i)?.put else {
+            return None;
+        };
+        Some(text)
     }
 
     /// Whether a candidate rather than the typed word is in the text.
@@ -127,9 +130,9 @@ impl Completion {
             let slot = if i + 1 == self.at {
                 Slot::Selection
             } else {
-                Parts::default().word(cand)
+                Parts::default().word(&cand.label)
             };
-            out.push(Span::new(cand.as_str(), Some(slot)));
+            out.push(Span::new(cand.label.as_str(), Some(slot)));
         }
         out
     }
@@ -143,10 +146,11 @@ impl Completion {
         };
         let gap = width_of(GAP);
         let room = w.saturating_sub(usize::from(at + 1 < self.cands.len()));
-        let mut used = self.cands.get(at).map_or(0, |s| width_of(s));
+        let mut used = self.cands.get(at).map_or(0, |c| width_of(&c.label));
         let mut first = at;
         while let Some(prev) = first.checked_sub(1) {
-            used += gap + self.cands.get(prev).map_or(0, |s| width_of(s));
+            used +=
+                gap + self.cands.get(prev).map_or(0, |c| width_of(&c.label));
             if used > room {
                 break;
             }
@@ -210,9 +214,12 @@ impl Model {
     pub(crate) fn land_prompt(&mut self, old: &Snapshot) {
         if let Some(Line {
             kind: LineKind::Tasks(prompt),
+            comp,
             ..
         }) = &mut self.line
         {
+            // an open menu shows labels of the old reading
+            *comp = None;
             let landing = Landing::of(old, &self.snap);
             prompt.places = prompt
                 .places
@@ -411,7 +418,8 @@ impl Model {
             }
             (LineKind::Command, None) => self.command_pool(&typed, &before),
         };
-        let cands = matching(&pool, &typed);
+        let texts = matching(&pool, &typed);
+        let cands = self.labelled(texts);
         (!cands.is_empty()).then_some(Completion {
             from,
             to,
