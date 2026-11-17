@@ -43,7 +43,7 @@ Done task
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
-│ │    gP , <Left>  Lower the priority                                       │ │
+│ │    gP , <Left> , h  Lower the priority                                   │ │
 │ │    gd  Set the due date                                                  │ │
 │ │    gt  Add a tag                                                         │ │
 │ │    gT  Remove a tag                                                      │ │

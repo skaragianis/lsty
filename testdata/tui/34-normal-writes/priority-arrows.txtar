@@ -6,6 +6,10 @@ keys jV<Left>
 file todo.txt left
 keys Vk<Right>
 file todo.txt visual
+keys l
+file todo.txt l
+keys jh
+file todo.txt h
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -21,3 +25,9 @@ Sell
 -- visual --
 (C) Buy
 Sell
+-- l --
+(B) Buy
+Sell
+-- h --
+(B) Buy
+(A) Sell

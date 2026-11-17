@@ -14,6 +14,8 @@ pub(super) struct Binding {
     pub(super) action: Action,
     pub(super) written: String,
     pub(super) strokes: Vec<Stroke>,
+    /// Whether the user's file bound it, not the defaults.
+    pub(super) user: bool,
 }
 
 /// What the matcher made of the keys so far.

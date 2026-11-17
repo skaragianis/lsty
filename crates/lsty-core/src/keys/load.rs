@@ -315,6 +315,13 @@ fn resolve_conflicts(
     }
 }
 
+/// Whether `text` came to `action` later than users could bind it (the
+/// arrows and `h`/`l` of the priority): losing it is no news.
+fn late(action: Action, text: &str) -> bool {
+    matches!(action, Action::CyclePriority | Action::CyclePriorityBack)
+        && matches!(text, "<Left>" | "<Right>" | "h" | "l")
+}
+
 fn take_key(
     mode: Mode,
     owner: &mut Claim,
@@ -322,18 +329,13 @@ fn take_key(
     key: &Written,
 ) -> Option<Warning> {
     let len = owner.keys.len();
-    // The arrows came to the priority actions later than users could bind
-    // them: losing one of them is no news.
-    let arrow = owner.keys.iter().any(|o| {
-        o.strokes == key.strokes
-            && matches!(o.text.as_str(), "<Left>" | "<Right>")
-    }) && !owner.user
-        && matches!(
-            owner.action,
-            Action::CyclePriority | Action::CyclePriorityBack
-        );
+    let quiet = !owner.user
+        && owner
+            .keys
+            .iter()
+            .any(|o| o.strokes == key.strokes && late(owner.action, &o.text));
     owner.keys.retain(|o| o.strokes != key.strokes);
-    (owner.keys.len() < len && !arrow).then(|| {
+    (owner.keys.len() < len && !quiet).then(|| {
         warn(format!(
             "[{}] {} is bound to {} and {winner}; {winner} wins",
             mode.as_str(),
@@ -352,6 +354,7 @@ fn flatten(claims: Vec<Claim>) -> Vec<Binding> {
                     action: claim.action,
                     written: key.text,
                     strokes: key.strokes,
+                    user: claim.user,
                 });
             }
         }
@@ -393,6 +396,7 @@ fn drop_hidden(
         });
         match by {
             None => kept.push(b.clone()),
+            Some(_) if !b.user && late(b.action, &b.written) => {}
             Some(o) => warnings.push(warn(format!(
                 "[{}] {} is hidden by {}",
                 mode.as_str(),

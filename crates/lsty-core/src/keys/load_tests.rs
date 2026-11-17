@@ -231,17 +231,24 @@ const ROWS: &[Row] = &[
         ..BASE
     },
     Row {
-        case: "an arrow taken from the priority is no conflict",
-        text: "[normal]\nyank = [\"<Left>\"]",
+        case: "an arrow or h taken from the priority is no conflict",
+        text: "[normal]\nyank = [\"<Left>\", \"h\"]",
         action: Action::CyclePriorityBack,
         want: &["gP"],
         ..BASE
     },
     Row {
-        case: "an arrow taken from the priority goes to the user",
-        text: "[normal]\nyank = [\"<Left>\"]",
+        case: "a sequence starting with h hides no priority key with a warning",
+        text: "[normal]\nyank = [\"hy\"]",
+        action: Action::CyclePriorityBack,
+        want: &["gP", "<Left>"],
+        ..BASE
+    },
+    Row {
+        case: "an arrow or h taken from the priority goes to the user",
+        text: "[normal]\nyank = [\"<Left>\", \"h\"]",
         action: Action::Yank,
-        want: &["<Left>"],
+        want: &["<Left>", "h"],
         ..BASE
     },
     Row {
@@ -255,43 +262,43 @@ const ROWS: &[Row] = &[
         ..BASE
     },
     Row {
-        case: "the arrows raise and lower the priority in the list",
+        case: "the arrows, h and l raise and lower the priority in the list",
         action: Action::CyclePriority,
-        want: &["gp", "<Right>"],
+        want: &["gp", "<Right>", "l"],
         ..BASE
     },
     Row {
-        case: "the arrows lower the priority in the list",
+        case: "the arrows, h and l lower the priority in the list",
         action: Action::CyclePriorityBack,
-        want: &["gP", "<Left>"],
+        want: &["gP", "<Left>", "h"],
         ..BASE
     },
     Row {
-        case: "the arrows raise the priority in a selection",
+        case: "the arrows, h and l raise the priority in a selection",
         mode: Mode::Visual,
         action: Action::CyclePriority,
-        want: &["gp", "<Right>"],
+        want: &["gp", "<Right>", "l"],
         ..BASE
     },
     Row {
-        case: "the arrows lower the priority in a selection",
+        case: "the arrows, h and l lower the priority in a selection",
         mode: Mode::Visual,
         action: Action::CyclePriorityBack,
-        want: &["gP", "<Left>"],
+        want: &["gP", "<Left>", "h"],
         ..BASE
     },
     Row {
-        case: "the arrows raise the priority in the detail panel",
+        case: "the arrows, h and l raise the priority in the detail panel",
         mode: Mode::Detail,
         action: Action::CyclePriority,
-        want: &["gp", "<Right>"],
+        want: &["gp", "<Right>", "l"],
         ..BASE
     },
     Row {
-        case: "the arrows lower the priority in the detail panel",
+        case: "the arrows, h and l lower the priority in the detail panel",
         mode: Mode::Detail,
         action: Action::CyclePriorityBack,
-        want: &["gP", "<Left>"],
+        want: &["gP", "<Left>", "h"],
         ..BASE
     },
     Row {
@@ -313,6 +320,13 @@ const ROWS: &[Row] = &[
         text: "[normal]\nhelp = [\"g\"]",
         action: Action::Help,
         warnings: &[G_WARNING],
+        ..BASE
+    },
+    Row {
+        case: "28.14 a key of the user is not late",
+        text: "[normal]\ncycle_priority = [\"l\"]\nyank = [\"ly\"]",
+        action: Action::CyclePriority,
+        warnings: &[r#"[normal] "l" is hidden by "ly""#],
         ..BASE
     },
     Row {
