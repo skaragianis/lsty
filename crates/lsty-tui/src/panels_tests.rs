@@ -13,6 +13,7 @@ use crate::{
     layout::Size,
     model::Model,
     msg::Msg,
+    sidebar::panel_heights,
     test_util::{
         cursor_text, deps, expiry, keys, plain, press, reload, screen,
         started, todo_of, workdir, workdir_model,
@@ -86,12 +87,53 @@ fn folding_hides_children_and_keeps_the_cursor_on_the_parent() {
     let shown = names(&m, 0);
     assert_eq!(shown.len(), 2, "{shown:?}");
     assert!(shown[m.panels[0].cursor].contains("▸+work"));
+    assert_eq!(m.panel_rows()[0], 2, "the panel shrinks with its nodes");
     press(&mut m, "h");
     assert_eq!(names(&m, 0).len(), 2, "a folded node stays folded");
     press(&mut m, "l");
     assert_eq!(names(&m, 0).len(), 4);
+    assert_eq!(m.panel_rows()[0], 4, "and grows back");
     press(&mut m, "l");
     assert_eq!(names(&m, 0).len(), 4);
+}
+
+#[test]
+fn a_fold_leaves_the_cursor_of_the_panel_it_shrinks_or_acts_on_in_view() {
+    // (todo, height, keys, Projects view after them, fold key, panel that
+    // shows its cursor): an unfold takes rows from the Filters; a fold
+    // acts on a cursor that the wheel scrolled out of view.
+    type Row = (
+        &'static str,
+        u16,
+        &'static [&'static str],
+        Option<usize>,
+        &'static str,
+        usize,
+    );
+    const TREE: &str = "t +a.x +b.x +c.x +d.x\n";
+    const ROWS: [Row; 2] = [
+        (
+            LIST,
+            18,
+            &["<C-w>3", "2jh", "<C-w>5", "8j", "<C-w>3"],
+            None,
+            "l",
+            2,
+        ),
+        (TREE, 9, &["<C-w>3"], Some(4), "h", 0),
+    ];
+    for (todo, height, before, top, fold, panel) in ROWS {
+        let (_dir, mut m) = model(plain(), (130, height), todo);
+        for k in before {
+            keys(&mut m, k);
+        }
+        if let Some(top) = top {
+            m.panels[0].top = top;
+        }
+        keys(&mut m, fold);
+        let rows = m.panel_rows()[panel];
+        assert!(m.panels[panel].seen(rows), "{todo:?} {fold}");
+    }
 }
 
 #[test]
@@ -799,10 +841,34 @@ fn a_cursor_whose_entries_are_gone_lands_on_the_last_entry() {
 fn a_motion_to_the_rule_takes_the_nearest_entry_in_view() {
     // The rule is the fifth entry of the filters: at the bottom of five
     // rows and in the middle of nine.
-    for (height, notation, want) in [(15, "L", 3), (23, "M", 5)] {
+    for (height, notation, want) in [(12, "L", 3), (16, "M", 5)] {
         let (_dir, mut m) = model(plain(), (130, height), "A +p\n");
         keys(&mut m, "<C-w>5");
         keys(&mut m, notation);
         assert_eq!(m.panels[2].cursor, want, "{height} {notation}");
+    }
+}
+
+#[test]
+fn the_panels_take_the_lines_their_entries_need() {
+    // (lines, entries of Projects, Contexts, Filters) and the heights
+    // of the three panels, borders included
+    type Row = (usize, [usize; 3], [usize; 3]);
+    const ROWS: [Row; 12] = [
+        (30, [3, 2, 12], [4, 3, 23]),
+        (21, [3, 2, 12], [4, 3, 14]),
+        (18, [3, 2, 12], [4, 3, 11]),
+        (9, [3, 2, 12], [3, 3, 3]),
+        (9, [3, 6, 12], [2, 4, 3]),
+        (7, [9, 9, 9], [2, 2, 3]),
+        (6, [9, 9, 9], [2, 2, 2]),
+        (4, [9, 9, 9], [1, 1, 2]),
+        (1, [9, 9, 9], [0, 1, 0]),
+        (0, [9, 9, 9], [0, 0, 0]),
+        (12, [0, 0, 0], [2, 2, 8]),
+        (12, [1, 1, 1], [2, 2, 8]),
+    ];
+    for (lines, entries, want) in ROWS {
+        assert_eq!(panel_heights(lines, entries), want, "{lines} {entries:?}");
     }
 }

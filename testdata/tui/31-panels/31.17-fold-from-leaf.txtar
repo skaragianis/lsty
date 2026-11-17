@@ -28,24 +28,24 @@ show_detail = false
 │ +Work    1/1││  1 ▷ (B) Send invoice +work @phone           1d late       2h │
 │ +home    3/4││  1   (A) Call client about the Q3 invoice    tomorrow  c1     │
 │ ▸+work  5/10││          +work @phone                                         │
-│             ││  2 ⧗     Draft report +work.acme dep:c1                       │
-│             ││  3       Review contract +work.acme                           │
-├[4]─Contexts─┤│  4 ✓     Fix bug +work.acme                  1d ago           │
-│ @phone   2/4││  5       Plan roadmap +work/q3                                │
-│             ││  6       Update wiki +Work                                    │
-│             ││  7       Buy milk +home                                       │
-│             ││  8       Fix tap +home                                        │
-│             ││  9       Mow lawn +home                                       │
-├[5]─Filters──┤│ 10 ✓     Paint fence +home                   4d ago           │
-│ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked ││                                                               │
-│ [ ] Archive ││                                                               │
-│ ─────────── ││                                                               │
-│ Today       ││                                                               │
+├[4]─Contexts─┤│  2 ⧗     Draft report +work.acme dep:c1                       │
+│ @phone   2/4││  3       Review contract +work.acme                           │
+├[5]─Filters──┤│  4 ✓     Fix bug +work.acme                  1d ago           │
+│ [x] Done    ││  5       Plan roadmap +work/q3                                │
+│ [ ] Later   ││  6       Update wiki +Work                                    │
+│ [x] Blocked ││  7       Buy milk +home                                       │
+│ [ ] Archive ││  8       Fix tap +home                                        │
+│ ─────────── ││  9       Mow lawn +home                                       │
+│ Today       ││ 10 ✓     Paint fence +home                   4d ago           │
 │ Overdue     ││                                                               │
 │ Upcoming    ││                                                               │
 │ Doing       ││                                                               │
+│ Waiting     ││                                                               │
+│ No project  ││                                                               │
+│ Won't do    ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  <Tab> next  9.9.9
 -- cursor --

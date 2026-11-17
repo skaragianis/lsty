@@ -9,13 +9,13 @@ sidebar_min_width = 0
 -- squeezed --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────┐
 │ +home    1/1││  1   Buy milk +home   │
-│             ││                       │
 ├[4]─Contexts─┤│                       │
-│             │└───────────────────────┘
-│             │┌[2]─Detail─────────────┐
-├[5]─Filters──┤│ Buy milk +home        │
-│ [x] Done    ││ ───────────────────── │
-│ [ ] Later   ││ state  todo           │
-│ [x] Blocked ││ nr     1              │
+│             ││                       │
+├[5]─Filters──┤└───────────────────────┘
+│ [x] Done    │┌[2]─Detail─────────────┐
+│ [ ] Later   ││ Buy milk +home        │
+│ [x] Blocked ││ ───────────────────── │
+│ [ ] Archive ││ state  todo           │
+│ ─────────── ││ nr     1              │
 └─────────────┘└───────────────────────┘
  NORMAL  todo.txt  manual         9.9.9

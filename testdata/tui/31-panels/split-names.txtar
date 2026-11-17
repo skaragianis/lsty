@@ -12,7 +12,6 @@ show_detail = false
 │ +a..b    1/1││  1   Call +work @home                                         │
 │ +c++     1/1││  1   Plan @feat @s +a..b                                      │
 │ +work    1/1││  2   Port +c++ @c++                                           │
-│             ││                                                               │
 ├[4]─Contexts─┤│                                                               │
 │ @c++     1/1││                                                               │
 │ @feat    1/1││                                                               │
@@ -26,5 +25,6 @@ show_detail = false
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
+│ Upcoming    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9

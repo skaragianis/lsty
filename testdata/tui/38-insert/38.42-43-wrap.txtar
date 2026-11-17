@@ -14,34 +14,34 @@ Last
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │             ││  1   First                                                    │
-│             ││  2 word word word word word word word word word word word     │
+├[4]─Contexts─┤│  2 word word word word word word word word word word word     │
 │             ││    word word word word word word word word word word word     │
-│             ││    word word word word word word word word word word word     │
-│             ││    word word word word word word word word word word word     │
-├[4]─Contexts─┤│    word word word word word word word word word word word     │
-│             ││    word word word word end                                    │
-│             ││  1   Last                                                     │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-├[5]─Filters──┤│                                                               │
-│ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked │└───────────────────────────────────────────────────────────────┘
-│ [ ] Archive │┌[2]─Detail─────────────────────────────────────────────────────┐
-│ ─────────── ││ word word word word word word word word word word word word   │
-│ Today       ││ word word word word word word word word word word word word   │
-│ Overdue     ││ word word word word word word word word word word word word   │
-│ Upcoming    ││ word word word word word word word word word word word word   │
-│ Doing       ││ …                                                             │
+├[5]─Filters──┤│    word word word word word word word word word word word     │
+│ [x] Done    ││    word word word word word word word word word word word     │
+│ [ ] Later   ││    word word word word word word word word word word word     │
+│ [x] Blocked ││    word word word word end                                    │
+│ [ ] Archive ││  1   Last                                                     │
+│ ─────────── ││                                                               │
+│ Today       ││                                                               │
+│ Overdue     ││                                                               │
+│ Upcoming    ││                                                               │
+│ Doing       ││                                                               │
+│ Waiting     ││                                                               │
+│ No project  │└───────────────────────────────────────────────────────────────┘
+│ Won't do    │┌[2]─Detail─────────────────────────────────────────────────────┐
+│             ││ word word word word word word word word word word word word   │
+│             ││ word word word word word word word word word word word word   │
+│             ││ word word word word word word word word word word word word   │
+│             ││ word word word word word word word word word word word word   │
+│             ││ …                                                             │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word                    9.9.9
 -- a-cursor --
-│             ││    word word word word end                                    │
+│ [x] Blocked ││    word word word word end                                    │
                                            ^
 -- b-cursor --
-│             ││    word word word word word word word word word word word     │
+│ [x] Done    ││    word word word word word word word word word word word     │
                                            ^
 -- c-cursor --
-├[4]─Contexts─┤│    word word word word word word word word word word word     │
+│ [ ] Later   ││    word word word word word word word word word word word     │
                                            ^

@@ -11,11 +11,7 @@ show_detail = false
 -- wide --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   Buy milk +home                                                                                             │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 │             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
@@ -23,5 +19,9 @@ show_detail = false
 │ [x] Blocked ││                                                                                                                 │
 │ [ ] Archive ││                                                                                                                 │
 │ ─────────── ││                                                                                                                 │
+│ Today       ││                                                                                                                 │
+│ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

@@ -18,74 +18,74 @@ B +home
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.tt...ttppppptcccccc...........................................e
 e.ppppp....mmmee.mm...ttppppp..................................................e
-e.............ee...............................................................e
 EEEEEEEEEEEEEEEe...............................................................e
 E.cccccc...mmmEe...............................................................e
-E.............Ee...............................................................e
 EmmmmmmmmmmmEEEe...............................................................e
 e.tttttttt....ee...............................................................e
 e.ttttttttt...ee...............................................................e
 e.ttttttttttt.ee...............................................................e
 e.ttttttttttt.ee...............................................................e
+e.mmmmmmmmmmm.ee...............................................................e
+e.ttttt.......ee...............................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD........mmmmm.
 -- filters --
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.tt...ttppppptcccccc...........................................e
 e.ppppp....mmmee.mm...ttppppp..................................................e
-e.............ee...............................................................e
 emmmmmmmmmmmmeee...............................................................e
 e.cccccc...mmmee...............................................................e
-e.............ee...............................................................e
 EEEEEEEEEEEEEEEe...............................................................e
 E.tttttttt....Ee...............................................................e
 E.ttttttttt...Ee...............................................................e
 E.ttttttttttt.Ee...............................................................e
 E.ttttttttttt.Ee...............................................................e
+E.mmmmmmmmmmm.Ee...............................................................e
+E.ttttt.......Ee...............................................................e
 EEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD........mmmmm.
 -- projects --
 EEEEEEEEEEEEEEEeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 E.ppppp....mmmEe.tt...ttppppptcccccc...........................................e
 E.ppppp....mmmEe.mm...ttppppp..................................................e
-E.............Ee...............................................................e
 EmmmmmmmmmmmmEEe...............................................................e
 e.cccccc...mmmee...............................................................e
-e.............ee...............................................................e
 emmmmmmmmmmmeeee...............................................................e
 e.tttttttt....ee...............................................................e
 e.ttttttttt...ee...............................................................e
 e.ttttttttttt.ee...............................................................e
 e.ttttttttttt.ee...............................................................e
+e.mmmmmmmmmmm.ee...............................................................e
+e.ttttt.......ee...............................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD........mmmmm.
 -- list --
 emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.ppppp....mmmeE.tt...ttppppptcccccc...........................................E
 e.ppppp....mmmeE.mm...ttppppp..................................................E
-e.............eE...............................................................E
 emmmmmmmmmmmmeeE...............................................................E
 e.cccccc...mmmeE...............................................................E
-e.............eE...............................................................E
 emmmmmmmmmmmeeeE...............................................................E
 e.tttttttt....eE...............................................................E
 e.ttttttttt...eE...............................................................E
 e.ttttttttttt.eE...............................................................E
 e.ttttttttttt.eE...............................................................E
+e.mmmmmmmmmmm.eE...............................................................E
+e.ttttt.......eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy.......mmmmm.
 -- list-frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                           │
 │ +work    1/1││  1   B +home                                                  │
-│             ││                                                               │
 ├[4]─Contexts─┤│                                                               │
 │ @phone   1/1││                                                               │
-│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 │ [ ] Later   ││                                                               │
 │ [x] Blocked ││                                                               │
 │ [ ] Archive ││                                                               │
+│ ─────────── ││                                                               │
+│ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9

@@ -16,24 +16,24 @@ Fix tap +home
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +home    2/2││  1   (B) Send invoice +work @phone                            │
 │ ▸+work   3/3││  1       Draft report +work.acme                              │
-│             ││  2       Plan roadmap +work/q3                                │
-│             ││  3       Buy milk +home                                       │
-│             ││  4       Fix tap +home                                        │
-├[4]─Contexts─┤│                                                               │
-│ @phone   1/1││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-├[5]─Filters──┤│                                                               │
+├[4]─Contexts─┤│  2       Plan roadmap +work/q3                                │
+│ @phone   1/1││  3       Buy milk +home                                       │
+├[5]─Filters──┤│  4       Fix tap +home                                        │
 │ [x] Done    ││                                                               │
 │ [ ] Later   ││                                                               │
-│ [x] Blocked │└───────────────────────────────────────────────────────────────┘
-│ [ ] Archive │┌[2]─Detail─────────────────────────────────────────────────────┐
-│ ─────────── ││ Send invoice +work @phone                                     │
-│ Today       ││ ───────────────────────────────────────────────────────────── │
-│ Overdue     ││ state     todo                                                │
-│ Upcoming    ││ nr        1                                                   │
-│ Doing       ││ …                                                             │
+│ [x] Blocked ││                                                               │
+│ [ ] Archive ││                                                               │
+│ ─────────── ││                                                               │
+│ Today       ││                                                               │
+│ Overdue     ││                                                               │
+│ Upcoming    ││                                                               │
+│ Doing       ││                                                               │
+│ Waiting     │└───────────────────────────────────────────────────────────────┘
+│ No project  │┌[2]─Detail─────────────────────────────────────────────────────┐
+│ Won't do    ││ Send invoice +work @phone                                     │
+│             ││ ───────────────────────────────────────────────────────────── │
+│             ││ state     todo                                                │
+│             ││ nr        1                                                   │
+│             ││ …                                                             │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9

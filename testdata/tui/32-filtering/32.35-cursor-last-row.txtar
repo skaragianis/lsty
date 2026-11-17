@@ -20,16 +20,9 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││  1   (B) Send Invoice +work.acme @email                          2d late ││ ─────────────────────────────────── │
 │=▾+work   2/4││  4 ✓     Fix bug +work                                           1d ago  ││ state      done                     │
 │   .acme  1/1││                                                                          ││ nr         4                        │
-│             ││                                                                          ││ completed  2026-09-28               │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[4]─Contexts─┤│                                                                          ││                                     │
+├[4]─Contexts─┤│                                                                          ││ completed  2026-09-28               │
 │ @email   1/1││                                                                          ││                                     │
 │ @phone   1/1││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
@@ -43,5 +36,12 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  o new  a append  dd delete  u undo  / search  ? help                     9.9.9

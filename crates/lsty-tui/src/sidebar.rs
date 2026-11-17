@@ -10,7 +10,7 @@ use crate::{
     model::Model,
     motion::Step,
     panel::{Entry, Panel, row_spans},
-    text::{RULE, Span, put, titled_spans},
+    text::{RULE, Span, put, scrolled, titled_spans},
 };
 
 pub(crate) const PROJECTS: usize = 0;
@@ -29,21 +29,39 @@ const TOGGLES: [(Hidden, &str); 4] = [
     (Hidden::Archive, "Archive"),
 ];
 
-/// Splits `h` lines between the panels, borders included: the Filters
-/// panel gets what its entries need, at most half.
-fn panel_heights(h: usize, filter_entries: usize) -> [usize; PANELS] {
-    let low = (filter_entries + BORDER).min(h / 2);
-    let rest = h - low;
-    [rest - rest / 2, rest / 2, low]
+/// The lines a panel with `entries` entries takes, borders included. The
+/// last panel's bottom border is the sidebar's.
+const fn lines_for(i: usize, entries: usize) -> usize {
+    entries + if i == FILTERS { 2 } else { 1 }
 }
 
-/// The entry rows of each panel in a sidebar `h` lines high. The last
-/// panel's bottom border is the sidebar's.
-fn panel_rows_in(h: usize, filter_entries: usize) -> [usize; PANELS] {
-    let heights = panel_heights(h, filter_entries);
-    let mut rows = heights.map(|n| n.saturating_sub(1));
-    rows[FILTERS] = heights[FILTERS].saturating_sub(2);
-    rows
+/// Splits `h` lines between the panels, borders included. Each panel gets
+/// its title and one entry, Contexts first, then Projects, then Filters;
+/// then each grows to what its entries need in the same order; Filters
+/// takes what is left. A sidebar too short for the floors gives the later
+/// panels what remains, so the lines always add up to `h`.
+pub(crate) fn panel_heights(
+    h: usize,
+    entries: [usize; PANELS],
+) -> [usize; PANELS] {
+    let mut heights = [0; PANELS];
+    let mut left = h;
+    for floor in [0, 1, usize::MAX] {
+        for i in [CONTEXTS, PROJECTS, FILTERS] {
+            let want = lines_for(i, entries[i].max(1).min(floor));
+            let give = want.saturating_sub(heights[i]).min(left);
+            heights[i] += give;
+            left -= give;
+        }
+    }
+    heights[FILTERS] += left;
+    heights
+}
+
+/// The entry rows of each panel in a sidebar `h` lines high.
+fn panel_rows_in(h: usize, entries: [usize; PANELS]) -> [usize; PANELS] {
+    let heights = panel_heights(h, entries);
+    std::array::from_fn(|i| heights[i].saturating_sub(lines_for(i, 0)))
 }
 
 impl Model {
@@ -92,7 +110,32 @@ impl Model {
     /// The entry rows of each panel at the current height.
     pub(crate) fn panel_rows(&self) -> [usize; PANELS] {
         let h = usize::from(self.height).saturating_sub(1);
-        panel_rows_in(h, self.panels[FILTERS].entries.len())
+        panel_rows_in(h, self.entry_counts())
+    }
+
+    fn entry_counts(&self) -> [usize; PANELS] {
+        self.panels.each_ref().map(|p| p.entries.len())
+    }
+
+    /// Which panels show their cursor now.
+    fn panels_seen(&self) -> [bool; PANELS] {
+        let rows = self.panel_rows();
+        std::array::from_fn(|i| self.panels[i].seen(rows[i]))
+    }
+
+    /// Fits the views to the rows after the entries of a panel changed: a
+    /// panel follows its cursor if it was in view (`seen`), else it only
+    /// stays inside its entries.
+    fn refit_panels(&mut self, seen: [bool; PANELS]) {
+        let rows = self.panel_rows();
+        for ((panel, seen), rows) in self.panels.iter_mut().zip(seen).zip(rows)
+        {
+            if seen {
+                panel.scroll(rows);
+            } else {
+                panel.top = scrolled(panel.top, 0, panel.entries.len(), rows);
+            }
+        }
     }
 
     pub(crate) fn scroll_panels(&mut self) {
@@ -121,9 +164,10 @@ impl Model {
         let Some(i) = self.focus.panel() else {
             return;
         };
+        let mut seen = self.panels_seen();
+        seen[i] = true;
         if change(&mut self.panels[i]) {
-            let rows = self.panel_rows()[i];
-            self.panels[i].scroll(rows);
+            self.refit_panels(seen);
             self.keep_folds();
         }
     }
@@ -147,10 +191,8 @@ impl Model {
     /// The first screen row of each panel (its title line) and how
     /// many entry rows it shows, in a sidebar at `area`.
     pub(crate) fn panel_spots(&self, area: Rect) -> [(usize, usize); PANELS] {
-        let rows = panel_rows_in(
-            usize::from(area.height),
-            self.panels[FILTERS].entries.len(),
-        );
+        let rows =
+            panel_rows_in(usize::from(area.height), self.entry_counts());
         let mut y = usize::from(area.y);
         rows.map(|n| {
             let spot = (y, n);
@@ -171,12 +213,12 @@ impl Model {
 
     /// Folds or unfolds the node at entry `at` of panel `i`.
     pub(crate) fn click_fold(&mut self, i: usize, at: usize) {
+        let seen = self.panels_seen();
         let Some(panel) = self.panels.get_mut(i) else {
             return;
         };
         if panel.flip_fold(at) {
-            let rows = self.panel_rows()[i];
-            self.panels[i].scroll(rows);
+            self.refit_panels(seen);
             self.keep_folds();
         }
     }
