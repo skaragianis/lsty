@@ -15,6 +15,9 @@ Done task
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   (A) Call client +work                               │
 │ ┌ Help ────────────────────────────────────────────────┐ │
+│ │    L  Go to the bottom row of the view               │ │
+│ │    x , <Space>  Select, exclude or deselect the entr…│ │
+│ │    <CR>  Go to the list                              │ │
 │ │    h , <Left>  Collapse the tree node                │ │
 │ │    l , <Right>  Expand the tree node                 │ │
 │ │  View                                                │ │
@@ -23,12 +26,9 @@ Done task
 │ │    gc  Clear the filters                             │ │
 │ │    gs  Show or hide the sidebar                      │ │
 │ │    gi  Move the detail panel: right, below, off      │ │
-│ │    gw  Wrap or cut long tasks in the list            │ │
-│ │  Boxes                                               │ │
-│ │    <C-w>h , <C-w><Left>  Focus the box to the left   │ │
-│ │    <C-w>j , <C-w><Down>  Focus the box below         │ │
-│ │    <C-w>k , <C-w><Up>  Focus the box above           │ │
-│ └ 169-181 of 367 ──────────────────────────────────────┘ │
+│ │    +  Let a task take one more row in the list       │ │
+│ │    -  Let a task take one row fewer in the list      │ │
+│ └ 169-181 of 372 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close      9.9.9

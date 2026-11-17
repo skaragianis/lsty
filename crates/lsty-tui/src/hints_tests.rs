@@ -165,6 +165,25 @@ fn clear_search_shows_while_a_search_is_in_effect() {
     }
 }
 
+/// `+` is dim when no task needs a row more, `-` when no task takes more
+/// than one, in every mode that has them.
+#[test]
+fn the_row_hints_are_dim_at_their_limits() {
+    let long = ["w"; 400].join(" ") + "\n";
+    let rows = [
+        ("short", "normal", "A\n", "", "+ more rows - fewer rows"),
+        ("long", "normal", &long, "", ""),
+        ("one row", "normal", &long, "--", "- fewer rows"),
+        ("visual", "visual", &long, "--v", "- fewer rows"),
+        ("detail", "detail", &long, "--<C-w>2", "- fewer rows"),
+    ];
+    for (name, mode, todo, typed, want) in rows {
+        let hints = Some((mode, &["more_rows", "fewer_rows"][..]));
+        let (_dir, model) = hinted((todo, ""), hints, "", typed);
+        assert_eq!(shown_dim(&model, 200), want, "{name}");
+    }
+}
+
 /// What the status line shows dim, key and word, on a screen `width` wide.
 fn shown_dim(model: &Model, width: u16) -> String {
     let mut buf = Buffer::empty(Rect::new(0, 0, width, 1));

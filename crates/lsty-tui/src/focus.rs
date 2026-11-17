@@ -254,10 +254,37 @@ impl Model {
         self.relayout();
     }
 
-    /// `gw`: wraps the long tasks of the list, or cuts them again.
-    pub(crate) fn toggle_wrap(&mut self) {
-        self.deps.config.wrap = !self.deps.config.wrap;
-        self.scroll();
+    /// The rows a task may take in the list.
+    pub(crate) fn list_rows(&self) -> usize {
+        usize::try_from(self.deps.config.list_rows).unwrap_or(usize::MAX)
+    }
+
+    /// The rows the longest task takes: `list_rows`, or fewer when no
+    /// task needs that many.
+    pub(crate) fn rows_shown(&self) -> usize {
+        self.list_rows().min(self.spread().most())
+    }
+
+    /// Whether a task needs a row more than `list_rows`.
+    pub(crate) fn can_add_row(&self) -> bool {
+        self.list_rows() < self.spread().most()
+    }
+
+    /// `+`: a task may take one more row, while one needs it.
+    pub(crate) fn more_rows(&mut self) {
+        if self.can_add_row() {
+            self.deps.config.list_rows += 1;
+            self.scroll();
+        }
+    }
+
+    /// `-`: a task may take one row fewer than the longest takes.
+    pub(crate) fn fewer_rows(&mut self) {
+        let shown = self.rows_shown();
+        if shown > 1 {
+            self.deps.config.list_rows = shown as u64 - 1;
+            self.scroll();
+        }
     }
 
     /// Takes the new size of the terminal. An overlay moves beside the

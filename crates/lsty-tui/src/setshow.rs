@@ -43,7 +43,6 @@ pub(crate) fn value_text(cfg: &Config, name: &str) -> String {
         "show_sidebar" => return flag(name, cfg.show_sidebar),
         "show_detail" => return flag(name, cfg.show_detail),
         "show_ids" => return flag(name, cfg.show_ids),
-        "wrap" => return flag(name, cfg.wrap),
         "auto_archive" => return flag(name, cfg.auto_archive),
         "keep_priority" => return flag(name, cfg.keep_priority),
         "keep_adding" => return flag(name, cfg.keep_adding),
@@ -62,6 +61,7 @@ pub(crate) fn value_text(cfg: &Config, name: &str) -> String {
         "lock_timeout" => duration_text(cfg.lock_timeout),
         "sidebar_min_width" => cfg.sidebar_min_width.to_string(),
         "detail_min_width" => cfg.detail_min_width.to_string(),
+        "list_rows" => cfg.list_rows.to_string(),
         "hidden_tasks" => cfg
             .hidden_tasks
             .iter()

@@ -1,5 +1,5 @@
-//! The tasks list with `wrap` on: how many rows each task takes, what
-//! the later rows show, and which tasks are in view.
+//! The tasks list when a task may take more than one row: how many rows
+//! each task takes, what the later rows show, and which tasks are in view.
 
 use std::rc::Rc;
 
@@ -11,15 +11,12 @@ use lsty_core::{
 use crate::{
     columns::Layout,
     model::Model,
-    rows::{Inline, text_spans},
+    rows::{Inline, Row, text_spans},
     sizes::Sizes,
     text::{ELLIPSIS, Span, cut, fit},
     wrap::wrap_words,
 };
 
-/// The most rows a task takes; the last one ends with an ellipsis when
-/// the text goes on.
-pub(crate) const MAX_ROWS: usize = 3;
 /// How far in the rows after the first start, from the text's left edge,
 /// when there is no number column.
 pub(crate) const INDENT: usize = 2;
@@ -31,6 +28,9 @@ pub(crate) struct Tall<'a> {
     pub(crate) lead: usize,
     /// The width of the text on the first row and on the later rows.
     width: (usize, usize),
+    /// The most rows a task takes; the last ends with an ellipsis when
+    /// the text goes on.
+    rows: usize,
 }
 
 /// What an entry of the list pane is.
@@ -78,21 +78,24 @@ impl Stack<'_> {
 }
 
 impl Model {
-    /// How the tasks fall on rows, when the list wraps.
+    /// How the tasks fall on rows, when one may take more than one.
     fn tall(&self) -> Option<Tall<'_>> {
-        if !self.deps.config.wrap || self.rows.is_empty() {
-            return None;
-        }
+        (self.list_rows() > 1 && !self.rows.is_empty()).then(|| self.spread())
+    }
+
+    /// How the tasks would fall on rows.
+    pub(crate) fn spread(&self) -> Tall<'_> {
         let w = usize::from(self.panes(self.dims()).list.width);
         let layout: Layout = self.list_layout(w);
         let lead = layout.lead();
         // the number column already shows where a task starts
         let indent = if layout.gutter > 0 { 0 } else { INDENT };
-        Some(Tall {
+        Tall {
             model: self,
             lead: 1 + lead + indent,
             width: (layout.text, layout.text.saturating_sub(indent)),
-        })
+            rows: self.list_rows(),
+        }
     }
 
     /// Runs `f` on the list pane: its entries and the arithmetic of
@@ -161,19 +164,38 @@ impl Tall<'_> {
         let Some(row) = self.model.rows.get(i) else {
             return Rc::default();
         };
+        let key = (self.width, self.rows);
         let mut kept = row.lines.borrow_mut();
         match &*kept {
-            Some((width, lines)) if *width == self.width => Rc::clone(lines),
+            Some((was, lines)) if *was == key => Rc::clone(lines),
             Some(_) | None => {
-                let lines = Rc::new(self.wrap(i));
-                *kept = Some((self.width, Rc::clone(&lines)));
+                let lines = Rc::new(self.wrap(i, self.rows));
+                *kept = Some((key, Rc::clone(&lines)));
                 lines
             }
         }
     }
 
-    /// The text of task `i` wrapped, the last row cut with an ellipsis.
-    fn wrap(&self, i: usize) -> Vec<Vec<Span<'static>>> {
+    /// The rows the longest task needs for its whole text.
+    pub(crate) fn most(&self) -> usize {
+        let need = |row: &Row, i| match row.need.get() {
+            _ if row.text_width <= self.width.0 => 1,
+            Some((width, rows)) if width == self.width => rows,
+            Some(_) | None => {
+                let rows = self.wrap(i, usize::MAX).len();
+                row.need.set(Some((self.width, rows)));
+                rows
+            }
+        };
+        (self.model.rows.iter().enumerate())
+            .map(|(i, row)| need(row, i))
+            .max()
+            .unwrap_or(1)
+    }
+
+    /// The text of task `i` on at most `rows` rows, the last cut with an
+    /// ellipsis.
+    fn wrap(&self, i: usize, rows: usize) -> Vec<Vec<Span<'static>>> {
         let m = self.model;
         let Some(row) = m.rows.get(i) else {
             return vec![Vec::new()];
@@ -187,7 +209,7 @@ impl Tall<'_> {
             (row.base, row.parts),
             inline,
             self.width,
-            MAX_ROWS,
+            rows,
         );
         if lines.is_empty() {
             lines.push(Vec::new());
@@ -212,11 +234,11 @@ pub(crate) fn lay_out(
     let row = move |r| if r == 0 { first } else { later };
     // the rows hold their cells and a break space between each two: the
     // spans that start by the cell after lay out the rows as the whole text
-    let room = first + (rows - 1) * (later + 1);
+    let room = first.saturating_add((rows - 1).saturating_mul(later + 1));
     let mut at = 0;
     let held = spans.iter().take_while(|s| {
         at += s.cells();
-        at - s.cells() <= room + 1
+        at - s.cells() <= room.saturating_add(1)
     });
     let text = &spans[..held.count()];
     let lines = wrap_words(text, row);

@@ -319,6 +319,9 @@ fn apply(
 
 /// Reads one option; the problems come back as messages.
 fn add_option(cfg: &mut Config, name: &str, value: &Value) -> Vec<String> {
+    if name == "wrap" {
+        return vec!["wrap is now list_rows".to_owned()];
+    }
     let Some(problems) = options::apply(cfg, name, value) else {
         return vec![format!("unknown option {}", quote(name))];
     };

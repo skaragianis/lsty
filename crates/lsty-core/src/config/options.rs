@@ -31,7 +31,7 @@ fn setter(name: &str) -> Option<Setter> {
             |c, v| number(v, 0).map(|n| c.sidebar_min_width = n)
         }
         "show_detail" => |c, v| flag(v).map(|b| c.show_detail = b),
-        "wrap" => |c, v| flag(v).map(|b| c.wrap = b),
+        "list_rows" => |c, v| number(v, 1).map(|n| c.list_rows = n),
         "show_ids" => |c, v| flag(v).map(|b| c.show_ids = b),
         "detail_min_width" => {
             |c, v| number(v, 0).map(|n| c.detail_min_width = n)

@@ -1,10 +1,10 @@
 size 100 8
 start
-keys +
-file todo.txt plus
-keys jV-
-file todo.txt minus
-keys Vk+
+keys <Right>
+file todo.txt right
+keys jV<Left>
+file todo.txt left
+keys Vk<Right>
 file todo.txt visual
 -- config.toml --
 show_sidebar = false
@@ -12,10 +12,10 @@ show_detail = false
 -- todo.txt --
 Buy
 Sell
--- plus --
+-- right --
 (D) Buy
 Sell
--- minus --
+-- left --
 (D) Buy
 (A) Sell
 -- visual --

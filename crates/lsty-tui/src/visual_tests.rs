@@ -124,7 +124,7 @@ fn a_delete_or_a_priority_takes_tasks_of_any_state() {
     const DOING: &str = "B started:2026-09-28T0700Z owner:me";
     for (keys, want) in [
         ("vjd", "\n\nC\n".to_owned()),
-        ("vj-", format!("(A) A\n(A) {DOING}\nC\n")),
+        ("vjgP", format!("(A) A\n(A) {DOING}\nC\n")),
     ] {
         let dir = workdir(format!("A\n{DOING}\nC\n"));
         let mut model = model_of(dir.path());
@@ -337,8 +337,8 @@ const UNDER_WAY: &[Under] = &[
     (ABC, "j", "g", "A\nB +k\nC\n", "g", "A\nB +k\nC\n", None),
     (ABC, "j", "2", "A\nB +k\nC\n", "j", "A\nB +k\nC\n", None),
     (ABC, "j", "2", "A\nB +k\nC\n", "J", "A\nB +k\nC\n", LOOK),
-    (CLOSED, "gg", "2", CLOSED_K, "-", CLOSED_K, None),
-    (CLOSED, "gg", "vj", CLOSED_K, "-", CLOSED_K, None),
+    (CLOSED, "gg", "2", CLOSED_K, "gP", CLOSED_K, None),
+    (CLOSED, "gg", "vj", CLOSED_K, "gP", CLOSED_K, None),
     (
         "A due:2030-01-01\nB\nC\n",
         "Ggd2030-01-01<CR>|gg",
@@ -351,7 +351,7 @@ const UNDER_WAY: &[Under] = &[
     (ABC, "j", "g", "A\nB +k\nC\n", "o", "A\nB +k\nC\n", LOOK),
     (
         ABC,
-        "+j",
+        "gpj",
         "2",
         "(A) A\nB +k\nC\n",
         ".",

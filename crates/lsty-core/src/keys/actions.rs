@@ -369,8 +369,13 @@ actions! {
     ToggleDetail => (
         "toggle_detail", View, "Move the detail panel: right, below, off", "detail", Other
     );
-    ToggleWrap => (
-        "toggle_wrap", View, "Wrap or cut long tasks in the list", "wrap", Other
+    MoreRows => (
+        "more_rows", View, "Let a task take one more row in the list",
+        "more rows", Other
+    );
+    FewerRows => (
+        "fewer_rows", View, "Let a task take one row fewer in the list",
+        "fewer rows", Other
     );
     EnterVisual => ("enter_visual", View, "Select tasks", "select", Other);
     ExitVisual => ("exit_visual", View, "Leave the selection", "exit", Other);

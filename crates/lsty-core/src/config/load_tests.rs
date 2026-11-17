@@ -66,7 +66,7 @@ fn defaults() {
         show_sidebar: true,
         sidebar_min_width: 80,
         show_detail: true,
-        wrap: true,
+        list_rows: 3,
         show_ids: true,
         detail_min_width: 120,
         detail_position: DetailPosition::Right,
@@ -102,7 +102,7 @@ hidden_tasks = ["blocked", "done"]
 show_sidebar = false
 sidebar_min_width = 0
 show_detail = false
-wrap = false
+list_rows = 4
 show_ids = false
 detail_min_width = 10
 detail_position = "bottom"
@@ -141,7 +141,7 @@ fn every_option_is_read() {
         show_sidebar: false,
         sidebar_min_width: 0,
         show_detail: false,
-        wrap: false,
+        list_rows: 4,
         show_ids: false,
         detail_min_width: 10,
         detail_position: DetailPosition::Bottom,
@@ -390,6 +390,11 @@ const WARNINGS: &[WarningRow] = &[
         ],
     ),
     (
+        "wrap was renamed",
+        "wrap = false",
+        &["wrap is now list_rows"],
+    ),
+    (
         "float is not an integer",
         "detail_min_width = 1.5",
         &["detail_min_width: expected integer"],
@@ -452,6 +457,9 @@ fn upcoming(c: &Config) -> String {
 }
 fn sidebar(c: &Config) -> String {
     c.sidebar_min_width.to_string()
+}
+fn list_rows(c: &Config) -> String {
+    c.list_rows.to_string()
 }
 fn detail(c: &Config) -> String {
     c.detail_min_width.to_string()
@@ -624,6 +632,8 @@ const VALUES: &[ValueRow] = &[
     ("07.16 valid days", "upcoming_days = 14", upcoming, "14", 0),
     ("negative width", "sidebar_min_width = -1", sidebar, "80", 1),
     ("float width", "detail_min_width = 1.5", detail, "120", 1),
+    ("zero rows", "list_rows = 0", list_rows, "3", 1),
+    ("five rows", "list_rows = 5", list_rows, "5", 0),
     (
         "07.17 milliseconds",
         r#"lock_timeout = "500ms""#,
@@ -981,7 +991,7 @@ fn the_readme_lists_every_option_once_with_its_default() {
         show_sidebar,
         sidebar_min_width,
         show_detail,
-        wrap,
+        list_rows,
         show_ids,
         detail_min_width,
         detail_position,

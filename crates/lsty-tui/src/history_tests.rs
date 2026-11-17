@@ -65,7 +65,7 @@ fn repeat_keeps_the_count_of_the_change() {
     let dated = format!("A{due}\nB{due}\nC{due}\nD{due}\nE\n");
     let rows = [
         ("2ddj.", "\n\nC\n\n\n"),
-        ("-j2.jj.", "(A) A\n(A) B\n(A) C\n(A) D\n(A) E\n"),
+        ("gPj2.jj.", "(A) A\n(A) B\n(A) C\n(A) D\n(A) E\n"),
         ("J2.gg.", "C\nD\nB\nA\nE\n"),
         ("VjJ<Esc>gg3.gg.", "B\nD\nC\nA\nE\n"),
         ("gd2026-10-02<CR>j2.j.", &dated),

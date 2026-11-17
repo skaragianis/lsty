@@ -41,9 +41,13 @@ const LINES: [&str; 12] = [
 /// The done file, shown when the config shows archived tasks.
 const DONE: &str = "x 2026-09-01 Old\nx 2026-09-01 Kept id:o\n";
 
-/// `stop` has no default key.
-const BINDINGS: &str =
-    "[normal]\nstop = [\"<F9>\"]\n[visual]\nstop = [\"<F9>\"]\n";
+/// `stop` has no default key; `+` and `-` step the priority, as they did when
+/// the seeds were found.
+const BINDINGS: &str = "\
+[normal]\nstop = [\"<F9>\"]\n\
+cycle_priority = [\"gp\", \"+\"]\ncycle_priority_back = [\"gP\", \"-\"]\n\
+[visual]\nstop = [\"<F9>\"]\n\
+cycle_priority = [\"gp\", \"+\"]\ncycle_priority_back = [\"gP\", \"-\"]\n";
 
 /// The keys pressed: a key, and what is typed after it.
 const KEYS: [(&str, &str); 38] = [

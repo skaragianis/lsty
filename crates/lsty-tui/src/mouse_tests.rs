@@ -650,7 +650,6 @@ fn a_reload_drops_a_press_on_a_name() {
 /// A wrapping list, 40 by 12: a task of three rows, then B and C.
 fn wrapped_list(dir: &Path, hidden: Vec<Hidden>) -> Model {
     let config = Config {
-        wrap: true,
         hidden_tasks: hidden,
         ..alone()
     };
@@ -666,13 +665,7 @@ const LONG_FIRST: &str =
 fn a_double_click_on_a_later_row_opens_the_task() {
     let dir = workdir(LONG_FIRST);
     let clock = Rc::new(Cell::new(instant(NOW)));
-    let mut d = deps(
-        dir.path(),
-        Config {
-            wrap: true,
-            ..alone()
-        },
-    );
+    let mut d = deps(dir.path(), alone());
     let read = Rc::clone(&clock);
     d.now = Box::new(move || read.get());
     let mut model = started(d);

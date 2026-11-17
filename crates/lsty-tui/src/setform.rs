@@ -21,7 +21,6 @@ pub(crate) const OPTIONS: [(&str, Kind); 23] = [
     ("show_sidebar", Kind::Flag),
     ("show_detail", Kind::Flag),
     ("show_ids", Kind::Flag),
-    ("wrap", Kind::Flag),
     ("auto_archive", Kind::Flag),
     ("keep_priority", Kind::Flag),
     ("keep_adding", Kind::Flag),
@@ -38,6 +37,7 @@ pub(crate) const OPTIONS: [(&str, Kind); 23] = [
     ("lock_timeout", Kind::Value),
     ("sidebar_min_width", Kind::Number),
     ("detail_min_width", Kind::Number),
+    ("list_rows", Kind::Number),
     ("hidden_tasks", Kind::List),
 ];
 

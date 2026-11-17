@@ -51,8 +51,8 @@ a
 │ │    P  Paste above the cursor                                                                                               │ │
 │ │    J , <A-Down>  Move the task down                                                                                        │ │
 │ │    K , <A-Up>  Move the task up                                                                                            │ │
-│ │    gp , + , <Right>  Raise the priority                                                                                    │ │
-│ │    gP , - , <Left>  Lower the priority                                                                                     │ │
+│ │    gp , <Right>  Raise the priority                                                                                        │ │
+│ │    gP , <Left>  Lower the priority                                                                                         │ │
 │ │    gd  Set the due date                                                                                                    │ │
 │ │    gt  Add a tag                                                                                                           │ │
 │ │    gT  Remove a tag                                                                                                        │ │
@@ -65,7 +65,7 @@ a
 │ │    /  Search the list                                                                                                      │ │
 │ │    <C-l>  Clear the search                                                                                                 │ │
 │ │    gc  Clear the filters                                                                                                   │ │
-│ └ 194-246 of 367 ────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
+│ └ 198-250 of 372 ────────────────────────────────────────────────────────────────────────────────────────────────────────────┘ │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                                                                            9.9.9

@@ -332,8 +332,8 @@ fn delete_does_what_the_rule_says() {
 
 #[test]
 fn a_priority_step_does_what_the_rule_says() {
-    every_press((Action::CyclePriority, "+", "+"));
-    every_press((Action::CyclePriorityBack, "-", "-"));
+    every_press((Action::CyclePriority, "gp", "gp"));
+    every_press((Action::CyclePriorityBack, "gP", "gP"));
 }
 
 /// `stop` has no key by default and is asked of `act`.
@@ -819,7 +819,7 @@ fn a_refused_key_says_what_it_always_said() {
         (TODO, OLD, "vj", "d", SOME, true),
         (TODO, OLD, "vj", "gd", SOME, true),
         (TODO, OLD, "", "2dd", SOME, true),
-        (TODO, OLD, "-", "2.", SOME, true),
+        (TODO, OLD, "gP", "2.", SOME, true),
         (TODO, OLD, "gtk:v<CR>", "2.", SOME, true),
         (THREE, OLD, "vjJ<Esc>gg", "4.", SOME, true),
         (TWO, "", "s", "J", SORTED, false),

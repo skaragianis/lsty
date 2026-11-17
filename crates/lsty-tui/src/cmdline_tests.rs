@@ -350,7 +350,6 @@ const SHOWN: &[Shown] = &[
     ("show_sidebar", "show_sidebar"),
     ("show_detail", "noshow_detail"),
     ("show_ids", "noshow_ids"),
-    ("wrap", "wrap"),
     ("auto_archive", "auto_archive"),
     ("keep_priority", "keep_priority"),
     ("keep_adding", "keep_adding"),
@@ -367,6 +366,7 @@ const SHOWN: &[Shown] = &[
     ("lock_timeout", "lock_timeout=1.5s"),
     ("sidebar_min_width", "sidebar_min_width=60"),
     ("detail_min_width", "detail_min_width=90"),
+    ("list_rows", "list_rows=4"),
     ("hidden_tasks", "hidden_tasks=later,done"),
 ];
 
@@ -376,7 +376,7 @@ fn set_shows_the_value_of_every_option() {
         show_sidebar: true,
         show_detail: false,
         show_ids: false,
-        wrap: true,
+        list_rows: 4,
         auto_archive: true,
         keep_priority: true,
         keep_adding: true,
