@@ -103,6 +103,7 @@ const NORMAL: &[Entry] = moving![
     (Action::ToggleDetail, &["gi"]),
     (Action::MoreRows, &["+"]),
     (Action::FewerRows, &["-"]),
+    (Action::DefaultRows, &["0"]),
     (Action::EnterVisual, &["v", "V"]),
     (Action::FocusLeft, &["<C-w>h", "<C-w><Left>"]),
     (Action::FocusDown, &["<C-w>j", "<C-w><Down>"]),
@@ -136,6 +137,7 @@ const VISUAL: &[Entry] = moving![
     (Action::RemoveTag, &["gT"]),
     (Action::MoreRows, &["+"]),
     (Action::FewerRows, &["-"]),
+    (Action::DefaultRows, &["0"]),
     (Action::ExitVisual, &["<Esc>", "<C-c>", "v", "V"]),
 ];
 
@@ -182,6 +184,7 @@ const PANEL: &[Entry] = moving![
     (Action::ToggleDetail, &["gi"]),
     (Action::MoreRows, &["+"]),
     (Action::FewerRows, &["-"]),
+    (Action::DefaultRows, &["0"]),
     (Action::Search, &["/"]),
     (Action::ClearSearch, &["<C-l>"]),
     (Action::ClearFilters, &["gc"]),

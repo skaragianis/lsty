@@ -15,6 +15,8 @@ Done task
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   (A) Call client +work                               │
 │ ┌ Help ────────────────────────────────────────────────┐ │
+│ │    H  Go to the top row of the view                  │ │
+│ │    M  Go to the middle row of the view               │ │
 │ │    L  Go to the bottom row of the view               │ │
 │ │    x , <Space>  Select, exclude or deselect the entr…│ │
 │ │    <CR>  Go to the list                              │ │
@@ -26,9 +28,7 @@ Done task
 │ │    gc  Clear the filters                             │ │
 │ │    gs  Show or hide the sidebar                      │ │
 │ │    gi  Move the detail panel: right, below, off      │ │
-│ │    +  Let a task take one more row in the list       │ │
-│ │    -  Let a task take one row fewer in the list      │ │
-│ └ 169-181 of 372 ──────────────────────────────────────┘ │
+│ └ 169-181 of 376 ──────────────────────────────────────┘ │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close      9.9.9

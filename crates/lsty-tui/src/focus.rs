@@ -1,7 +1,10 @@
 //! Where the keyboard is, and what shows the sidebar.
 
 use lsty_core::{
-    config::DetailPosition::{Bottom, Right},
+    config::{
+        DEFAULT_LIST_ROWS,
+        DetailPosition::{Bottom, Right},
+    },
     keys::{Action, Mode},
 };
 
@@ -254,9 +257,16 @@ impl Model {
         self.relayout();
     }
 
+    /// The rows a task may take in the list: `set`, or fewer when the
+    /// list shows fewer.
+    fn rows_up_to(&self, set: u64) -> usize {
+        let set = usize::try_from(set).unwrap_or(usize::MAX);
+        set.min(self.pane_rows().max(1))
+    }
+
     /// The rows a task may take in the list.
     pub(crate) fn list_rows(&self) -> usize {
-        usize::try_from(self.deps.config.list_rows).unwrap_or(usize::MAX)
+        self.rows_up_to(self.deps.config.list_rows)
     }
 
     /// The rows the longest task takes: `list_rows`, or fewer when no
@@ -265,15 +275,30 @@ impl Model {
         self.list_rows().min(self.spread().most())
     }
 
-    /// Whether a task needs a row more than `list_rows`.
+    /// Whether a task needs a row more than `list_rows` and the list has
+    /// room for it.
     pub(crate) fn can_add_row(&self) -> bool {
-        self.list_rows() < self.spread().most()
+        self.list_rows() < self.spread().most().min(self.pane_rows())
+    }
+
+    /// Whether `0` changes the rows a task may take: it does when they
+    /// are not the default, even where the list is too short to show it.
+    pub(crate) fn can_default_rows(&self) -> bool {
+        self.deps.config.list_rows != DEFAULT_LIST_ROWS
     }
 
     /// `+`: a task may take one more row, while one needs it.
     pub(crate) fn more_rows(&mut self) {
         if self.can_add_row() {
             self.deps.config.list_rows += 1;
+            self.scroll();
+        }
+    }
+
+    /// `0`: a task may take the default rows again.
+    pub(crate) fn default_rows(&mut self) {
+        if self.can_default_rows() {
+            self.deps.config.list_rows = DEFAULT_LIST_ROWS;
             self.scroll();
         }
     }

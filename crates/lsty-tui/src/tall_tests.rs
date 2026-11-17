@@ -215,6 +215,7 @@ fn a_row_more_or_fewer_keeps_the_cursor_task_whole() {
     assert_eq!((model.top, model.cursor), (3, 8));
     for (from, typed, rows, lit) in STOPS {
         let (_dir, mut model) = tall(12, from);
+        assert_eq!(model.can_default_rows(), from != 3, "{from} hint");
         keys(&mut model, typed);
         assert_eq!(model.deps.config.list_rows, rows, "{from} {typed}");
         assert_eq!(model.can_add_row(), lit, "{from} {typed}");
@@ -224,8 +225,9 @@ fn a_row_more_or_fewer_keeps_the_cursor_task_whole() {
 type Stop = (usize, &'static str, u64, bool);
 
 /// (`list_rows` at first, keys, `list_rows` after, whether `+` is lit): both
-/// keys stop, `-` drops to one below the longest task, also after a filter.
-const STOPS: [Stop; 9] = [
+/// keys stop, `-` drops to one below the longest task, also after a filter;
+/// `0` sets 3 unless it is 3.
+const STOPS: [Stop; 12] = [
     (1, "++", 3, false),
     (1, "+++", 3, false),
     (3, "---", 1, true),
@@ -235,12 +237,23 @@ const STOPS: [Stop; 9] = [
     (5, "+-+", 3, false),
     (5, "/w01<CR>-", 1, true),
     (5, "/w01<CR>--", 1, true),
+    (1, "0", 3, false),
+    (2, "-0", 3, false),
+    (5, "0", 3, false),
 ];
 
 #[test]
-fn a_cursor_task_taller_than_the_pane_shows_the_rows_that_fit() {
+fn a_task_takes_no_more_rows_than_the_list_shows() {
     let (_dir, mut model) = tall(5, 3);
     assert_eq!(model.pane_rows(), 2);
+    // a task takes no more rows than the list shows, and `+` stops there
+    assert!(heights(&model).iter().all(|&h| h <= 2));
+    assert!(!model.can_add_row());
+    let set = ["+", "-", "0"].map(|k| {
+        keys(&mut model, k);
+        model.deps.config.list_rows
+    });
+    assert_eq!(set, [3, 1, 3]);
     keys(&mut model, "2j");
     assert_eq!((model.top, model.cursor), (2, 2));
     assert!(whole(&model));
