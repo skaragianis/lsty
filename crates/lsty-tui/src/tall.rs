@@ -11,7 +11,7 @@ use lsty_core::{
 use crate::{
     columns::Layout,
     model::Model,
-    rows::{Inline, Row, text_spans},
+    rows::{Inline, Row, Shape, text_spans},
     sizes::Sizes,
     text::{ELLIPSIS, Span, cut, fit},
     wrap::wrap_words,
@@ -26,11 +26,9 @@ pub(crate) struct Tall<'a> {
     model: &'a Model,
     /// The cells before the text on the later rows.
     pub(crate) lead: usize,
-    /// The width of the text on the first row and on the later rows.
-    width: (usize, usize),
-    /// The most rows a task takes; the last ends with an ellipsis when
-    /// the text goes on.
-    rows: usize,
+    /// The width of the text on the first row and on the later rows, and
+    /// the most rows a task takes.
+    shape: Shape,
 }
 
 /// What an entry of the list pane is.
@@ -93,8 +91,10 @@ impl Model {
         Tall {
             model: self,
             lead: 1 + lead + indent,
-            width: (layout.text, layout.text.saturating_sub(indent)),
-            rows: self.list_rows(),
+            shape: Shape {
+                widths: (layout.text, layout.text.saturating_sub(indent)),
+                rows: self.list_rows(),
+            },
         }
     }
 
@@ -117,10 +117,19 @@ impl Model {
             self.rows.len() + usize::from(field.is_some_and(|f| !f.replacing));
         let height = |v: usize| stack.height(v);
         let plain = stack.tall.is_none() && field.is_none();
+        let (top, rows) = self.cut;
         let size = Sizes {
             len,
             rows: self.pane_rows(),
             heights: (!plain).then_some(&height),
+            cut: (
+                top,
+                if field.is_none() {
+                    rows.min(height(top) - 1)
+                } else {
+                    0
+                },
+            ),
         };
         f(&stack, size)
     }
@@ -152,7 +161,7 @@ impl Tall<'_> {
         let Some(row) = self.model.rows.get(i) else {
             return 1;
         };
-        if row.text_width <= self.width.0 {
+        if row.text_width <= self.shape.widths.0 {
             return 1;
         }
         self.lines(i).len()
@@ -164,13 +173,12 @@ impl Tall<'_> {
         let Some(row) = self.model.rows.get(i) else {
             return Rc::default();
         };
-        let key = (self.width, self.rows);
         let mut kept = row.lines.borrow_mut();
         match &*kept {
-            Some((was, lines)) if *was == key => Rc::clone(lines),
+            Some((was, lines)) if *was == self.shape => Rc::clone(lines),
             Some(_) | None => {
-                let lines = Rc::new(self.wrap(i, self.rows));
-                *kept = Some((key, Rc::clone(&lines)));
+                let lines = Rc::new(self.wrap(i, self.shape));
+                *kept = Some((self.shape, Rc::clone(&lines)));
                 lines
             }
         }
@@ -178,24 +186,41 @@ impl Tall<'_> {
 
     /// The rows the longest task needs for its whole text.
     pub(crate) fn most(&self) -> usize {
-        let need = |row: &Row, i| match row.need.get() {
-            _ if row.text_width <= self.width.0 => 1,
-            Some((width, rows)) if width == self.width => rows,
-            Some(_) | None => {
-                let rows = self.wrap(i, usize::MAX).len();
-                row.need.set(Some((self.width, rows)));
-                rows
-            }
+        // no more than the rows of the pane count, and none after a task
+        // that reaches them
+        let cap = Shape {
+            rows: self.model.pane_rows().max(1),
+            ..self.shape
         };
-        (self.model.rows.iter().enumerate())
-            .map(|(i, row)| need(row, i))
-            .max()
-            .unwrap_or(1)
+        let mut most = 1;
+        for (i, row) in self.model.rows.iter().enumerate() {
+            most = most.max(self.need(i, row, cap));
+            if most == cap.rows {
+                break;
+            }
+        }
+        most
     }
 
-    /// The text of task `i` on at most `rows` rows, the last cut with an
+    /// The rows task `i`, shown as `row`, needs for its whole text, up to
+    /// the rows of `cap`; worked out once for a shape.
+    fn need(&self, i: usize, row: &Row, cap: Shape) -> usize {
+        if row.text_width <= self.shape.widths.0 {
+            return 1;
+        }
+        match row.need.get() {
+            Some((was, rows)) if was == cap => rows,
+            Some(_) | None => {
+                let rows = self.wrap(i, cap).len();
+                row.need.set(Some((cap, rows)));
+                rows
+            }
+        }
+    }
+
+    /// The text of task `i` on the rows of `shape`, the last cut with an
     /// ellipsis.
-    fn wrap(&self, i: usize, rows: usize) -> Vec<Vec<Span<'static>>> {
+    fn wrap(&self, i: usize, shape: Shape) -> Vec<Vec<Span<'static>>> {
         let m = self.model;
         let Some(row) = m.rows.get(i) else {
             return vec![Vec::new()];
@@ -204,13 +229,8 @@ impl Tall<'_> {
             return vec![Vec::new()];
         };
         let inline = Inline::new(&m.deps.config);
-        let mut lines = lay_out(
-            m.snap.line(task),
-            (row.base, row.parts),
-            inline,
-            self.width,
-            rows,
-        );
+        let mut lines =
+            lay_out(m.snap.line(task), (row.base, row.parts), inline, shape);
         if lines.is_empty() {
             lines.push(Vec::new());
         }
@@ -218,23 +238,22 @@ impl Tall<'_> {
     }
 }
 
-/// The text of `line` on rows `first` then `later` cells wide, no more
-/// than `rows`, the last cut with an ellipsis. When that cut would
-/// leave a project or context out or cut it, they follow the ellipsis
-/// instead.
+/// The text of `line` on the rows of `shape`, the last cut with an
+/// ellipsis. When that cut would leave a project or context out or cut it,
+/// they follow the ellipsis instead.
 pub(crate) fn lay_out(
     line: &Line,
     paint: (Option<Slot>, Parts),
     inline: Inline,
-    (first, later): (usize, usize),
-    rows: usize,
+    shape: Shape,
 ) -> Vec<Vec<Span<'static>>> {
     let spans = text_spans(line, paint, inline);
     let base = paint.0;
-    let row = move |r| if r == 0 { first } else { later };
-    // the rows hold their cells and a break space between each two: the
-    // spans that start by the cell after lay out the rows as the whole text
-    let room = first.saturating_add((rows - 1).saturating_mul(later + 1));
+    let Shape { rows, .. } = shape;
+    let row = move |r| shape.row(r);
+    // the spans that start by the cell after the cells the rows hold lay out
+    // the rows as the whole text
+    let room = shape.room();
     let mut at = 0;
     let held = spans.iter().take_while(|s| {
         at += s.cells();
@@ -268,7 +287,7 @@ pub(crate) fn lay_out(
     if last.is_none_or(|n| n < text.len() && whole(n)) {
         return clip(lines, rows, row(rows - 1), &space);
     }
-    with_tags(&spans, &kinds, row, rows, (&space, room))
+    with_tags(&spans, &kinds, shape, &space)
 }
 
 /// Whether span `n` is a project or a context.
@@ -284,10 +303,12 @@ fn is_tag(kinds: &[Kind], n: usize) -> bool {
 fn with_tags(
     spans: &[Span<'_>],
     kinds: &[Kind],
-    row: impl Fn(usize) -> usize + Copy,
-    rows: usize,
-    (space, room): (&Span<'static>, usize),
+    shape: Shape,
+    space: &Span<'static>,
 ) -> Vec<Vec<Span<'static>>> {
+    let Shape { rows, .. } = shape;
+    let row = move |r| shape.row(r);
+    let room = shape.room();
     let ends: Vec<usize> = spans
         .iter()
         .scan(0, |at, s| {

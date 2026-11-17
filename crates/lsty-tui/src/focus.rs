@@ -287,19 +287,40 @@ impl Model {
         self.deps.config.list_rows != DEFAULT_LIST_ROWS
     }
 
+    /// A task may take `rows` rows. The cursor row stays on its line of
+    /// the list when the list had it in view, the task at the top cut if
+    /// need be, until the next scroll.
+    fn set_list_rows(&mut self, rows: u64) {
+        let seen = self.edit.is_none()
+            && !self.rows.is_empty()
+            && !self.cursor_hidden();
+        let line = self.sized(|size| {
+            let above: usize =
+                (self.top..self.cursor).map(|i| size.height(i)).sum();
+            above.saturating_sub(size.cut.1)
+        });
+        self.deps.config.list_rows = rows;
+        if seen {
+            let at = self.cursor;
+            let (top, skip) = self.sized(|size| size.anchored(at, line));
+            self.top = top;
+            self.cut = (top, skip);
+        } else {
+            self.scroll();
+        }
+    }
+
     /// `+`: a task may take one more row, while one needs it.
     pub(crate) fn more_rows(&mut self) {
         if self.can_add_row() {
-            self.deps.config.list_rows += 1;
-            self.scroll();
+            self.set_list_rows(self.deps.config.list_rows + 1);
         }
     }
 
     /// `0`: a task may take the default rows again.
     pub(crate) fn default_rows(&mut self) {
         if self.can_default_rows() {
-            self.deps.config.list_rows = DEFAULT_LIST_ROWS;
-            self.scroll();
+            self.set_list_rows(DEFAULT_LIST_ROWS);
         }
     }
 
@@ -307,8 +328,7 @@ impl Model {
     pub(crate) fn fewer_rows(&mut self) {
         let shown = self.rows_shown();
         if shown > 1 {
-            self.deps.config.list_rows = shown as u64 - 1;
-            self.scroll();
+            self.set_list_rows(shown as u64 - 1);
         }
     }
 

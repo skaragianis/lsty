@@ -183,8 +183,24 @@ impl Model {
             | Step::Place(_)
             | Step::Row(_) => step,
         };
+        if matches!(step, Step::Scroll(_) | Step::Place(_)) {
+            self.cut = (0, 0);
+        }
         (self.cursor, self.top) = self
             .sized(|size| step.to_sized(size, Some(self.cursor), self.top));
+        self.keep_cut();
+    }
+
+    /// Drops the cut of the top task once it stops applying: the view
+    /// moved, the cursor is on or above the top task, or a field is open.
+    /// Once gone it does not come back.
+    pub(crate) fn keep_cut(&mut self) {
+        let stale = self.top != self.cut.0
+            || self.cursor <= self.top
+            || self.edit.is_some();
+        if stale {
+            self.cut = (0, 0);
+        }
     }
 
     /// A half page or page step as the tasks that fill the same cells
@@ -253,6 +269,7 @@ impl Model {
     /// is less to show, whether or not that shows the cursor row.
     pub(crate) fn keep_top(&mut self, top: usize) {
         self.top = self.sized(|size| size.scrolled(top, 0));
+        self.keep_cut();
     }
 
     /// Brings the cursor row back into view after the wheel took it
@@ -303,5 +320,6 @@ impl Model {
         let look = usize::from(self.edit.as_ref().is_some_and(Draft::refuses));
         self.top = self
             .sized(|size| size.window(size.window(self.top, at + look), at));
+        self.keep_cut();
     }
 }

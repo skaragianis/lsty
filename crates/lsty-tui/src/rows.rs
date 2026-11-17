@@ -31,9 +31,29 @@ const MARKER_HUMAN_DOING: &str = "▷";
 /// The widths of the first and later rows.
 pub(crate) type Widths = (usize, usize);
 
-/// The widths of the rows and the most rows, and the rows a text took for
-/// them.
-pub(crate) type Wrapped = ((Widths, usize), Rc<Vec<Vec<Span<'static>>>>);
+/// How a text falls on rows: the widths of the first and later rows, and
+/// the most rows; the last ends with an ellipsis when the text goes on.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) struct Shape {
+    pub(crate) widths: Widths,
+    pub(crate) rows: usize,
+}
+
+impl Shape {
+    /// The width of row `r`.
+    pub(crate) const fn row(self, r: usize) -> usize {
+        if r == 0 { self.widths.0 } else { self.widths.1 }
+    }
+
+    /// The cells the rows hold with a break space between each two.
+    pub(crate) const fn room(self) -> usize {
+        let (first, later) = self.widths;
+        first.saturating_add((self.rows - 1).saturating_mul(later + 1))
+    }
+}
+
+/// The shape of the rows, and the rows a text took for it.
+pub(crate) type Wrapped = (Shape, Rc<Vec<Vec<Span<'static>>>>);
 
 /// One task of the list.
 #[derive(Clone, Debug)]
@@ -59,9 +79,8 @@ pub(crate) struct Row {
     pub(crate) sticky: bool,
     /// The rows the text takes, once worked out.
     pub(crate) lines: RefCell<Option<Wrapped>>,
-    /// The rows the whole text needs for the widths of the first and later
-    /// rows, once worked out.
-    pub(crate) need: std::cell::Cell<Option<(Widths, usize)>>,
+    /// The rows the text needs up to the rows of a shape, once worked out.
+    pub(crate) need: std::cell::Cell<Option<(Shape, usize)>>,
 }
 
 /// What a row takes from the clock and the config.

@@ -10,6 +10,9 @@ pub(crate) struct Sizes<'a> {
     pub(crate) rows: usize,
     /// How many cells entry `i` takes; `None` when every entry takes one.
     pub(crate) heights: Option<&'a dyn Fn(usize) -> usize>,
+    /// The entry at the top of the view and the cells of it cut at the
+    /// top edge.
+    pub(crate) cut: (usize, usize),
 }
 
 impl Sizes<'_> {
@@ -19,6 +22,7 @@ impl Sizes<'_> {
             len,
             rows,
             heights: None,
+            cut: (0, 0),
         }
     }
 
@@ -47,7 +51,41 @@ impl Sizes<'_> {
     /// The entries the pane shows from `top` on, with the cells each
     /// shows: the last may be cut by the bottom.
     pub(crate) fn shown(&self, top: usize) -> Vec<(usize, usize)> {
-        self.run(top, self.rows)
+        let skip = self.skipped(top);
+        let mut out = self.run(top, self.rows + skip);
+        if let Some(first) = out.first_mut() {
+            first.1 -= skip;
+        }
+        out
+    }
+
+    /// The cells of the entry at `top` that the view cuts.
+    fn skipped(&self, top: usize) -> usize {
+        if top == self.cut.0 { self.cut.1 } else { 0 }
+    }
+
+    /// The first entry of a view where entry `at` starts on line `line`,
+    /// and the cells of it cut at the top edge. The line moves up when
+    /// `at` would not fit, and down when entries above are out of view
+    /// and the view would end short.
+    pub(crate) fn anchored(&self, at: usize, line: usize) -> (usize, usize) {
+        let climb = |line: usize| {
+            let (mut top, mut used) = (at, 0);
+            while used < line && top > 0 {
+                top -= 1;
+                used += self.height(top);
+            }
+            (top, used, line)
+        };
+        let line = line.min(self.rows.saturating_sub(self.height(at)));
+        let (top, used, line) = climb(line);
+        if top == 0 && used <= line {
+            return (top, 0);
+        }
+        let below: usize =
+            self.run(at, self.rows).iter().map(|&(_, n)| n).sum();
+        let (top, used, line) = climb(line.max(self.rows - below));
+        (top, used.saturating_sub(line))
     }
 
     /// The first entry of a view with `cells` before entry `at`.
@@ -78,8 +116,12 @@ impl Sizes<'_> {
     }
 
     /// The first of the entries to show: `top` moved the least that
-    /// keeps entry `at` whole in view, and never past the last page.
+    /// keeps entry `at` whole in view, and never past the last page. A
+    /// view that cuts the top entry and shows `at` whole stays.
     pub(crate) fn window(&self, top: usize, at: usize) -> usize {
+        if self.skipped(top) > 0 && self.seen(top, at) {
+            return top;
+        }
         top.max(self.first_fitting(at)).min(at).min(self.last_top())
     }
 
@@ -89,15 +131,18 @@ impl Sizes<'_> {
     }
 
     /// The number of entries from `top` on that are whole in view, at
-    /// least 1 when there is one.
+    /// least 1 when there is one. A cut top entry counts, and its cut
+    /// cells are out of view.
     pub(crate) fn whole(&self, top: usize) -> usize {
-        self.reach(top, self.rows, true)
+        self.reach(top, self.rows + self.skipped(top), true)
             .min(self.len.saturating_sub(top))
     }
 
     /// Whether entry `at` is whole in the view that starts at `top`.
     pub(crate) fn seen(&self, top: usize, at: usize) -> bool {
-        top <= at && self.first_fitting(at) <= top
+        let room =
+            (self.rows + self.skipped(top)).saturating_sub(self.height(at));
+        top <= at && self.above(at, room) <= top
     }
 
     /// The most entries, but one at least, that fit whole in `cells`,

@@ -16,7 +16,7 @@ use crate::{
     layout::{BORDER, FRAME, Size, cells},
     model::Model,
     reldate::Cell,
-    rows::{Inline, Row, text_spans},
+    rows::{Inline, Row, Shape, text_spans},
     styles::Styles,
     tall::{Entry, Tall, lay_out},
     text::{RULE, Span, fit, pad, prefix, put, width},
@@ -37,6 +37,8 @@ struct Pane {
     slot: Option<Slot>,
     /// The first and last row of the selection.
     selected: Option<(usize, usize)>,
+    /// The rows of the task at the top the list cuts.
+    skip: usize,
 }
 
 impl Model {
@@ -109,6 +111,7 @@ impl Model {
             inner,
             slot,
             selected: self.selected_rows(),
+            skip: self.sized(|size| size.cut.1),
         };
         let room = usize::from(area.height).saturating_sub(BORDER);
         let end = area.y + cells(room) + 1;
@@ -173,6 +176,7 @@ impl Model {
             inner,
             slot,
             selected,
+            ..
         } = pane;
         let Some(row) = self.rows.get(index) else {
             return;
@@ -180,7 +184,8 @@ impl Model {
         let wrapped = tall.map(|t| (t.lines(index), t.lead));
         let chosen =
             selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
-        for n in 0..shown {
+        let from = if index == self.top { pane.skip } else { 0 };
+        for n in from..from + shown {
             let spans = match &wrapped {
                 Some((lines, indent)) if n > 0 => {
                     let mut spans = vec![Span::blanks(*indent, None)];
@@ -193,7 +198,7 @@ impl Model {
                 }
                 None => self.row_spans(row, index, layout, None),
             };
-            let y = y + cells(n);
+            let y = y + cells(n - from);
             self.draw_sides(buf, (x, y), inner, slot);
             let area = Rect::new(x + 1, y, cells(inner), 1);
             if chosen {
@@ -388,8 +393,11 @@ impl Model {
             if row.text_width <= layout.text {
                 return text_spans(line, paint, inline);
             }
-            let width = (layout.text, layout.text);
-            let mut one = lay_out(line, paint, inline, width, 1);
+            let shape = Shape {
+                widths: (layout.text, layout.text),
+                rows: 1,
+            };
+            let mut one = lay_out(line, paint, inline, shape);
             one.pop().unwrap_or_default()
         });
         pad(&mut text, layout.text, row.base);

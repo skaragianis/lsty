@@ -85,6 +85,10 @@ pub(crate) struct Model {
     /// selection.
     pub(crate) keys_lost: bool,
     pub(crate) top: usize,
+    /// The task at the top of the list and the rows of it the list cuts at
+    /// the top edge, until the next scroll. `keep_cut` drops it once the
+    /// view moves, the cursor reaches the top task or a field opens.
+    pub(crate) cut: (usize, usize),
     pub(crate) width: u16,
     pub(crate) height: u16,
     pub(crate) message: Said,
@@ -206,6 +210,7 @@ impl Model {
             visual: None,
             keys_lost: false,
             top: 0,
+            cut: (0, 0),
             width: 0,
             height: 0,
             message: Said::default(),
@@ -607,6 +612,7 @@ impl Model {
     }
 
     pub(crate) fn rebuild_rows(&mut self) {
+        self.cut = (0, 0);
         self.refilter.owed = false;
         let ctx = self.context();
         self.rows = rows::build(
