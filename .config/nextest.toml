@@ -1,3 +1,14 @@
 # A test that hangs fails after 20 seconds instead of holding the run.
 [profile.default]
 slow-timeout = { period = "10s", terminate-after = 2 }
+
+[test-groups]
+exhaustive = { max-threads = 2 }
+
+# On macOS two of the exhaustive tests run at once and they have a minute
+# before a hang kills them; other systems run them as they please.
+[[profile.default.overrides]]
+platform = 'cfg(target_os = "macos")'
+filter = 'test(/_does_what_the_rule_says|_as_the_rule_says|_do_what_their_hint_says|_key_that_works_is_dim|_dim_when_it_does_nothing|no_command_writes_a_control_character|a reader during moves/)'
+test-group = "exhaustive"
+slow-timeout = { period = "10s", terminate-after = 6 }
