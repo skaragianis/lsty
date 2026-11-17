@@ -35,26 +35,59 @@ const fn lines_for(i: usize, entries: usize) -> usize {
     entries + if i == FILTERS { 2 } else { 1 }
 }
 
-/// Splits `h` lines between the panels, borders included. Each panel gets
-/// its title and one entry, Contexts first, then Projects, then Filters;
-/// then each grows to what its entries need in the same order; Filters
-/// takes what is left. A sidebar too short for the floors gives the later
-/// panels what remains, so the lines always add up to `h`.
+/// The panels in the order they take lines.
+const PRIORITY: [usize; PANELS] = [CONTEXTS, PROJECTS, FILTERS];
+
+/// The least lines a panel has: its title and one entry.
+const FLOORS: [usize; PANELS] = [
+    lines_for(PROJECTS, 1),
+    lines_for(CONTEXTS, 1),
+    lines_for(FILTERS, 1),
+];
+
+/// Splits `h` lines between the panels, borders included. Each starts at
+/// a third (the lines left over go to Contexts, then Projects, and no
+/// panel starts below its floor). Then Contexts and Projects, in that
+/// order, take what their entries need that their third lacks from the
+/// panels after them, the last first, each down to its floor. A panel that
+/// needs less than its third keeps the rest. A sidebar too short for the
+/// floors is `crowded`; the lines always add up to `h`.
 pub(crate) fn panel_heights(
     h: usize,
     entries: [usize; PANELS],
 ) -> [usize; PANELS] {
+    if h < FLOORS.iter().sum() {
+        return crowded(h);
+    }
+    let mut heights = FLOORS.map(|floor| floor.max(h / 3));
+    let left = h - heights.iter().sum::<usize>();
+    heights[CONTEXTS] += left.min(1);
+    heights[PROJECTS] += left / 2;
+    for (rank, &i) in PRIORITY[..2].iter().enumerate() {
+        for &donor in PRIORITY[rank + 1..].iter().rev() {
+            let lacks = lines_for(i, entries[i]).saturating_sub(heights[i]);
+            let take = lacks.min(heights[donor] - FLOORS[donor]);
+            heights[i] += take;
+            heights[donor] -= take;
+        }
+    }
+    heights
+}
+
+/// The heights of a sidebar too short for the floors: titles first, then
+/// one entry each, in priority order. The floors sum to the lines it asks
+/// for, so none are left.
+fn crowded(h: usize) -> [usize; PANELS] {
     let mut heights = [0; PANELS];
     let mut left = h;
-    for floor in [0, 1, usize::MAX] {
-        for i in [CONTEXTS, PROJECTS, FILTERS] {
-            let want = lines_for(i, entries[i].max(1).min(floor));
-            let give = want.saturating_sub(heights[i]).min(left);
+    for floor in [0, 1] {
+        for i in PRIORITY {
+            let give =
+                lines_for(i, floor).saturating_sub(heights[i]).min(left);
             heights[i] += give;
             left -= give;
         }
     }
-    heights[FILTERS] += left;
     heights
 }
 

@@ -21,10 +21,22 @@ Urgent = "pri:A|pri:B -@email"
 │ +spec01  2/2││                                                                          ││ due:2026-09-29                      │
 │ ▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
 │   .acme  1/1││                                                                          ││ state     todo                      │
-├[4]─Contexts─┤│                                                                          ││ nr        1                         │
-│ @email   1/1││                                                                          ││ priority  A                         │
-│ @phone   1/1││                                                                          ││ due       2026-09-29                │
-├[5]─Filters──┤│                                                                          ││           (today)                   │
+│             ││                                                                          ││ nr        1                         │
+│             ││                                                                          ││ priority  A                         │
+│             ││                                                                          ││ due       2026-09-29                │
+│             ││                                                                          ││           (today)                   │
+│             ││                                                                          ││                                     │
+├[4]─Contexts─┤│                                                                          ││                                     │
+│ @email   1/1││                                                                          ││                                     │
+│ @phone   1/1││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││                                     │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
 │ [x] Blocked ││                                                                          ││                                     │
@@ -33,17 +45,5 @@ Urgent = "pri:A|pri:B -@email"
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 │ Upcoming    ││                                                                          ││                                     │
-│ Doing       ││                                                                          ││                                     │
-│ Waiting     ││                                                                          ││                                     │
-│ No project  ││                                                                          ││                                     │
-│ Won't do    ││                                                                          ││                                     │
-│=Urgent      ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help      9.9.9

@@ -54,12 +54,12 @@ Task 011 +p11
 Task 012 +p12
 -- before --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +p26     1/1││  1   Task 001 +p01                                            │
-│ +p27     1/1││  1   Task 002 +p02                                            │
-│ +p28     1/1││  2   Task 003 +p03                                            │
-│ +p29     1/1││  3   Task 004 +p04                                            │
-│ +p30     1/1││  4   Task 005 +p05                                            │
-├[4]─Contexts─┤│  5   Task 006 +p06                                            │
+│ +p28     1/1││  1   Task 001 +p01                                            │
+│ +p29     1/1││  1   Task 002 +p02                                            │
+│ +p30     1/1││  2   Task 003 +p03                                            │
+├[4]─Contexts─┤│  3   Task 004 +p04                                            │
+│             ││  4   Task 005 +p05                                            │
+│             ││  5   Task 006 +p06                                            │
 │             ││  6   Task 007 +p07                                            │
 ├[5]─Filters──┤│  7   Task 008 +p08                                            │
 │ [x] Done    ││  8   Task 009 +p09                                            │
@@ -67,12 +67,12 @@ Task 012 +p12
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9
 -- after --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +p08     1/1││  1   Task 001 +p01                                            │
-│ +p09     1/1││  1   Task 002 +p02                                            │
-│ +p10     1/1││  2   Task 003 +p03                                            │
-│ +p11     1/1││  3   Task 004 +p04                                            │
-│ +p12     1/1││  4   Task 005 +p05                                            │
-├[4]─Contexts─┤│  5   Task 006 +p06                                            │
+│ +p10     1/1││  1   Task 001 +p01                                            │
+│ +p11     1/1││  1   Task 002 +p02                                            │
+│ +p12     1/1││  2   Task 003 +p03                                            │
+├[4]─Contexts─┤│  3   Task 004 +p04                                            │
+│             ││  4   Task 005 +p05                                            │
+│             ││  5   Task 006 +p06                                            │
 │             ││  6   Task 007 +p07                                            │
 ├[5]─Filters──┤│  7   Task 008 +p08                                            │
 │ [x] Done    ││  8   Task 009 +p09                                            │

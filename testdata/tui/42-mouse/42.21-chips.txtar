@@ -1,8 +1,8 @@
 size 130 30
 start
 keys / i n v <CR>
-click 3 2
-click 3 5
+clickon "+work   2/2"
+clickon "@phone   1/1"
 frame all
 clickon "+work"
 frame no-project
@@ -25,8 +25,22 @@ C +work.acme
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
 │=▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │=@phone   1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -35,20 +49,6 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
-│ Upcoming    ││                                                                                                                 │
-│ Doing       ││                                                                                                                 │
-│ Waiting     ││                                                                                                                 │
-│ No project  ││                                                                                                                 │
-│ Won't do    ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
 -- no-project --
@@ -56,8 +56,22 @@ C +work.acme
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
 │ ▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │=@phone   1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -66,20 +80,6 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
-│ Upcoming    ││                                                                                                                 │
-│ Doing       ││                                                                                                                 │
-│ Waiting     ││                                                                                                                 │
-│ No project  ││                                                                                                                 │
-│ Won't do    ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
 -- no-context --
@@ -87,8 +87,22 @@ C +work.acme
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
 │ ▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │ @phone   1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -97,20 +111,6 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
-│ Upcoming    ││                                                                                                                 │
-│ Doing       ││                                                                                                                 │
-│ Waiting     ││                                                                                                                 │
-│ No project  ││                                                                                                                 │
-│ Won't do    ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
 -- no-filter --
@@ -118,8 +118,22 @@ C +work.acme
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
 │ ▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │ @phone   1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -128,20 +142,6 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │ Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
-│ Upcoming    ││                                                                                                                 │
-│ Doing       ││                                                                                                                 │
-│ Waiting     ││                                                                                                                 │
-│ No project  ││                                                                                                                 │
-│ Won't do    ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
 -- frame --
@@ -149,8 +149,22 @@ C +work.acme
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
 │ ▾+work   2/2││  1   B +home                                                                                                    │
 │   .acme  1/1││  2   C +work.acme                                                                                               │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
 │ @phone   1/1││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
+│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -159,20 +173,6 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │ Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
-│ Upcoming    ││                                                                                                                 │
-│ Doing       ││                                                                                                                 │
-│ Waiting     ││                                                                                                                 │
-│ No project  ││                                                                                                                 │
-│ Won't do    ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- frame-bg --

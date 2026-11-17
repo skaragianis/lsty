@@ -43,13 +43,13 @@ a08 +p08
 │ +p08     1/1││  7   a08 +p08                                                 │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked ││                                                               │
-│ [ ] Archive ││                                                               │
-│ ─────────── ││                                                               │
-│ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold        9.9.9
 -- top --
@@ -64,13 +64,13 @@ a08 +p08
 │ +p08     1/1││  7   a08 +p08                                                 │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked ││                                                               │
-│ [ ] Archive ││                                                               │
-│ ─────────── ││                                                               │
-│ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold        9.9.9
 -- page-down --
@@ -85,13 +85,13 @@ a08 +p08
 │ +p08     1/1││  7   a08 +p08                                                 │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked ││                                                               │
-│ [ ] Archive ││                                                               │
-│ ─────────── ││                                                               │
-│ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold        9.9.9
 -- page-down-bg --
@@ -127,13 +127,13 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ +p08     1/1││  7   a08 +p08                                                 │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked ││                                                               │
-│ [ ] Archive ││                                                               │
-│ ─────────── ││                                                               │
-│ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold        9.9.9
 -- scroll-bg --
@@ -169,13 +169,13 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ +p08     1/1││  7   a08 +p08                                                 │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked ││                                                               │
-│ [ ] Archive ││                                                               │
-│ ─────────── ││                                                               │
-│ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold        9.9.9
 -- view-keys-bg --
@@ -211,13 +211,13 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ +p08     1/1││  7   a08 +p08                                                 │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked ││                                                               │
-│ [ ] Archive ││                                                               │
-│ ─────────── ││                                                               │
-│ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold        9.9.9
 -- view-top-bg --
@@ -253,13 +253,13 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ +p08     1/1││  7   a08 +p08                                                 │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
-│ [ ] Later   ││                                                               │
-│ [x] Blocked ││                                                               │
-│ [ ] Archive ││                                                               │
-│ ─────────── ││                                                               │
-│ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold        9.9.9
 -- view-bottom-bg --
