@@ -7,6 +7,7 @@ use lsty_core::{
 
 use crate::{
     cmdline::{invalid, usage},
+    layout::shown_detail,
     model::Model,
     rows::Shows,
     setform::{self as form, Form, Kind, Op},
@@ -147,9 +148,22 @@ impl Model {
                 "show_sidebar" => {
                     self.deps.config.show_sidebar = self.sidebar_on;
                 }
-                "show_detail" => self.deps.config.show_detail = self.detail_on,
+                "show_detail" => {
+                    self.deps.config.show_detail = self.detail.is_some();
+                }
                 _ => {}
             }
+        }
+    }
+
+    /// Brings the detail panel in line with the options that changed from
+    /// `was`.
+    fn adopt_detail(&mut self, was: &Config) {
+        let now = &self.deps.config;
+        if now.show_detail != was.show_detail {
+            self.detail = shown_detail(now);
+        } else if now.detail_position != was.detail_position {
+            self.detail = self.detail.and(Some(now.detail_position));
         }
     }
 
@@ -157,13 +171,11 @@ impl Model {
     /// line with what changed.
     fn adopt_config(&mut self, cfg: Config) {
         let was = std::mem::replace(&mut self.deps.config, cfg);
+        self.adopt_detail(&was);
         let now = &self.deps.config;
         if now.show_sidebar != was.show_sidebar {
             self.sidebar_on = now.show_sidebar;
             self.overlay = false;
-        }
-        if now.show_detail != was.show_detail {
-            self.detail_on = now.show_detail;
         }
         let hidden = now.hidden_tasks != was.hidden_tasks;
         if hidden {

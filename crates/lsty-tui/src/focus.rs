@@ -1,6 +1,9 @@
 //! Where the keyboard is, and what shows the sidebar.
 
-use lsty_core::keys::{Action, Mode};
+use lsty_core::{
+    config::DetailPosition::{Bottom, Right},
+    keys::{Action, Mode},
+};
 
 use crate::{model::Model, sidebar::FILTERS, text::scrolled};
 
@@ -218,9 +221,6 @@ impl Model {
             }
         }
         self.focus = to;
-        if to == Focus::Detail {
-            self.show_link(self.detail_link());
-        }
         self.relayout();
     }
 
@@ -238,9 +238,19 @@ impl Model {
         self.relayout();
     }
 
-    /// `gi`.
+    /// `gi`: moves the detail panel from the place it is drawn at to the
+    /// next one that has room, starting at `detail_position` and ending
+    /// hidden.
     pub(crate) fn toggle_detail(&mut self) {
-        self.detail_on = !self.detail_on;
+        let first = self.deps.config.detail_position;
+        let order = [first, if first == Right { Bottom } else { Right }];
+        let at = self
+            .detail_place()
+            .map_or(0, |now| 1 + usize::from(now != first));
+        self.detail = order[at..].iter().copied().find(|&place| {
+            self.detail = Some(place);
+            self.detail_place() == Some(place)
+        });
         self.relayout();
     }
 
@@ -280,6 +290,9 @@ impl Model {
     /// Brings the views in line with the size and with what is shown.
     pub(crate) fn relayout(&mut self) {
         self.settle_focus();
+        if self.focus == Focus::Detail {
+            self.show_link(self.detail_link());
+        }
         self.scroll();
         self.scroll_panels();
     }

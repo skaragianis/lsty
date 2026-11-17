@@ -50,7 +50,7 @@ Done task
 │ │    <C-l>  Clear the search                                               │ │
 │ │    gc  Clear the filters                                                 │ │
 │ │    gs  Show or hide the sidebar                                          │ │
-│ │    gi  Show or hide the detail panel                                     │ │
+│ │    gi  Move the detail panel: right, below, off                          │ │
 │ │    gw  Wrap or cut long tasks in the list                                │ │
 │ │  Boxes                                                                   │ │
 │ │    <C-w>h , <C-w><Left>  Focus the box to the left                       │ │

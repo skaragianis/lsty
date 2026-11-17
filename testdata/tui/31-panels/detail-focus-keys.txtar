@@ -6,7 +6,7 @@ keys <C-w>2 <C-w>5
 frame filters
 keys <C-w>l
 frame list
-keys <C-w>2 gi
+keys <C-w>2 gi gi
 frame detail-hidden
 -- todo.txt --
 Read docs file:a.md +home @phone

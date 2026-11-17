@@ -367,7 +367,7 @@ actions! {
         "toggle_sidebar", View, "Show or hide the sidebar", "sidebar", Other
     );
     ToggleDetail => (
-        "toggle_detail", View, "Show or hide the detail panel", "detail", Other
+        "toggle_detail", View, "Move the detail panel: right, below, off", "detail", Other
     );
     ToggleWrap => (
         "toggle_wrap", View, "Wrap or cut long tasks in the list", "wrap", Other

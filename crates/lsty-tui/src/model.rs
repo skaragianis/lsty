@@ -3,7 +3,7 @@
 use std::{collections::BTreeMap, time::Duration};
 
 use lsty_core::{
-    config::Warning,
+    config::{DetailPosition, Warning},
     dates::Clock,
     discover::FileState,
     errs,
@@ -26,6 +26,7 @@ use crate::{
     hints,
     history::{Again, History},
     insert::Draft,
+    layout::shown_detail,
     line::Line,
     live::{self, Live},
     motion::{Step, View},
@@ -96,7 +97,8 @@ pub(crate) struct Model {
     /// The last change, for `.`.
     pub(crate) again: Option<Again>,
     pub(crate) sidebar_on: bool,
-    pub(crate) detail_on: bool,
+    /// The place chosen for the detail panel, `None` while it is hidden.
+    pub(crate) detail: Option<DetailPosition>,
     pub(crate) overlay: bool,
     pub(crate) focus: Focus,
     /// The terminal reported that it lost focus.
@@ -167,7 +169,7 @@ impl Model {
         let warnings = [start.warnings, hints, more].concat();
         let mut model = Self {
             sidebar_on: deps.config.show_sidebar,
-            detail_on: deps.config.show_detail,
+            detail: shown_detail(&deps.config),
             overlay: false,
             focus: Focus::List,
             unfocused: false,

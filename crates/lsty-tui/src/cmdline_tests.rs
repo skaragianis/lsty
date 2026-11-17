@@ -205,10 +205,10 @@ fn set_shows_and_hides_the_panels_the_options_name() {
     let (_dir, mut model) = workdir_model(SAMPLE, alone());
     line(&mut model, "set show_sidebar");
     assert!(model.sidebar_on);
-    assert!(!model.detail_on);
+    assert!(model.detail.is_none());
     line(&mut model, "set show_detail noshow_sidebar");
     assert!(!model.sidebar_on);
-    assert!(model.detail_on);
+    assert!(model.detail.is_some());
 }
 
 #[test]

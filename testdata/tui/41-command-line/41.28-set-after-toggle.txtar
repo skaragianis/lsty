@@ -5,12 +5,12 @@ keys :
 type set show_sidebar
 keys <CR>
 frame sidebar-back
-keys g i
+keys g i g i
 keys :
 type set show_detail
 keys <CR>
 frame detail-back
-keys g i
+keys g i g i
 keys :
 type set noshow_detail
 keys <CR>
