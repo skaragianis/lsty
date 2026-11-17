@@ -1,0 +1,83 @@
+# a project's .lsty/config.toml layers over the home config
+mkdir .git
+mkdir home/.config/lsty/themes
+cp $THEMES/probe.toml home/.config/lsty/themes/probe.toml
+cp home.toml home/.config/lsty/config.toml
+mkdir proj/.lsty
+mkdir proj/sub
+cp project.toml proj/.lsty/config.toml
+cp empty.txt proj/todo.txt
+cp empty.txt todo.txt
+
+# the project sets include_creation and the home sets auto_archive: both hold
+# for a todo file of the project, and the options only home sets are refused
+cd proj
+exec lsty --human add project
+stderr -count=1 '^lsty: warning: '$WORK'/proj/.lsty/config.toml: default_file: only the home config sets it, ignored$'
+stderr -count=1 '^lsty: warning: '$WORK'/proj/.lsty/config.toml: paste_command: only the home config sets it, ignored$'
+! stderr 'include_creation'
+exec lsty --human do 1
+exists done.txt
+rm done.txt
+cp $WORK/empty.txt todo.txt
+
+# a theme the project sets is read from the home themes folder
+exec lsty ls --color=always
+cmp stdout $WORK/want-colour
+
+# a theme the project sets that does not exist is a warning naming the file
+mkdir $WORK/proj2/.lsty
+cp $WORK/unknown.toml $WORK/proj2/.lsty/config.toml
+cp $WORK/empty.txt $WORK/proj2/todo.txt
+cd $WORK/proj2
+exec lsty ls --color=always
+stderr -count=1 'proj2/.lsty/config.toml.*theme: no theme'
+cd $WORK/proj
+
+# the walk goes up from a folder below
+cd sub
+exec lsty --human add below
+cd ..
+
+# a todo file outside the folder of the project: the home config only
+exec lsty --human --file $WORK/todo.txt add outside
+! stderr .
+
+# a named config, -d and --no-config: no project layer
+env LSTY_CONFIG=$WORK/home.toml
+exec lsty --human add named
+! stderr .
+env LSTY_CONFIG=
+exec lsty -d $WORK/none.cfg --human add dash-d
+! stderr .
+exec lsty --no-config --human add no-config
+! stderr .
+
+# todo.sh's variables beat the project too
+env TODOTXT_DATE_ON_ADD=1
+exec lsty --human add todosh
+env TODOTXT_DATE_ON_ADD=
+match todo.txt $WORK/want-proj
+match $WORK/todo.txt $WORK/want-outside
+
+-- home.toml --
+auto_archive = true
+-- project.toml --
+include_creation = false
+theme = "probe"
+default_file = "elsewhere.txt"
+paste_command = "mine"
+-- unknown.toml --
+theme = "nope"
+-- none.cfg --
+-- empty.txt --
+-- want-proj --
+below id:<id1>
+2026-09-29 named id:<id2>
+2026-09-29 dash-d id:<id3>
+2026-09-29 no-config id:<id4>
+2026-09-29 todosh id:<id5>
+-- want-outside --
+2026-09-29 outside id:<id6>
+-- want-colour --
+[91m-- 0 of 0 shown[m

@@ -3,7 +3,7 @@ use std::path::Path;
 use toml::de::{DeTable, DeValue};
 
 use super::{
-    Config, Filter, Paths, Value, Warning,
+    Config, Filter, Paths, SOURCE, Value, Warning,
     options::{self, string_list},
     quote,
 };
@@ -37,12 +37,45 @@ pub fn load(
         }
         Err(e) => return (cfg, vec![Warning::config(e.message().to_owned())]),
     };
-    match parse(&data) {
-        Ok(entries) => {
-            let warnings = apply(&mut cfg, entries);
-            (cfg, warnings)
+    let warnings = apply_file(&mut cfg, &data, None);
+    (cfg, warnings)
+}
+
+/// Layers the project file `file` over `cfg`: it sets only what it names,
+/// a filter or hint replaces the one of the same name, and the options
+/// only the home config sets are refused. Warnings name `file`, opened
+/// from `cwd` when relative.
+pub fn layer_project(
+    cfg: &mut Config,
+    file: &Path,
+    cwd: &Path,
+) -> Vec<Warning> {
+    match fsio::read_in(cwd, file) {
+        Ok(Some(data)) => apply_file(cfg, &data, Some(file)),
+        Ok(None) => Vec::new(),
+        Err(e) => {
+            vec![Warning::new(
+                &errs::lossy_path(file),
+                e.message().to_owned(),
+            )]
         }
-        Err(message) => (cfg, vec![Warning::config(message)]),
+    }
+}
+
+/// The options a project file may not set.
+const HOME_ONLY: [&str; 3] = ["paste_command", "copy_command", "default_file"];
+
+/// Reads a config file into `cfg`; `project` is the path of a project
+/// file, `None` for the home one.
+fn apply_file(
+    cfg: &mut Config,
+    data: &[u8],
+    project: Option<&Path>,
+) -> Vec<Warning> {
+    let from = project.map_or_else(|| SOURCE.to_owned(), errs::lossy_path);
+    match parse(data) {
+        Ok(entries) => apply(cfg, entries, &from, project),
+        Err(message) => vec![Warning::new(&from, message)],
     }
 }
 
@@ -244,48 +277,55 @@ fn error_line(data: &[u8], offset: usize) -> usize {
     }
 }
 
-/// Reads the entries in file order.
-fn apply(cfg: &mut Config, entries: Vec<Entry>) -> Vec<Warning> {
+/// Reads the entries in file order. `from` is the source of the warnings;
+/// a `project` file also keeps the home-only options out and says where
+/// its `theme` came from.
+fn apply(
+    cfg: &mut Config,
+    entries: Vec<Entry>,
+    from: &str,
+    project: Option<&Path>,
+) -> Vec<Warning> {
     let mut warnings = Vec::new();
+    let mut warn =
+        |message: String| warnings.push(Warning::new(from, message));
     for Entry { what, .. } in entries {
         match what {
+            What::Option(name, _)
+                if project.is_some() && HOME_ONLY.contains(&name.as_str()) =>
+            {
+                warn(format!("{name}: only the home config sets it, ignored"));
+            }
             What::Option(name, value) => {
-                add_option(cfg, &name, &value, &mut warnings);
+                let problems = add_option(cfg, &name, &value);
+                if name == "theme" && problems.is_empty() {
+                    cfg.theme_file = project.map(Path::to_path_buf);
+                }
+                problems.into_iter().for_each(&mut warn);
             }
-            What::NotTable(name) => {
-                let message = format!("{name}: expected table");
-                warnings.push(Warning::config(message));
-            }
+            What::NotTable(name) => warn(format!("{name}: expected table")),
             What::Hint(mode, value) => {
-                warnings
-                    .extend(add_hint(cfg, &mode, &value).map(Warning::config));
+                add_hint(cfg, &mode, &value).into_iter().for_each(&mut warn);
             }
             What::Filter(name, value) => {
-                warnings.extend(
-                    add_filter(cfg, &name, &value).map(Warning::config),
-                );
+                add_filter(cfg, &name, &value)
+                    .into_iter()
+                    .for_each(&mut warn);
             }
         }
     }
     warnings
 }
 
-fn add_option(
-    cfg: &mut Config,
-    name: &str,
-    value: &Value,
-    warnings: &mut Vec<Warning>,
-) {
+/// Reads one option; the problems come back as messages.
+fn add_option(cfg: &mut Config, name: &str, value: &Value) -> Vec<String> {
     let Some(problems) = options::apply(cfg, name, value) else {
-        let message = format!("unknown option {}", quote(name));
-        warnings.push(Warning::config(message));
-        return;
+        return vec![format!("unknown option {}", quote(name))];
     };
-    warnings.extend(
-        problems
-            .into_iter()
-            .map(|p| Warning::config(format!("{name}: {p}"))),
-    );
+    problems
+        .into_iter()
+        .map(|p| format!("{name}: {p}"))
+        .collect()
 }
 
 fn add_hint(cfg: &mut Config, mode: &str, value: &Value) -> Option<String> {
@@ -303,9 +343,13 @@ fn add_filter(cfg: &mut Config, name: &str, value: &Value) -> Option<String> {
     let Value::Str(query) = value else {
         return Some(format!("filters.{}: expected string", shown(name)));
     };
-    cfg.filters.push(Filter {
+    let filter = Filter {
         name: name.to_owned(),
         query: query.clone(),
-    });
+    };
+    match cfg.filters.iter_mut().find(|f| f.name == name) {
+        Some(old) => *old = filter,
+        None => cfg.filters.push(filter),
+    }
     None
 }

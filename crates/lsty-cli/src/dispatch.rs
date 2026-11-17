@@ -1,10 +1,15 @@
 //! `lsty X`: the shared steps of a command, and what runs when the first
 //! argument is not a command.
 
-use std::{ffi::OsString, fs, os::unix::ffi::OsStrExt as _, path::Path};
+use std::{
+    ffi::OsString,
+    fs,
+    os::unix::ffi::OsStrExt as _,
+    path::{Path, PathBuf},
+};
 
 use lsty_core::{
-    config::{self, Config, Warning},
+    config::{self, Config, Paths, Warning},
     dates::Clock,
     discover::{self, FileState, Found, FoundBy},
     errs::{self, Code, Error, Result},
@@ -42,6 +47,10 @@ pub fn run(env: Env<'_>) -> u8 {
     let mut session = Session::new(env);
     session.execute()
 }
+
+/// The config, and the todo file: its error waits until the warnings are
+/// printed.
+type Loaded = (Config, Result<Found>);
 
 struct Session<'a> {
     env: Env<'a>,
@@ -205,7 +214,7 @@ impl<'a> Session<'a> {
         &mut self,
         command: &Command,
     ) -> Result<(Config, Clock, Actor, Found)> {
-        let config = self.load_config()?;
+        let (config, found) = self.load_config(None)?;
         let clock = self.clock()?;
         let stdin_tty = self.terminals.is_tty(Stream::Stdin);
         let actor = identity::identify(
@@ -214,7 +223,7 @@ impl<'a> Session<'a> {
             self.env.vars,
             stdin_tty,
         )?;
-        let found = self.find(self.explicit_file(), &config)?;
+        let found = found?;
         self.found = Some(found.clone());
         self.check_file(&found)?;
         Ok((config, clock, actor, found))
@@ -224,15 +233,21 @@ impl<'a> Session<'a> {
         self.parsed.opts.first(Opt::File).filter(|f| !f.is_empty())
     }
 
-    fn read_config(&self) -> (Config, Vec<Warning>) {
-        let paths =
-            config::find_paths(self.env.vars, self.env.home.as_deref());
-        config::load(&paths, &self.env.cwd, self.has(Opt::NoConfig))
+    fn config_paths(&self) -> Paths {
+        config::find_paths(self.env.vars, self.env.home.as_deref())
     }
 
-    /// The config of lsty with what todo.sh's variables and config file
-    /// set over it, and the warnings of both.
-    fn read_settings(&mut self) -> Result<(Config, Vec<Warning>)> {
+    fn read_config(&self, paths: &Paths) -> (Config, Vec<Warning>) {
+        config::load(paths, &self.env.cwd, self.has(Opt::NoConfig))
+    }
+
+    /// The config of lsty (the project's over the home one, once the todo
+    /// file is found) with what todo.sh's variables and config file set
+    /// over it, the warnings of all, and the todo file.
+    fn read_settings(
+        &mut self,
+        explicit: Option<&str>,
+    ) -> Result<(Loaded, Vec<Warning>)> {
         if !self.has(Opt::NoConfig) {
             self.todosh = Todosh::read(
                 self.parsed.config.as_deref().map(Path::new),
@@ -247,31 +262,64 @@ impl<'a> Session<'a> {
             .iter()
             .map(|m| Warning::new(&todosh.source, m.clone()))
             .collect();
-        let (mut config, from_toml) = self.read_config();
+        let paths = self.config_paths();
+        let (mut config, from_toml) = self.read_config(&paths);
         warnings.extend(from_toml);
+        let explicit = explicit.or_else(|| self.explicit_file());
+        let input = self.input(explicit, &config);
+        let chosen = input.choose();
+        let found = discover::find_chosen(&input, chosen.clone());
+        let file = found
+            .as_ref()
+            .ok()
+            .and_then(|_| self.project_file(&input, &chosen.0, &paths));
+        if let Some(file) = file {
+            warnings.extend(config::layer_project(
+                &mut config,
+                &file,
+                &self.env.cwd,
+            ));
+        }
         let (applied, plain) =
             settings::apply(&mut config, todosh, self.env.vars)?;
         warnings.extend(applied);
         if plain {
             self.terminals.plain();
         }
-        Ok((config, warnings))
+        Ok(((config, found), warnings))
     }
 
-    /// The config, with its warnings and the theme's printed.
-    fn load_config(&mut self) -> Result<Config> {
-        let (config, mut warnings) = self.read_settings()?;
-        warnings.extend(self.set_theme(&config));
+    /// The project's `.lsty/config.toml` for the todo file. A named config
+    /// file (`LSTY_CONFIG`, `-d`) and `--no-config` leave the home config
+    /// alone.
+    fn project_file(
+        &self,
+        input: &discover::Input<'_>,
+        chosen: &Path,
+        paths: &Paths,
+    ) -> Option<PathBuf> {
+        let named = paths.explicit || self.parsed.config.is_some();
+        if self.has(Opt::NoConfig) || named {
+            return None;
+        }
+        discover::project_config(input, chosen)
+    }
+
+    /// The config, with its warnings and the theme's printed, and the
+    /// todo file.
+    fn load_config(&mut self, explicit: Option<&str>) -> Result<Loaded> {
+        let (loaded, mut warnings) = self.read_settings(explicit)?;
+        warnings.extend(self.set_theme(&loaded.0));
         self.print_warnings(&warnings)?;
-        Ok(config)
+        Ok(loaded)
     }
 
     /// The config for the TUI, which loads its own theme: only the
     /// config's warnings are printed.
-    fn load_tui_config(&mut self) -> Result<Config> {
-        let (config, warnings) = self.read_settings()?;
+    fn load_tui_config(&mut self, explicit: Option<&str>) -> Result<Loaded> {
+        let (loaded, warnings) = self.read_settings(explicit)?;
         self.print_warnings(&warnings)?;
-        Ok(config)
+        Ok(loaded)
     }
 
     fn print_warnings(&mut self, warnings: &[Warning]) -> Result<()> {
@@ -296,15 +344,15 @@ impl<'a> Session<'a> {
     }
 
     fn read_theme(&self, config: &Config) -> (Theme, Vec<Warning>) {
-        let paths =
-            config::find_paths(self.env.vars, self.env.home.as_deref());
-        theme::load(
+        let paths = self.config_paths();
+        let (theme, warnings) = theme::load(
             &config.theme,
             &paths.themes_dir,
             &self.env.cwd,
             self.has(Opt::NoConfig),
             self.profile(),
-        )
+        );
+        (theme, config.theme_warnings(warnings))
     }
 
     /// Loads the theme once, when stdout or stderr is coloured, and
@@ -350,7 +398,7 @@ impl<'a> Session<'a> {
         if !self.color_on(Stream::Stderr) {
             return Painter::off();
         }
-        let (config, _) = self.read_config();
+        let (config, _) = self.read_config(&self.config_paths());
         let (theme, _) = self.read_theme(&config);
         Painter::new(&theme, self.profile())
     }
@@ -364,15 +412,19 @@ impl<'a> Session<'a> {
             })
     }
 
-    fn find(&self, explicit: Option<&str>, config: &Config) -> Result<Found> {
-        discover::find(&discover::Input {
+    fn input<'s>(
+        &'s self,
+        explicit: Option<&'s str>,
+        config: &'s Config,
+    ) -> discover::Input<'s> {
+        discover::Input {
             explicit: explicit.map(Path::new),
             vars: self.env.vars,
             cwd: &self.env.cwd,
             home: self.env.home.as_deref(),
             default_file: config.default_file.as_deref(),
             todosh: Some(&self.todosh),
-        })
+        }
     }
 
     fn check_file(&self, found: &Found) -> Result<()> {
@@ -417,12 +469,12 @@ impl<'a> Session<'a> {
         let Some(run_tui) = self.env.run_tui else {
             return Err(Error::new(Code::Io, "the TUI is not built yet"));
         };
-        let config = self.load_tui_config()?;
-        let explicit = explicit
-            .filter(|f| !f.is_empty())
-            .or_else(|| self.explicit_file());
-        let found = self.find(explicit, &config)?;
-        Ok(run_tui(TuiArgs { found, config }))
+        let explicit = explicit.filter(|f| !f.is_empty());
+        let (config, found) = self.load_tui_config(explicit)?;
+        Ok(run_tui(TuiArgs {
+            found: found?,
+            config,
+        }))
     }
 
     fn header(&self) -> Vec<Field> {

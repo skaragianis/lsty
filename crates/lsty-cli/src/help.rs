@@ -52,7 +52,10 @@ const ENVIRONMENT: [(&str, &str); 17] = [
         "TODOTXT_PRESERVE_LINE_NUMBERS",
         "1 is how lsty works; 0 is refused",
     ),
-    ("LSTY_CONFIG", "the path of config.toml"),
+    (
+        "LSTY_CONFIG",
+        "the path of config.toml, the only config; else a project's .lsty/config.toml layers over it (not with -d or --no-config)",
+    ),
     ("LSTY_OWNER", "who is acting: one name per agent"),
     ("LSTY_TODAY", "override today (YYYY-MM-DD)"),
     ("LSTY_NOW", "override the time (YYYY-MM-DDTHHMMZ)"),

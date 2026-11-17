@@ -3,15 +3,29 @@
 //! closing the popup brings back the theme it opened over. At 16 colours
 //! the built-in themes look the same, and the popup's title says so.
 
-use std::{fs, io, path::Path};
+use std::{
+    ffi::{OsStr, OsString},
+    fs::{self, File},
+    io::{self, Read, Write},
+    os::fd::{AsFd, OwnedFd},
+    path::Path,
+};
 
 use lsty_core::{
     case::lower,
     errs::lossy_path,
+    fsio::{Hooks as _, OsHooks},
     keys::{Action, Fed, Mode, Outcome},
     theme::{self, Profile, Slot, Theme},
 };
 use ratatui::{buffer::Buffer, layout::Rect};
+use rustix::{
+    fs::{
+        AtFlags, CWD, FileType, Mode as Perm, OFlags, fchmod, fstat, openat,
+        renameat, unlinkat,
+    },
+    io::Errno,
+};
 use toml::de::{DeTable, DeValue};
 
 use crate::{
@@ -329,7 +343,8 @@ impl Model {
         self.end_preview();
     }
 
-    /// Keeps the selected theme and saves it to the config file.
+    /// Keeps the selected theme and saves it to the config file that set
+    /// the theme: the project's, else the home one.
     fn choose_theme(&mut self) {
         let Some(name) = self
             .choosing
@@ -342,17 +357,22 @@ impl Model {
         self.choosing = None;
         self.previewed = None;
         self.deps.config.theme.clone_from(&name);
-        let file = self
-            .deps
-            .config_file
-            .as_ref()
-            .filter(|_| !self.deps.config.no_config);
+        let deps = &self.deps;
+        let file = (deps.config.theme_file.as_ref())
+            .or(deps.config_file.as_ref())
+            .filter(|_| !deps.config.no_config);
         let Some(file) = file else {
             self.message.say(format!("theme {name} for this session"));
             return;
         };
         let path = self.deps.cwd.join(file);
-        match write_theme(&path, &name) {
+        let project = self.deps.config.theme_file.is_some();
+        let saved = if project {
+            write_project_theme(&path, &name)
+        } else {
+            write_theme(&path, &name)
+        };
+        match saved {
             Ok(()) => self.message.say(format!("theme {name} saved")),
             Err(why) => self.alert(format!("can't save the theme: {why}")),
         }
@@ -432,21 +452,114 @@ impl Model {
 }
 
 /// Sets the theme in the config file at `path`, which is made when it
-/// is missing.
+/// is missing; a link at the file is followed.
 fn write_theme(path: &Path, name: &str) -> Result<(), String> {
     let data = match fs::read(path) {
         Ok(data) => data,
         Err(e) if e.kind() == io::ErrorKind::NotFound => Vec::new(),
         Err(e) => return Err(reason(path, &e)),
     };
+    save(path, themed(data, path, name)?.as_bytes())
+}
+
+/// The text of the config file at `path`, which holds `data`, with its
+/// theme set to `name`.
+fn themed(data: Vec<u8>, path: &Path, name: &str) -> Result<String, String> {
     let shown = lossy_path(path);
     let text =
         String::from_utf8(data).map_err(|_| format!("{shown}: not UTF-8"))?;
-    let next = with_theme(&text, name).map_err(|why| match why {
+    with_theme(&text, name).map_err(|why| match why {
         Unset::NotToml => format!("{shown}: not valid TOML"),
         Unset::Table => format!("{shown}: theme is a table, not a name"),
-    })?;
-    save(path, next.as_bytes())
+    })
+}
+
+/// Opens `entry` of the folder `from` without following a link. A link is
+/// `link`, said against `at`.
+fn open_in(
+    from: impl AsFd,
+    (entry, at, link): (&OsStr, &Path, &str),
+    flags: OFlags,
+) -> Result<Option<OwnedFd>, String> {
+    let flags = flags | OFlags::NOFOLLOW | OFlags::CLOEXEC;
+    match openat(from, entry, flags, Perm::empty()) {
+        Ok(fd) => Ok(Some(fd)),
+        Err(Errno::NOENT) => Ok(None),
+        Err(Errno::LOOP | Errno::NOTDIR) => {
+            Err(format!("{}: {link}", lossy_path(at)))
+        }
+        Err(e) => Err(reason(at, &e.into())),
+    }
+}
+
+/// Sets the theme in the project config `<project>/.lsty/config.toml`,
+/// which is made when it is missing. The project folder is opened once,
+/// links followed, so a linked project saves; `.lsty` and the file are
+/// opened and the new file made and renamed in the folder handles, never
+/// by a path, so a link put there since is not followed.
+fn write_project_theme(path: &Path, name: &str) -> Result<(), String> {
+    let (Some(folder), Some(project), Some(file)) =
+        (path.parent(), path.ancestors().nth(2), path.file_name())
+    else {
+        return Err(format!("{}: it cannot be resolved", lossy_path(path)));
+    };
+    let gone = || format!("{}: it cannot be resolved", lossy_path(folder));
+    let dir = OFlags::RDONLY | OFlags::DIRECTORY;
+    let root = openat(CWD, project, dir, Perm::empty()).map_err(|_| gone())?;
+    let lsty = folder.file_name().unwrap_or_default();
+    let lsty_at = (lsty, folder, "is a link or not a folder");
+    let lsty = open_in(root, lsty_at, dir)?.ok_or_else(gone)?;
+    let old = open_in(
+        &lsty,
+        (file, path, "is a link or not a file"),
+        OFlags::RDONLY | OFlags::NONBLOCK,
+    )?
+    .map(File::from);
+    let (mut data, mut mode) = (Vec::new(), None);
+    if let Some(mut old) = old {
+        let stat = fstat(&old).map_err(|e| reason(path, &e.into()))?;
+        if !FileType::from_raw_mode(stat.st_mode).is_file() {
+            return Err(format!(
+                "{}: is a link or not a file",
+                lossy_path(path)
+            ));
+        }
+        old.read_to_end(&mut data).map_err(|e| reason(path, &e))?;
+        mode = Some(Perm::from_bits_truncate(stat.st_mode & 0o777));
+    }
+    let next = themed(data, path, name)?;
+    replace_in(&lsty, file, next.as_bytes(), mode)
+        .map_err(|e| reason(path, &e))
+}
+
+/// Replaces `file` of the folder `lsty` with `data` through a synced temp
+/// file of the folder, a rename and a sync of the folder.
+fn replace_in(
+    lsty: &OwnedFd,
+    file: &OsStr,
+    data: &[u8],
+    mode: Option<Perm>,
+) -> io::Result<()> {
+    let mut temp = OsString::from(".");
+    temp.push(file);
+    temp.push(format!(".lsty-{}.tmp", std::process::id()));
+    // a temp file left by a crash of this process id
+    unlinkat(lsty, &temp, AtFlags::empty()).unwrap_or_default();
+    let flags =
+        OFlags::WRONLY | OFlags::CREATE | OFlags::EXCL | OFlags::CLOEXEC;
+    let open = mode.unwrap_or(Perm::from_raw_mode(0o666));
+    let mut fresh = File::from(openat(lsty, &temp, flags, open)?);
+    // the umask may have narrowed the mode of the old file
+    let done = mode
+        .map_or(Ok(()), |m| Ok(fchmod(&fresh, m)?))
+        .and_then(|()| fresh.write_all(data))
+        .and_then(|()| fresh.sync_all())
+        .and_then(|()| Ok(renameat(lsty, &temp, lsty, file)?))
+        .and_then(|()| OsHooks.sync_dir(&File::from(lsty.try_clone()?)));
+    if done.is_err() {
+        unlinkat(lsty, &temp, AtFlags::empty()).unwrap_or_default();
+    }
+    done
 }
 
 /// Why the theme of a config file could not be set.

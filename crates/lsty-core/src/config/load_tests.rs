@@ -6,7 +6,7 @@ use lsty_scripttest::workspace_root;
 
 use super::{
     Config, DetailPosition, Filter, Hidden, LineNumbers, Paths, Value,
-    Warning, find_paths, is_option, load, set,
+    Warning, find_paths, is_option, layer_project, load, set,
 };
 use crate::todotxt::Priority;
 
@@ -79,6 +79,7 @@ fn defaults() {
         default_file: None,
         hints: BTreeMap::new(),
         filters: Vec::new(),
+        theme_file: None,
         no_config: false,
     };
     assert_eq!(Config::default(), want);
@@ -882,13 +883,67 @@ fn relative_file_is_read_from_the_given_folder() {
     );
 }
 
+#[test]
+fn a_project_file_layers_over_the_home_one() {
+    let home = "show_ids = false\ntheme = \"nord\"\npaste_command = \"p\"\n\
+                [filters]\nwork = \"+w\"\nhome = \"@h\"\n\
+                [hints]\nnormal = [\"a\"]\nvisual = [\"v\"]\n";
+    let (mut cfg, _) = load_text(home);
+    assert_eq!(cfg.theme_file, None);
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("project.toml");
+    let text = "show_ids = true\ntheme = \"dracula\"\ncopy_command = \"c\"\n\
+                default_file = \"d\"\npaste_command = \"x\"\n\
+                [filters]\nwork = \"+p\"\nnew = \"@n\"\n\
+                [hints]\nnormal = [\"b\"]\n";
+    fs::write(&file, text).unwrap();
+    let from = file.display().to_string();
+    let warnings = layer_project(&mut cfg, &file, Path::new("/"));
+    let refused =
+        |o: &str| format!("{from}|{o}: only the home config sets it, ignored");
+    assert_eq!(
+        messages(&warnings),
+        [
+            refused("copy_command"),
+            refused("default_file"),
+            refused("paste_command")
+        ]
+    );
+    assert_eq!(
+        (cfg.show_ids, cfg.theme.as_str(), cfg.theme_file.as_ref()),
+        (true, "dracula", Some(&file))
+    );
+    assert_eq!(cfg.paste_command.as_deref(), Some("p"));
+    assert_eq!((&cfg.copy_command, &cfg.default_file), (&None, &None));
+    assert_eq!(filters(&cfg), "work=+p,home=@h,new=@n");
+    assert_eq!(hints(&cfg), r#"{"normal": ["b"], "visual": ["v"]}"#);
+}
+
+#[test]
+fn a_project_file_without_a_theme_or_with_a_syntax_error() {
+    let home = "show_ids = false\ntheme = \"nord\"\n";
+    let dir = tempfile::tempdir().unwrap();
+    let file = dir.path().join("project.toml");
+    let from = file.display().to_string();
+    let (mut cfg, _) = load_text(home);
+    fs::write(&file, "show_ids = true\n").unwrap();
+    assert_eq!(layer_project(&mut cfg, &file, Path::new("/")), []);
+    assert_eq!((cfg.show_ids, cfg.theme_file.as_ref()), (true, None));
+    fs::write(&file, "show_ids = [\n").unwrap();
+    let warnings = layer_project(&mut cfg, &file, Path::new("/"));
+    assert_eq!(messages(&warnings).len(), 1);
+    assert_eq!(warnings[0].source, from);
+    assert!(cfg.show_ids);
+}
+
 /// The names of the scalar options: every field of `Config` but the
 /// tables and `no_config`. A new field fails to compile here until it is
 /// named.
 macro_rules! scalar_options {
     ($($name:ident),* $(,)?) => {{
-        let Config { $($name: _,)* hints: _, filters: _, no_config: _ } =
-            Config::default();
+        let Config {
+            $($name: _,)* hints: _, filters: _, theme_file: _, no_config: _,
+        } = Config::default();
         [$(stringify!($name)),*]
     }};
 }

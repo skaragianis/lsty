@@ -24,6 +24,7 @@ mod walk;
 mod tests;
 
 const TODO_NAME: &str = "todo.txt";
+const PROJECT_CONFIG: &str = ".lsty/config.toml";
 
 /// What [`find`] needs from the caller.
 pub struct Input<'a> {
@@ -163,7 +164,8 @@ impl Input<'_> {
         PathBuf::from(full)
     }
 
-    fn choose(&self) -> (PathBuf, FoundBy) {
+    /// The todo file as named, before links are followed, and what named it.
+    pub fn choose(&self) -> (PathBuf, FoundBy) {
         if let Some(path) = self.explicit {
             return (path.to_path_buf(), FoundBy::File);
         }
@@ -172,7 +174,10 @@ impl Input<'_> {
         }
         let cwd = fsio::clean(self.cwd);
         let root = walk::git_root(&cwd);
-        if let Some(path) = walk::walk_up(&cwd, root.as_deref(), self.home) {
+        let up = walk::folders(&cwd, root.as_deref(), self.home)
+            .map(|dir| dir.join(TODO_NAME))
+            .find(|path| walk::is_regular(path));
+        if let Some(path) = up {
             return (path, FoundBy::WalkUp);
         }
         // The config file never beats the walk up: todo.sh's own template
@@ -193,6 +198,29 @@ impl Input<'_> {
     }
 }
 
+/// The `.lsty/config.toml` of the project the todo file of `input` belongs
+/// to: the nearest one on the walk up from the current folder (same stops
+/// as for `todo.txt`) whose folder holds the todo file `chosen`, as
+/// `choose` named it. Links are followed in the folders of both and in
+/// the config file, but not in the todo file itself.
+pub fn project_config(input: &Input<'_>, chosen: &Path) -> Option<PathBuf> {
+    let named = input.abs(chosen);
+    let folder = named.parent().and_then(|dir| fs::canonicalize(dir).ok());
+    let todo = match (folder, named.file_name()) {
+        (Some(dir), Some(name)) => dir.join(name),
+        _ => named,
+    };
+    let cwd = fsio::clean(input.cwd);
+    let root = walk::git_root(&cwd);
+    let holds = |file: &Path| {
+        let dir = file.ancestors().nth(2).map(fs::canonicalize);
+        matches!(dir, Some(Ok(ref dir)) if todo.starts_with(dir))
+    };
+    walk::folders(&cwd, root.as_deref(), input.home)
+        .map(|dir| dir.join(PROJECT_CONFIG))
+        .find(|file| walk::is_regular(file) && holds(file))
+}
+
 /// Chooses the todo file and derives the done file. Creates nothing.
 ///
 /// # Errors
@@ -200,7 +228,18 @@ impl Input<'_> {
 /// An `io` error when the todo file names a folder or cannot be examined,
 /// and `invalid_value` when `DONE_FILE` is the todo file.
 pub fn find(input: &Input<'_>) -> errs::Result<Found> {
-    let (path, found_by) = input.choose();
+    find_chosen(input, input.choose())
+}
+
+/// Like `find`, for the todo file that `choose` named.
+///
+/// # Errors
+///
+/// The errors of `find`.
+pub fn find_chosen(
+    input: &Input<'_>,
+    (path, found_by): (PathBuf, FoundBy),
+) -> errs::Result<Found> {
     let (todo, state) = locate(&input.abs(&path))?;
     let done = done::done_file(input, &todo, found_by)?;
     Ok(Found {

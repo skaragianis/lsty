@@ -7,7 +7,7 @@ use std::{
 };
 
 use super::{
-    FileState, Found, FoundBy, Input, find, report_file,
+    FileState, Found, FoundBy, Input, find, project_config, report_file,
     walk::{git_root, is_regular},
 };
 use crate::{
@@ -165,6 +165,16 @@ const CASES: &[Case] = &[
         cwd: "@/H/a",
         todo: "@/H/a/todo.txt",
         done: "@/H/a/done.txt",
+        found_by: "fallback",
+        ..BASE
+    },
+    Case {
+        name: "walk stops at a home that is a link to the launch folder",
+        files: &["R/real/a/", "R/todo.txt"],
+        links: &[("H", "R/real")],
+        cwd: "@/R/real/a",
+        todo: "@/R/real/a/todo.txt",
+        done: "@/R/real/a/done.txt",
         found_by: "fallback",
         ..BASE
     },
@@ -662,7 +672,10 @@ fn build(root: &Path, case: &Case) {
 
 fn has_ancestor_marker(root: &Path) -> bool {
     git_root(root).is_some()
-        || root.ancestors().any(|d| is_regular(&d.join("todo.txt")))
+        || root.ancestors().any(|d| {
+            is_regular(&d.join("todo.txt"))
+                || is_regular(&d.join(".lsty/config.toml"))
+        })
 }
 
 /// A temp folder with no git folder or todo file above it, so a search
@@ -759,6 +772,152 @@ fn find_cases() {
             }
             Err(err) => check_err(&root, case, &err),
         }
+    }
+}
+
+/// Rows for `project_config`: `files`, `links`, the launch folder `cwd`,
+/// the todo file as named `explicit`, and the folder whose
+/// `.lsty/config.toml` is wanted `todo` (empty for none); the home is
+/// `@/H`.
+const PROJECTS: &[Case] = &[
+    Case {
+        name: "here",
+        files: &["R/.lsty/config.toml"],
+        cwd: "R",
+        explicit: "R/todo.txt",
+        todo: "R",
+        ..BASE
+    },
+    Case {
+        name: "from below",
+        files: &["R/.lsty/config.toml", "R/a/b/"],
+        cwd: "R/a/b",
+        explicit: "R/todo.txt",
+        todo: "R",
+        ..BASE
+    },
+    Case {
+        name: "nearest",
+        files: &["R/.lsty/config.toml", "R/a/.lsty/config.toml"],
+        cwd: "R/a",
+        explicit: "R/a/todo.txt",
+        todo: "R/a",
+        ..BASE
+    },
+    Case {
+        name: "a launch folder that is a link into the project",
+        files: &["R/.lsty/config.toml"],
+        links: &[("L", "R")],
+        cwd: "L",
+        explicit: "R/todo.txt",
+        todo: "L",
+        ..BASE
+    },
+    Case {
+        name: "a stray nearer one is passed",
+        files: &["R/.lsty/config.toml", "R/a/.lsty/config.toml"],
+        cwd: "R/a",
+        explicit: "R/todo.txt",
+        todo: "R",
+        ..BASE
+    },
+    Case {
+        name: "todo outside",
+        files: &["R/.lsty/config.toml", "o/"],
+        cwd: "R",
+        explicit: "o/todo.txt",
+        todo: "",
+        ..BASE
+    },
+    Case {
+        name: "a todo link counts where it is",
+        files: &["R/.lsty/config.toml", "o/real.txt"],
+        links: &[("R/todo.txt", "o/real.txt")],
+        cwd: "R",
+        explicit: "R/todo.txt",
+        todo: "R",
+        ..BASE
+    },
+    Case {
+        name: "a todo file through a folder link counts where it leads",
+        files: &["R/.lsty/config.toml", "R/todo.txt"],
+        links: &[("L", "R")],
+        cwd: "R",
+        explicit: "L/todo.txt",
+        todo: "R",
+        ..BASE
+    },
+    Case {
+        name: "a folder is not a file",
+        files: &["R/.lsty/config.toml/"],
+        cwd: "R",
+        explicit: "R/todo.txt",
+        todo: "",
+        ..BASE
+    },
+    Case {
+        name: "stops after the git root",
+        files: &["P/.lsty/config.toml", "P/R/.git/", "P/R/a/"],
+        cwd: "P/R/a",
+        explicit: "P/R/todo.txt",
+        todo: "",
+        ..BASE
+    },
+    Case {
+        name: "the git root is searched",
+        files: &["P/R/.git/", "P/R/.lsty/config.toml", "P/R/a/"],
+        cwd: "P/R/a",
+        explicit: "P/R/todo.txt",
+        todo: "P/R",
+        ..BASE
+    },
+    Case {
+        name: "stops after home",
+        files: &[".lsty/config.toml", "H/p/"],
+        cwd: "H/p",
+        explicit: "H/todo.txt",
+        todo: "",
+        ..BASE
+    },
+    Case {
+        name: "stops after a home that is a link to the launch folder's path",
+        files: &["R/.lsty/config.toml", "R/real/p/"],
+        links: &[("H", "R/real")],
+        cwd: "R/real/p",
+        explicit: "R/real/todo.txt",
+        todo: "",
+        ..BASE
+    },
+    Case {
+        name: "home is searched",
+        files: &["H/.lsty/config.toml", "H/p/"],
+        cwd: "H/p",
+        explicit: "H/todo.txt",
+        todo: "H",
+        ..BASE
+    },
+];
+
+#[test]
+fn project_config_cases() {
+    for case in PROJECTS {
+        let tmp = bare_temp();
+        let root = canonical(tmp.path());
+        build(&root, case);
+        let vars = |_: &str| None;
+        let home = root.join("H");
+        let input = Input {
+            explicit: Some(&root.join(case.explicit)),
+            vars: &vars,
+            cwd: &root.join(case.cwd),
+            home: Some(&home),
+            default_file: None,
+            todosh: None,
+        };
+        let want = (!case.todo.is_empty())
+            .then(|| root.join(case.todo).join(".lsty/config.toml"));
+        let chosen = input.choose().0;
+        assert_eq!(project_config(&input, &chosen), want, "{}", case.name);
     }
 }
 

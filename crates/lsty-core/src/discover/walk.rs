@@ -3,7 +3,6 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::TODO_NAME;
 use crate::fsio;
 
 /// The nearest folder from `cwd` upwards that holds an entry named `.git`.
@@ -13,24 +12,24 @@ pub(super) fn git_root(cwd: &Path) -> Option<PathBuf> {
         .map(Path::to_path_buf)
 }
 
-/// The nearest `todo.txt` from the clean `cwd` upwards. The walk ends after
-/// the first folder that is the git `root`, `home` or `/`.
-pub(super) fn walk_up(
-    cwd: &Path,
+/// The folders from the clean `cwd` upwards, ending with the first that is
+/// the git `root`, `home` (as named or with its links followed) or `/`.
+pub(super) fn folders<'a>(
+    cwd: &'a Path,
     root: Option<&Path>,
     home: Option<&Path>,
-) -> Option<PathBuf> {
-    let home = home.map(fsio::clean);
-    for dir in cwd.ancestors() {
-        let candidate = dir.join(TODO_NAME);
-        if is_regular(&candidate) {
-            return Some(candidate);
-        }
-        if root == Some(dir) || home.as_deref() == Some(dir) {
-            return None;
-        }
-    }
-    None
+) -> impl Iterator<Item = &'a Path> {
+    let homes: Vec<PathBuf> = home
+        .into_iter()
+        .flat_map(|h| [Some(fsio::clean(h)), fs::canonicalize(h).ok()])
+        .flatten()
+        .collect();
+    let mut ended = false;
+    cwd.ancestors().take_while(move |dir| {
+        let before = ended;
+        ended = root == Some(*dir) || homes.iter().any(|h| h == dir);
+        !before
+    })
 }
 
 /// A regular file, or a symlink to one.

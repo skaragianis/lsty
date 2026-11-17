@@ -4,7 +4,7 @@
 //! default is used and a [`Warning`] says so. Nothing here reads the
 //! process: the caller passes the variables and the home folder.
 
-use std::{collections::BTreeMap, fmt, time::Duration};
+use std::{collections::BTreeMap, fmt, path::PathBuf, time::Duration};
 
 use crate::{errs::quote, todotxt::Priority};
 
@@ -18,7 +18,7 @@ mod load_tests;
 mod paths_tests;
 
 pub(crate) use load::{Key, Table, Val, parse_table};
-pub use load::{load, toml_strings};
+pub use load::{layer_project, load, toml_strings};
 pub use options::{is_option, set};
 pub use paths::{Paths, find_paths};
 
@@ -187,8 +187,24 @@ pub struct Config {
     pub hints: BTreeMap<String, Vec<String>>,
     /// `[filters]`, in the order the file lists them.
     pub filters: Vec<Filter>,
+    /// The project file that set `theme`; `None` when the home config
+    /// (or nothing) did.
+    pub theme_file: Option<PathBuf>,
     /// Set when `--no-config` left the user's files unread.
     pub no_config: bool,
+}
+
+impl Config {
+    /// The `warnings` of loading the theme, with the one about its name
+    /// put against the project file that set it.
+    pub fn theme_warnings(&self, mut warnings: Vec<Warning>) -> Vec<Warning> {
+        if let Some(file) = &self.theme_file {
+            for w in warnings.iter_mut().filter(|w| w.source == SOURCE) {
+                w.source = crate::errs::lossy_path(file);
+            }
+        }
+        warnings
+    }
 }
 
 impl Default for Config {
@@ -224,6 +240,7 @@ impl Default for Config {
             default_file: None,
             hints: BTreeMap::new(),
             filters: Vec::new(),
+            theme_file: None,
             no_config: false,
         }
     }

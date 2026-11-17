@@ -97,8 +97,10 @@ pub fn load(
     profile: Profile,
 ) -> (Theme, Vec<Warning>) {
     let user_file = |theme: &str| {
+        // a name is a file of the themes folder, never a path
+        let plain = !theme.contains(std::path::is_separator);
         let path = themes_dir.join(format!("{theme}{EXTENSION}"));
-        (!no_config && is_file(cwd, &path)).then_some(path)
+        (plain && !no_config && is_file(cwd, &path)).then_some(path)
     };
     let mut warnings = Vec::new();
     let mut user = user_file(name);
