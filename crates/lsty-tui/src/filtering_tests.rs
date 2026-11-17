@@ -196,7 +196,7 @@ fn the_search_is_smartcase_text_and_a_plus_word_a_project() {
 fn enter_puts_the_projects_of_the_search_in_place_of_the_selection() {
     let (_dir, mut model) = home_and_phone();
     assert_eq!(nrs(&model), [] as [u32; 0]);
-    keys(&mut model, "/+work");
+    keys(&mut model, "/<C-u>+work @phone");
     assert_eq!(nrs(&model), [1]);
     assert_eq!(chip_texts(&model), ["+work", "@phone"]);
     assert_eq!(model.panels[PROJECTS].active, [Term::and("home")]);
@@ -232,7 +232,7 @@ fn names_move_with_their_connectives_and_the_other_terms_stay() {
     keys(&mut model, "/");
     assert_eq!(
         model.line.as_ref().map(|l| l.field.text()).as_deref(),
-        Some("-+gone +work|@phone bug")
+        Some("-@phone|@email -+gone +work|@phone bug ")
     );
 }
 
@@ -287,10 +287,55 @@ fn home_and_phone() -> (TempDir, Model) {
 }
 
 #[test]
+fn the_search_opens_with_the_selections_and_enter_reads_them_back() {
+    // what is typed, and what `/` then shows: projects, then contexts
+    const SHAPES: [(&str, &str); 6] = [
+        ("+home", "+home"),
+        ("-+work|+home", "-+work|+home"),
+        ("-+home +work|+work.acme", "-+home +work|+work.acme"),
+        ("+work|+home -+work.acme", "+work|+home -+work.acme"),
+        ("-@phone +work|+home", "+work|+home -@phone"),
+        ("@phone|@email +work", "+work @phone|@email"),
+    ];
+    for (typed, shown) in SHAPES {
+        let (_dir, mut model) = workdir_model(LIST, alone());
+        keys(&mut model, &format!("/{typed}<CR>"));
+        let panels =
+            [PROJECTS, CONTEXTS].map(|i| model.panels[i].active.clone());
+        let rows = nrs(&model);
+        keys(&mut model, "/");
+        let line = model.line.as_ref().map(|l| l.field.text());
+        assert_eq!(line.as_deref(), Some(&*format!("{shown} ")), "{typed}");
+        keys(&mut model, "<CR>");
+        let back =
+            [PROJECTS, CONTEXTS].map(|i| model.panels[i].active.clone());
+        assert_eq!(back, panels, "{typed}");
+        assert_eq!(
+            (nrs(&model), model.search.as_str()),
+            (rows, ""),
+            "{typed}"
+        );
+        // `<Esc>` still takes back the search that moved them
+        keys(&mut model, "<Esc>");
+        let gone = [PROJECTS, CONTEXTS].map(|i| model.panels[i].active.len());
+        assert_eq!(gone, [0, 0], "{typed}");
+    }
+    // Each panel goes back to before the last search that changed it,
+    // whatever a later search did to the other panel or left alone.
+    for later in ["@phone", "milk", ""] {
+        let (_dir, mut model) = workdir_model(LIST, alone());
+        keys(&mut model, &format!("/+home<CR>/{later}<CR><Esc>"));
+        let gone = [PROJECTS, CONTEXTS].map(|i| model.panels[i].active.len());
+        assert_eq!(gone, [0, 0], "{later}");
+    }
+}
+
+#[test]
 fn clearing_the_search_takes_back_what_its_enter_moved() {
     let (_dir, mut model) = home_and_phone();
     let before = nrs(&model);
-    keys(&mut model, "/+work milk<CR>");
+    keys(&mut model, "/<C-u>+work milk<CR>");
+    assert_eq!(model.panels[CONTEXTS].active, []);
     assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
     assert_eq!(model.search, "milk");
     keys(&mut model, "<Esc>");
@@ -303,10 +348,11 @@ fn clearing_the_search_takes_back_what_its_enter_moved() {
 #[test]
 fn clearing_takes_back_moved_names_with_no_text_left() {
     let (_dir, mut model) = home_and_phone();
-    keys(&mut model, "/+work<CR>");
+    keys(&mut model, "/<C-u>+work<CR>");
     assert_eq!(model.search, "");
     keys(&mut model, "<Esc>");
     assert_eq!(model.panels[PROJECTS].active, [Term::and("home")]);
+    assert_eq!(model.panels[CONTEXTS].active, [Term::and("phone")]);
     model.panels[PROJECTS].active.clear();
     keys(&mut model, "<Esc>");
     assert_eq!(model.panels[PROJECTS].active, []);
@@ -346,11 +392,12 @@ fn clearing_after_gc_takes_nothing_back() {
 }
 
 #[test]
-fn only_the_last_search_is_taken_back() {
+fn each_panel_goes_back_to_before_the_last_search_that_changed_it() {
     let (_dir, mut model) = home_and_phone();
-    keys(&mut model, "/+work<CR>/@email<CR><Esc>");
-    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
-    assert_eq!(model.panels[CONTEXTS].active, [Term::and("phone")]);
+    keys(&mut model, "/<C-u>+work<CR>/ @email<CR><Esc>");
+    // projects: the search that changed them is the first one
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("home")]);
+    assert_eq!(model.panels[CONTEXTS].active, []);
 }
 
 #[test]

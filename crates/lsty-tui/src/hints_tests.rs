@@ -143,12 +143,8 @@ fn clear_search_shows_while_a_search_is_in_effect() {
             80,
             "manual  x done",
         ),
-        (
-            "already selected",
-            "/+work<CR>/+work<CR>",
-            80,
-            "manual  x done",
-        ),
+        // An unchanged search keeps what the one before it moved.
+        ("resubmitted", "/+work<CR>/<CR>", 80, clear),
         // Only the first hint fits beside the version.
         ("narrow", "/A<CR>", 56, "manual  <Esc> clear search   "),
         ("search prompt", "/A", 80, "/A  <CR> keep  <Tab> next"),

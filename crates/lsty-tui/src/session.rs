@@ -46,7 +46,7 @@ pub(crate) struct Session {
     /// The lines run on the `:` line and the searches that were kept.
     history: Saved,
     recall: Option<Recalled>,
-    /// The text of the search prompt is the kept search, not typed.
+    /// The text of the search prompt is what was filled in, not typed.
     prefilled: bool,
     /// A failed save was already shown.
     failed: bool,
@@ -82,7 +82,7 @@ impl Session {
         self.prefilled = false;
     }
 
-    /// The search prompt opened with the kept search in it.
+    /// The search prompt opened with what was filled in.
     pub(crate) fn prefill(&mut self, filled: bool) {
         self.prefilled = filled;
     }
