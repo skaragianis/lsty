@@ -43,6 +43,9 @@ Done task
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   (A) Call client +work                                                   │
 │ ┌ Help ────────────────────────────────────────────────────────────────────┐ │
+│ │    gP , <Left>  Lower the priority                                       │ │
+│ │    gd  Set the due date                                                  │ │
+│ │    gt  Add a tag                                                         │ │
 │ │    gT  Remove a tag                                                      │ │
 │ │    <CR> , gx  Open a link of the task                                    │ │
 │ │  History                                                                 │ │
@@ -57,10 +60,7 @@ Done task
 │ │    gi  Move the detail panel: right, below, off                          │ │
 │ │    +  Let a task take one more row in the list                           │ │
 │ │    -  Let a task take one row fewer in the list                          │ │
-│ │  Boxes                                                                   │ │
-│ │    <C-w>h , <C-w><Left>  Focus the box to the left                       │ │
-│ │    <C-w>j , <C-w><Down>  Focus the box below                             │ │
-│ └ 241-257 of 372 ──────────────────────────────────────────────────────────┘ │
+│ └ 241-257 of 376 ──────────────────────────────────────────────────────────┘ │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                          9.9.9

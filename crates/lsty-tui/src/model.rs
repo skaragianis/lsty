@@ -483,6 +483,7 @@ impl Model {
             Action::ToggleDetail => self.toggle_detail(),
             Action::MoreRows => self.more_rows(),
             Action::FewerRows => self.fewer_rows(),
+            Action::DefaultRows => self.default_rows(),
             Action::Fold => self.fold(),
             Action::Unfold => self.unfold(),
             Action::ToggleEntry => self.act_on_entry(),

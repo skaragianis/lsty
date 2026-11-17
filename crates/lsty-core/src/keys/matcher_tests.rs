@@ -424,7 +424,7 @@ const ROWS: &[Row] = &[
         mode: Mode::Normal,
         file: "",
         keys: &["0"],
-        want: &[no_match("0")],
+        want: &[matched(Action::DefaultRows, 0)],
     },
 ];
 

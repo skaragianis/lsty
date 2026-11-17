@@ -318,7 +318,7 @@ fn moving(m: &Model, s: &Summary, past: Option<usize>) -> Answer {
         Answer::Refused(Refusal::Archived)
     } else {
         let todo_row = past.is_some_and(|row| row.source != Source::Done);
-        lit_if(todo_row, Refusal::Quiet)
+        quiet(todo_row)
     }
 }
 
@@ -329,6 +329,11 @@ const fn lit_if(lit: bool, why: Refusal) -> Answer {
     } else {
         Answer::Refused(why)
     }
+}
+
+/// A key that does its work, or does nothing and says nothing.
+const fn quiet(lit: bool) -> Answer {
+    lit_if(lit, Refusal::Quiet)
 }
 
 /// `.`: as the key it repeats over the tasks it stored or the count typed over
@@ -401,20 +406,18 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         action if nothing_to_move(action, m, s) => {
             return Answer::Refused(Refusal::Quiet);
         }
-        Action::ToggleEntry => {
-            let lit = m.focused_panel().is_some_and(|p| !p.entries.is_empty());
-            return lit_if(lit, Refusal::Quiet);
-        }
-        Action::Fold => {
-            let node = m.focused_panel().and_then(Panel::to_fold);
-            return lit_if(node.is_some(), Refusal::Quiet);
-        }
-        Action::Unfold => {
-            let node = m.focused_panel().and_then(Panel::to_unfold);
-            return lit_if(node.is_some(), Refusal::Quiet);
-        }
-        Action::MoreRows => return lit_if(m.can_add_row(), Refusal::Quiet),
-        Action::FewerRows => return lit_if(m.rows_shown() > 1, Refusal::Quiet),
+        Action::ToggleEntry => return quiet(
+            m.focused_panel().is_some_and(|p| !p.entries.is_empty()),
+        ),
+        Action::Fold => return quiet(
+            m.focused_panel().and_then(Panel::to_fold).is_some(),
+        ),
+        Action::Unfold => return quiet(
+            m.focused_panel().and_then(Panel::to_unfold).is_some(),
+        ),
+        Action::MoreRows => return quiet(m.can_add_row()),
+        Action::FewerRows => return quiet(m.rows_shown() > 1),
+        Action::DefaultRows => return quiet(m.can_default_rows()),
         Action::ClearFilters => {
             let lit = m.panels.iter().any(|p| !p.active.is_empty());
             return lit_if(lit, Refusal::Says("no filters to clear"));
@@ -428,7 +431,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::FocusProjects
         | Action::FocusContexts
         | Action::FocusFilters => {
-            return lit_if(m.focus_after(action).is_some(), Refusal::Quiet);
+            return quiet(m.focus_after(action).is_some());
         }
         Action::ToggleStart if puts_back(m, s) => return put_back_answer(m),
         Action::ToggleComplete => complete,
@@ -453,7 +456,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             });
             return lit_if(!no_id, Refusal::NoId);
         }
-        Action::Yank => return lit_if(s.total > 0, Refusal::Quiet),
+        Action::Yank => return quiet(s.total > 0),
         Action::MoveTaskDown => return moving(m, s, Some(s.lo + s.total)),
         Action::MoveTaskUp => return moving(m, s, s.lo.checked_sub(1)),
         Action::OpenLink => return open_link(m, s),
@@ -472,15 +475,15 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::DeleteToStart
         | Action::DeleteToEnd => {
             let lit = m.open_field().is_none_or(|f| f.acts(action));
-            return lit_if(lit, Refusal::Quiet);
+            return quiet(lit);
         }
         Action::CompleteNext | Action::CompletePrev => {
             let lit = m.line.as_ref().is_none_or(|l| !l.no_candidates);
-            return lit_if(lit, Refusal::Quiet);
+            return quiet(lit);
         }
         Action::Next | Action::Prev => {
             let lit = m.popup().is_none_or(|p| p.cands.len() > 1);
-            return lit_if(lit, Refusal::Quiet);
+            return quiet(lit);
         }
         // These always apply.
         Action::CursorDown
@@ -538,7 +541,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
     let open = s.todo + s.doing > 0;
     let x = action == Action::ToggleComplete;
     if s.total == 0 {
-        lit_if(action == Action::InsertPrerequisite, Refusal::Quiet)
+        quiet(action == Action::InsertPrerequisite)
     } else if s.archived == 0 || (open && (x || action == Action::Wontdo)) {
         rule(s)
     } else if open {

@@ -377,6 +377,10 @@ actions! {
         "fewer_rows", View, "Let a task take one row fewer in the list",
         "fewer rows", Other
     );
+    DefaultRows => (
+        "default_rows", View, "Let a task take the default rows in the list",
+        "default rows", Other
+    );
     EnterVisual => ("enter_visual", View, "Select tasks", "select", Other);
     ExitVisual => ("exit_visual", View, "Leave the selection", "exit", Other);
     FocusLeft => (

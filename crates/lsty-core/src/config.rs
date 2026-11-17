@@ -28,6 +28,9 @@ const SOURCE: &str = "config.toml";
 /// The leader key until `leader` says another, and when it is not one key.
 pub const DEFAULT_LEADER: char = '\\';
 
+/// `list_rows` until it says another, and what `0` sets it to.
+pub const DEFAULT_LIST_ROWS: u64 = 3;
+
 /// How line numbers are drawn.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LineNumbers {
@@ -226,7 +229,7 @@ impl Default for Config {
             show_sidebar: true,
             sidebar_min_width: 80,
             show_detail: true,
-            list_rows: 3,
+            list_rows: DEFAULT_LIST_ROWS,
             show_ids: true,
             detail_min_width: 120,
             detail_position: DetailPosition::Right,
