@@ -30,22 +30,22 @@ show_detail = false
 │ ▾+work  5/10│ne                                                    │
 │   .acme  2/3│t report +work.acme dep:c1                            │
 │   /q3    1/1│ew contract +work.acme                                │
-├[4]─Contexts─┤bug +work.acme                       1d ago           │
-│ @phone   2/4│ roadmap +work/q3                                     │
-├[5]─Filters──┤te wiki +Work                                         │
-│ [x] Done    │milk +home                                            │
-│ [ ] Later   │tap +home                                             │
-│ [x] Blocked │lawn +home                                            │
-│ [ ] Archive │t fence +home                        4d ago           │
-│ ─────────── │                                                      │
-│ Today       │                                                      │
-│ Overdue     │                                                      │
-│ Upcoming    │                                                      │
-│ Doing       │                                                      │
-│ Waiting     │                                                      │
-│ No project  │                                                      │
-│ Won't do    │                                                      │
+│             │bug +work.acme                       1d ago           │
+│             │ roadmap +work/q3                                     │
+├[4]─Contexts─┤te wiki +Work                                         │
+│ @phone   2/4│milk +home                                            │
+│             │tap +home                                             │
+│             │lawn +home                                            │
+│             │t fence +home                        4d ago           │
 │             │                                                      │
+│             │                                                      │
+│             │                                                      │
+├[5]─Filters──┤                                                      │
+│ [x] Done    │                                                      │
+│ [ ] Later   │                                                      │
+│ [x] Blocked │                                                      │
+│ [ ] Archive │                                                      │
+│ ─────────── │                                                      │
 └─────────────┘──────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t stop         9.9.9
 -- hidden --

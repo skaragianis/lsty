@@ -14,12 +14,12 @@ Done task
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work                                                        │
 │ ┌ Help ────────────────────────────────────────────────────────────────────────────────────────┐ │
-├[│panel                                                                                         │ │
+│ │panel                                                                                         │ │
 │ │  Navigation                                                                                  │ │
-├[│    j , <Down>  Move the cursor down                                                          │ │
+│ │    j , <Down>  Move the cursor down                                                          │ │
 │ │    k , <Up>  Move the cursor up                                                              │ │
 │ │    gg , <Home>  Go to the top                                                                │ │
-│ │    G , <End>  Go to the bottom                                                               │ │
+├[│    G , <End>  Go to the bottom                                                               │ │
 │ │    <C-d>  Scroll half a page down                                                            │ │
 │ │    <C-u>  Scroll half a page up                                                              │ │
 │ │    <C-f> , <PageDown>  Scroll a page down                                                    │ │
@@ -27,36 +27,36 @@ Done task
 │ │    <C-e>  Scroll the view down a row                                                         │ │
 │ │    <C-y>  Scroll the view up a row                                                           │ │
 │ │    zz  Centre the cursor row in the view                                                     │─┘
-│ │    zt  Put the cursor row at the top of the view                                             │─┐
+├[│    zt  Put the cursor row at the top of the view                                             │─┐
 │ │    zb  Put the cursor row at the bottom of the view                                          │ │
 │ │    H  Go to the top row of the view                                                          │ │
 │ │    M  Go to the middle row of the view                                                       │ │
 │ └ 154-170 of 376 ──────────────────────────────────────────────────────────────────────────────┘ │
-│             ││ priority  A                                                                       │
+│ ─────────── ││ priority  A                                                                       │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                                              9.9.9
 -- back --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work                                                        │
 │ +work    1/1││  1       Buy milk +home                                                           │
-├[4]─Contexts─┤│  2       Done task                                                                │
+│             ││  2       Done task                                                                │
 │             ││                                                                                   │
-├[5]─Filters──┤│                                                                                   │
-│ [x] Done    ││                                                                                   │
-│ [ ] Later   ││                                                                                   │
-│ [x] Blocked ││                                                                                   │
-│ [ ] Archive ││                                                                                   │
-│ ─────────── ││                                                                                   │
-│ Today       ││                                                                                   │
-│ Overdue     ││                                                                                   │
-│ Upcoming    ││                                                                                   │
-│ Doing       ││                                                                                   │
-│ Waiting     │└───────────────────────────────────────────────────────────────────────────────────┘
-│ No project  │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
-│ Won't do    ││ Call client +work                                                                 │
-│             ││ ───────────────────────────────────────────────────────────────────────────────── │
-│             ││ state     todo                                                                    │
-│             ││ nr        1                                                                       │
-│             ││ priority  A                                                                       │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             │└───────────────────────────────────────────────────────────────────────────────────┘
+├[5]─Filters──┤┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ [x] Done    ││ Call client +work                                                                 │
+│ [ ] Later   ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [x] Blocked ││ state     todo                                                                    │
+│ [ ] Archive ││ nr        1                                                                       │
+│ ─────────── ││ priority  A                                                                       │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9

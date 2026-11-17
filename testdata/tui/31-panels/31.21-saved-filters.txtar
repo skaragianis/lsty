@@ -30,28 +30,28 @@ Agents = "owner:agent1"
 │ ▾+work  5/10││          +work @phone                                         │
 │   .acme  2/3││  2 ⧗     Draft report +work.acme dep:c1                       │
 │   /q3    1/1││  3       Review contract +work.acme                           │
-├[4]─Contexts─┤│  4 ✓     Fix bug +work.acme                  1d ago           │
-│ @phone   2/4││  5       Plan roadmap +work/q3                                │
-├[5]─Filters──┤│  6       Update wiki +Work                                    │
-│ [x] Done    ││  7       Buy milk +home                                       │
-│ [ ] Later   ││  8       Fix tap +home                                        │
-│ [x] Blocked ││  9       Mow lawn +home                                       │
-│ [ ] Archive ││ 10 ✓     Paint fence +home                   4d ago           │
+│             ││  4 ✓     Fix bug +work.acme                  1d ago           │
+│             ││  5       Plan roadmap +work/q3                                │
+│             ││  6       Update wiki +Work                                    │
+│             ││  7       Buy milk +home                                       │
+├[4]─Contexts─┤│  8       Fix tap +home                                        │
+│ @phone   2/4││  9       Mow lawn +home                                       │
+│             ││ 10 ✓     Paint fence +home                   4d ago           │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+│             ││                                                               │
+├[5]─Filters──┤│                                                               │
+│ [x] Done    ││                                                               │
+│ [ ] Later   ││                                                               │
+│ [x] Blocked ││                                                               │
+│ [ ] Archive ││                                                               │
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
 │ Upcoming    ││                                                               │
-│ Doing       ││                                                               │
-│ Waiting     ││                                                               │
-│ No project  ││                                                               │
-│ Won't do    ││                                                               │
-│ Urgent      ││                                                               │
-│ Agents      ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t stop  T wont  o new    9.9.9

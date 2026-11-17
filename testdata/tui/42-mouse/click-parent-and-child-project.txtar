@@ -1,8 +1,8 @@
 size 100 30
 start
-click 3 2
-click 3 3
-click 3 3
+clickon "+work   4/4"
+clickon ".acme  1/1"
+clickon ".acme  1/1"
 tick 50ms
 frame frame
 -- config.toml --
@@ -18,9 +18,22 @@ E +home +work
 │ +home    2/2││  4   D +work.acme @phone @email                                                   │
 │=▾+work   4/4││                                                                                   │
 │&  .acme  1/1││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @email   3/3││                                                                                   │
 │ @phone   3/3││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
+│             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
@@ -29,18 +42,5 @@ E +home +work
 │ ─────────── ││                                                                                   │
 │ Today       ││                                                                                   │
 │ Overdue     ││                                                                                   │
-│ Upcoming    ││                                                                                   │
-│ Doing       ││                                                                                   │
-│ Waiting     ││                                                                                   │
-│ No project  ││                                                                                   │
-│ Won't do    ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9

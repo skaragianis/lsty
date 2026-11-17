@@ -46,10 +46,10 @@ Task 030 +p30
 │ +p22     1/1││  3   Task 004 +p04                                            │
 │ +p23     1/1││  4   Task 005 +p05                                            │
 │ +p24     1/1││  5   Task 006 +p06                                            │
-│ +p25     1/1││  6   Task 007 +p07                                            │
-│ +p26     1/1││  7   Task 008 +p08                                            │
-│ +p27     1/1││  8   Task 009 +p09                                            │
-├[4]─Contexts─┤│  9   Task 010 +p10                                            │
+├[4]─Contexts─┤│  6   Task 007 +p07                                            │
+│             ││  7   Task 008 +p08                                            │
+│             ││  8   Task 009 +p09                                            │
+│             ││  9   Task 010 +p10                                            │
 │             ││ 10   Task 011 +p11                                            │
 ├[5]─Filters──┤│ 11   Task 012 +p12                                            │
 │ [x] Done    ││ 12   Task 013 +p13                                            │
@@ -63,10 +63,10 @@ Task 030 +p30
 │ +p22     1/1││  3   Task 004 +p04                                            │
 │ +p23     1/1││  4   Task 005 +p05                                            │
 │ +p24     1/1││  5   Task 006 +p06                                            │
-│ +p25     1/1││  6   Task 007 +p07                                            │
-│ +p26     1/1││  7   Task 008 +p08                                            │
-│ +p27     1/1││  8   Task 009 +p09                                            │
-├[4]─Contexts─┤│  9   Task 010 +p10                                            │
+├[4]─Contexts─┤│  6   Task 007 +p07                                            │
+│             ││  7   Task 008 +p08                                            │
+│             ││  8   Task 009 +p09                                            │
+│             ││  9   Task 010 +p10                                            │
 │             ││ 10   Task 011 +p11                                            │
 ├[5]─Filters──┤│ 11   Task 012 +p12                                            │
 │ [x] Done    ││ 12   Task 013 +p13                                            │

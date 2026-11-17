@@ -12,12 +12,12 @@ A +work @phone
 -- filters --
 ┌[3]─Projects─┐t ──────────────────────────────────────────────────────────────┐
 │ +work    1/1│@phone                                                          │
+│             │                                                                │
 ├[4]─Contexts─┤                                                                │
 │ @phone   1/1│                                                                │
+│             │                                                                │
 ├[5]─Filters──┤                                                                │
 │ [x] Done    │                                                                │
-│ [ ] Later   │                                                                │
-│ [x] Blocked │                                                                │
 └─────────────┘────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold        9.9.9
 -- list --

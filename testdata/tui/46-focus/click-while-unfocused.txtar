@@ -14,44 +14,44 @@ Buy milk +home
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +home    1/1││  1   Call client +work                                        │
 │ +work    1/1││  2   Buy milk +home                                           │
+│             ││                                                               │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
-├[5]─Filters──┤│                                                               │
-│ [x] Done    │└───────────────────────────────────────────────────────────────┘
-│ [ ] Later   │┌[2]─Detail─────────────────────────────────────────────────────┐
-│ [x] Blocked ││ Buy milk +home                                                │
-│ [ ] Archive ││ ───────────────────────────────────────────────────────────── │
-│ ─────────── ││ state  todo                                                   │
-│ Today       ││ nr     2                                                      │
+│             │└───────────────────────────────────────────────────────────────┘
+│             │┌[2]─Detail─────────────────────────────────────────────────────┐
+│             ││ Buy milk +home                                                │
+├[5]─Filters──┤│ ───────────────────────────────────────────────────────────── │
+│ [x] Done    ││ state  todo                                                   │
+│ [ ] Later   ││ nr     2                                                      │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9
 -- clicked-fg --
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.mm...ttttttttttttppppp........................................e
 e.ppppp....mmmee.tt...tttttttttppppp...........................................e
+e.............ee...............................................................e
 emmmmmmmmmmmmeee...............................................................e
 e.............ee...............................................................e
-emmmmmmmmmmmeeee...............................................................e
-e.tttttttt....eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttttttt...eemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttttttttt.ee.tttttttttppppp................................................e
-e.ttttttttttt.ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
-e.mmmmmmmmmmm.ee.mmmmmmmtttt...................................................e
-e.ttttt.......ee.mmmmmmmt......................................................e
+e.............eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.............eemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.............ee.tttttttttppppp................................................e
+emmmmmmmmmmmeeee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.tttttttt....ee.mmmmmmmtttt...................................................e
+e.ttttttttt...ee.mmmmmmmt......................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy.......mmmmm.
 -- regained --
 emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.ppppp....mmmeE.tt...ttttttttttttppppp........................................E
 e.ppppp....mmmeE.mm...tttttttttppppp...........................................E
+e.............eE...............................................................E
 emmmmmmmmmmmmeeE...............................................................E
 e.............eE...............................................................E
-emmmmmmmmmmmeeeE...............................................................E
-e.tttttttt....eEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-e.ttttttttt...eemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.ttttttttttt.ee.ttttttttttttppppp.............................................e
-e.ttttttttttt.ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
-e.mmmmmmmmmmm.ee.mmmmmmmtttt...................................................e
-e.ttttt.......ee.mmmmmmmt......................................................e
+e.............eEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+e.............eemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.............ee.ttttttttttttppppp.............................................e
+emmmmmmmmmmmeeee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+e.tttttttt....ee.mmmmmmmtttt...................................................e
+e.ttttttttt...ee.mmmmmmmt......................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy.......mmmmm.

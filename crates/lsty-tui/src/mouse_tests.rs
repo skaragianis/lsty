@@ -505,14 +505,14 @@ fn a_click_on_a_name_steps_it_like_x() {
     let chips = |m: &Model| -> Vec<String> {
         m.chips().into_iter().map(|c| c.text).collect()
     };
-    click(&mut m, 3, 5);
+    click(&mut m, 3, 11);
     assert_eq!(chips(&m), ["@email"]);
-    click(&mut m, 3, 6);
+    click(&mut m, 3, 12);
     assert_eq!(chips(&m), ["@email|@phone"]);
-    click(&mut m, 3, 6);
+    click(&mut m, 3, 12);
     assert_eq!(chips(&m), ["@email", "@phone"]);
-    click(&mut m, 3, 6);
-    click(&mut m, 3, 6);
+    click(&mut m, 3, 12);
+    click(&mut m, 3, 12);
     assert_eq!(chips(&m), ["@email"]);
 }
 
@@ -871,12 +871,12 @@ fn every_cell_of_the_screen_hits_what_it_shows() {
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
-        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "sEEEEEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
         "                                                            ",
     ];
@@ -887,11 +887,11 @@ fn every_cell_of_the_screen_hits_what_it_shows() {
         "sEFEEEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sEEEFEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sEEEEEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKddd",
-        "sEEEEEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
         "                                                            ",
@@ -914,7 +914,7 @@ fn target(kind: Kind, pane: Pane, panel: usize, at: usize) -> Target {
 
 #[test]
 fn a_cell_hits_the_row_or_entry_it_shows() {
-    let (_dir, model) = full_screen(16);
+    let (_dir, model) = full_screen(22);
     let at = |x, y| model.hit(Position::new(x, y));
     let row = target(Kind::Row, Pane::List, 0, 0);
     assert_eq!(at(20, 1), row);
@@ -930,8 +930,8 @@ fn a_cell_hits_the_row_or_entry_it_shows() {
     let side = |kind, panel, at| target(kind, Pane::Sidebar, panel, at);
     assert_eq!(at(4, 2), side(Kind::Fold, 0, 1));
     assert_eq!(at(5, 3), side(Kind::Entry, 0, 2));
-    assert_eq!(at(5, 8), side(Kind::Toggle, 2, 0));
-    assert_eq!(at(5, 12), side(Kind::None, 2, 4));
+    assert_eq!(at(5, 15), side(Kind::Toggle, 2, 0));
+    assert_eq!(at(5, 19), side(Kind::None, 2, 4));
 }
 
 #[test]
@@ -1017,8 +1017,8 @@ fn the_field_and_its_popup_are_hit_where_they_are_drawn() {
         "ssssssssssssssslllllllPPPPPPPPPlllllllll",
         "ssssssssssssssslllllllPPPPPPPPPlllllllll",
         "ssssssssssssssslllllllllllllllllllllllll",
-        "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
-        "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
+        "ssssssssssssssslllllllllllllllllllllllll",
+        "ssssssssssssssslllllllllllllllllllllllll",
         "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
         "ssssssssssssssslllllllllllllllllllllllll",
         "                                        ",

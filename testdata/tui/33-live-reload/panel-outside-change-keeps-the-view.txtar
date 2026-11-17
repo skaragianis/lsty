@@ -76,9 +76,9 @@ Task 030 +p30
 │ +p19     1/1││  1   Task 001 +p01                                            │
 │ +p20     1/1││  1   Task 002 +p02                                            │
 │ +p21     1/1││  2   Task 003 +p03                                            │
-│ +p22     1/1││  3   Task 004 +p04                                            │
-│ +p23     1/1││  4   Task 005 +p05                                            │
-├[4]─Contexts─┤│  5   Task 006 +p06                                            │
+├[4]─Contexts─┤│  3   Task 004 +p04                                            │
+│             ││  4   Task 005 +p05                                            │
+│             ││  5   Task 006 +p06                                            │
 │             ││  6   Task 007 +p07                                            │
 ├[5]─Filters──┤│  7   Task 008 +p08                                            │
 │ [x] Done    ││  8   Task 009 +p09                                            │
@@ -89,9 +89,9 @@ Task 030 +p30
 │ +p18     1/1││  2   Task 001 +p01                                            │
 │ +p19     1/1││  1   Task 002 +p02                                            │
 │ +p20     1/1││  2   Task 003 +p03                                            │
-│ +p21     1/1││  3   Task 004 +p04                                            │
-│ +p22     1/1││  4   Task 005 +p05                                            │
-├[4]─Contexts─┤│  5   Task 006 +p06                                            │
+├[4]─Contexts─┤│  3   Task 004 +p04                                            │
+│             ││  4   Task 005 +p05                                            │
+│             ││  5   Task 006 +p06                                            │
 │             ││  6   Task 007 +p07                                            │
 ├[5]─Filters──┤│  7   Task 008 +p08                                            │
 │ [x] Done    ││  8   Task 009 +p09                                            │

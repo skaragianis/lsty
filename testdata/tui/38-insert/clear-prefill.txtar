@@ -18,9 +18,9 @@ B +home
 │=+work    1/1││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
+│             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
-│ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9
 -- a-file --

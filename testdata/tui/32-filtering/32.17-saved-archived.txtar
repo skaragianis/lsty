@@ -22,16 +22,22 @@ Archived = "is:archived"
 │ +spec01  2/2││                                                                          ││ ─────────────────────────────────── │
 │ ▾+work   2/4││                                                                          ││ state      done                     │
 │   .acme  1/1││                                                                          ││ completed  2026-09-01               │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 ├[4]─Contexts─┤│                                                                          ││                                     │
 │ @email   1/1││                                                                          ││                                     │
 │ @phone   1/1││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
-│ [x] Done    ││                                                                          ││                                     │
-│ [ ] Later   ││                                                                          ││                                     │
-│ [x] Blocked ││                                                                          ││                                     │
-│ [ ] Archive ││                                                                          ││                                     │
-│ ─────────── ││                                                                          ││                                     │
-│ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 │ Upcoming    ││                                                                          ││                                     │
 │ Doing       ││                                                                          ││                                     │
@@ -39,11 +45,5 @@ Archived = "is:archived"
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
 │=Archived    ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  o new  a append  dd delete  u undo  / search  ? help                     9.9.9

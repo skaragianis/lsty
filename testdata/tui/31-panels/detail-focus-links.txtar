@@ -23,18 +23,18 @@ show_sidebar = false
 -- tab-leaves-at-last --
 ┌[3]─Projects─┐t ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             │s file:docs/a.md file:docs/b.md file:docs/c.md                             ││ Read docs file:docs/a.md            │
-├[4]─Contexts─┤                                                                           ││ file:docs/b.md file:docs/c.md       │
+│             │                                                                           ││ file:docs/b.md file:docs/c.md       │
 │             │                                                                           ││ ─────────────────────────────────── │
-├[5]─Filters──┤                                                                           ││ state  todo                         │
-│ [x] Done    │                                                                           ││ nr     1                            │
-│ [ ] Later   │                                                                           ││ links                               │
-│ [x] Blocked │                                                                           ││ ✓ docs/a.md                         │
-│ [ ] Archive │                                                                           ││ ✓ docs/b.md                         │
-│ ─────────── │                                                                           ││ ✓ docs/c.md                         │
-│ Today       │                                                                           ││                                     │
-│ Overdue     │                                                                           ││                                     │
-│ Upcoming    │                                                                           ││                                     │
-│ Doing       │                                                                           ││                                     │
+│             │                                                                           ││ state  todo                         │
+├[4]─Contexts─┤                                                                           ││ nr     1                            │
+│             │                                                                           ││ links                               │
+│             │                                                                           ││ ✓ docs/a.md                         │
+│             │                                                                           ││ ✓ docs/b.md                         │
+│             │                                                                           ││ ✓ docs/c.md                         │
+├[5]─Filters──┤                                                                           ││                                     │
+│ [x] Done    │                                                                           ││                                     │
+│ [ ] Later   │                                                                           ││                                     │
+│ [x] Blocked │                                                                           ││                                     │
 └─────────────┘───────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                                                9.9.9
 -- shift-tab-enters-at-last --

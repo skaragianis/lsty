@@ -18,9 +18,9 @@ Buy +y
 │ +y       2/2││  2   Buy +y                                                        filtered  t001 │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
+│             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
-│ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  pasted 1 task; hidden by current filters in 2 seconds or at the next key
 -- a-file --
