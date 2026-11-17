@@ -1,63 +1,45 @@
-size 40 12
+size 40 9
 start
-keys GA
 fg fg
-frame field
-cursor field-cursor
-click 12 8
-keys X
-frame clicked
-cursor clicked-cursor
+frame frame
+keys j
+frame second-whole
 -- config.toml --
 show_sidebar = false
 show_detail = false
-wrap = true
+list_rows = 3
 -- todo.txt --
+Buy milk
 Draft the quarterly planning review for the whole finance team and send it round +work @phone
 (A) Call the plumber about the leak in the upstairs bathroom and ask for a quote +home
-Write the notes from the meeting with the landlord and file them away
+Fix the tap
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+E.tt.......tttttttt....................E
 E.mm.......ttttttttttttttttttt.........E
 E..........ttttttttttttttttttttttt.....E
 E..........tttttttttttttttcccccctppppp.E
 E.mm...AAA.tttttttttttttttttttttttttt..E
 E..........tttttttttttttttttttt........E
-E..........ttttttttttttttttttttttppppp.E
-E.tttttttttttttttttttttttttttttttttttt.E
-E....tttttttttttttttttttttttttttttttt..E
-E....tttt..............................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm.........mmmmm.
--- field --
+NNNNNNNN.tttttttt..mmmmmm.........mmmmm.
+-- frame --
 ┌ [1]─~/todo.txt ──────────────────────┐
+│  1       Buy milk                    │
+│  1       Draft the quarterly         │
+│          planning review for the     │
+│          whole finance… @phone +work │
+│  2   (A) Call the plumber about the  │
+│          leak in the upstairs        │
+└──────────────────────────────────────┘
+ NORMAL  todo.txt  manual         9.9.9
+-- second-whole --
+┌ [1]─~/todo.txt ──────────────────────┐
+│  1       Buy milk                    │
 │  2       Draft the quarterly         │
 │          planning review for the     │
 │          whole finance… @phone +work │
 │  1   (A) Call the plumber about the  │
 │          leak in the upstairs        │
-│          bathroom and ask for… +home │
-│  3 Write the notes from the meeting  │
-│    with the landlord and file them   │
-│    away                              │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual         9.9.9
--- field-cursor --
-│    away                              │
-         ^
--- clicked --
-┌ [1]─~/todo.txt ──────────────────────┐
-│  2       Draft the quarterly         │
-│          planning review for the     │
-│          whole finance… @phone +work │
-│  1   (A) Call the plumber about the  │
-│          leak in the upstairs        │
-│          bathroom and ask for… +home │
-│  3 Write the notes from the meeting  │
-│    with thXe landlord and file them  │
-│    away                              │
-└──────────────────────────────────────┘
- INSERT  todo.txt  manual         9.9.9
--- clicked-cursor --
-│    with thXe landlord and file them  │
-             ^
+ NORMAL  todo.txt  manual         9.9.9

@@ -481,7 +481,8 @@ impl Model {
             }
             Action::ToggleSidebar => self.toggle_sidebar(),
             Action::ToggleDetail => self.toggle_detail(),
-            Action::ToggleWrap => self.toggle_wrap(),
+            Action::MoreRows => self.more_rows(),
+            Action::FewerRows => self.fewer_rows(),
             Action::Fold => self.fold(),
             Action::Unfold => self.unfold(),
             Action::ToggleEntry => self.act_on_entry(),

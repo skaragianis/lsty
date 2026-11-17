@@ -28,9 +28,12 @@ pub(crate) const MARKER_DOING: &str = "▶";
 /// The marker of a task the human claimed.
 const MARKER_HUMAN_DOING: &str = "▷";
 
-/// The widths of the first and later rows, and the rows a text took
-/// for them.
-pub(crate) type Wrapped = ((usize, usize), Rc<Vec<Vec<Span<'static>>>>);
+/// The widths of the first and later rows.
+pub(crate) type Widths = (usize, usize);
+
+/// The widths of the rows and the most rows, and the rows a text took for
+/// them.
+pub(crate) type Wrapped = ((Widths, usize), Rc<Vec<Vec<Span<'static>>>>);
 
 /// One task of the list.
 #[derive(Clone, Debug)]
@@ -54,8 +57,11 @@ pub(crate) struct Row {
     pub(crate) text_width: usize,
     /// The view does not match the task; it is held in sight for now.
     pub(crate) sticky: bool,
-    /// The rows the text takes with `wrap` on, once worked out.
+    /// The rows the text takes, once worked out.
     pub(crate) lines: RefCell<Option<Wrapped>>,
+    /// The rows the whole text needs for the widths of the first and later
+    /// rows, once worked out.
+    pub(crate) need: std::cell::Cell<Option<(Widths, usize)>>,
 }
 
 /// What a row takes from the clock and the config.
@@ -229,6 +235,7 @@ impl Row {
             text_width: tokens_width(line, ctx.inline),
             sticky: false,
             lines: RefCell::default(),
+            need: std::cell::Cell::default(),
         }
     }
 

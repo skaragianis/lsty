@@ -159,9 +159,8 @@ pub struct Config {
     pub sidebar_min_width: u64,
     /// `show_detail`.
     pub show_detail: bool,
-    /// `wrap`: a task whose text does not fit on its row takes more rows
-    /// in the tasks list.
-    pub wrap: bool,
+    /// `list_rows`: the most rows a task takes in the tasks list.
+    pub list_rows: u64,
     /// `show_ids`: show the ids of tasks in the id column of the tasks
     /// list, and the `dep:` tags in the text of a row.
     pub show_ids: bool,
@@ -227,7 +226,7 @@ impl Default for Config {
             show_sidebar: true,
             sidebar_min_width: 80,
             show_detail: true,
-            wrap: true,
+            list_rows: 3,
             show_ids: true,
             detail_min_width: 120,
             detail_position: DetailPosition::Right,

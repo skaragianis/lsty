@@ -67,8 +67,8 @@ const KEYS: [Key; 7] = [
     (Action::ToggleStart, "t", "j", BLOCKS),
     (Action::ToggleStart, "t", "gg", CLOSES),
     (Action::Wontdo, "T", "gg", CLOSES),
-    (Action::CyclePriority, "+", "gg", CLOSES),
-    (Action::CyclePriorityBack, "-", "gg", CLOSES),
+    (Action::CyclePriority, "gp", "gg", CLOSES),
+    (Action::CyclePriorityBack, "gP", "gg", CLOSES),
     (Action::Stop, "<F9>", "gg", CLAIMS),
 ];
 
@@ -146,17 +146,17 @@ fn a_dim_press_leaves_the_selection_and_the_repeat_alone() {
     for (_, key, first, (shown, ..)) in KEYS {
         let selection = format!("gg{first}Vj");
         let list = format!("{shown}Mine\n");
-        check(&list, "Gk-", (&selection, key), "<Esc>Gk.");
+        check(&list, "GkgP", (&selection, key), "<Esc>Gk.");
     }
     for key in OVER_ARCHIVED {
-        check("A\nMine\n", "gg-", ("jVj", key), "<Esc>gg.");
+        check("A\nMine\n", "gggP", ("jVj", key), "<Esc>gg.");
     }
-    for real in ["gg-", "ggVjJ<Esc>", "gggd2030-01-01<CR>"] {
+    for real in ["gggP", "ggVjJ<Esc>", "gggd2030-01-01<CR>"] {
         check("A\nB\nC\nD\n", real, ("G", "3."), "ggj.");
     }
     check("A\nB\nC\nD\n", "gg2gd2030-01-01<CR>", ("gg", "1."), "jj.");
     // A prompt's <CR> that changes nothing, over a count or a selection.
-    let real = "gg3gt+x<CR>gg3gd2030-01-01<CR>Gk-";
+    let real = "gg3gt+x<CR>gg3gd2030-01-01<CR>GkgP";
     for way in [
         ("gg", "3gd2030-01-01<CR>"),
         ("ggVjj", "gt+x<CR>"),
@@ -321,8 +321,8 @@ fn a_refused_press_does_not_wait_for_a_held_lock() {
         (BLOCKED, "jVj", NO_BLOCKER, "x", blocked),
         (BLOCKED, "j", FREED, "t", blocked),
         (REOPENED, "ggVj", CLAIMS.1, "<F9>", Some(NOT_UNDERWAY)),
-        (CLOSED, "gg", REOPENED, "+", reopen),
-        (CLOSED, "gg", REOPENED, "-", reopen),
+        (CLOSED, "gg", REOPENED, "gp", reopen),
+        (CLOSED, "gg", REOPENED, "gP", reopen),
     ] {
         let dir = bound(shown, STOP_BOUND);
         let config = Config {
@@ -461,9 +461,9 @@ fn walk(place: &Place, action: Action) -> Option<(bool, bool, bool)> {
     Some((is_dim, before != after || ran, said))
 }
 
-/// Lit on an empty list, and pressing shows nothing: `gw` changes what the
-/// next task looks like, and `<Esc>` has a hint only while it clears a search.
-const LIT_AND_UNSEEN: [Action; 2] = [Action::ToggleWrap, Action::ClearSearch];
+/// Lit on an empty list, and pressing shows nothing: `<Esc>` has a hint only
+/// while it clears a search.
+const LIT_AND_UNSEEN: [Action; 1] = [Action::ClearSearch];
 
 /// Lit on an empty list, and pressing only says why not.
 const SAYS_WHY_NOT: [Action; 3] =

@@ -234,7 +234,7 @@ const ROWS: &[Row] = &[
         case: "an arrow taken from the priority is no conflict",
         text: "[normal]\nyank = [\"<Left>\"]",
         action: Action::CyclePriorityBack,
-        want: &["gP", "-"],
+        want: &["gP"],
         ..BASE
     },
     Row {
@@ -257,41 +257,41 @@ const ROWS: &[Row] = &[
     Row {
         case: "the arrows raise and lower the priority in the list",
         action: Action::CyclePriority,
-        want: &["gp", "+", "<Right>"],
+        want: &["gp", "<Right>"],
         ..BASE
     },
     Row {
         case: "the arrows lower the priority in the list",
         action: Action::CyclePriorityBack,
-        want: &["gP", "-", "<Left>"],
+        want: &["gP", "<Left>"],
         ..BASE
     },
     Row {
         case: "the arrows raise the priority in a selection",
         mode: Mode::Visual,
         action: Action::CyclePriority,
-        want: &["gp", "+", "<Right>"],
+        want: &["gp", "<Right>"],
         ..BASE
     },
     Row {
         case: "the arrows lower the priority in a selection",
         mode: Mode::Visual,
         action: Action::CyclePriorityBack,
-        want: &["gP", "-", "<Left>"],
+        want: &["gP", "<Left>"],
         ..BASE
     },
     Row {
         case: "the arrows raise the priority in the detail panel",
         mode: Mode::Detail,
         action: Action::CyclePriority,
-        want: &["gp", "+", "<Right>"],
+        want: &["gp", "<Right>"],
         ..BASE
     },
     Row {
         case: "the arrows lower the priority in the detail panel",
         mode: Mode::Detail,
         action: Action::CyclePriorityBack,
-        want: &["gP", "-", "<Left>"],
+        want: &["gP", "<Left>"],
         ..BASE
     },
     Row {

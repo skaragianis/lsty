@@ -413,6 +413,8 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
             let node = m.focused_panel().and_then(Panel::to_unfold);
             return lit_if(node.is_some(), Refusal::Quiet);
         }
+        Action::MoreRows => return lit_if(m.can_add_row(), Refusal::Quiet),
+        Action::FewerRows => return lit_if(m.rows_shown() > 1, Refusal::Quiet),
         Action::ClearFilters => {
             let lit = m.panels.iter().any(|p| !p.active.is_empty());
             return lit_if(lit, Refusal::Says("no filters to clear"));
@@ -507,7 +509,6 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::CycleSort
         | Action::ToggleSidebar
         | Action::ToggleDetail
-        | Action::ToggleWrap
         | Action::EnterVisual
         | Action::ExitVisual
         | Action::FocusNext

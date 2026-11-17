@@ -1,14 +1,14 @@
 size 40 12
 start
-keys jo
+keys ji
 fg fg
-frame below
+frame insert
 keys <Esc>
 frame normal
 -- config.toml --
 show_sidebar = false
 show_detail = false
-wrap = true
+list_rows = 3
 -- todo.txt --
 Buy milk
 Draft the quarterly planning review for the whole finance team and send it round +work @phone
@@ -17,23 +17,23 @@ Fix the tap
 -- fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm.......tttttttt....................E
-E.mm.......ttttttttttttttttttt.........E
-E..........ttttttttttttttttttttttt.....E
-E..........tttttttttttttttcccccctppppp.E
-E....tppppp............................E
+E.tttttttttttttttttttttttttttttttt.....E
+E....ttttttttttttttttttttttttttttt.....E
+E....tttttttttttttttttttttttpppppt.....E
+E....cccccc............................E
 E.mm...AAA.tttttttttttttttttttttttttt..E
 E..........tttttttttttttttttttt........E
 E..........ttttttttttttttttttttttppppp.E
 E.mm.......ttttttttttt.................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 IIIIIIII.tttttttt..mmmmmm.........mmmmm.
--- below --
+-- insert --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│  2       Buy milk                    │
-│  1       Draft the quarterly         │
-│          planning review for the     │
-│          whole finance… @phone +work │
-│     +work                            │
+│  1       Buy milk                    │
+│  2 Draft the quarterly planning      │
+│    review for the whole finance      │
+│    team and send it round +work      │
+│    @phone                            │
 │  1   (A) Call the plumber about the  │
 │          leak in the upstairs        │
 │          bathroom and ask for… +home │

@@ -5,7 +5,7 @@ fg colors
 -- config.toml --
 show_sidebar = false
 show_detail = false
-wrap = false
+list_rows = 1
 -- todo.txt --
 See https://x.org +work @home due:2026-09-30
 Open https://example.com/a/very/long/path/that/is/cut +work @home

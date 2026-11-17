@@ -5,7 +5,7 @@ frame frame
 -- config.toml --
 show_sidebar = false
 show_detail = false
-wrap = true
+list_rows = 3
 -- todo.txt --
 Draft the quarterly planning review for the whole finance team and send it round +work @phone
 Buy milk
