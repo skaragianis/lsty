@@ -25,20 +25,9 @@ x 2026-09-01 Old decided wontdo:true
 -- done_off --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  1   Open task                                                           ││ Open task                           │
-│             ││  1   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│  1   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
 │             ││                                                                          ││ state  todo                         │
-│             ││                                                                          ││ nr     1                            │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[4]─Contexts─┤│                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[5]─Filters──┤│                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││ nr     1                            │
 │ [ ] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
 │ [x] Blocked ││                                                                          ││                                     │
@@ -51,27 +40,27 @@ x 2026-09-01 Old decided wontdo:true
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                                                9.9.9
 -- filter_shows_only_wontdo --
 ┌[3]─Projects─┐┌ [1]─Won't do ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  4 ✗ Decided against wontdo:true                                  1d ago ││ Decided against wontdo:true         │
-│             ││                                                                          ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│                                                                          ││ ─────────────────────────────────── │
 │             ││                                                                          ││ state      done                     │
-│             ││                                                                          ││ nr         4                        │
-│             ││                                                                          ││ completed  2026-09-28               │
-│             ││                                                                          ││ wontdo     true                     │
-│             ││                                                                          ││                                     │
-├[4]─Contexts─┤│                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[5]─Filters──┤│                                                                          ││                                     │
-│ [ ] Done    ││                                                                          ││                                     │
-│ [ ] Later   ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││ nr         4                        │
+│ [ ] Done    ││                                                                          ││ completed  2026-09-28               │
+│ [ ] Later   ││                                                                          ││ wontdo     true                     │
 │ [x] Blocked ││                                                                          ││                                     │
 │ [ ] Archive ││                                                                          ││                                     │
 │ ─────────── ││                                                                          ││                                     │
@@ -82,27 +71,27 @@ x 2026-09-01 Old decided wontdo:true
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
 │=Won't do    ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x reopen  o new  a append  dd delete  u undo  / search  ? help                                   9.9.9
 -- archive_on --
 ┌[3]─Projects─┐┌ [1]─Won't do ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  4 ✗ Decided against wontdo:true                                 1d ago  ││ Decided against wontdo:true         │
-│             ││  1 ✗ Old decided wontdo:true                                     28d ago ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│  1 ✗ Old decided wontdo:true                                     28d ago ││ ─────────────────────────────────── │
 │             ││                                                                          ││ state      done                     │
-│             ││                                                                          ││ nr         4                        │
-│             ││                                                                          ││ completed  2026-09-28               │
-│             ││                                                                          ││ wontdo     true                     │
-│             ││                                                                          ││                                     │
-├[4]─Contexts─┤│                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[5]─Filters──┤│                                                                          ││                                     │
-│ [ ] Done    ││                                                                          ││                                     │
-│ [ ] Later   ││                                                                          ││                                     │
+├[5]─Filters──┤│                                                                          ││ nr         4                        │
+│ [ ] Done    ││                                                                          ││ completed  2026-09-28               │
+│ [ ] Later   ││                                                                          ││ wontdo     true                     │
 │ [x] Blocked ││                                                                          ││                                     │
 │ [x] Archive ││                                                                          ││                                     │
 │ ─────────── ││                                                                          ││                                     │
@@ -113,26 +102,26 @@ x 2026-09-01 Old decided wontdo:true
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
 │=Won't do    ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                                                9.9.9
 -- filter_off_again --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  1   Open task                                                           ││ Tagged but open wontdo:true         │
-│             ││  2   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
+├[4]─Contexts─┤│  2   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
 │             ││  1 ✓ Old plain                                                   28d ago ││ state   todo                        │
-│             ││  2 ✗ Old decided wontdo:true                                     28d ago ││ nr      2                           │
-│             ││                                                                          ││ wontdo  true                        │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[4]─Contexts─┤│                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[5]─Filters──┤│                                                                          ││                                     │
-│ [ ] Done    ││                                                                          ││                                     │
+├[5]─Filters──┤│  2 ✗ Old decided wontdo:true                                     28d ago ││ nr      2                           │
+│ [ ] Done    ││                                                                          ││ wontdo  true                        │
 │ [ ] Later   ││                                                                          ││                                     │
 │ [x] Blocked ││                                                                          ││                                     │
 │ [x] Archive ││                                                                          ││                                     │
@@ -144,5 +133,16 @@ x 2026-09-01 Old decided wontdo:true
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help                    9.9.9

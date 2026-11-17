@@ -12,9 +12,9 @@ show_detail = false
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +a..b    1/1││  1   Ship it for +work.                                       │
 │ ▾+work   2/2││  1   Plan +work.acme, then call @phone.                       │
-├[4]─Contexts─┤│  2   Mail the team (+work).                                   │
-│ @phone   1/1││  3   Typo +a..b                                               │
-│             ││                                                               │
+│   .acme  1/1││  2   Mail the team (+work).                                   │
+├[4]─Contexts─┤│  3   Typo +a..b                                               │
+│ @phone   1/1││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 │ [ ] Later   ││                                                               │

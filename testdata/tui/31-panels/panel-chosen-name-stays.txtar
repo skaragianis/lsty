@@ -32,23 +32,23 @@ show_detail = false
 │=+solo    0/0││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @shop    1/1││                                                                                   │
-│             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
+│ [ ] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  1 deleted  x done  t start  T wont  o new  a append  dd delete     9.9.9
 -- unchosen --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  2   Buy milk +home @shop                                                         │
-│             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @shop    1/1││                                                                                   │
-│             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
+│ [ ] Archive ││                                                                                   │
+│ ─────────── ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9

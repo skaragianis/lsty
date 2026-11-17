@@ -13,27 +13,27 @@ x 2026-09-28 Fix bug +work
 Write parser +spec01 id:parser
 -- in-panel --
 ┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
-│ +spec01  1/1││  1   (A) Call client +work @phone                                 today           │
-│=▾+work   2/3││  1   (B) Send Invoice +work.acme @email                           2d late         │
-├[4]─Contexts─┤│  2 ✓     Fix bug +work                                            1d ago          │
-│ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
-│ @phone   1/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
-├[5]─Filters──┤│ Call client +work @phone due:2026-09-29                                           │
-│ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
-│ [ ] Later   ││ state     todo                                                                    │
-│ [x] Blocked ││ …                                                                                 │
+│ +home    1/1││  1   (A) Call client +work @phone                                 today           │
+│ +spec01  1/1││  1   (B) Send Invoice +work.acme @email                           2d late         │
+│=▾+work   2/3││  2 ✓     Fix bug +work                                            1d ago          │
+│   .acme  1/1│└───────────────────────────────────────────────────────────────────────────────────┘
+├[4]─Contexts─┤┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ @email   1/1││ Call client +work @phone due:2026-09-29                                           │
+│ @phone   1/1││ ───────────────────────────────────────────────────────────────────────────────── │
+├[5]─Filters──┤│ state     todo                                                                    │
+│ [x] Done    ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
 -- in-list --
 ┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
-│ +spec01  1/1││  1   (A) Call client +work @phone                                         today   │
-│=▾+work   2/3││  1   (B) Send Invoice +work.acme @email                                   2d late │
-├[4]─Contexts─┤│  2 ✓     Fix bug +work                                                    1d ago  │
-│ @email   1/1│└───────────────────────────────────────────────────────────────────────────────────┘
-│ @phone   1/1│┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
-├[5]─Filters──┤│ Call client +work @phone due:2026-09-29                                           │
-│ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
-│ [ ] Later   ││ state     todo                                                                    │
-│ [x] Blocked ││ …                                                                                 │
+│ +home    1/1││  1   (A) Call client +work @phone                                         today   │
+│ +spec01  1/1││  1   (B) Send Invoice +work.acme @email                                   2d late │
+│=▾+work   2/3││  2 ✓     Fix bug +work                                                    1d ago  │
+│   .acme  1/1│└───────────────────────────────────────────────────────────────────────────────────┘
+├[4]─Contexts─┤┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ @email   1/1││ Call client +work @phone due:2026-09-29                                           │
+│ @phone   1/1││ ───────────────────────────────────────────────────────────────────────────────── │
+├[5]─Filters──┤│ state     todo                                                                    │
+│ [x] Done    ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9

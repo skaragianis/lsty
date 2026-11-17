@@ -32,20 +32,20 @@ show_detail = false
 │   /q3    1/1│ew contract +work.acme                                │
 ├[4]─Contexts─┤bug +work.acme                       1d ago           │
 │ @phone   2/4│ roadmap +work/q3                                     │
-│             │te wiki +Work                                         │
-│             │milk +home                                            │
-│             │tap +home                                             │
-│             │lawn +home                                            │
-├[5]─Filters──┤t fence +home                        4d ago           │
-│ [x] Done    │                                                      │
-│ [ ] Later   │                                                      │
-│ [x] Blocked │                                                      │
-│ [ ] Archive │                                                      │
+├[5]─Filters──┤te wiki +Work                                         │
+│ [x] Done    │milk +home                                            │
+│ [ ] Later   │tap +home                                             │
+│ [x] Blocked │lawn +home                                            │
+│ [ ] Archive │t fence +home                        4d ago           │
 │ ─────────── │                                                      │
 │ Today       │                                                      │
 │ Overdue     │                                                      │
 │ Upcoming    │                                                      │
 │ Doing       │                                                      │
+│ Waiting     │                                                      │
+│ No project  │                                                      │
+│ Won't do    │                                                      │
+│             │                                                      │
 └─────────────┘──────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t stop         9.9.9
 -- hidden --

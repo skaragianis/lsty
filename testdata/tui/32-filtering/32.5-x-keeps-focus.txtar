@@ -22,17 +22,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││                                                                          ││ due:2026-09-27                      │
 │ ▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
 │=  .acme  1/1││                                                                          ││ state     todo                      │
-│             ││                                                                          ││ nr        2                         │
-│             ││                                                                          ││ priority  B                         │
-│             ││                                                                          ││ due       2026-09-27                │
-├[4]─Contexts─┤│                                                                          ││           (2d overdue)              │
-│ @email   1/1││                                                                          ││                                     │
-│ @phone   1/1││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[5]─Filters──┤│                                                                          ││                                     │
+├[4]─Contexts─┤│                                                                          ││ nr        2                         │
+│ @email   1/1││                                                                          ││ priority  B                         │
+│ @phone   1/1││                                                                          ││ due       2026-09-27                │
+├[5]─Filters──┤│                                                                          ││           (2d overdue)              │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
 │ [x] Blocked ││                                                                          ││                                     │
@@ -45,6 +38,13 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  <Tab> next  h fold  l unfold                                  9.9.9
 -- cleared --
@@ -53,17 +53,10 @@ x 2026-09-01 Old task +work
 │ +spec01  2/2││  2   (B) Send Invoice +work.acme @email              2d late             ││ due:2026-09-27                      │
 │ ▾+work   2/4││  1 ✓     Fix bug +work                               1d ago              ││ ─────────────────────────────────── │
 │   .acme  1/1││  2       Write parser +spec01                                 parser     ││ state     todo                      │
-│             ││  3 ⧗     Add CLI ls +spec01 dep:parser                                1h ││ nr        2                         │
-│             ││  4       Plan offsite                                sat                 ││ priority  B                         │
-│             ││                                                                          ││ due       2026-09-27                │
-├[4]─Contexts─┤│                                                                          ││           (2d overdue)              │
-│ @email   1/1││                                                                          ││                                     │
-│ @phone   1/1││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-├[5]─Filters──┤│                                                                          ││                                     │
+├[4]─Contexts─┤│  3 ⧗     Add CLI ls +spec01 dep:parser                                1h ││ nr        2                         │
+│ @email   1/1││  4       Plan offsite                                sat                 ││ priority  B                         │
+│ @phone   1/1││                                                                          ││ due       2026-09-27                │
+├[5]─Filters──┤│                                                                          ││           (2d overdue)              │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
 │ [x] Blocked ││                                                                          ││                                     │
@@ -76,5 +69,12 @@ x 2026-09-01 Old task +work
 │ Waiting     ││                                                                          ││                                     │
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
+│             ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  <Tab> next  h fold  l unfold                                  9.9.9
