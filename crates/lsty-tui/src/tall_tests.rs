@@ -474,14 +474,19 @@ fn placing_the_view_and_the_cursor_counts_the_rows_of_the_tasks() {
 }
 
 /// The rows of `text` laid out `first` cells wide on the first row,
-/// `later` after.
-fn laid(text: &str, (first, later): (usize, usize)) -> Vec<String> {
+/// `later` after, `rows` at most.
+fn laid(
+    text: &str,
+    (first, later): (usize, usize),
+    rows: usize,
+) -> Vec<String> {
     let inline = Inline::new(&Config::default());
     lay_out(
         &Line::parse(text.as_bytes()),
         (None, Parts::default()),
         inline,
         (first, later),
+        rows,
     )
     .iter()
     .map(|row| row.iter().map(|s| s.text.as_ref()).collect())
@@ -562,11 +567,44 @@ const TAGS: [(&str, &[&str]); 17] = [
 #[test]
 fn projects_and_contexts_the_last_row_would_cut_follow_the_ellipsis() {
     for (text, want) in TAGS {
-        assert_eq!(laid(text, (14, 12)), want, "{text}");
+        assert_eq!(laid(text, (14, 12), MAX_ROWS), want, "{text}");
     }
     // rows one cell wide: the fourth word still leaves an ellipsis
-    assert_eq!(laid("a b c d", (1, 1)), ["a", "b", "…"]);
+    assert_eq!(laid("a b c d", (1, 1), MAX_ROWS), ["a", "b", "…"]);
+    for (text, widths, want) in ONE_ROW {
+        assert_eq!(laid(text, widths, 1), [want], "{text} {widths:?}");
+    }
 }
+
+/// (text, widths, the row): a row cut at its edge shows the projects and
+/// contexts it cuts off by the rules of the last of several rows; its
+/// width is the first, not the later.
+type OneRow = (&'static str, (usize, usize), &'static str);
+
+const ONE_ROW: [OneRow; 10] = [
+    ("界", (1, 1), "…"),
+    ("fix it +a @b", (20, 20), "fix it +a @b"),
+    (
+        "fix the parser quickly @agent +lsty",
+        (26, 26),
+        "fix the pars… @agent +lsty",
+    ),
+    (
+        "fix the parser quickly @agent +lsty",
+        (14, 14),
+        "… @agent +lsty",
+    ),
+    ("aaaa bbbb @c +p", (8, 8), "a… @c +p"),
+    ("aaaa bbbb @c +p", (5, 5), "… @c…"),
+    (
+        "do @x then aaaa bbbb cccc dddd +y",
+        (20, 20),
+        "do @x then aaaa… +y",
+    ),
+    ("aaaa bbbb +a cccc +a", (12, 12), "aaaa bbb… +a"),
+    ("a b c d", (1, 1), "…"),
+    ("aaaa bbbb cccc", (9, 3), "aaaa bbb…"),
+];
 
 /// (text, widths, the last row as text and slot): the ellipsis takes the
 /// slot of the text it cuts, also when the cut ends a word, and the tags
@@ -613,6 +651,7 @@ fn the_tags_that_follow_the_ellipsis_keep_their_style() {
             (None, Parts::default()),
             inline,
             widths,
+            MAX_ROWS,
         );
         let last: Vec<_> =
             rows[2].iter().map(|s| (s.text.as_ref(), s.slot)).collect();
@@ -634,6 +673,7 @@ fn a_muted_task_keeps_its_slot_on_the_last_row() {
             (Some(Slot::Muted), Parts::default()),
             inline,
             (12, 12),
+            MAX_ROWS,
         );
         assert!(
             rows[2].iter().all(|s| s.slot == Some(Slot::Muted)),
