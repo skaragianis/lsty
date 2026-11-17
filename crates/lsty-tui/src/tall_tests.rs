@@ -10,8 +10,8 @@ use tempfile::TempDir;
 
 use crate::{
     model::Model,
-    msg::{Gesture, Mouse, Msg},
-    rows::Inline,
+    msg::{Button, Gesture, Mouse, Msg},
+    rows::{Inline, Shape},
     tall::{Entry, lay_out},
     test_util::{alone, deps, keys, screen, started, workdir, workdir_model},
     text::Span,
@@ -211,8 +211,8 @@ fn a_row_more_or_fewer_keeps_the_cursor_task_whole() {
     let lines = screen(&model, 40, 12);
     assert!(lines[7].contains("w0800"), "{lines:?}");
     assert!(lines[9].contains("w0813"), "{lines:?}");
-    keys(&mut model, "--");
-    assert_eq!((model.top, model.cursor), (3, 8));
+    fewer_rows_cut_the_top(&mut model);
+    cut_view_scrolls_and_opens_whole();
     for (from, typed, rows, lit) in STOPS {
         let (_dir, mut model) = tall(12, from);
         assert_eq!(model.can_default_rows(), from != 3, "{from} hint");
@@ -220,6 +220,72 @@ fn a_row_more_or_fewer_keeps_the_cursor_task_whole() {
         assert_eq!(model.deps.config.list_rows, rows, "{from} {typed}");
         assert_eq!(model.can_add_row(), lit, "{from} {typed}");
     }
+}
+
+/// With the top task cut and the cursor task at the bottom, a move down or
+/// a field opened on it works on whole tasks: it ends in view.
+fn cut_view_scrolls_and_opens_whole() {
+    let (_dir, mut model) = tall(12, 1);
+    keys(&mut model, "7j+");
+    assert_eq!((model.top, model.cursor, model.cut), (2, 7, (2, 1)));
+    keys(&mut model, "kL");
+    assert_eq!(model.cursor, 7);
+    keys(&mut model, "j");
+    assert!(whole(&model), "{:?}", (model.top, model.cursor));
+    // a drag inside the pane reads the rows as drawn, and keeps the cut
+    let (_dir, mut model) = tall(12, 1);
+    keys(&mut model, "7j+");
+    for (gesture, y) in [
+        (Gesture::Down(Button::Left), 2),
+        (Gesture::Drag(Button::Left), 3),
+    ] {
+        let at = Position::new(5, y);
+        model.update(Msg::Mouse(Mouse {
+            gesture,
+            at,
+            shift: false,
+        }));
+    }
+    assert_eq!((model.selected_rows(), model.cut), (Some((3, 4)), (2, 1)));
+    let (_dir, mut model) = tall(12, 1);
+    keys(&mut model, "7j+A");
+    let end = model.field_line() + model.field_height();
+    assert!(end <= model.pane_rows(), "{end}");
+    keys(&mut model, "<Esc>");
+    assert_eq!(model.cut.1, 0);
+}
+
+/// Line `line` of the screen holds `text`.
+fn row_has(model: &Model, line: usize, text: &str) {
+    let lines = screen(model, 40, 12);
+    assert!(lines[line].contains(text), "{lines:?}");
+}
+
+/// `-` keeps the cursor task on its line, the task at the top cut, until
+/// the next scroll. The cursor is on task 8, at the bottom of 3 rows each.
+fn fewer_rows_cut_the_top(model: &mut Model) {
+    // the cursor task keeps its line: the task at the top is cut
+    keys(model, "-");
+    assert_eq!((model.top, model.cursor, model.cut), (4, 8, (4, 1)));
+    assert_eq!(model.task_at_line(0), Some(4));
+    row_has(model, 1, "w0405 w0406");
+    row_has(model, 7, "w0800");
+    // a cut that is gone does not come back: onto the top task and off it
+    keys(model, "4k4j");
+    assert_eq!((model.top, model.cursor, model.cut.1), (4, 8, 0));
+    row_has(model, 1, "w0400");
+    // nor after the list is built again
+    keys(model, "+-");
+    assert_eq!(model.cut, (4, 1));
+    model.rebuild();
+    assert_eq!(model.cut.1, 0);
+    row_has(model, 1, "w0400");
+    keys(model, "-");
+    assert_eq!((model.top, model.cursor), (1, 8));
+    row_has(model, 8, "w0800");
+    // the next scroll shows whole tasks again
+    keys(model, "+<C-e>");
+    assert_eq!(model.sized(|s| s.cut.1), 0);
 }
 
 type Stop = (usize, &'static str, u64, bool);
@@ -521,18 +587,13 @@ fn placing_the_view_and_the_cursor_counts_the_rows_of_the_tasks() {
 
 /// The rows of `text` laid out `first` cells wide on the first row,
 /// `later` after, `rows` at most.
-fn laid(
-    text: &str,
-    (first, later): (usize, usize),
-    rows: usize,
-) -> Vec<String> {
+fn laid(text: &str, widths: (usize, usize), rows: usize) -> Vec<String> {
     let inline = Inline::new(&Config::default());
     lay_out(
         &Line::parse(text.as_bytes()),
         (None, Parts::default()),
         inline,
-        (first, later),
-        rows,
+        Shape { widths, rows },
     )
     .iter()
     .map(|row| row.iter().map(|s| s.text.as_ref()).collect())
@@ -696,8 +757,10 @@ fn the_tags_that_follow_the_ellipsis_keep_their_style() {
             &Line::parse(text.as_bytes()),
             (None, Parts::default()),
             inline,
-            widths,
-            MAX_ROWS,
+            Shape {
+                widths,
+                rows: MAX_ROWS,
+            },
         );
         let last: Vec<_> =
             rows[2].iter().map(|s| (s.text.as_ref(), s.slot)).collect();
@@ -718,8 +781,10 @@ fn a_muted_task_keeps_its_slot_on_the_last_row() {
             &line,
             (Some(Slot::Muted), Parts::default()),
             inline,
-            (12, 12),
-            MAX_ROWS,
+            Shape {
+                widths: (12, 12),
+                rows: MAX_ROWS,
+            },
         );
         assert!(
             rows[2].iter().all(|s| s.slot == Some(Slot::Muted)),

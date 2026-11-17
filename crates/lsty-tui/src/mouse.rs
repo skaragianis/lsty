@@ -283,9 +283,11 @@ impl Model {
         let rows = self.pane_rows();
         let last = self.rows.len().checked_sub(1)?;
         let line = if y < top {
+            self.cut = (0, 0);
             self.top = self.top.saturating_sub(1);
             0
         } else if y - top >= rows {
+            self.cut = (0, 0);
             self.top = self.sized(|size| size.scrolled(self.top, 1));
             rows.saturating_sub(1)
         } else {
@@ -327,6 +329,7 @@ impl Model {
         let n = self.sized(|size| size.reach(self.top, step, !up));
         let n = isize::try_from(n).unwrap_or(isize::MAX);
         let by = if up { -n } else { n };
+        self.cut = (0, 0);
         self.top = self.sized(|size| size.scrolled(self.top, by));
     }
 

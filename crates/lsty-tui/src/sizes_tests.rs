@@ -7,11 +7,23 @@ fn sized<R>(f: impl FnOnce(Sizes<'_>) -> R) -> R {
         len: 6,
         rows: 5,
         heights: Some(&|i| HEIGHTS[i]),
+        cut: (0, 0),
     })
 }
 
 #[test]
 fn entries_of_mixed_heights_fill_the_pane_by_whole_entries() {
+    // (at, line, top, cut): `at` starts on `line`, the first entry cut by
+    // what the line leaves; the line moves up when `at` would not fit and
+    // down when the view would end short with entries out of it above.
+    const ANCHORS: [(usize, usize, usize, usize); 6] = [
+        (4, 1, 3, 0),
+        (4, 2, 2, 1),
+        (2, 4, 1, 0),
+        (1, 3, 0, 0),
+        (5, 3, 3, 0),
+        (5, 4, 3, 0),
+    ];
     // (top, at, window): the view moves the least that shows `at` whole.
     const WINDOWS: [(usize, usize, usize); 6] = [
         (0, 2, 1),
@@ -23,6 +35,10 @@ fn entries_of_mixed_heights_fill_the_pane_by_whole_entries() {
     ];
     for (top, at, want) in WINDOWS {
         assert_eq!(sized(|s| s.window(top, at)), want, "{top} {at}");
+    }
+    for (at, line, top, cut) in ANCHORS {
+        let got = sized(|s| s.anchored(at, line));
+        assert_eq!(got, (top, cut), "{at} {line}");
     }
     assert_eq!(sized(|s| s.last_top()), 3);
     assert_eq!(sized(|s| s.scrolled(1, 9)), 3);
