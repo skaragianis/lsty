@@ -296,7 +296,8 @@ impl Model {
     /// What completes `word` in a filter term: nothing inside a quoted
     /// phrase (a `"` open in `before`), the projects or the contexts for
     /// a word with a sigil, the paths for `file:`, the states for a word
-    /// that starts `is:` or one of its starts.
+    /// that starts `is:` or one of its starts, the values of the key for
+    /// any other `key:`.
     pub(crate) fn search_pool(
         &mut self,
         word: &str,
@@ -313,6 +314,8 @@ impl Model {
             && ("is:".starts_with(&low) || low.starts_with("is:"))
         {
             Cow::Owned(state_words().map(|w| format!("is:{w}")).collect())
+        } else if let Some((key, _)) = word.split_once(':') {
+            self.value_pool(key).into()
         } else {
             Cow::default()
         }
