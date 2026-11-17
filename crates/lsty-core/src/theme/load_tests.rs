@@ -6,7 +6,7 @@ use super::{
     Colour, Profile, Slot, Style, Theme, builtin::BUILTIN, load, load::parse,
     names,
 };
-use crate::{config::Warning, ops::test_util::strings};
+use crate::{config::Warning, errs::quote, ops::test_util::strings};
 
 const BUILTIN_NAMES: [&str; 15] = [
     "ansi",
@@ -737,25 +737,28 @@ fn no_config_ignores_a_user_file_of_a_built_in_name() {
 
 #[test]
 fn a_relative_folder_is_taken_from_the_working_folder() {
-    let dir = themes_dir(&[("mine", ONLY_PROJECT)]);
-    let (theme, warnings) =
-        load("mine", Path::new(""), dir.path(), false, Profile::TrueColor);
-    assert_eq!(warnings, vec![]);
-    assert_eq!(fg(&theme, Slot::Project), Some(Colour::Rgb(1, 2, 3)));
+    // a name with dots or a backslash is a name, not a path
+    for name in ["mine", "a..b", "a\\b"] {
+        let dir = themes_dir(&[(name, ONLY_PROJECT)]);
+        let (theme, warnings) =
+            load(name, Path::new(""), dir.path(), false, Profile::TrueColor);
+        assert_eq!(warnings, vec![]);
+        assert_eq!(fg(&theme, Slot::Project), Some(Colour::Rgb(1, 2, 3)));
+    }
 }
 
 #[test]
 fn a_user_theme_named_like_the_default_applies_after_an_unknown_name() {
-    let dir = themes_dir(&[("catppuccin-frappe", ONLY_PROJECT)]);
-    let (theme, warnings) = load(
-        "nope",
-        dir.path(),
-        Path::new("/"),
-        false,
-        Profile::TrueColor,
-    );
-    assert_eq!(texts(&warnings), [r#"config.toml|theme: no theme "nope""#]);
-    assert_eq!(fg(&theme, Slot::Project), Some(Colour::Rgb(1, 2, 3)));
+    let dir = themes_dir(&[("catppuccin-frappe", ONLY_PROJECT), ("mine", "")]);
+    let absolute = dir.path().join("mine").display().to_string();
+    // a name with a separator is a path, so no theme either
+    for name in ["nope", "./mine", "x/../mine", absolute.as_str()] {
+        let (theme, warnings) =
+            load(name, dir.path(), Path::new("/"), false, Profile::TrueColor);
+        let want = format!("config.toml|theme: no theme {}", quote(name));
+        assert_eq!(texts(&warnings), [want], "{name}");
+        assert_eq!(fg(&theme, Slot::Project), Some(Colour::Rgb(1, 2, 3)));
+    }
 }
 
 #[test]

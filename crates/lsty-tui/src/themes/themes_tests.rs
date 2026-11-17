@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, io, os::unix::fs::PermissionsExt, path::Path};
 
 use lsty_core::{
     config::Config,
@@ -108,6 +108,110 @@ fn a_linked_config_is_written_through_the_link() {
         fs::read_to_string(&real).ok(),
         Some(format!("theme = \"{name}\"\nshow_sidebar = false\n"))
     );
+}
+
+/// A project's config is written where its folder is the project's, also
+/// when the file was deleted since launch or the project is a link; it is
+/// not when `.lsty` or the file is a link, or the folder is gone, and the
+/// status says why. The write goes through folder handles, never a path
+/// under the project, so a link swapped in between the check and the write
+/// cannot be followed.
+#[test]
+fn a_project_theme_is_saved_to_its_file_unless_a_link_is_in_the_way() {
+    const OLD: &str = "theme = \"dracula\"\n";
+    // (what happened to the config, the status)
+    let cases = [
+        ("", ""),
+        ("link out", "is a link or not a folder"),
+        ("file link", "is a link or not a file"),
+        ("dangling link", "is a link or not a file"),
+        ("linked project", ""),
+        ("file deleted", ""),
+        ("folder deleted", "it cannot be resolved"),
+    ];
+    for (case, status) in cases {
+        let dir = workdir(SAMPLE);
+        let away = workdir("");
+        let project = dir.path().join(".lsty");
+        let real = if case == "link out" {
+            away.path()
+        } else {
+            &project
+        };
+        fs::create_dir_all(real).unwrap_or_else(|e| panic!("{e}"));
+        let file = real.join("config.toml");
+        fs::write(&file, OLD).unwrap_or_else(|e| panic!("{e}"));
+        let elsewhere = away.path().join("config.toml");
+        if case == "file link" {
+            fs::write(&elsewhere, OLD).unwrap_or_else(|e| panic!("{e}"));
+        }
+        let config = Config {
+            theme_file: Some(project.join("config.toml")),
+            ..alone()
+        };
+        let mut model = started(deps(dir.path(), config));
+        spoil(case, [&project, real, &file, &elsewhere])
+            .unwrap_or_else(|e| panic!("{e}"));
+        open(&mut model);
+        keys(&mut model, "j<CR>");
+        let name = model.deps.config.theme.clone();
+        let text = model.message.text().unwrap_or_default();
+        let want = match (status.is_empty(), case) {
+            (true, _) => Some(format!("theme = \"{name}\"\n")),
+            (false, "link out" | "file link") => Some(OLD.to_owned()),
+            (false, _) => None,
+        };
+        assert_eq!(fs::read_to_string(&file).ok(), want, "{case}");
+        assert!(text.ends_with(status), "{case}: {text}");
+        assert!(
+            status.is_empty() || text.starts_with("can't save"),
+            "{text}"
+        );
+        assert!(!dir.path().join("config.toml").exists());
+        links_stay(case, &file, &elsewhere);
+    }
+}
+
+/// What happens to a project's config after launch.
+fn spoil(
+    case: &str,
+    [project, real, file, other]: [&Path; 4],
+) -> io::Result<()> {
+    match case {
+        "link out" => std::os::unix::fs::symlink(real, project),
+        "file link" | "dangling link" => fs::remove_file(file)
+            .and_then(|()| std::os::unix::fs::symlink(other, file)),
+        "linked project" => project.parent().zip(other.parent()).map_or(
+            Ok(()),
+            |(dir, away)| {
+                let real = away.join("project");
+                fs::rename(dir, &real)
+                    .and_then(|()| std::os::unix::fs::symlink(real, dir))
+            },
+        ),
+        "file deleted" => fs::remove_file(file),
+        "folder deleted" => fs::remove_dir_all(project),
+        "" => fs::set_permissions(file, fs::Permissions::from_mode(0o600)),
+        _ => Ok(()),
+    }
+}
+
+/// The links of `case` are still links, and none was written through.
+fn links_stay(case: &str, file: &Path, other: &Path) {
+    assert!(case != "dangling link" || !other.exists(), "{case}");
+    let meta = fs::symlink_metadata(file);
+    assert!(!case.ends_with("link") || meta.is_ok_and(|m| m.is_symlink()));
+    let mode = |p: &Path| fs::metadata(p).map(|m| m.permissions().mode());
+    if case.is_empty() {
+        // a file that exists keeps its mode
+        assert_eq!(mode(file).ok().map(|m| m & 0o777), Some(0o600));
+    }
+    if case == "file deleted" {
+        // a file made new gets what the umask allows, like any new file
+        let plain = file.with_file_name("plain");
+        fs::write(&plain, "").unwrap_or_else(|e| panic!("{e}"));
+        assert_eq!(mode(file).ok(), mode(&plain).ok());
+    }
 }
 
 #[test]
