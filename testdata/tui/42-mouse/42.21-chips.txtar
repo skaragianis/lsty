@@ -23,14 +23,14 @@ C +work.acme
 -- all --
 ┌[3]─Projects─┐┌ [1]─+work  @phone  Today  /inv ─────────────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A inv +work @phone                                                                                   today │
-│>▾+work   2/2││                                                                                                                 │
+│=▾+work   2/2││                                                                                                                 │
 │   .acme  1/1││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
-│>@phone   1/1││                                                                                                                 │
+│=@phone   1/1││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
@@ -42,7 +42,7 @@ C +work.acme
 │ [x] Blocked ││                                                                                                                 │
 │ [ ] Archive ││                                                                                                                 │
 │ ─────────── ││                                                                                                                 │
-│>Today       ││                                                                                                                 │
+│=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
 │ Upcoming    ││                                                                                                                 │
 │ Doing       ││                                                                                                                 │
@@ -61,7 +61,7 @@ C +work.acme
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 ├[4]─Contexts─┤│                                                                                                                 │
-│>@phone   1/1││                                                                                                                 │
+│=@phone   1/1││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
@@ -73,7 +73,7 @@ C +work.acme
 │ [x] Blocked ││                                                                                                                 │
 │ [ ] Archive ││                                                                                                                 │
 │ ─────────── ││                                                                                                                 │
-│>Today       ││                                                                                                                 │
+│=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
 │ Upcoming    ││                                                                                                                 │
 │ Doing       ││                                                                                                                 │
@@ -104,7 +104,7 @@ C +work.acme
 │ [x] Blocked ││                                                                                                                 │
 │ [ ] Archive ││                                                                                                                 │
 │ ─────────── ││                                                                                                                 │
-│>Today       ││                                                                                                                 │
+│=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
 │ Upcoming    ││                                                                                                                 │
 │ Doing       ││                                                                                                                 │

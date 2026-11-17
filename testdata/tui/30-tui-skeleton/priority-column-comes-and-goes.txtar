@@ -62,7 +62,7 @@ NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy.....mmmmm.
 -- filtered --
 ┌[3]─Projects─┐┌ [1]─+y ───────────────────────────────────────────────────────┐
 │ +x       1/1││  2   Sell +y                                                  │
-│>+y       1/2││  1 ✓ Old +y                                                   │
+│=+y       1/2││  1 ✓ Old +y                                                   │
 │             ││                                                               │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │

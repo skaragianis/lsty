@@ -16,7 +16,7 @@ show_detail = false
 -- chosen --
 ┌[3]─Projects─┐┌ [1]─+solo ────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   Call client +solo @solo                                                      │
-│>+solo    1/1││                                                                                   │
+│=+solo    1/1││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @shop    1/1││                                                                                   │
 │ @solo    1/1││                                                                                   │
@@ -29,7 +29,7 @@ show_detail = false
 -- stays --
 ┌[3]─Projects─┐┌ [1]─+solo ────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││ nothing matches                                                                   │
-│>+solo    0/0││                                                                                   │
+│=+solo    0/0││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @shop    1/1││                                                                                   │
 │             ││                                                                                   │

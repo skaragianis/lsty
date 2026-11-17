@@ -21,7 +21,7 @@ x 2026-09-01 Old task +work
 ┌[3]─Projects─┐┌ [1]─+work  Today  /call ─────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
 │ +spec01  2/2││                                                                          ││ due:2026-09-29                      │
-│>▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
+│=▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
 │   .acme  1/1││                                                                          ││ state     todo                      │
 │             ││                                                                          ││ nr        1                         │
 │             ││                                                                          ││ priority  A                         │
@@ -39,7 +39,7 @@ x 2026-09-01 Old task +work
 │ [x] Blocked ││                                                                          ││                                     │
 │ [ ] Archive ││                                                                          ││                                     │
 │ ─────────── ││                                                                          ││                                     │
-│>Today       ││                                                                          ││                                     │
+│=Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 │ Upcoming    ││                                                                          ││                                     │
 │ Doing       ││                                                                          ││                                     │

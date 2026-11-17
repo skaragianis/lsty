@@ -14,7 +14,7 @@ A +work
 B +home
 -- on --
 ┌[3]─Projects─┐┌ [1]─+home ────────────────────────────────────────────────────┐
-│>+home    1/1││  2   B +home                                                  │
+│=+home    1/1││  2   B +home                                                  │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │
@@ -23,7 +23,7 @@ B +home
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9
 -- number-clicked --
 ┌[3]─Projects─┐┌ [1]─+home ────────────────────────────────────────────────────┐
-│>+home    1/1││  2   B +home                                                  │
+│=+home    1/1││  2   B +home                                                  │
 ├[4]─Contexts─┤│                                                               │
 │             ││                                                               │
 ├[5]─Filters──┤│                                                               │

@@ -16,11 +16,11 @@ pub(crate) enum Conn {
 }
 
 impl Conn {
-    /// What the panel shows beside a project or context: `>` for the
+    /// What the panel shows beside a project or context: `=` for the
     /// first when it is a plain term.
     const fn mark(self, first: bool) -> &'static str {
         match self {
-            Self::And if first => ">",
+            Self::And if first => "=",
             Self::And => "&",
             Self::Or => "|",
             Self::Not => "-",
