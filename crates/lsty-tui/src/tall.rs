@@ -187,6 +187,7 @@ impl Tall<'_> {
             (row.base, row.parts),
             inline,
             self.width,
+            MAX_ROWS,
         );
         if lines.is_empty() {
             lines.push(Vec::new());
@@ -196,7 +197,7 @@ impl Tall<'_> {
 }
 
 /// The text of `line` on rows `first` then `later` cells wide, no more
-/// than `MAX_ROWS`, the last cut with an ellipsis. When that cut would
+/// than `rows`, the last cut with an ellipsis. When that cut would
 /// leave a project or context out or cut it, they follow the ellipsis
 /// instead.
 pub(crate) fn lay_out(
@@ -204,13 +205,14 @@ pub(crate) fn lay_out(
     paint: (Option<Slot>, Parts),
     inline: Inline,
     (first, later): (usize, usize),
+    rows: usize,
 ) -> Vec<Vec<Span<'static>>> {
     let spans = text_spans(line, paint, inline);
     let base = paint.0;
     let row = move |r| if r == 0 { first } else { later };
-    // three rows hold their cells and two break spaces: the spans that
-    // start by the cell after lay out the three rows as the whole text
-    let room = first + 2 * later + 2;
+    // the rows hold their cells and a break space between each two: the
+    // spans that start by the cell after lay out the rows as the whole text
+    let room = first + (rows - 1) * (later + 1);
     let mut at = 0;
     let held = spans.iter().take_while(|s| {
         at += s.cells();
@@ -218,8 +220,10 @@ pub(crate) fn lay_out(
     });
     let text = &spans[..held.count()];
     let lines = wrap_words(text, row);
-    if lines.len() <= MAX_ROWS {
-        return lines;
+    if lines.len() <= rows {
+        // a grapheme wider than its row is the only way a row is too wide
+        let fit_row = |(r, line)| fit(line, row(r));
+        return lines.into_iter().enumerate().map(fit_row).collect();
     }
     let space = Span::new(" ", base.or(Some(Slot::Text)));
     // token `j` is span `2 * j`, a space between each two
@@ -229,20 +233,20 @@ pub(crate) fn lay_out(
         .map(|t| t.kind)
         .collect();
     // all are shown whole when the last ends before the last two cells
-    // of the third row, one for a space and one for the ellipsis
+    // of the last row, one for a space and one for the ellipsis
     let edge = |r| {
-        if r < 2 {
+        if r + 1 < rows {
             row(r)
         } else {
-            later.saturating_sub(2)
+            row(r).saturating_sub(2)
         }
     };
     let last = (0..spans.len()).rev().find(|&n| is_tag(&kinds, n));
-    let whole = |n| wrap_words(&spans[..=n], edge).len() <= MAX_ROWS;
+    let whole = |n| wrap_words(&spans[..=n], edge).len() <= rows;
     if last.is_none_or(|n| n < text.len() && whole(n)) {
-        return clip(lines, later, &space);
+        return clip(lines, rows, row(rows - 1), &space);
     }
-    with_tags(&spans, &kinds, row, (&space, room))
+    with_tags(&spans, &kinds, row, rows, (&space, room))
 }
 
 /// Whether span `n` is a project or a context.
@@ -252,13 +256,14 @@ fn is_tag(kinds: &[Kind], n: usize) -> bool {
 }
 
 /// The text cut with an ellipsis as late as lets every project and
-/// context it does not hold whole follow it in `MAX_ROWS` rows, contexts
+/// context it does not hold whole follow it in `rows` rows, contexts
 /// first, each once in the order written and none the text holds a copy
 /// of whole; the last cut when they do not fit.
 fn with_tags(
     spans: &[Span<'_>],
     kinds: &[Kind],
     row: impl Fn(usize) -> usize + Copy,
+    rows: usize,
     (space, room): (&Span<'static>, usize),
 ) -> Vec<Vec<Span<'static>>> {
     let ends: Vec<usize> = spans
@@ -300,21 +305,24 @@ fn with_tags(
         .flat_map(|n| (ends[n] - spans[n].cells() + 1..=ends[n]).rev())
         .skip_while(|&c| need(c) > room)
         .map(|c| wrap_words(&build(c), row))
-        .find(|lines| lines.len() <= MAX_ROWS)
-        .unwrap_or_else(|| clip(wrap_words(&build(0), row), row(1), space))
+        .find(|lines| lines.len() <= rows)
+        .unwrap_or_else(|| {
+            clip(wrap_words(&build(0), row), rows, row(rows - 1), space)
+        })
 }
 
-/// `lines` cut to `MAX_ROWS`, the rows past the last joined onto it and
-/// cut to `later` cells with an ellipsis, `space` between them.
+/// `lines` cut to `rows`, the rows past the last joined onto it and cut
+/// to `width` cells with an ellipsis, `space` between them.
 fn clip(
     mut lines: Vec<Vec<Span<'static>>>,
-    later: usize,
+    rows: usize,
+    width: usize,
     space: &Span<'static>,
 ) -> Vec<Vec<Span<'static>>> {
-    let rest = lines.split_off(lines.len().min(MAX_ROWS - 1));
+    let rest = lines.split_off(lines.len().min(rows - 1));
     if !rest.is_empty() {
         let last = rest.join(space);
-        lines.push(fit(last, later));
+        lines.push(fit(last, width));
     }
     lines
 }

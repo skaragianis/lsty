@@ -14,7 +14,7 @@ x 2026-09-29 Read https://x.org +work
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────┐
 │  1   See https://x.org +work @home                  tomorrow │
-│  1   Open https://example.com/a/very/long/path/th…           │
+│  1   Open https://example.com/a/very/… @home +work           │
 │  2   Open file:docs/a.md file:docs/b.md +work                │
 │  3 ✓ Read https://x.org +work                                │
 │                                                              │
@@ -23,7 +23,7 @@ x 2026-09-29 Read https://x.org +work
 -- colors --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt...ttttllllllllllllltppppptccccc..................SSSSSSSS.E
-E.mm...tttttllllllllllllllllllllllllllllllllllllllll...........E
+E.mm...tttttlllllllllllllllllllllllllllltccccctppppp...........E
 E.mm...tttttlllllllllllllltlllllllllllllltppppp................E
 E.mm.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
 E..............................................................E

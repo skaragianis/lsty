@@ -18,7 +18,7 @@ use crate::{
     reldate::Cell,
     rows::{Inline, Row, text_spans},
     styles::Styles,
-    tall::{Entry, Tall},
+    tall::{Entry, Tall, lay_out},
     text::{RULE, Span, fit, pad, prefix, put, width},
 };
 
@@ -384,7 +384,13 @@ impl Model {
         }
         let inline = Inline::new(&self.deps.config);
         let mut text = text.unwrap_or_else(|| {
-            fit(text_spans(line, (row.base, row.parts), inline), layout.text)
+            let paint = (row.base, row.parts);
+            if row.text_width <= layout.text {
+                return text_spans(line, paint, inline);
+            }
+            let width = (layout.text, layout.text);
+            let mut one = lay_out(line, paint, inline, width, 1);
+            one.pop().unwrap_or_default()
         });
         pad(&mut text, layout.text, row.base);
         out.extend(text);
