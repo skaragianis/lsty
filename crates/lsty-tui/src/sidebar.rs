@@ -326,9 +326,11 @@ impl Model {
         let spans = entry.map_or_default(|e| row_spans(e, inner));
         let area = Rect::new(x + 1, y, cells(inner), 1);
         let focused = self.focus == Focus::of_panel(i);
-        if focused && index == panel.cursor && index < panel.entries.len() {
+        let current =
+            focused && index == panel.cursor && index < panel.entries.len();
+        if current {
             buf.set_style(area, self.styles.fill(Slot::Cursorline));
         }
-        put(buf, (x + 1, y), inner, &spans, &self.styles);
+        put(buf, (x + 1, y), inner, &spans, self.styles.row(current));
     }
 }

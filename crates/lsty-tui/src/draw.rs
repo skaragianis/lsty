@@ -181,32 +181,21 @@ impl Model {
         let Some(row) = self.rows.get(index) else {
             return;
         };
-        let wrapped = tall.map(|t| (t.lines(index), t.lead));
         let chosen =
             selected.is_some_and(|(lo, hi)| (lo..=hi).contains(&index));
         let from = if index == self.top { pane.skip } else { 0 };
         for n in from..from + shown {
-            let spans = match &wrapped {
-                Some((lines, indent)) if n > 0 => {
-                    let mut spans = vec![Span::blanks(*indent, None)];
-                    spans.extend(lines.get(n).into_iter().flatten().cloned());
-                    spans
-                }
-                Some((lines, _)) => {
-                    let first = lines.first().cloned();
-                    self.row_spans(row, index, layout, first)
-                }
-                None => self.row_spans(row, index, layout, None),
-            };
+            let spans = self.line_spans(row, (index, n), layout, tall);
             let y = y + cells(n - from);
             self.draw_sides(buf, (x, y), inner, slot);
             let area = Rect::new(x + 1, y, cells(inner), 1);
+            let current = !chosen && self.is_current(index);
             if chosen {
                 buf.set_style(area, self.styles.fill(Slot::Selection));
-            } else if self.is_current(index) {
+            } else if current {
                 buf.set_style(area, self.styles.fill(Slot::Cursorline));
             }
-            put(buf, (x + 1, y), inner, &spans, &self.styles);
+            put(buf, (x + 1, y), inner, &spans, self.styles.row(current));
         }
     }
 
@@ -265,7 +254,7 @@ impl Model {
         spans.extend(text);
         let area = Rect::new(x + 1, y, cells(inner), 1);
         buf.set_style(area, self.styles.fill(Slot::Cursorline));
-        put(buf, (x + 1, y), inner, &spans, &self.styles);
+        put(buf, (x + 1, y), inner, &spans, self.styles.row(true));
     }
 
     /// What goes before a row of the field: the number of the task it
@@ -356,6 +345,24 @@ impl Model {
         match n {
             Some(n) => Span::new(format!("{n:>gutter$}"), Some(slot)),
             None => Span::blanks(gutter, Some(Slot::Muted)),
+        }
+    }
+
+    /// The spans of line `n` of task `index`: the first through
+    /// `row_spans`, the later ones as `tall` wrapped them.
+    fn line_spans<'a>(
+        &'a self,
+        row: &'a Row,
+        (index, n): (usize, usize),
+        layout: Layout,
+        tall: Option<&Tall<'_>>,
+    ) -> Vec<Span<'a>> {
+        match tall {
+            Some(t) if n > 0 => t.later(index, n),
+            Some(_) | None => {
+                let first = tall.and_then(|t| t.lines(index).first().cloned());
+                self.row_spans(row, index, layout, first)
+            }
         }
     }
 

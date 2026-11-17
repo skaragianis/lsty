@@ -127,14 +127,24 @@ fn names_of_a_missing_folder_are_the_built_in_ones() {
 fn every_built_in_theme_loads_cleanly_and_defines_every_slot() {
     for (name, text) in BUILTIN {
         let (_, warnings) =
-            parse(name, text.as_bytes(), &[Style::default(); Slot::ALL.len()]);
+            parse(name, text.as_bytes(), &builtin_theme("ansi"));
         assert_eq!(warnings, vec![], "29.2 {name}");
         let slots = text
             .lines()
             .skip_while(|l| *l != "[slots]")
+            .take_while(|l| *l != "[cursorline_slots]")
             .filter(|l| l.contains('='))
             .count();
         assert_eq!(slots, Slot::ALL.len(), "29.2 {name}: slots in the file");
+        let theme = builtin_theme(name);
+        let own = Slot::ALL.map(|s| theme.cursor_style(s) != theme.style(s));
+        assert_eq!(own.contains(&true), name == "lsty-80s", "{name}");
+        // a stale claim on the white row keeps no yellow
+        let warning = |t: &Theme| {
+            (t.cursor_style(Slot::Warning), t.style(Slot::Warning))
+        };
+        let (on_row, plain) = warning(&theme);
+        assert_eq!(on_row != plain, name == "lsty-80s", "{name} warning");
     }
 }
 
@@ -432,7 +442,10 @@ const PROFILES: [Profile; 3] =
 
 /// The style of `slot` as a terminal with `profile` gets it.
 fn shown(theme: &Theme, slot: Slot, profile: Profile) -> Style {
-    let style = theme.style(slot);
+    reduced(theme.style(slot), profile)
+}
+
+fn reduced(style: Style, profile: Profile) -> Style {
     let reduce = |c: Option<Colour>| c.map(|c| profile.reduce(c));
     Style {
         fg: reduce(style.fg),
@@ -445,6 +458,15 @@ fn shown(theme: &Theme, slot: Slot, profile: Profile) -> Style {
 fn fill(theme: &Theme, slot: Slot, profile: Profile) -> Option<Colour> {
     let style = shown(theme, slot, profile);
     style.bg.or(style.fg)
+}
+
+/// The style of `slot` in the plain rows, or on the highlighted one.
+fn styled(theme: &Theme, slot: Slot, on_cursor: bool) -> Style {
+    if on_cursor {
+        theme.cursor_style(slot)
+    } else {
+        theme.style(slot)
+    }
 }
 
 /// A dim hint shows: no built-in theme paints it like a lit one.
@@ -590,17 +612,24 @@ fn no_built_in_colour_equals_its_background_above_16_colours() {
     for name in BUILTIN_NAMES {
         for profile in [Profile::Ansi256, Profile::TrueColor] {
             let theme = builtin_at(name, profile);
-            let on = |slot, under: Option<Colour>| {
-                let style = shown(&theme, slot, profile);
+            let on = |slot, style, under: Option<Colour>| {
+                let style = reduced(style, profile);
                 let under = style.bg.or(under);
                 (style.fg.is_some() && style.fg == under)
                     .then(|| format!("{name} {profile:?} {slot:?} {under:?}"))
             };
             let screen = fill(&theme, Slot::Background, profile);
-            lost.extend(Slot::ALL.into_iter().filter_map(|s| on(s, screen)));
+            lost.extend(
+                Slot::ALL
+                    .into_iter()
+                    .filter_map(|s| on(s, theme.style(s), screen)),
+            );
             for (place, slots) in places {
                 let under = fill(&theme, place, profile);
-                lost.extend(slots.iter().filter_map(|&s| on(s, under)));
+                let look = |s| styled(&theme, s, place == Slot::Cursorline);
+                lost.extend(
+                    slots.iter().filter_map(|&s| on(s, look(s), under)),
+                );
             }
         }
     }
@@ -761,12 +790,35 @@ fn a_user_theme_named_like_the_default_applies_after_an_unknown_name() {
     }
 }
 
+/// A slot table replaces the whole style; `[cursorline_slots]` does so on
+/// the highlighted row only, and a file that sets `cursorline` starts it
+/// clean.
 #[test]
-fn a_slot_table_replaces_the_whole_style() {
-    let (theme, _) =
-        load_user("mine", "[slots]\npriority_a = { fg = \"3\" }\nlink = {}\n");
+fn a_slot_table_replaces_the_whole_style_on_its_row() {
+    let (theme, _) = load_user(
+        "mine",
+        "[slots]\npriority_a = { fg = \"3\" }\nlink = {}\ntext = \"1\"\n\
+         [cursorline_slots]\ntext = { fg = \"3\", bold = true }\n",
+    );
     assert_eq!(theme.style(Slot::PriorityA), Style::fg(Colour::Index(3)));
     assert_eq!(theme.style(Slot::Link), Style::default());
+    assert_eq!(theme.style(Slot::Text), Style::fg(Colour::Index(1)));
+    let bold = Style {
+        bold: true,
+        ..Style::fg(Colour::Index(3))
+    };
+    assert_eq!(theme.cursor_style(Slot::Text), bold);
+    assert_eq!(
+        theme.cursor_style(Slot::PriorityA),
+        theme.style(Slot::PriorityA)
+    );
+    let own = load_user("lsty-80s", "[slots]\ntext = \"1\"\n").0;
+    assert_ne!(own.cursor_style(Slot::Text), own.style(Slot::Text));
+    let moved = load_user("lsty-80s", "[slots]\ncursorline = \"1\"\n").0;
+    assert_eq!(moved.cursor_style(Slot::Text), moved.style(Slot::Text));
+    // a cursorline that does not load moves nothing
+    let kept = load_user("lsty-80s", "[slots]\ncursorline = 1\n").0;
+    assert_ne!(kept.cursor_style(Slot::Text), kept.style(Slot::Text));
 }
 
 #[test]
@@ -831,7 +883,8 @@ fn values_that_are_not_colours_are_shown_in_the_warning_as_plain_text() {
 fn warnings_follow_the_order_of_the_file() {
     let (_, warnings) = load_user(
         "mine",
-        "[slots]\nzzz = 1\nmuted = 2\ncontext = { bold = 1, fg = 3 }\n",
+        "[slots]\nzzz = 1\nmuted = 2\ncontext = { bold = 1, fg = 3 }\n\
+         [cursorline_slots]\nyyy = 1\ntext = 2\n",
     );
     assert_eq!(
         texts(&warnings),
@@ -840,6 +893,8 @@ fn warnings_follow_the_order_of_the_file() {
             r#"themes/mine.toml|muted: bad colour "2""#,
             "themes/mine.toml|context: bold: expected bool",
             r#"themes/mine.toml|context: bad colour "3""#,
+            r#"themes/mine.toml|unknown slot "cursorline_slots.yyy""#,
+            r#"themes/mine.toml|cursorline_slots.text: bad colour "2""#,
         ]
     );
 }

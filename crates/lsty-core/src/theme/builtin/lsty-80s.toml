@@ -1,4 +1,6 @@
-# lsty-80s: light gray text on EGA blue, a black cursor row and status line.
+# lsty-80s: light gray text on EGA blue, a white cursor row, a black status
+# line. The cursor row is white, so [cursorline_slots] darkens to their EGA
+# pairs the colours that can show on it.
 
 [palette]
 black        = "#000000"
@@ -44,7 +46,7 @@ panel_border        = "lightgray"
 panel_border_active = { fg = "white", bold = true }
 background          = { bg = "blue" }
 selection           = { bg = "darkgray" }
-cursorline          = { bg = "black" }
+cursorline          = { bg = "white" }
 chip                = { fg = "black", bg = "cyan" }
 status_bg           = { bg = "black" }
 hint_key            = { fg = "white", bold = true }
@@ -52,3 +54,22 @@ hint_desc           = "lightgray"
 hint_dim            = "darkgray"
 warning             = { fg = "yellow", bold = true }
 error               = { fg = "lightred", bold = true }
+
+[cursorline_slots]
+priority_a     = { fg = "red", bold = true }
+priority_b     = "brown"
+priority_c     = "green"
+priority_other = "black"
+project        = "magenta"
+context        = "cyan"
+link           = { fg = "cyan", underline = true }
+text           = "black"
+muted          = "darkgray"
+id             = "darkgray"
+due_overdue    = { fg = "red", bold = true }
+due_today      = { fg = "brown", bold = true }
+due_soon       = "cyan"
+code           = "black"
+done           = { fg = "darkgray", strike = true }
+doing          = "green"
+warning        = { fg = "brown", bold = true }

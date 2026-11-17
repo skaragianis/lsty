@@ -8,6 +8,8 @@ use ratatui::style::{Color, Modifier, Style};
 pub(crate) struct Styles {
     slots: [Style; Slot::ALL.len()],
     fills: [Style; Slot::ALL.len()],
+    /// The styles of the highlighted row.
+    cursor: Option<Box<Self>>,
 }
 
 fn colour(profile: Profile, c: Colour) -> Color {
@@ -59,9 +61,30 @@ fn fill_style(profile: Profile, style: ThemeStyle) -> Style {
 impl Styles {
     /// The styles of `theme` on a terminal that shows `profile`.
     pub(crate) fn new(theme: &Theme, profile: Profile) -> Self {
-        let slots = Slot::ALL.map(|s| text_style(profile, theme.style(s)));
+        let on_row = Self::build(theme, profile, Theme::cursor_style);
+        Self {
+            cursor: Some(Box::new(on_row)),
+            ..Self::build(theme, profile, Theme::style)
+        }
+    }
+
+    fn build(
+        theme: &Theme,
+        profile: Profile,
+        look: fn(&Theme, Slot) -> ThemeStyle,
+    ) -> Self {
+        let slots = Slot::ALL.map(|s| text_style(profile, look(theme, s)));
         let fills = Slot::ALL.map(|s| fill_style(profile, theme.style(s)));
-        Self { slots, fills }
+        Self {
+            slots,
+            fills,
+            cursor: None,
+        }
+    }
+
+    /// The styles for a row: those of the highlighted row when `current`.
+    pub(crate) fn row(&self, current: bool) -> &Self {
+        self.cursor.as_deref().filter(|_| current).unwrap_or(self)
     }
 
     /// The style of text in `slot`; no slot is no style.

@@ -9,7 +9,7 @@ use lsty_core::{
     errs::Source,
     theme::Slot,
 };
-use ratatui::{buffer::Buffer, layout::Rect};
+use ratatui::{buffer::Buffer, layout::Rect, style::Color};
 use tempfile::TempDir;
 
 use crate::{
@@ -410,15 +410,29 @@ fn gi_cycles_the_detail_panel_and_a_resize_keeps_the_place_while_it_fits() {
         }
         assert_eq!(got, want, "{what}");
     }
-    // the focused panel still shows the selected link in its new place
-    let (_dir, mut m) = model(plain(), (130, 20), "Read https://x.org/a\n");
+    // the focused panel still shows the selected link in its new place, with
+    // the background its cursor row look gives it
+    let (dir, mut m) = model(plain(), (130, 20), "Read https://x.org/a\n");
+    let themes = dir.path().join("themes");
+    fs::create_dir_all(&themes).unwrap_or_else(|e| panic!("{e}"));
+    let theme = "[slots]\ncursorline = { bg = \"#ffffff\" }\n\
+        [cursorline_slots]\nlink = { fg = \"#ffffff\", bg = \"#0000ff\" }\n";
+    fs::write(themes.join("mine.toml"), theme)
+        .unwrap_or_else(|e| panic!("{e}"));
+    m.show_theme("mine");
     keys(&mut m, "<C-w>2gi");
     assert_eq!(m.focus, Focus::Detail);
+    let mut buf = Buffer::empty(Rect::new(0, 0, 130, 20));
+    m.draw(&mut buf);
     let lines = screen(&m, 130, 20);
-    assert!(
-        lines.iter().any(|l| l.contains("│   https://x.org/a")),
-        "{lines:?}"
-    );
+    let y = lines.iter().position(|l| l.contains("│   https://x.org/a"));
+    let y = y.unwrap_or_else(|| panic!("{lines:?}"));
+    let x = lines[y]
+        .split("https")
+        .next()
+        .map_or(0, |s| s.chars().count());
+    let at = (u16::try_from(x).unwrap_or(0), u16::try_from(y).unwrap_or(0));
+    assert_eq!(buf[at].bg, Color::Rgb(0, 0, 255));
 }
 
 #[test]

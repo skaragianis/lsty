@@ -201,11 +201,14 @@ impl Model {
             let mut spans = cut(spans.unwrap_or_default(), content);
             pad(&mut spans, content, None);
             let spans = [vec![Span::blanks(PADDING, None)], spans].concat();
-            put(buf, (area.x + 1, y), inner, &spans, &self.styles);
-            if selected.is_some_and(|n| shown.get(i) == Some(&Some(n))) {
+            let current =
+                selected.is_some_and(|n| shown.get(i) == Some(&Some(n)));
+            if current {
                 let row = Rect::new(area.x + 1, y, cells(inner), 1);
                 buf.set_style(row, self.styles.fill(Slot::Cursorline));
             }
+            let styles = self.styles.row(current);
+            put(buf, (area.x + 1, y), inner, &spans, styles);
         }
         let bottom = format!("└{}┘", RULE.repeat(inner));
         put_line(buf, rows + 1, bottom);

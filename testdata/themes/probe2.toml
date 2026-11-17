@@ -31,3 +31,7 @@ warning             = "28"
 error               = "29"
 code                = "30"
 id                  = "31"
+
+[cursorline_slots]
+text    = "27"
+project = "4"

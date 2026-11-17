@@ -9,6 +9,17 @@ fg after
 keys :
 type ls +work due:2026-09-29
 fg typing
+keys <Esc>
+size 100 16
+keys :
+type set show_sidebar
+keys <CR>
+keys :
+type set show_detail
+keys <CR>
+keys <C-w>3
+frame panels
+fg panel
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -35,7 +46,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo        9.9.9
 -- after --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm...mmmmmcccccmppppp............................................................................E
+E.yy...yyyyyPPPPPyppppp............................................................................E
 E.tt...mmmmccccc.............................................................................TTTTT.E
 E..................................................................................................E
 E..................................................................................................E
@@ -44,10 +55,44 @@ EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNNNNN.mmmmmmmm..tttttt..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..D.DDDD........ttttt.
 -- typing --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-E.mm...mmmmmcccccmppppp............................................................................E
+E.yy...yyyyyPPPPPyppppp............................................................................E
 E.tt...mmmmccccc.............................................................................TTTTT.E
 E..................................................................................................E
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 MMMMMMMMM.mmmmcccccmTTTTTTTTTTTTTT..kkkk.yyy..kkkkk.yyyy..kkkkk.yyyyyy..............................
+-- panels --
+┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
+│ +home    1/1││  1   Call +work @desk                                                             │
+│ +work    1/1││  1   Pay +home                                                              today │
+│             ││                                                                                   │
+│             ││                                                                                   │
+├[4]─Contexts─┤│                                                                                   │
+│ @desk    1/1││                                                                                   │
+│             ││                                                                                   │
+│             │└───────────────────────────────────────────────────────────────────────────────────┘
+│             │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+├[5]─Filters──┤│ Call +work @desk                                                                  │
+│ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ [ ] Later   ││ state  todo                                                                       │
+│ [x] Blocked ││ nr     1                                                                          │
+└─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
+ NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
+-- panel --
+EEEEEEEEEEEEEEEeetttttttttttttteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+E.PPPPP....tttEe.yy...yyyyyPPPPPyppppp.............................................................e
+E.ccccc....tttEe.tt...mmmmccccc..............................................................TTTTT.e
+E.............Ee...................................................................................e
+E.............Ee...................................................................................e
+EttttttttttttEEe...................................................................................e
+e.ppppp....tttee...................................................................................e
+e.............ee...................................................................................e
+e.............eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.............eetttttttttteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+ettttttttttteeee.mmmmmcccccmppppp..................................................................e
+e.mmmmmmmm....ee.ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.e
+e.mmmmmmmmm...ee.tttttttmmmm.......................................................................e
+e.mmmmmmmmmmm.ee.tttttttm..........................................................................e
+eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+NNNNNNNN.mmmmmmmm..tttttt..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD..................ttttt.
