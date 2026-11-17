@@ -16,25 +16,25 @@ Buy
 (A) Buy
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   (C) Buy                                                                                     │
+│  1   (A) Buy                                                                                     │
 │  1   (A) Buy                                                                                     │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (C)  x done  t start  T wont  o new  a append        9.9.9
+ NORMAL  todo.txt  manual  1 prioritized (A)  x done  t start  T wont  o new  a append        9.9.9
 -- a-file --
-(C) Buy
+(A) Buy
 (A) Buy
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   (C) Buy                                                                                     │
-│  2       Buy                                                                                     │
+│  1   (A) Buy                                                                                     │
+│  2   (B) Buy                                                                                     │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 deprioritized  x done  t start  T wont  o new  a append          9.9.9
+ NORMAL  todo.txt  manual  2 re-prioritized from (A) to (B)  x done  t start  T wont  o new   9.9.9
 -- b-file --
-(C) Buy
-Buy
+(A) Buy
+(B) Buy

@@ -28,20 +28,20 @@ fn letter(c: u8) -> Option<Priority> {
     Priority::new(c)
 }
 
-/// Current priority, last letter, forward: the priority after.
+/// Current priority, last letter, raised: the priority after.
 type Step = (&'static str, Option<u8>, u8, bool, Option<u8>);
 
 const STEPS: [Step; 10] = [
-    ("none forward", None, b'C', true, Some(b'A')),
-    ("A forward", Some(b'A'), b'C', true, Some(b'B')),
-    ("last forward", Some(b'C'), b'C', true, None),
-    ("past the range forward", Some(b'E'), b'C', true, None),
-    ("none back", None, b'C', false, Some(b'C')),
-    ("A back", Some(b'A'), b'C', false, None),
-    ("B back", Some(b'B'), b'C', false, Some(b'A')),
-    ("past the range back", Some(b'E'), b'C', false, Some(b'C')),
-    ("last back", Some(b'C'), b'C', false, Some(b'B')),
-    ("A forward, range A", Some(b'A'), b'A', true, None),
+    ("none raised", None, b'C', true, Some(b'C')),
+    ("last raised", Some(b'C'), b'C', true, Some(b'B')),
+    ("B raised", Some(b'B'), b'C', true, Some(b'A')),
+    ("A raised", Some(b'A'), b'C', true, None),
+    ("past the range raised", Some(b'E'), b'C', true, Some(b'C')),
+    ("none lowered", None, b'C', false, Some(b'A')),
+    ("A lowered", Some(b'A'), b'C', false, Some(b'B')),
+    ("last lowered", Some(b'C'), b'C', false, None),
+    ("past the range lowered", Some(b'E'), b'C', false, None),
+    ("none lowered, range A", None, b'A', false, Some(b'A')),
 ];
 
 #[test]

@@ -31,7 +31,7 @@ x (A) 2026-10-01 Old +y
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9
 -- one --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
-│ +x       1/1││  1   (A) Buy +x                                               │
+│ +x       1/1││  1   (D) Buy +x                                               │
 │ +y       1/2││  1       Sell +y                                              │
 │             ││  2 ✓     Old +y                                               │
 ├[4]─Contexts─┤│                                                               │
@@ -43,10 +43,10 @@ x (A) 2026-10-01 Old +y
 │ [x] Blocked ││                                                               │
 │ [x] Archive ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (A)  x done  t start  T wont     9.9.9
+ NORMAL  todo.txt  manual  1 prioritized (D)  x done  t start  T wont     9.9.9
 -- one-fg --
 emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-e.pp.......mmmeE.tt...AAA.ttttpp...............................................E
+e.pp.......mmmeE.tt...PPP.ttttpp...............................................E
 e.pp.......mmmeE.mm.......tttttpp..............................................E
 e.............eE.mm.dddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
 emmmmmmmmmmmmeeE...............................................................E

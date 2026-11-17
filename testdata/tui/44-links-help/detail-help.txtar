@@ -51,8 +51,8 @@ a
 │ │    P  Paste above the cursor                                                                                               │ │
 │ │    J , <A-Down>  Move the task down                                                                                        │ │
 │ │    K , <A-Up>  Move the task up                                                                                            │ │
-│ │    gp , -  Raise or lower the priority                                                                                     │ │
-│ │    gP , +  Cycle the priority back                                                                                         │ │
+│ │    gp , + , <Right>  Raise the priority                                                                                    │ │
+│ │    gP , - , <Left>  Lower the priority                                                                                     │ │
 │ │    gd  Set the due date                                                                                                    │ │
 │ │    gt  Add a tag                                                                                                           │ │
 │ │    gT  Remove a tag                                                                                                        │ │

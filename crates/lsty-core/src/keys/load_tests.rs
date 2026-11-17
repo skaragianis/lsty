@@ -231,6 +231,70 @@ const ROWS: &[Row] = &[
         ..BASE
     },
     Row {
+        case: "an arrow taken from the priority is no conflict",
+        text: "[normal]\nyank = [\"<Left>\"]",
+        action: Action::CyclePriorityBack,
+        want: &["gP", "-"],
+        ..BASE
+    },
+    Row {
+        case: "an arrow taken from the priority goes to the user",
+        text: "[normal]\nyank = [\"<Left>\"]",
+        action: Action::Yank,
+        want: &["<Left>"],
+        ..BASE
+    },
+    Row {
+        case: "two user bindings of an arrow still conflict",
+        text: "[normal]\ncycle_priority = [\"<Right>\"]\nyank = [\"<Right>\"]",
+        action: Action::Yank,
+        want: &["<Right>"],
+        warnings: &[
+            r#"[normal] "<Right>" is bound to cycle_priority and yank; yank wins"#,
+        ],
+        ..BASE
+    },
+    Row {
+        case: "the arrows raise and lower the priority in the list",
+        action: Action::CyclePriority,
+        want: &["gp", "+", "<Right>"],
+        ..BASE
+    },
+    Row {
+        case: "the arrows lower the priority in the list",
+        action: Action::CyclePriorityBack,
+        want: &["gP", "-", "<Left>"],
+        ..BASE
+    },
+    Row {
+        case: "the arrows raise the priority in a selection",
+        mode: Mode::Visual,
+        action: Action::CyclePriority,
+        want: &["gp", "+", "<Right>"],
+        ..BASE
+    },
+    Row {
+        case: "the arrows lower the priority in a selection",
+        mode: Mode::Visual,
+        action: Action::CyclePriorityBack,
+        want: &["gP", "-", "<Left>"],
+        ..BASE
+    },
+    Row {
+        case: "the arrows raise the priority in the detail panel",
+        mode: Mode::Detail,
+        action: Action::CyclePriority,
+        want: &["gp", "+", "<Right>"],
+        ..BASE
+    },
+    Row {
+        case: "the arrows lower the priority in the detail panel",
+        mode: Mode::Detail,
+        action: Action::CyclePriorityBack,
+        want: &["gP", "-", "<Left>"],
+        ..BASE
+    },
+    Row {
         case: "28.13 later wins",
         text: "[normal]\nyank = [\"Y\"]\ndelete = [\"Y\"]",
         want: &["Y"],

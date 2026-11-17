@@ -11,13 +11,13 @@ A
 (A) B
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  1   (A) A                                                                                       │
-│  1   (B) B                                                                                       │
+│  1   (D) A                                                                                       │
+│  1       B                                                                                       │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (A); 2 re-prioritized from (A) to (B)  x done        9.9.9
+ NORMAL  todo.txt  manual  1 prioritized (D); 2 deprioritized  x done  t start  T wont        9.9.9
 -- a-file --
-(A) A
-(B) B
+(D) A
+B

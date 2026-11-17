@@ -117,7 +117,7 @@ fn nothing_to_undo_or_redo() {
     press(&mut model, "gp");
     assert_eq!(kept(&model), (1, 0));
     keys(&mut model, "<C-r>");
-    assert_eq!(todo_of(dir.path()), "(A) A\nB\nC\nD\nE\n");
+    assert_eq!(todo_of(dir.path()), "(D) A\nB\nC\nD\nE\n");
 }
 
 // 36.33: a busy lock keeps the record, and `:undo` its line to try again;
