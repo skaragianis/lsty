@@ -37,11 +37,6 @@ show_detail = false
 │             ││ 10 ✓     Old task three +work                26d ago          │
 │             ││ 11 ✓     Old task four +work                 25d ago          │
 │             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [ ] Done    ││                                                               │
 │ [x] Later   ││                                                               │
@@ -50,5 +45,10 @@ show_detail = false
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
+│ Upcoming    ││                                                               │
+│ Doing       ││                                                               │
+│ Waiting     ││                                                               │
+│ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t stop  T wont  o new    9.9.9

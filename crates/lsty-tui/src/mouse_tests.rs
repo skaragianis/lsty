@@ -871,16 +871,16 @@ fn every_cell_of_the_screen_hits_what_it_shows() {
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
-        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKKKKdd",
+        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sEEEEEEEEEEEEEslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
         "                                                            ",
     ];
-    // The last panel shows two of its four switches: its bottom border
+    // The last panel shows three of its four switches: its bottom border
     // is no switch.
     const SHORT: [&str; 12] = [
         "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
@@ -890,8 +890,8 @@ fn every_cell_of_the_screen_hits_what_it_shows() {
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRlddKKKKKKKKKKKKKddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
-        "ssssssssssssssslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
+        "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sTTTTTTTTTTTTTslRRRRRRRRRRRRRRRRRRRRRRRldddddddddddddddddddd",
         "sssssssssssssssllllllllllllllllllllllllldddddddddddddddddddd",
         "                                                            ",
@@ -930,8 +930,9 @@ fn a_cell_hits_the_row_or_entry_it_shows() {
     let side = |kind, panel, at| target(kind, Pane::Sidebar, panel, at);
     assert_eq!(at(4, 2), side(Kind::Fold, 0, 1));
     assert_eq!(at(5, 3), side(Kind::Entry, 0, 2));
-    assert_eq!(at(5, 15), side(Kind::Toggle, 2, 0));
-    assert_eq!(at(5, 19), side(Kind::None, 2, 4));
+    assert_eq!(at(5, 8), side(Kind::Toggle, 2, 0));
+    assert_eq!(at(5, 12), side(Kind::None, 2, 4));
+    assert_eq!(at(5, 15), side(Kind::Entry, 2, 7));
 }
 
 #[test]
@@ -1017,8 +1018,8 @@ fn the_field_and_its_popup_are_hit_where_they_are_drawn() {
         "ssssssssssssssslllllllPPPPPPPPPlllllllll",
         "ssssssssssssssslllllllPPPPPPPPPlllllllll",
         "ssssssssssssssslllllllllllllllllllllllll",
-        "ssssssssssssssslllllllllllllllllllllllll",
-        "ssssssssssssssslllllllllllllllllllllllll",
+        "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
+        "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
         "sTTTTTTTTTTTTTslllllllllllllllllllllllll",
         "ssssssssssssssslllllllllllllllllllllllll",
         "                                        ",

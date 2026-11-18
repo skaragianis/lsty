@@ -78,10 +78,10 @@ Task 030 +p30
 │ +p21     1/1││  2   Task 003 +p03                                            │
 ├[4]─Contexts─┤│  3   Task 004 +p04                                            │
 │             ││  4   Task 005 +p05                                            │
-│             ││  5   Task 006 +p06                                            │
-│             ││  6   Task 007 +p07                                            │
-├[5]─Filters──┤│  7   Task 008 +p08                                            │
-│ [x] Done    ││  8   Task 009 +p09                                            │
+├[5]─Filters──┤│  5   Task 006 +p06                                            │
+│ [x] Done    ││  6   Task 007 +p07                                            │
+│ [ ] Later   ││  7   Task 008 +p08                                            │
+│ [x] Blocked ││  8   Task 009 +p09                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9
 -- after --
@@ -91,9 +91,9 @@ Task 030 +p30
 │ +p20     1/1││  2   Task 003 +p03                                            │
 ├[4]─Contexts─┤│  3   Task 004 +p04                                            │
 │             ││  4   Task 005 +p05                                            │
-│             ││  5   Task 006 +p06                                            │
-│             ││  6   Task 007 +p07                                            │
-├[5]─Filters──┤│  7   Task 008 +p08                                            │
-│ [x] Done    ││  8   Task 009 +p09                                            │
+├[5]─Filters──┤│  5   Task 006 +p06                                            │
+│ [x] Done    ││  6   Task 007 +p07                                            │
+│ [ ] Later   ││  7   Task 008 +p08                                            │
+│ [x] Blocked ││  8   Task 009 +p09                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9

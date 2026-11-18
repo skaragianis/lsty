@@ -38,11 +38,6 @@ x 2026-09-01 Old decided wontdo:true
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
 │ [ ] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
@@ -51,6 +46,11 @@ x 2026-09-01 Old decided wontdo:true
 │ ─────────── ││                                                                          ││                                     │
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
+│ Upcoming    ││                                                                          ││                                     │
+│ Doing       ││                                                                          ││                                     │
+│ Waiting     ││                                                                          ││                                     │
+│ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                                                9.9.9
 -- filter_shows_only_wontdo --
@@ -69,12 +69,12 @@ x 2026-09-01 Old decided wontdo:true
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
+│ [ ] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [ ] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 │ Upcoming    ││                                                                          ││                                     │
@@ -100,12 +100,10 @@ x 2026-09-01 Old decided wontdo:true
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
+│ [ ] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
 │ [x] Archive ││                                                                          ││                                     │
 │ ─────────── ││                                                                          ││                                     │
 │ Today       ││                                                                          ││                                     │
@@ -113,6 +111,8 @@ x 2026-09-01 Old decided wontdo:true
 │ Upcoming    ││                                                                          ││                                     │
 │ Doing       ││                                                                          ││                                     │
 │ Waiting     ││                                                                          ││                                     │
+│ No project  ││                                                                          ││                                     │
+│=Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                                                9.9.9
 -- filter_off_again --
@@ -131,12 +131,12 @@ x 2026-09-01 Old decided wontdo:true
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
+│ [ ] Done    ││                                                                          ││                                     │
+│ [ ] Later   ││                                                                          ││                                     │
+│ [x] Blocked ││                                                                          ││                                     │
+│ [x] Archive ││                                                                          ││                                     │
+│ ─────────── ││                                                                          ││                                     │
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
 │ Upcoming    ││                                                                          ││                                     │

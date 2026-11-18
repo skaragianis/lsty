@@ -1,5 +1,7 @@
 //! The sidebar: the Projects, Contexts and Filters panels.
 
+use std::cmp::Reverse;
+
 use lsty_core::{config::Hidden, keys::Action, theme::Slot, todotxt::Kind};
 use ratatui::{buffer::Buffer, layout::Rect};
 
@@ -45,13 +47,23 @@ const FLOORS: [usize; PANELS] = [
     lines_for(FILTERS, 1),
 ];
 
-/// Splits `h` lines between the panels, borders included. Each starts at
-/// a third (the lines left over go to Contexts, then Projects, and no
-/// panel starts below its floor). Then Contexts and Projects, in that
-/// order, take what their entries need that their third lacks from the
-/// panels after them, the last first, each down to its floor. A panel that
-/// needs less than its third keeps the rest. A sidebar too short for the
-/// floors is `crowded`; the lines always add up to `h`.
+/// The most entries a panel keeps while another needs its lines.
+const KEPT: usize = 3;
+
+/// Splits `h` lines between the panels, borders included, in steps:
+/// 1. each starts at a third (the lines left over go to Contexts, then
+///    Projects, and no panel starts below its floor);
+/// 2. a panel short of lines, Contexts first, then Projects, then Filters,
+///    takes the blank rows of the others, the panel with the most first;
+/// 3. a panel with fewer than `KEPT` entries shown takes shown entries
+///    from the others, the last first, each down to `KEPT` entries (all
+///    of them if fewer); when the sidebar is too short for every panel to
+///    keep `KEPT`, the 3 drops to 2, then 1, for all together;
+/// 4. Contexts, then Projects, short of lines still take shown entries
+///    from the panels after them, the last first, down to the same.
+///
+/// A sidebar too short for the floors is `crowded`; the lines always add
+/// up to `h`.
 pub(crate) fn panel_heights(
     h: usize,
     entries: [usize; PANELS],
@@ -59,19 +71,52 @@ pub(crate) fn panel_heights(
     if h < FLOORS.iter().sum() {
         return crowded(h);
     }
+    let need: [usize; PANELS] =
+        std::array::from_fn(|i| lines_for(i, entries[i]));
     let mut heights = FLOORS.map(|floor| floor.max(h / 3));
     let left = h - heights.iter().sum::<usize>();
     heights[CONTEXTS] += left.min(1);
     heights[PROJECTS] += left / 2;
+    let fit = std::array::from_fn(|d| need[d].max(FLOORS[d]));
+    for i in PRIORITY {
+        let mut donors = [PROJECTS, CONTEXTS, FILTERS];
+        let blank = |d: usize| heights[d].saturating_sub(fit[d]);
+        donors.sort_by_key(|&d| Reverse((blank(d), d)));
+        take(&mut heights, fit, (i, need[i]), donors);
+    }
+    let kept = (2..=KEPT)
+        .rev()
+        .map(|most| {
+            std::array::from_fn(|d| {
+                FLOORS[d].max(lines_for(d, entries[d].min(most)))
+            })
+        })
+        .find(|kept: &[usize; PANELS]| kept.iter().sum::<usize>() <= h)
+        .unwrap_or(FLOORS);
+    for i in PRIORITY {
+        take(&mut heights, kept, (i, kept[i]), PRIORITY.into_iter().rev());
+    }
     for (rank, &i) in PRIORITY[..2].iter().enumerate() {
-        for &donor in PRIORITY[rank + 1..].iter().rev() {
-            let lacks = lines_for(i, entries[i]).saturating_sub(heights[i]);
-            let take = lacks.min(heights[donor] - FLOORS[donor]);
-            heights[i] += take;
-            heights[donor] -= take;
-        }
+        let below = PRIORITY[rank + 1..].iter().rev().copied();
+        take(&mut heights, kept, (i, need[i]), below);
     }
     heights
+}
+
+/// Hands panel `i` lines from the `donors` in turn, each down to its
+/// floor, until it has `want`.
+fn take(
+    heights: &mut [usize; PANELS],
+    floors: [usize; PANELS],
+    (i, want): (usize, usize),
+    donors: impl IntoIterator<Item = usize>,
+) {
+    for donor in donors.into_iter().filter(|&d| d != i) {
+        let spare = heights[donor].saturating_sub(floors[donor]);
+        let take = want.saturating_sub(heights[i]).min(spare);
+        heights[i] += take;
+        heights[donor] -= take;
+    }
 }
 
 /// The heights of a sidebar too short for the floors: titles first, then
