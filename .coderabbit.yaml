@@ -1,0 +1,2 @@
+reviews:
+  path_filters: ["!testdata/**"]
