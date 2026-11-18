@@ -10,9 +10,9 @@ use crate::{
 const INTRO: [&[&str]; 9] = [
     &[
         "# Identity",
-        "Set LSTY_OWNER once per run: agent-<first 4 session-id characters>. Use it",
-        "for every call; never a bare model or product name. Never use --human or",
-        "--no-config. A restart is a new run.",
+        "Set LSTY_OWNER once per run: agent-<first 4 session-id characters>. Use it for",
+        "every call; never a bare model or product name. Never --human or --no-config.",
+        "A restart is a new run. Project config layers over home unless -d/LSTY_CONFIG.",
     ],
     &[
         "# Calls",

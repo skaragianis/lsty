@@ -19,21 +19,23 @@ Terminal lists for Humans and Agents.
 ![lsty navigating, adding, filtering, and completing tasks while an agent works](https://raw.githubusercontent.com/skaragianis/lsty/main/assets/demo.gif)
 
 lsty is a Vim-inspired [todo.txt](http://todotxt.org/) TUI and a
-[todo.sh](https://github.com/todotxt/todo.txt-cli)-inspired CLI, with
-extensions for safe concurrent use by humans, scripts, and LLM agents.
+[todo.sh](https://github.com/todotxt/todo.txt-cli)-inspired CLI, with extensions
+for safe concurrent use by humans, scripts, and LLM agents.
 
-## What's It For?
+## Problems solved
 
-- Personal todo list that includes recurring tasks
-- Human in the loop with agents posting decisions for approval
+- Personal todo list with recurring tasks
+- Human in the loop, with agents posting decisions for approval
 - Agentic loop memory that a human can keep an eye on
 - Software factory single source of truth with file and web links
-- Work queue for parallel agents and agent types
+- Ordered work queue for parallel agents and agent types
 - Tracking agent cycle time for your definition of done
 
 ## Features
 
-- Watch agents work on lists in "real-time"
+- Concurrent access by lsty processes, with locking, atomic writes, and file
+  watching
+- Watch agents work lists in "real-time"
 - Configurable key bindings and themes. Normal, insert, visual and command-line
   modes. `u` for undo and `<C-r>` for redo
 - Priorities, projects, contexts, dependencies, dates, and links
@@ -44,8 +46,6 @@ extensions for safe concurrent use by humans, scripts, and LLM agents.
 - JSON output for scripts and agents. Retry-safe commands
 - Task ownership and claiming for coordinating work
 - Clipboard support (OSC 52 for SSH) and optional mouse support
-- Concurrent access by lsty processes, with locking, atomic writes, and file
-  watching
 - No databases or daemons, just text files
 
 ## Installation
@@ -71,13 +71,14 @@ cargo install lsty --locked
 
 ### Prebuilt binaries
 
-[Releases](https://github.com/skaragianis/lsty/releases) has archives for
-Linux (x86_64 and aarch64, statically linked) and macOS (Intel and Apple
-Silicon), with `SHA256SUMS`.
+[Releases](https://github.com/skaragianis/lsty/releases) has archives for Linux
+(x86_64 and aarch64, statically linked) and macOS (Intel and Apple Silicon),
+with `SHA256SUMS`.
 
 ### Build from source
 
-Install [Rust](https://rustup.rs/), [just](https://just.systems) and Git, then run:
+Install [Rust](https://rustup.rs/), [just](https://just.systems) and Git, then
+run:
 
 ```sh
 git clone https://github.com/skaragianis/lsty.git
@@ -86,9 +87,9 @@ just install
 lsty --version
 ```
 
-The repository pins Rust 1.100.0 in `rust-toolchain.toml`. With rustup
-installed Cargo uses that toolchain automatically. `just install` puts `lsty`
-in `~/.cargo/bin`, which rustup adds to your `PATH`.
+The repository pins Rust 1.100.0 in `rust-toolchain.toml`. With rustup installed
+Cargo uses that toolchain automatically. `just install` puts `lsty` in
+`~/.cargo/bin`, which rustup adds to your `PATH`.
 
 ## Quick start
 
@@ -114,23 +115,23 @@ lsty # launches the TUI
 
 Default keys in normal mode:
 
-| Key                      | Action                      |
-| ------------------------ | --------------------------- |
-| `j` / `k`, or arrow keys | Move down / up              |
-| `gg` / `G`               | Go to the first / last task |
-| `O`                      | Add a task above the cursor |
-| `x`                      | Complete or reopen          |
-| `t`                      | Start or stop the task      |
-| `T`                      | Mark won't do               |
-| `dd` or `Del`            | Delete the task             |
-| `gx`                     | Open the task's links       |
-| `PageDown` / `PageUp`    | Move down / up a page       |
-| `?`                      | Show keys and commands      |
-| `:archive`               | Move done tasks to done.txt |
-| `q`                      | Quit                        |
+| Key                            | Action                      |
+| ------------------------------ | --------------------------- |
+| `k` / `j`, or `Up` / `Down`    | Move up / down              |
+| `h` / `l`, or `Left` / `Right` | Lower / raise the priority  |
+| `gg` / `G`                     | Go to the first / last task |
+| `O`                            | Add a task above the cursor |
+| `x`                            | Complete or reopen          |
+| `t`                            | Start or stop the task      |
+| `T`                            | Mark won't do               |
+| `dd` or `Del`                  | Delete the task             |
+| `gx`                           | Open the task's links       |
+| `PageDown` / `PageUp`          | Move down / up a page       |
+| `?`                            | Show keys and commands      |
+| `:archive`                     | Move done tasks to done.txt |
+| `q`                            | Quit                        |
 
-Press `?` for every key binding and `:` command. `:help TEXT` opens it
-filtered.
+Press `?` for every key binding and `:` command. `:help TEXT` opens it filtered.
 
 `gx` opens the links of the task under the cursor: its `file:` tags and any web
 address (`https://...`, `ftp://...`, any scheme). If the opener fails, the
@@ -165,8 +166,8 @@ Use `lsty PATH` for the TUI or `--file PATH` for CLI commands. Otherwise lsty
 checks these sources in order:
 
 1. `TODO_FILE` environment variable.
-2. An existing `todo.txt` in the current directory or a parent, stopping at
-   the nearest Git root, your home directory, or the filesystem root.
+2. An existing `todo.txt` in the current directory or a parent, stopping at the
+   nearest Git root, your home directory, or the filesystem root.
 3. `TODO_DIR/todo.txt`.
 4. `default_file` from configuration.
 5. A fallback `todo.txt` in the Git root, or the current directory outside Git.
@@ -204,20 +205,30 @@ the language too.
 The Filters panel lists the built-in filters Today, Overdue, Upcoming, Doing,
 Waiting, No project and Won't do, then your custom ones.
 
-In the TUI, `x` or a click on a project or context in its panel moves it
-through or (`|`, with the one chosen before it), and (`&`), not (`-`) and
-off. The first one chosen has nothing to join, so it shows `>` and goes on
-to `-` and off. The title of the list shows the result in the filter
-language, the projects and contexts in the order they were chosen: `+lsty
-@home|@work -@waiting`. In the Filters panel `x` flips a switch or selects
-one filter at a time. `Enter` moves to the list without changing the
-filter.
+In the TUI, `x` or a click on a project or context in its panel moves it through
+or (`|`, with the one chosen before it), and (`&`), not (`-`) and off. The first
+one chosen has nothing to join, so it shows `=` and goes on to `-` and off. The
+title of the list shows the result in the filter language, the projects and
+contexts in the order they were chosen: `+lsty @home|@work -@waiting`. In the
+Filters panel `x` flips a switch or selects one filter at a time. `Enter` moves
+to the list without changing the filter.
+
+`/` opens the search with the selected projects and contexts eg.
+(`+lsty|+home -@waiting`). `Esc` and `Ctrl-l` clear the last search, and
+`Ctrl-u` empties the prompt for a fresh search.
 
 ### Configuration
 
-The default configuration file is `~/.config/lsty/config.toml`, including
-on macOS. `XDG_CONFIG_HOME` changes the configuration root, and `LSTY_CONFIG`
+The default configuration file is `~/.config/lsty/config.toml`, including on
+macOS. `XDG_CONFIG_HOME` changes the configuration root, and `LSTY_CONFIG`
 selects an alternative configuration file.
+
+A project can carry its own `.lsty/config.toml`, found by walking up from the
+launch folder with the same stops as for `todo.txt`. It layers over the home
+file, to keep a theme per project, and applies only when its folder holds the
+todo file in use, so a `--file` list elsewhere never reads it. `LSTY_CONFIG`,
+`-d` and `--no-config` skip it. `default_file`, `paste_command` and
+`copy_command` are read from the home file only.
 
 A minimal example:
 
@@ -236,7 +247,7 @@ auto_archive = false
 | `include_creation`  | `true`  | `true`, `false`                       | Write a creation date on new tasks                 |
 | `keep_priority`     | `true`  | `true`, `false`                       | Keep a task's priority when it is completed        |
 | `default_priority`  | unset   | one letter `A`-`Z`                    | The priority of new tasks                          |
-| `priority_range`    | `"D"`   | one letter `A`-`Z`                    | The last priority that `gp` and `gP` cycle through |
+| `priority_range`    | `"D"`   | one letter `A`-`Z`                    | Where `gp` starts and `gP` stops                   |
 | `lock_timeout`      | `"2s"`  | a duration: `500ms`, `2s`, `4h`, `2d` | How long to wait for another writer's lock         |
 | `claim_stale_after` | `"4h"`  | a duration                            | When an untouched claim counts as stale            |
 
@@ -258,9 +269,9 @@ auto_archive = false
 | `sidebar_min_width` | `80`                           | 0 or more                                    | The terminal width below which the sidebar is hidden                    |
 | `show_detail`       | `true`                         | `true`, `false`                              | Show the detail panel                                                   |
 | `detail_min_width`  | `120`                          | 0 or more                                    | The narrowest terminal that shows the detail panel beside the list      |
-| `detail_position`   | `"right"`                      | `right`, `bottom`                            | Beside the list when wide enough, or always below it                    |
+| `detail_position`   | `"right"`                      | `right`, `bottom`                            | Where `gi` starts: beside the list when wide enough, or below it        |
 | `show_ids`          | `true`                         | `true`, `false`                              | Show the `id:` and `dep:` tags in a row's text                          |
-| `wrap`              | `true`                         | `true`, `false`                              | Wrap a long task onto up to 3 rows of the list                          |
+| `list_rows`         | `3`                            | 1 or more                                    | The most rows a task takes in the list (`+`, `-`, `0` change it)        |
 | `paste_command`     | unset                          | a command line                               | What reads the clipboard; unset tries `wl-paste`, `xclip` and `pbpaste` |
 | `copy_command`      | unset                          | a command line                               | What writes the clipboard; unset tries `pbcopy`, `wl-copy` and `xclip`  |
 
@@ -280,8 +291,8 @@ normal = ["toggle_complete", "insert_below", "undo", "help"]
 ```
 
 Key bindings live in `keys.toml` and custom themes in `themes/` under the
-configuration directory. `--no-config` ignores configuration, custom keys,
-and custom themes.
+configuration directory. `--no-config` ignores configuration, custom keys, and
+custom themes.
 
 ## Scripts and agents
 
@@ -295,9 +306,9 @@ those tools might conflict. Locking is not a cross-machine solution.
 
 ### Compatibility and help
 
-The CLI is inspired by todo.sh but may not always be a drop-in replacement.
-lsty has been benchmarked against todo.sh for performance and compatibility,
-but lsty intentionally diverges around some todo.sh quirks.
+The CLI is inspired by todo.sh but may not always be a drop-in replacement. lsty
+has been benchmarked against todo.sh for performance and compatibility, but lsty
+intentionally diverges around some todo.sh quirks.
 
 ```sh
 lsty help          # command overview, options, and environment variables
@@ -327,11 +338,11 @@ just --list  # every recipe
 I wondered what it would be like to have agents populating and pulling from a
 shared project todo list, where they can leave follow-ups for the human or next
 agents. So it began as a ~2,500 line specification that was decomposed into 44
-implementation specs. A software factory built it in Go and then that
-was used as the reference implementation for the final Rust version. It was
-then benchmarked against todo.sh. I've found it very useful (and entertaining)
-to have a live "surface" to keep an eye on spec implementation progress.
-Frontier LLMs have no issue using it without specific skills.
+implementation specs. A software factory built it in Go and then that was used
+as the reference implementation for the final Rust version. It was then
+benchmarked against todo.sh. I've found it very useful (and entertaining) to
+have a live "surface" to keep an eye on spec implementation progress. Frontier
+LLMs have no issue using it without specific skills.
 
 ## Contributing
 
@@ -341,5 +352,5 @@ issue before a large change. See
 
 ## License
 
-Licensed under the
-[Apache License, Version 2.0](https://github.com/skaragianis/lsty/blob/main/LICENSE).
+Licensed under the [Apache License, Version
+2.0](https://github.com/skaragianis/lsty/blob/main/LICENSE).
