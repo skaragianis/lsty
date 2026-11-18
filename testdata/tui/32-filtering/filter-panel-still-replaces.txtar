@@ -27,12 +27,9 @@ E +home +work
 │ @phone   3/3││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
+│ [x] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
 │ [ ] Archive ││                                                                                   │
 │ ─────────── ││                                                                                   │
@@ -40,5 +37,8 @@ E +home +work
 │ Overdue     ││                                                                                   │
 │ Upcoming    ││                                                                                   │
 │=Doing       ││                                                                                   │
+│ Waiting     ││                                                                                   │
+│ No project  ││                                                                                   │
+│ Won't do    ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9

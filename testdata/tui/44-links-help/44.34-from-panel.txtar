@@ -18,21 +18,21 @@ Done task
 │ │  Navigation                                                                                  │ │
 │ │    j , <Down>  Move the cursor down                                                          │ │
 │ │    k , <Up>  Move the cursor up                                                              │ │
-│ │    gg , <Home>  Go to the top                                                                │ │
-├[│    G , <End>  Go to the bottom                                                               │ │
-│ │    <C-d>  Scroll half a page down                                                            │ │
+├[│    gg , <Home>  Go to the top                                                                │ │
+│ │    G , <End>  Go to the bottom                                                               │ │
+├[│    <C-d>  Scroll half a page down                                                            │ │
 │ │    <C-u>  Scroll half a page up                                                              │ │
 │ │    <C-f> , <PageDown>  Scroll a page down                                                    │ │
 │ │    <C-b> , <PageUp>  Scroll a page up                                                        │ │
 │ │    <C-e>  Scroll the view down a row                                                         │ │
 │ │    <C-y>  Scroll the view up a row                                                           │ │
 │ │    zz  Centre the cursor row in the view                                                     │─┘
-├[│    zt  Put the cursor row at the top of the view                                             │─┐
+│ │    zt  Put the cursor row at the top of the view                                             │─┐
 │ │    zb  Put the cursor row at the bottom of the view                                          │ │
 │ │    H  Go to the top row of the view                                                          │ │
 │ │    M  Go to the middle row of the view                                                       │ │
 │ └ 154-170 of 376 ──────────────────────────────────────────────────────────────────────────────┘ │
-│ ─────────── ││ priority  A                                                                       │
+│ Won't do    ││ priority  A                                                                       │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  / search  <Esc> close                                              9.9.9
 -- back --
@@ -43,20 +43,20 @@ Done task
 │             ││                                                                                   │
 │             ││                                                                                   │
 │             ││                                                                                   │
-│             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             ││                                                                                   │
-│             │└───────────────────────────────────────────────────────────────────────────────────┘
-├[5]─Filters──┤┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
-│ [x] Done    ││ Call client +work                                                                 │
-│ [ ] Later   ││ ───────────────────────────────────────────────────────────────────────────────── │
-│ [x] Blocked ││ state     todo                                                                    │
-│ [ ] Archive ││ nr        1                                                                       │
-│ ─────────── ││ priority  A                                                                       │
+├[5]─Filters──┤│                                                                                   │
+│ [x] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked ││                                                                                   │
+│ [ ] Archive ││                                                                                   │
+│ ─────────── ││                                                                                   │
+│ Today       │└───────────────────────────────────────────────────────────────────────────────────┘
+│ Overdue     │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ Upcoming    ││ Call client +work                                                                 │
+│ Doing       ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ Waiting     ││ state     todo                                                                    │
+│ No project  ││ nr        1                                                                       │
+│ Won't do    ││ priority  A                                                                       │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9

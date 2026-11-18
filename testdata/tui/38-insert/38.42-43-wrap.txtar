@@ -19,25 +19,25 @@ Last
 │             ││    word word word word word word word word word word word     │
 │             ││    word word word word word word word word word word word     │
 │             ││    word word word word word word word word word word word     │
-│             ││    word word word word end                                    │
-├[4]─Contexts─┤│  1   Last                                                     │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             │└───────────────────────────────────────────────────────────────┘
-├[5]─Filters──┤┌[2]─Detail─────────────────────────────────────────────────────┐
-│ [x] Done    ││ word word word word word word word word word word word word   │
-│ [ ] Later   ││ word word word word word word word word word word word word   │
-│ [x] Blocked ││ word word word word word word word word word word word word   │
-│ [ ] Archive ││ word word word word word word word word word word word word   │
-│ ─────────── ││ …                                                             │
+├[4]─Contexts─┤│    word word word word end                                    │
+│             ││  1   Last                                                     │
+├[5]─Filters──┤│                                                               │
+│ [x] Done    ││                                                               │
+│ [ ] Later   ││                                                               │
+│ [x] Blocked ││                                                               │
+│ [ ] Archive ││                                                               │
+│ ─────────── ││                                                               │
+│ Today       │└───────────────────────────────────────────────────────────────┘
+│ Overdue     │┌[2]─Detail─────────────────────────────────────────────────────┐
+│ Upcoming    ││ word word word word word word word word word word word word   │
+│ Doing       ││ word word word word word word word word word word word word   │
+│ Waiting     ││ word word word word word word word word word word word word   │
+│ No project  ││ word word word word word word word word word word word word   │
+│ Won't do    ││ …                                                             │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  INSERT  todo.txt  manual  <CR> commit  <C-w> del word                    9.9.9
 -- a-cursor --
-│             ││    word word word word end                                    │
+├[4]─Contexts─┤│    word word word word end                                    │
                                            ^
 -- b-cursor --
 │             ││    word word word word word word word word word word word     │

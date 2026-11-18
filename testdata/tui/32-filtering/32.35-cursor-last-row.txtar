@@ -30,11 +30,6 @@ x 2026-09-01 Old task +work
 │ @phone   1/1││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
 │             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
-│             ││                                                                          ││                                     │
 ├[5]─Filters──┤│                                                                          ││                                     │
 │ [x] Done    ││                                                                          ││                                     │
 │ [ ] Later   ││                                                                          ││                                     │
@@ -43,5 +38,10 @@ x 2026-09-01 Old task +work
 │ ─────────── ││                                                                          ││                                     │
 │ Today       ││                                                                          ││                                     │
 │ Overdue     ││                                                                          ││                                     │
+│ Upcoming    ││                                                                          ││                                     │
+│ Doing       ││                                                                          ││                                     │
+│ Waiting     ││                                                                          ││                                     │
+│ No project  ││                                                                          ││                                     │
+│ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  o new  a append  dd delete  u undo  / search  ? help                     9.9.9

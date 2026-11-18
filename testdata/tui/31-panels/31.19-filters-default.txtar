@@ -37,11 +37,6 @@ show_detail = false
 │             ││ 10 ✓     Paint fence +home                   4d ago           │
 │             ││                                                               │
 │             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
-│             ││                                                               │
 ├[5]─Filters──┤│                                                               │
 │ [x] Done    ││                                                               │
 │ [ ] Later   ││                                                               │
@@ -50,5 +45,10 @@ show_detail = false
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
 │ Overdue     ││                                                               │
+│ Upcoming    ││                                                               │
+│ Doing       ││                                                               │
+│ Waiting     ││                                                               │
+│ No project  ││                                                               │
+│ Won't do    ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  <Tab> next  9.9.9

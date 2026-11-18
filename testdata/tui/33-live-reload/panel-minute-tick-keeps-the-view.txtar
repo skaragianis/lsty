@@ -46,13 +46,13 @@ Task 030 +p30
 │ +p22     1/1││  3   Task 004 +p04                                            │
 │ +p23     1/1││  4   Task 005 +p05                                            │
 │ +p24     1/1││  5   Task 006 +p06                                            │
-├[4]─Contexts─┤│  6   Task 007 +p07                                            │
-│             ││  7   Task 008 +p08                                            │
+│ +p25     1/1││  6   Task 007 +p07                                            │
+├[4]─Contexts─┤│  7   Task 008 +p08                                            │
 │             ││  8   Task 009 +p09                                            │
-│             ││  9   Task 010 +p10                                            │
-│             ││ 10   Task 011 +p11                                            │
-├[5]─Filters──┤│ 11   Task 012 +p12                                            │
-│ [x] Done    ││ 12   Task 013 +p13                                            │
+├[5]─Filters──┤│  9   Task 010 +p10                                            │
+│ [x] Done    ││ 10   Task 011 +p11                                            │
+│ [ ] Later   ││ 11   Task 012 +p12                                            │
+│ [x] Blocked ││ 12   Task 013 +p13                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9
 -- after --
@@ -63,12 +63,12 @@ Task 030 +p30
 │ +p22     1/1││  3   Task 004 +p04                                            │
 │ +p23     1/1││  4   Task 005 +p05                                            │
 │ +p24     1/1││  5   Task 006 +p06                                            │
-├[4]─Contexts─┤│  6   Task 007 +p07                                            │
-│             ││  7   Task 008 +p08                                            │
+│ +p25     1/1││  6   Task 007 +p07                                            │
+├[4]─Contexts─┤│  7   Task 008 +p08                                            │
 │             ││  8   Task 009 +p09                                            │
-│             ││  9   Task 010 +p10                                            │
-│             ││ 10   Task 011 +p11                                            │
-├[5]─Filters──┤│ 11   Task 012 +p12                                            │
-│ [x] Done    ││ 12   Task 013 +p13                                            │
+├[5]─Filters──┤│  9   Task 010 +p10                                            │
+│ [x] Done    ││ 10   Task 011 +p11                                            │
+│ [ ] Later   ││ 11   Task 012 +p12                                            │
+│ [x] Blocked ││ 12   Task 013 +p13                                            │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9

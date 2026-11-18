@@ -66,33 +66,33 @@ MMMMMMMMM.mmmmcccccmTTTTTTTTTTTTTT..kkkk.yyy..kkkkk.yyyy..kkkkk.yyyyyy..........
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   Call +work @desk                                                             │
 │ +work    1/1││  1   Pay +home                                                              today │
-│             ││                                                                                   │
-│             ││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │ @desk    1/1││                                                                                   │
-│             ││                                                                                   │
-│             │└───────────────────────────────────────────────────────────────────────────────────┘
-│             │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
-├[5]─Filters──┤│ Call +work @desk                                                                  │
-│ [x] Done    ││ ───────────────────────────────────────────────────────────────────────────────── │
-│ [ ] Later   ││ state  todo                                                                       │
-│ [x] Blocked ││ nr     1                                                                          │
+├[5]─Filters──┤│                                                                                   │
+│ [x] Done    ││                                                                                   │
+│ [ ] Later   ││                                                                                   │
+│ [x] Blocked │└───────────────────────────────────────────────────────────────────────────────────┘
+│ [ ] Archive │┌[2]─Detail─────────────────────────────────────────────────────────────────────────┐
+│ ─────────── ││ Call +work @desk                                                                  │
+│ Today       ││ ───────────────────────────────────────────────────────────────────────────────── │
+│ Overdue     ││ state  todo                                                                       │
+│ Upcoming    ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
 -- panel --
 EEEEEEEEEEEEEEEeetttttttttttttteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 E.PPPPP....tttEe.yy...yyyyyPPPPPyppppp.............................................................e
 E.ccccc....tttEe.tt...mmmmccccc..............................................................TTTTT.e
-E.............Ee...................................................................................e
-E.............Ee...................................................................................e
 EttttttttttttEEe...................................................................................e
 e.ppppp....tttee...................................................................................e
-e.............ee...................................................................................e
-e.............eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-e.............eetttttttttteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-ettttttttttteeee.mmmmmcccccmppppp..................................................................e
-e.mmmmmmmm....ee.ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.e
-e.mmmmmmmmm...ee.tttttttmmmm.......................................................................e
-e.mmmmmmmmmmm.ee.tttttttm..........................................................................e
+ettttttttttteeee...................................................................................e
+e.mmmmmmmm....ee...................................................................................e
+e.mmmmmmmmm...ee...................................................................................e
+e.mmmmmmmmmmm.eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.mmmmmmmmmmm.eetttttttttteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+e.ttttttttttt.ee.mmmmmcccccmppppp..................................................................e
+e.mmmmm.......ee.ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt.e
+e.mmmmmmm.....ee.tttttttmmmm.......................................................................e
+e.mmmmmmmm....ee.tttttttm..........................................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNNNNNNN.mmmmmmmm..tttttt..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD..................ttttt.

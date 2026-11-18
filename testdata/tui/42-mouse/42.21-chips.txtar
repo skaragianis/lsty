@@ -36,11 +36,6 @@ C +work.acme
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -49,6 +44,11 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
+│ Waiting     ││                                                                                                                 │
+│ No project  ││                                                                                                                 │
+│ Won't do    ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
 -- no-project --
@@ -67,11 +67,6 @@ C +work.acme
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -80,6 +75,11 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
+│ Waiting     ││                                                                                                                 │
+│ No project  ││                                                                                                                 │
+│ Won't do    ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
 -- no-context --
@@ -98,11 +98,6 @@ C +work.acme
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -111,6 +106,11 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │=Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
+│ Waiting     ││                                                                                                                 │
+│ No project  ││                                                                                                                 │
+│ Won't do    ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
 -- no-filter --
@@ -129,11 +129,6 @@ C +work.acme
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -142,6 +137,11 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │ Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
+│ Waiting     ││                                                                                                                 │
+│ No project  ││                                                                                                                 │
+│ Won't do    ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
 -- frame --
@@ -160,11 +160,6 @@ C +work.acme
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -173,6 +168,11 @@ C +work.acme
 │ ─────────── ││                                                                                                                 │
 │ Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
+│ Waiting     ││                                                                                                                 │
+│ No project  ││                                                                                                                 │
+│ Won't do    ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
 -- frame-bg --

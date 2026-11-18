@@ -30,11 +30,6 @@ F started:2026-09-29T0900Z
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
 │             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
-│             ││                                                                                                                 │
 ├[5]─Filters──┤│                                                                                                                 │
 │ [x] Done    ││                                                                                                                 │
 │ [ ] Later   ││                                                                                                                 │
@@ -43,6 +38,11 @@ F started:2026-09-29T0900Z
 │ ─────────── ││                                                                                                                 │
 │ Today       ││                                                                                                                 │
 │ Overdue     ││                                                                                                                 │
+│ Upcoming    ││                                                                                                                 │
+│ Doing       ││                                                                                                                 │
+│ Waiting     ││                                                                                                                 │
+│ No project  ││                                                                                                                 │
+│ Won't do    ││                                                                                                                 │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
  NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  <Tab> next  h fold  l unfold                                  9.9.9
 -- frame-bg --
