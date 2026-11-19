@@ -367,6 +367,13 @@ fn a_panel_changed_after_the_search_keeps_its_change() {
     keys(&mut model, "<C-l>");
     assert_eq!(model.search, "");
     assert_eq!(model.panels[PROJECTS].active, by_hand);
+    // also when the hand changes end where the search left the panel
+    let (_dir, mut model) = home_and_phone();
+    keys(
+        &mut model,
+        "/<C-u>+work<CR><C-w>3j<Space><Space><Space><Esc><Esc>",
+    );
+    assert_eq!(model.panels[PROJECTS].active, [Term::and("work")]);
 }
 
 #[test]
