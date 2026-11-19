@@ -378,7 +378,7 @@ actions! {
         "fewer rows", Other
     );
     DefaultRows => (
-        "default_rows", View, "Let a task take the default rows in the list",
+        "default_rows", View, "Let a task take the rows config.toml sets",
         "default rows", Other
     );
     EnterVisual => ("enter_visual", View, "Select tasks", "select", Other);
