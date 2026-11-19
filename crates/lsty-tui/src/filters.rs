@@ -128,6 +128,8 @@ impl Model {
                 connective::step
             };
             pick(&mut panel.active, entry.name());
+            // what the last search moved is no longer to be taken back
+            self.taken.get_mut(i).map(Option::take);
         }
         self.rebuild_panels();
         self.scroll_panels();
