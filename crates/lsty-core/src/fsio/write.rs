@@ -123,7 +123,7 @@ fn create_temp(path: &Path, temp: &Path) -> errs::Result<File> {
     let file = OpenOptions::new()
         .write(true)
         .create_new(true)
-        .mode(NEW_FILE_MODE)
+        .mode(mode.unwrap_or(NEW_FILE_MODE))
         .open(temp)
         .map_err(|e| io_at("write", path, "open", temp, e))?;
     if let Some(mode) = mode {
