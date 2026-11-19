@@ -112,6 +112,8 @@ pub(crate) struct Model {
     pub(crate) catalog: Vec<filters::Entry>,
     /// The search that was kept.
     pub(crate) search: String,
+    /// The `list_rows` the config gave, which `0` goes back to.
+    pub(crate) configured_rows: u64,
     /// What the last kept search did to the projects and the contexts.
     pub(crate) taken: [Taken; 2],
     /// The text line of the status line while it is open.
@@ -181,6 +183,7 @@ impl Model {
             panels: Self::new_panels(),
             catalog,
             search: String::new(),
+            configured_rows: deps.config.list_rows,
             taken: Default::default(),
             line: None,
             output: None,

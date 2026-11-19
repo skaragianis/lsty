@@ -43,9 +43,9 @@ fn todo() -> String {
 
 /// A model of `todo()` with the list alone, `h` lines high, a task taking
 /// up to `list_rows` rows.
-fn tall(h: u16, list_rows: usize) -> (TempDir, Model) {
+fn tall(h: u16, list_rows: u64) -> (TempDir, Model) {
     let config = Config {
-        list_rows: list_rows as u64,
+        list_rows,
         ..alone()
     };
     let (dir, mut model) = workdir_model(&todo(), config);
@@ -75,7 +75,7 @@ fn the_tasks_take_the_rows_the_tests_assume() {
     assert_eq!(heights(&model), HEIGHTS);
     assert_eq!(model.pane_rows(), 9);
     for list_rows in [1, 2, 5] {
-        let (_dir, model) = tall(12, list_rows);
+        let (_dir, model) = tall(12, list_rows as u64);
         let want = HEIGHTS.map(|h| h.min(list_rows));
         assert_eq!(heights(&model), want, "{list_rows}");
     }
@@ -215,9 +215,10 @@ fn a_row_more_or_fewer_keeps_the_cursor_task_whole() {
     cut_view_scrolls_and_opens_whole();
     for (from, typed, rows, lit) in STOPS {
         let (_dir, mut model) = tall(12, from);
-        assert_eq!(model.can_default_rows(), from != 3, "{from} hint");
         keys(&mut model, typed);
         assert_eq!(model.deps.config.list_rows, rows, "{from} {typed}");
+        let back = model.can_default_rows();
+        assert_eq!(back, rows != from, "{from} {typed} hint");
         assert_eq!(model.can_add_row(), lit, "{from} {typed}");
     }
 }
@@ -288,12 +289,12 @@ fn fewer_rows_cut_the_top(model: &mut Model) {
     assert_eq!(model.sized(|s| s.cut.1), 0);
 }
 
-type Stop = (usize, &'static str, u64, bool);
+type Stop = (u64, &'static str, u64, bool);
 
 /// (`list_rows` at first, keys, `list_rows` after, whether `+` is lit): both
 /// keys stop, `-` drops to one below the longest task, also after a filter;
-/// `0` sets 3 unless it is 3.
-const STOPS: [Stop; 12] = [
+/// `0` sets the configured rows, `from`, and is dim there.
+const STOPS: [Stop; 13] = [
     (1, "++", 3, false),
     (1, "+++", 3, false),
     (3, "---", 1, true),
@@ -303,9 +304,11 @@ const STOPS: [Stop; 12] = [
     (5, "+-+", 3, false),
     (5, "/w01<CR>-", 1, true),
     (5, "/w01<CR>--", 1, true),
-    (1, "0", 3, false),
-    (2, "-0", 3, false),
-    (5, "0", 3, false),
+    // `0` goes back to the `list_rows` of the config, and is dim there
+    (1, "++0", 1, true),
+    (5, "0", 5, false),
+    (5, "-0", 5, false),
+    (5, ":set list_rows=4<CR>0", 5, false),
 ];
 
 #[test]
