@@ -4,6 +4,38 @@ Changes a lsty user can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.8.0 (2026-11-19)
+
+### Breaking
+
+- **keys:** `gp` now raises the priority and `gP` lowers it. `+` and `-` no longer change the priority. `<Right>` and `l` raise it and `<Left>` and `h` lower it.
+- **tui:** List wrap is replaced by `list_rows`, the most rows a task takes in the list (3 by default).
+
+### Added
+
+- **theme:** Add the `lsty-80s` theme, and a `background` slot that fills the whole screen under every other colour; a theme without it keeps the terminal's background.
+- **theme:** Let a theme restyle slots on the highlighted row alone, with `[cursorline_slots]`; `lsty-80s` uses it for a white cursor row.
+- **theme:** Colour each part of a task (priority, project, context, code, link, due date, claim) the same wherever it shows: the list, the sidebar, the detail panel, completion, the link picker, the INSERT field and the `:` line.
+- **config:** Layer a project's `.lsty/config.toml` over the home config, to keep a theme per project etc. It is found by walking up from the launch folder and applies only when its folder holds the todo file in use. The theme picker saves to the file that set the theme; a project config that is a link is not saved, the pick lasts the session and the status says why.
+- **tui:** Open the search with the selected projects and contexts written as filter text. `Enter` moves them back into their panels, and `Esc` or `Ctrl-l` put each panel back as it was before the last search that changed it.
+- **tui:** Complete the value after a key in the search, such as `is:` or `dep:`.
+- **tui:** Let `+` and `-` take one more or one less row for a task in the list, up to the height of the list, and `0` set it back to `list_rows`; the highlighted task stays on its screen row.
+- **tui:** Start the sidebar panels at a third of the height each, and keep that while each fits its entries.
+
+### Changed
+
+- **tui:** Make `gi` move the detail panel to the next place with room: right, below, hidden (below, right, hidden with `detail_position = "bottom"`).
+- **tui:** Mark the first selected project or context in a panel with `=` in place of `>`.
+- **show:** Read `blocked` for the state of a blocked task in `lsty show`, the detail panel and `:show`; `--json` keeps `state` and its blocked flag.
+
+### Fixed
+
+- **tui:** Show archived tasks when archive is on, whatever done says.
+- **tui:** Show the distance in the gutter of an archived row, and size the number column for archived rows.
+- **tui:** Show the cut-off projects and contexts of a task cut at its edge in a one-row list.
+- **tui:** Keep a panel you changed by hand when `Esc` clears the search.
+- **fsio:** Keep a private todo or config file private while it is saved: the file written before it replaces the old one has the old one's permissions from the start.
+
 ## 0.7.2 (2026-11-13)
 
 ### Changed
