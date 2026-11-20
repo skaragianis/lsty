@@ -76,7 +76,7 @@ Task 40 +proj40
 │ [ ] Later   ││ 25   Task 26 +proj26                                                                                            │
 │ [x] Blocked ││ 26   Task 27 +proj27                                                                                            │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help                    9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help              1|40  9.9.9
 -- frame-bg --
 ..................................................................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

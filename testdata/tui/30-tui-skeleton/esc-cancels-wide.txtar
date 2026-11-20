@@ -23,40 +23,40 @@ Also A
 │  1   A                                                                       │
 │  1   Also A                                                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont    9.9.9
+ NORMAL  todo.txt  manual  <Esc> clear search  x done  t start       1|2  9.9.9
 -- pending --
 ┌ [1]─/A ──────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                       │
 │  1   Also A                                                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> cancel  x done  t start  T wont  o new   9.9.9
+ NORMAL  todo.txt  manual  <Esc> cancel  x done  t start  T wont     1|2  9.9.9
 -- count --
 ┌ [1]─/A ──────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                       │
 │  1   Also A                                                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL 2  todo.txt  manual  <Esc> cancel  x done  t start  T wont        9.9.9
+ NORMAL 2  todo.txt  manual  <Esc> cancel  x done  t start  T wont   1|2  9.9.9
 -- count-colours --
 EEEEEEhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt...t.......................................................................E
 E.mm...tttttt..................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..k.yyyy..k.yyyyy..k.yyyy........mmmmm.
+NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..k.yyyy..k.yyyyy..k.yyyy..NNNNN.mmmmm.
 -- visual --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   A                                                                       │
 │  2   Also A                                                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL 3  2 selected  todo.txt  manual  <Esc> cancel  x done  t start    9.9.9
+ VISUAL 3  2 selected  todo.txt  manual  <Esc> cancel  x done        2|2  9.9.9
 -- visual-colours --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...t.......................................................................E
 E.tt...tttttt..................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-VVVVVVVVVV.tttttttttt..tttttttt..mmmmmm..kkkkk.yyyyyy..k.yyyy..k.yyyyy....mmmmm.
+VVVVVVVVVV.tttttttttt..tttttttt..mmmmmm..kkkkk.yyyyyy..k.yyyy.......VVVVV.mmmmm.
 -- visual-pending --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   A                                                                       │
 │  2   Also A                                                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  <Esc> cancel  t start      9.9.9
+ VISUAL  2 selected  todo.txt  manual  x done  <Esc> cancel          2|2  9.9.9

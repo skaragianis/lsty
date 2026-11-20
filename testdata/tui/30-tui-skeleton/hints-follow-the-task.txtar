@@ -1,4 +1,4 @@
-size 100 8
+size 106 8
 start
 status  x done  t start  T wont  o new
 keys j
@@ -22,7 +22,7 @@ size 72 8
 frame narrow-won't-do
 keys g g
 frame narrow-todo
-size 100 8
+size 106 8
 keys j j j v
 status  x reopen  <Esc> exit  d delete
 keys k k
@@ -43,7 +43,7 @@ x 2026-09-01 Decided wontdo:true
 │  4 ✗ Decided wontdo:true                                 28d ago     │
 │                                                                      │
 └──────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  o new          9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x reopen  o new     4|4  9.9.9
 -- narrow-todo --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────┐
 │  1   Open                                                            │
@@ -52,4 +52,4 @@ x 2026-09-01 Decided wontdo:true
 │  3 ✗ Decided wontdo:true                                 28d ago     │
 │                                                                      │
 └──────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t start  T wont  9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  x done  t start     1|4  9.9.9

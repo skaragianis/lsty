@@ -21,7 +21,7 @@ Other
 │ state  todo                          │
 │ …                                    │
 └──────────────────────────────────────┘
- NORMAL 2  todo.txt  manual       9.9.9
+ NORMAL 2  todo.txt  manual        1|3
 -- detail --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1   Blocker                       b │

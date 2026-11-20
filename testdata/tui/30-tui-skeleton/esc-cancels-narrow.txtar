@@ -21,19 +21,19 @@ Also A
 │  1   A                               │
 │  1   Also A                          │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual         9.9.9
+ NORMAL  todo.txt  manual    1|2  9.9.9
 -- pending --
 ┌ [1]─/A ──────────────────────────────┐
 │  1   A                               │
 │  1   Also A                          │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual         9.9.9
+ NORMAL  todo.txt  manual    1|2  9.9.9
 -- count --
 ┌ [1]─/A ──────────────────────────────┐
 │  1   A                               │
 │  1   Also A                          │
 └──────────────────────────────────────┘
- NORMAL 2  todo.txt  manual       9.9.9
+ NORMAL 2  todo.txt  manual        1|2
 -- visual --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1   A                               │

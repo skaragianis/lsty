@@ -26,7 +26,7 @@ E..........tttttttttttttttttttt........E
 E..........ttttttttttttttttttttttppppp.E
 E.mm.......ttttttttttt.................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm.........mmmmm.
+IIIIIIII.tttttttt..mmmmmm....IIIIIIIIII.
 -- insert --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1       Buy milk                    │
@@ -39,7 +39,7 @@ IIIIIIII.tttttttt..mmmmmm.........mmmmm.
 │          bathroom and ask for… +home │
 │  2       Fix the tap                 │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual         9.9.9
+ INSERT  todo.txt  manual     2|4│1|93
 -- normal --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1       Buy milk                    │
@@ -52,4 +52,4 @@ IIIIIIII.tttttttt..mmmmmm.........mmmmm.
 │  2       Fix the tap                 │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual         9.9.9
+ NORMAL  todo.txt  manual    2|4  9.9.9

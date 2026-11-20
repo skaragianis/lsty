@@ -29,7 +29,7 @@ Write `the parser` id:p
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  task 2 is blocked by 1 (Write `the parser`)  todo.txt  manual  x done  t start  T wont  o new  a append            9.9.9
+ NORMAL  task 2 is blocked by 1 (Write `the parser`)  todo.txt  manual  x done  t start  T wont  o new  a append       2|2  9.9.9
 -- a-file --
 Write `the parser` id:p
 (B) Add CLI dep:p id:q due:2026-09-28
@@ -49,7 +49,7 @@ Write `the parser` id:p
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  task 2 is blocked by 1 (Write `the parser`)  todo.txt  manual  x done  t start  T wont  o new  a append            9.9.9
+ NORMAL  task 2 is blocked by 1 (Write `the parser`)  todo.txt  manual  x done  t start  T wont  o new  a append       2|2  9.9.9
 -- b-file --
 Write `the parser` id:p
 (B) Add CLI dep:p id:q due:2026-09-28
@@ -69,4 +69,4 @@ E...............................................................................
 E.........................................................................................Ee.....................................e
 E.........................................................................................Ee.....................................e
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..tttttttt..mmmmmm..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyyyyy............mmmmm.
+NNNNNNNN.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..tttttttt..mmmmmm..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyyyyy......NNNNN.mmmmm.

@@ -51,4 +51,4 @@ Buy milk +home t:2026-10-05
 │ Doing       ││                                                                          ││                                     │
 │ Waiting     ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search        9.9.9
+ NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo  / search   1|1  9.9.9

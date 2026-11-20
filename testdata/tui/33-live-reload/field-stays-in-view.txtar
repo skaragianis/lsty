@@ -88,7 +88,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual         9.9.9
+ INSERT  todo.txt  manual  <CR> commit
 -- minute --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
@@ -96,7 +96,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual         9.9.9
+ INSERT  todo.txt  manual  <CR> commit
 -- outside --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
@@ -104,7 +104,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual         9.9.9
+ INSERT  todo.txt  manual  <CR> commit
 -- refused --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2   Task 003 +p                     │

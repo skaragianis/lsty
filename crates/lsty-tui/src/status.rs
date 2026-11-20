@@ -1,5 +1,5 @@
 //! The status line: the mode, the file, the doing count, a message, the
-//! hints and the version.
+//! hints, the position and the version.
 
 use lsty_core::{
     errs::Source,
@@ -15,7 +15,7 @@ use crate::{
     messages::Tone,
     model::Model,
     rows::MARKER_DOING,
-    text::{Span, cut, fit, pad, put, width, width_of},
+    text::{Span, cut, fit, pad, put, width},
 };
 
 fn mode_slot(mode: Mode) -> Slot {
@@ -53,7 +53,8 @@ impl Model {
         };
         let answer = self.answers();
         let mut used = width(&line);
-        let taken = self.version_room(used, w);
+        let tail = self.right_end(used, w);
+        let taken = if tail.is_empty() { 0 } else { width(&tail) + 2 };
         let room = w - taken;
         let label = |action| {
             let answer = answer(action);
@@ -77,13 +78,8 @@ impl Model {
             line.extend(hint);
         }
         let mut line = cut(line, room);
-        if taken > 0 {
-            pad(&mut line, room + 2, None);
-            line.extend([
-                Span::new(self.deps.version, Some(Slot::Muted)),
-                Span::new(" ", None),
-            ]);
-        }
+        pad(&mut line, w - width(&tail), None);
+        line.extend(tail);
         pad(&mut line, w, None);
         let area = Rect::new(0, y, width_cells, 1);
         buf.set_style(area, self.styles.fill(Slot::StatusBg));
@@ -105,17 +101,40 @@ impl Model {
         }
     }
 
-    /// The cells at the right of a status line `w` cells wide that the
-    /// version, the space after it and a gap of two take; none while a
-    /// field is open, or when the left part (`base` cells) and all of
-    /// that do not fit.
-    fn version_room(&self, base: usize, w: usize) -> usize {
-        let room = width_of(self.deps.version) + 3;
-        if self.line.is_some() || base + room > w {
-            0
-        } else {
-            room
+    /// The spans at the right end of a status line `w` cells wide whose
+    /// left part is `base` cells, after a gap of two: the position, then
+    /// the version, each with a space after it. The version gives way
+    /// first, then the position. The position shows with the list or its
+    /// field focused, and both go while a prompt line is open.
+    fn right_end(&self, base: usize, w: usize) -> Vec<Span<'_>> {
+        let mode = self.key_mode();
+        let mut out = Vec::new();
+        if matches!(
+            mode,
+            Mode::Normal | Mode::Visual | Mode::Insert | Mode::Completion
+        ) {
+            let new = self.edit.as_ref().is_some_and(|e| !e.replacing());
+            let of = self.rows.len() + usize::from(new);
+            let at = (self.field_at() + 1).min(of);
+            let field = self.edit.as_ref().map_or(String::new(), |e| {
+                format!(
+                    "\u{2502}{}|{}",
+                    e.field.cursor + 1,
+                    e.field.text.len()
+                )
+            });
+            let label = format!(" {at}|{of}{field} ");
+            out.push(Span::new(label, Some(mode_slot(self.mode()))));
+            out.push(Span::new(" ", None));
         }
+        if self.line.is_none() {
+            out.push(Span::new(self.deps.version, Some(Slot::Muted)));
+            out.push(Span::new(" ", None));
+        }
+        while !out.is_empty() && base + 2 + width(&out) > w {
+            out.truncate(out.len() - 2);
+        }
+        out
     }
 
     /// Whether a warning or an error is up: the status line then puts it

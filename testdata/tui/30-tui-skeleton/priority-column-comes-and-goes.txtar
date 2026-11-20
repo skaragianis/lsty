@@ -28,7 +28,7 @@ x (A) 2026-10-01 Old +y
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wont  o new            1|3  9.9.9
 -- one --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +x       1/1││  1   (D) Buy +x                                               │
@@ -43,7 +43,7 @@ x (A) 2026-10-01 Old +y
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (D)  x done  t start  T wont     9.9.9
+ NORMAL  todo.txt  manual  1 prioritized (D)  x done  t start        1|3  9.9.9
 -- one-fg --
 emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.pp.......mmmeE.tt...PPP.ttttpp...............................................E
@@ -58,7 +58,7 @@ e.ttttttttttt.eE...............................................................E
 e.mmmmmmmmmmm.eE...............................................................E
 e.ttttt.......eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy.....mmmmm.
+NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy.......NNNNN.mmmmm.
 -- filtered --
 ┌[3]─Projects─┐┌ [1]─+y ───────────────────────────────────────────────────────┐
 │ +x       1/1││  2   Sell +y                                                  │
@@ -73,4 +73,4 @@ NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy.....mmmmm.
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append       9.9.9
+ NORMAL  todo.txt  manual  x done  t start  T wont  o new            1|2  9.9.9
