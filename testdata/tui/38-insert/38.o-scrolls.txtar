@@ -27,7 +27,7 @@ T11
 │  1   T11                             │
 │    N                                 │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual         9.9.9
+ INSERT  todo.txt  manual    12|12│2|1
 -- a-cursor --
 │    N                                 │
       ^

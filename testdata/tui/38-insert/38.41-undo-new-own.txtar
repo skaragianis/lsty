@@ -27,7 +27,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  can't undo: the list changed — look again  todo.txt  manual  x done  t start         9.9.9
+ NORMAL  can't undo: the list changed — look again  todo.txt  manual  x done  t start    2|3  9.9.9
 -- a-file --
 A
 2026-09-29 N +y

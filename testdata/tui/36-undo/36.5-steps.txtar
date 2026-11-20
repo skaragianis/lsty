@@ -27,7 +27,7 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 re-prioritized from (C) to (B)     9.9.9
+ NORMAL  todo.txt  manual  1 re-prioritized from (C) to (B)      1|1
 -- three-todo --
 (B) Buy
 -- u1 --
@@ -60,6 +60,6 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 prioritized (D)  x done     9.9.9
+ NORMAL  todo.txt  manual  undid: 1 prioritized (D)        1|1  9.9.9
 -- u3-todo --
 Buy

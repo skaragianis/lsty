@@ -57,7 +57,7 @@ Other +outside
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont      1|2  9.9.9
 -- message-outlives-the-window --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Call                                                                                        │
@@ -65,7 +65,7 @@ Other +outside
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt is busy; showing the last state read  todo.txt  manual  x done  t start     9.9.9
+ NORMAL  todo.txt is busy; showing the last state read  todo.txt  manual  x done         1|2  9.9.9
 -- not-extended --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▷ Call                                                                                     0m │
@@ -73,4 +73,4 @@ Other +outside
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new        1|2  9.9.9

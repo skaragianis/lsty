@@ -30,25 +30,25 @@ Last
 │  1 ✓ D2                                                                                  27d ago │
 │  4   Other                                                                                       │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done; 2 already done  x done  t start  T wont  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  1 done; 2 already done  x done  t start  T wont  o new        4|6  9.9.9
 -- selection --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2 ✓ D2                                                                                  27d ago │
 │  1 ✓ Other                                                                                       │
 │  5 ✓ D3                                                                                  26d ago │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 done; 2 already done  x reopen  o new  a append  dd delete       9.9.9
+ NORMAL  todo.txt  manual  2 done; 2 already done  x reopen  o new  a append             5|6  9.9.9
 -- at-the-end --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2 ✓ Other                                                                                       │
 │  1 ✓ D3                                                                                  26d ago │
 │  6 ✓ Last                                                                                        │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 done; 1 already done  x reopen  o new  a append  dd delete       9.9.9
+ NORMAL  todo.txt  manual  2 done; 1 already done  x reopen  o new  a append             6|6  9.9.9
 -- repeat --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2 ✓ Other                                                                                       │
 │  1 ✓ D3                                                                                  26d ago │
 │  6 ✓ Last                                                                                        │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 done; 1 already done  x reopen  o new  a append  dd delete       9.9.9
+ NORMAL  todo.txt  manual  2 done; 1 already done  x reopen  o new  a append             6|6  9.9.9

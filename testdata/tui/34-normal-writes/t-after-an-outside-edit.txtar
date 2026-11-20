@@ -57,7 +57,7 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  the list changed — look again  todo.txt  manual  x done  t start  T wont  o new      9.9.9
+ NORMAL  the list changed — look again  todo.txt  manual  x done  t start  T wont        1|2  9.9.9
 -- task-changed-not-seen --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Call +outside                                                                               │
@@ -65,7 +65,7 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  the list changed — look again  todo.txt  manual  x done  t start  T wont  o new      9.9.9
+ NORMAL  the list changed — look again  todo.txt  manual  x done  t start  T wont        1|2  9.9.9
 -- only-another-line-changed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   New line                                                                                    │
@@ -73,4 +73,4 @@ Other
 │  1   Other                                                                                       │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont  o new    9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  put back as it was  x done  t stop  T wont      2|3  9.9.9

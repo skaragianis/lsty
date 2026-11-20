@@ -116,7 +116,7 @@ fn the_background_fill_reaches_every_cell_under_every_overlay() {
         buf
     };
     // The status line is drawn over the fill, not the other way round.
-    let status = check(&model, "list")[(60, 23)].bg;
+    let status = check(&model, "list")[(69, 23)].bg;
     assert_eq!(status, Color::Rgb(0, 0, 0));
     keys(&mut model, "<C-w>3");
     assert!(model.overlay);

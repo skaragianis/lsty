@@ -47,7 +47,7 @@ Mine started:2026-09-29T0800Z
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 3 in doing  1 done: Daily; 2 next: Daily (due 2026-09-30); 1 already done  x done  t start     9.9.9
+ NORMAL  todo.txt  manual  ▶ 3 in doing  1 done: Daily; 2 next: Daily (due 2026-09-30); 1 already done  x done        4|11  9.9.9
 -- rec-file --
 x 2026-09-29 Daily rec:1d
 2026-09-29 Daily rec:1d due:2026-09-30 id:t001
@@ -76,7 +76,7 @@ Mine started:2026-09-29T0800Z
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing  5 done: Theirs; 5 was claimed by agent2; 1 already done  x done  t start  T wont   9.9.9
+ NORMAL  todo.txt  manual  ▶ 2 in doing  5 done: Theirs; 5 was claimed by agent2; 1 already done  x done  t start     6|10  9.9.9
 -- agents-file --
 Daily rec:1d
 x 2026-09-01 Done one

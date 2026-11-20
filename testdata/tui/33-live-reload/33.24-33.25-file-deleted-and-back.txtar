@@ -28,7 +28,7 @@ D +p
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt deleted  [New] todo.txt  manual     9.9.9
+ NORMAL  todo.txt deleted  [New] todo.txt  manual      0|0
 -- back --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   C +p                                                │
@@ -39,4 +39,4 @@ D +p
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont    9.9.9
+ NORMAL  todo.txt  manual  x done  t start       1|2  9.9.9

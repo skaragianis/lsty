@@ -28,7 +28,7 @@ x 2026-09-01 Plain done
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 won't do: Open one  x done  t stop  T wont  o new  9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 won't do: Open one  x done  t stop  T wont    2|3  9.9.9
 -- on-todo-file --
 x 2026-09-29 Open one wontdo:true
 Doing one started:2026-09-29T0800Z owner:agent1
@@ -42,7 +42,7 @@ x 2026-09-01 Plain done
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 won't do: Doing one; 2 was claimed by agent1  x reopen  o new    9.9.9
+ NORMAL  todo.txt  manual  2 won't do: Doing one; 2 was claimed by agent1  x reopen      3|3  9.9.9
 -- on-doing-file --
 x 2026-09-29 Open one wontdo:true
 x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z
@@ -56,7 +56,7 @@ x 2026-09-01 Plain done
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  Open one is done — x reopens it  todo.txt  manual  x reopen  o new  a append         9.9.9
+ NORMAL  Open one is done — x reopens it  todo.txt  manual  x reopen  o new  a append    1|3  9.9.9
 -- x-reopens --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open one                                                                                    │
@@ -66,7 +66,7 @@ x 2026-09-01 Plain done
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 reopened  x done  t start  T wont  o new  a append  dd delete    9.9.9
+ NORMAL  todo.txt  manual  1 reopened  x done  t start  T wont  o new  a append          1|3  9.9.9
 -- x-reopens-file --
 Open one
 x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z

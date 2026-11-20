@@ -29,7 +29,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t start  T wont  o new  a append     9.9.9
+ NORMAL  todo.txt  manual  1 done: A; 2 done: B  x done  t start  T wont  o new          3|3  9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2 ✗ A wontdo:true                                                                               │
@@ -42,7 +42,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 won't do: A; 2 won't do: B  x done  t start  T wont  o new       9.9.9
+ NORMAL  todo.txt  manual  1 won't do: A; 2 won't do: B  x done  t start  T wont         3|3  9.9.9
 -- a-file --
 A
 B

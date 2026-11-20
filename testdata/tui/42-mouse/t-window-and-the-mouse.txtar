@@ -32,7 +32,7 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  2 started  x done  t stop  T wont  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  2 started  x done  t stop  T wont  o new        2|2  9.9.9
 -- clicks-end-the-window --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▷ Call                                                                                     0m │
@@ -40,4 +40,4 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new  a append   9.9.9
+ NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  x done  t stop  T wont  o new        1|2  9.9.9

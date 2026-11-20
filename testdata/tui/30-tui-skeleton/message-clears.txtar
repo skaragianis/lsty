@@ -16,16 +16,16 @@ Plain task
 │  1   Plain task                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  no link on this task  todo.txt  manual       9.9.9
+ NORMAL  no link on this task  todo.txt  manual        1|1
 -- still --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Plain task                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  no link on this task  todo.txt  manual       9.9.9
+ NORMAL  no link on this task  todo.txt  manual        1|1
 -- cleared --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Plain task                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont    9.9.9
+ NORMAL  todo.txt  manual  x done  t start       1|1  9.9.9
