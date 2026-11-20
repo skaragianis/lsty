@@ -1,7 +1,11 @@
 use lsty_core::theme::Slot;
 
 use super::{spaced, wrap_words};
-use crate::text::Span;
+use crate::{
+    model::Model,
+    test_util::{plain, workdir_model},
+    text::Span,
+};
 
 /// Name, the words, the width and the lines.
 type Wrap = (
@@ -88,4 +92,18 @@ fn a_word_cut_over_lines_keeps_its_slot() {
         got,
         [vec![("abcd", m)], vec![("ef", m), (" ", t), ("g", t)]]
     );
+}
+
+#[test]
+fn the_title_names_the_id_only_when_it_fits_whole() {
+    let todo = "A id:65f9\nB\n";
+    let (_dir, m) = workdir_model(todo, plain());
+    let title = |m: &Model, w| {
+        let spans = m.title_spans(w);
+        let text: String = spans.iter().map(|s| s.text.as_ref()).collect();
+        (text, spans.last().and_then(|s| s.slot))
+    };
+    let (plain_title, id) = ("[2]─Detail", Some(Slot::Id));
+    assert_eq!(title(&m, 22), ("[2]─Detail (id:65f9)".into(), id));
+    assert_eq!(title(&m, 21).0, plain_title);
 }

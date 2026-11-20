@@ -276,12 +276,8 @@ impl Model {
                 ..none
             };
         }
-        let Some(task) = self.rows.get(self.cursor) else {
-            return none;
-        };
         let spans = doc.lines.iter().take(doc.desc).nth(n);
-        let (Some(task), Some(spans)) = (self.snap.task(task.id), spans)
-        else {
+        let (Some(task), Some(spans)) = (self.cursor_task(), spans) else {
             return none;
         };
         token_at(self.snap.line(task), spans, col, &none).unwrap_or(none)

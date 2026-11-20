@@ -214,8 +214,17 @@ pub(crate) fn titled_spans<'a>(
     w: usize,
     (line, title_slot): (Option<Slot>, Option<Slot>),
 ) -> Vec<Span<'a>> {
+    framed((left, vec![Span::new(title, title_slot)], right), w, line)
+}
+
+/// As `titled_spans`, with the title in spans of their own slots.
+pub(crate) fn framed<'a>(
+    (left, title, right): (&str, Vec<Span<'a>>, &str),
+    w: usize,
+    line: Option<Slot>,
+) -> Vec<Span<'a>> {
     let room = w.saturating_sub(width_of(left) + width_of(right));
-    let title = fit(vec![Span::new(title, title_slot)], room);
+    let title = fit(title, room);
     let rest = RULE.repeat(room.saturating_sub(width(&title)));
     let mut spans = vec![Span::new(left.to_owned(), line)];
     spans.extend(title);

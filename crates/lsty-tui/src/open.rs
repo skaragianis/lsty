@@ -22,11 +22,7 @@ pub(crate) fn exists_mark(exists: bool) -> &'static str {
 impl Model {
     /// The links of the task under the cursor.
     pub(crate) fn cursor_links(&self) -> Vec<Link> {
-        let task = self
-            .rows
-            .get(self.cursor)
-            .and_then(|row| self.snap.task(row.id));
-        let Some(task) = task else {
+        let Some(task) = self.cursor_task() else {
             return Vec::new();
         };
         links::links(&self.snap, task, self.deps.home.as_deref())

@@ -284,12 +284,8 @@ impl Model {
     /// go next to. The task is only a position, so nothing it became can
     /// refuse a paste.
     fn paste_place(&self, action: Action) -> Place {
-        let task = self.rows.get(self.cursor).and_then(|row| {
-            self.snap
-                .task(row.id)
-                .filter(|_| row.source != Source::Done)
-        });
-        let Some(task) = task else {
+        let task = self.cursor_task();
+        let Some(task) = task.filter(|t| t.source() != Source::Done) else {
             return Place::End;
         };
         Place::Beside {

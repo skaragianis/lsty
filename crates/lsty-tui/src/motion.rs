@@ -1,6 +1,6 @@
 //! Moving the cursor and scrolling the view.
 
-use lsty_core::{errs::Source, keys::Action};
+use lsty_core::{errs::Source, keys::Action, list::Task};
 
 use crate::{
     focus::Focus, insert::Draft, model::Model, rows::Row, sizes::Sizes,
@@ -240,6 +240,12 @@ impl Model {
     /// The line the cursor row shows, if there is a row.
     pub(crate) fn cursor_place(&self) -> Option<Place> {
         self.rows.get(self.cursor).map(Row::place)
+    }
+
+    /// The task the cursor row shows, if there is a row.
+    pub(crate) fn cursor_task(&self) -> Option<&Task> {
+        let row = self.rows.get(self.cursor)?;
+        self.snap.task(row.id)
     }
 
     /// Puts the cursor on the first row at or after `place`, in file

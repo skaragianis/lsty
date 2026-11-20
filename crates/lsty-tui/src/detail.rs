@@ -17,7 +17,7 @@ use crate::{
     layout::{BORDER, FRAME, cells},
     model::Model,
     open::exists_mark,
-    text::{ELLIPSIS, RULE, Span, cut, pad, put, titled_spans, width_of},
+    text::{ELLIPSIS, RULE, Span, cut, framed, pad, put, width_of},
     wrap::wrap_words,
 };
 
@@ -166,14 +166,27 @@ pub(crate) fn detail_rows(
 }
 
 impl Model {
+    /// The title, then the cursor task's id when it fits whole in `w`.
+    fn title_spans(&self, w: usize) -> Vec<Span<'_>> {
+        let title = Some(self.title_slot(Focus::Detail));
+        let mut spans = vec![Span::new(TITLE, title)];
+        let id = self.cursor_task().and_then(|t| self.snap.line(t).tags().id);
+        if let Some(id) = id {
+            let text = format!(" (id:{})", lossy(id));
+            if width_of(TITLE) + width_of(&text) + BORDER <= w {
+                spans.push(Span::new(text, Some(Slot::Id)));
+            }
+        }
+        spans
+    }
+
     /// Draws the detail panel in `area`.
     pub(crate) fn draw_detail(&self, buf: &mut Buffer, area: Rect) {
         let w = usize::from(area.width);
         let inner = w.saturating_sub(BORDER);
         let (content, rows) = detail_size(area);
         let slot = Some(self.edge(&[Focus::Detail]));
-        let title = Some(self.title_slot(Focus::Detail));
-        let top = titled_spans(("┌", TITLE, "┐"), w, (slot, title));
+        let top = framed(("┌", self.title_spans(w), "┐"), w, slot);
         let at = |y: usize| area.y + cells(y);
         let put_line = |buf: &mut Buffer, y: usize, text: String| {
             let span = Span::new(text, slot);
@@ -228,11 +241,7 @@ impl Model {
             desc: 0,
             files: None,
         };
-        let Some(task) = self
-            .rows
-            .get(self.cursor)
-            .and_then(|r| self.snap.task(r.id))
-        else {
+        let Some(task) = self.cursor_task() else {
             return doc;
         };
         if rows == 0 {

@@ -14,7 +14,7 @@ show_sidebar = false
 Write `the parser` id:p
 (B) Add CLI dep:p id:q due:2026-09-28
 -- a-frame --
-┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail (id:q)────────────────────┐
 │  1       Write `the parser`                                                           p ││ Add CLI dep:p id:q due:2026-09-28   │
 │  2 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ ─────────────────────────────────── │
 │                                                                                         ││ state       blocked                 │
@@ -34,7 +34,7 @@ Write `the parser` id:p
 Write `the parser` id:p
 (B) Add CLI dep:p id:q due:2026-09-28
 -- b-frame --
-┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail (id:q)────────────────────┐
 │  1       Write `the parser`                                                           p ││ Add CLI dep:p id:q due:2026-09-28   │
 │  2 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ ─────────────────────────────────── │
 │                                                                                         ││ state       blocked                 │
@@ -54,7 +54,7 @@ Write `the parser` id:p
 Write `the parser` id:p
 (B) Add CLI dep:p id:q due:2026-09-28
 -- a-fg --
-EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
+EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmiiiiiiieeeeeeeeeeeeeeeeeeeee
 E.mm.......ttttttqqqqqqqqqqqq...........................................................i.Ee.ttttttttmmmmmtmmmmtOOOOOOOOOOOOOO...e
 E.tt.bbBBBbbbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbOOOOOOObbi.Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
 E.........................................................................................Ee.mmmmmmmmmmmmbbbbbbb.................e

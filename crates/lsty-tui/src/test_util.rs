@@ -405,11 +405,7 @@ pub(crate) fn reload(model: &mut Model) -> Vec<Cmd> {
 
 /// The line of the task under the cursor.
 pub(crate) fn cursor_text(model: &Model) -> String {
-    let task = model
-        .rows
-        .get(model.cursor)
-        .and_then(|r| model.snap.task(r.id));
-    task.map_or_default(|i| {
+    model.cursor_task().map_or_default(|i| {
         String::from_utf8_lossy(model.snap.line(i).raw()).into_owned()
     })
 }
