@@ -19,7 +19,6 @@ use crate::{
     grants::DEP,
     messages,
     model::Model,
-    rows::Row,
     segments::{at_end, cleared, described, line_field},
     text::head,
     track::{Moves, Place, landed_at},
@@ -225,9 +224,7 @@ impl Model {
     /// when that is archived or there is none.
     pub(crate) fn open_new(&mut self, below: bool) {
         let anchor = self
-            .rows
-            .get(self.cursor)
-            .map(Row::place)
+            .cursor_place()
             .filter(|(source, _)| *source == Source::Todo);
         self.open_new_at(anchor, below);
     }
@@ -241,11 +238,7 @@ impl Model {
         if self.refused(Action::InsertDependent, 1) {
             return;
         }
-        let Some(task) = self
-            .rows
-            .get(self.cursor)
-            .and_then(|row| self.snap.task(row.id))
-        else {
+        let Some(task) = self.cursor_task() else {
             return self.open_new(true);
         };
         let task_id = task.task_id();

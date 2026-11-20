@@ -450,7 +450,7 @@ pub(crate) fn decide(action: Action, m: &Model, s: &Summary) -> Answer {
         | Action::ChangeDescription
         | Action::InsertPrerequisite => |_| Answer::Applies,
         Action::InsertDependent => {
-            let task = m.rows.get(m.cursor).and_then(|r| m.snap.task(r.id));
+            let task = m.cursor_task();
             let no_id = task.is_some_and(|task| {
                 task.source() == Source::Done && m.snap.id_of(task).is_none()
             });
