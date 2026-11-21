@@ -48,7 +48,7 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
             fields.extend([
                 Field::array(
                     "messages",
-                    reading.messages.iter().map(|m| Json::bytes(m)),
+                    reading.messages().iter().map(|m| Json::bytes(m)),
                 ),
                 Field::bool("resumed", reading.seen.resumed),
             ]);
@@ -56,7 +56,7 @@ pub(crate) fn next(call: &Call<'_>) -> Result<Output> {
         },
         || {
             let mut lines = task_lines(call, snap, task.into_iter());
-            lines.extend(text_lines(&call.paint, reading.messages.iter()));
+            lines.extend(text_lines(&call.paint, reading.messages().iter()));
             lines
         },
     ))

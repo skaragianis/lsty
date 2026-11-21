@@ -1,10 +1,8 @@
 //! The `--expect` guard: "is task NR still the one I mean?".
 
-use std::fmt::Display;
-
 use super::refs::Target;
 use crate::{
-    errs::{Code, Error, Field, Ref, Result, Source, lossy, quote},
+    errs::{Code, Error, Field, Msg, Result, Source, lossy, quote},
     list::{Snapshot, Task},
     query::contains,
 };
@@ -93,29 +91,27 @@ fn mismatch(
             .with_field("expected", Field::Str(expected))
             .with_field("actual", Field::Null);
     };
-    mismatch_at(
-        snap.ref_of(task),
-        handle,
-        &snap.line(task).text(),
-        &expect.text,
-    )
+    mismatch_at(snap, task, handle, &expect.text)
 }
 
 /// The refusal for a task whose `actual` text is not the `expected`.
 pub(super) fn mismatch_at(
-    task: Ref,
-    handle: impl Display,
-    actual: &[u8],
+    snap: &Snapshot,
+    task: &Task,
+    handle: String,
     expected: &[u8],
 ) -> Error {
-    let message = format!(
-        "task {handle} is {}, expected {}",
-        quote(actual),
-        quote(expected)
-    );
-    let (actual, expected) = (lossy(actual), lossy(expected));
-    Error::new(Code::ExpectMismatch, message)
-        .with_task(task)
+    let actual = snap.line(task).text();
+    let said = Msg::from("task ")
+        .and(snap.name(task, handle))
+        .then(format!(
+            " is {}, expected {}",
+            quote(&actual),
+            quote(expected)
+        ));
+    let (actual, expected) = (lossy(&actual), lossy(expected));
+    Error::named(Code::ExpectMismatch, said)
+        .with_task(snap.ref_of(task))
         .with_field("expected", Field::Str(expected))
         .with_field("actual", Field::Str(actual))
 }

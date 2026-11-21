@@ -398,30 +398,30 @@ fn a_key_typed_twice_is_warned_about_once_for_the_first_value() {
         (
             "a due:1 due:2",
             "a",
-            &["#3 already has due:1; the first one counts"],
+            &[" already has due:1; the first one counts"],
         ),
         ("a due:1", "a", &[]),
         (
             "a due:1 due:2",
             "a due:1",
-            &["#3 already has due:1; the first one counts"],
+            &[" already has due:1; the first one counts"],
         ),
         ("a due:1 due:2", "a due:1 due:2", &[]),
         (
             "a due:1 due:2 due:3",
             "a due:1 due:2",
-            &["#3 already has due:1; the first one counts"],
+            &[" already has due:1; the first one counts"],
         ),
         ("a foo:1 foo:2", "a", &[]),
         (
             "a pri:A t:1 t:2",
             "a",
-            &["#3 already has t:1; the first one counts"],
+            &[" already has t:1; the first one counts"],
         ),
     ];
     for (typed, old, want) in rows {
         let old = crate::todotxt::Line::parse(old);
-        let got = super::repeated_keys("#3", &old, typed.as_bytes());
+        let got = super::repeated_keys(&old, typed.as_bytes());
         let got: Vec<String> = got
             .iter()
             .map(|w| String::from_utf8_lossy(w).into_owned())

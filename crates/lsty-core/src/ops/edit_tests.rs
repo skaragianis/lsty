@@ -178,6 +178,12 @@ fn a_conflict_names_the_task() {
             ""
         )
     );
+    let Some(crate::errs::Part::Name(name)) =
+        err.said().and_then(|said| said.parts().first())
+    else {
+        panic!("{err:?}");
+    };
+    assert_eq!(name.place, None);
 }
 
 const HELD: &str =

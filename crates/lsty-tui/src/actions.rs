@@ -125,7 +125,7 @@ impl Model {
         let said: Vec<String> = result
             .iter()
             .flat_map(|(outcome, _)| outcome.messages())
-            .map(|m| errs::lossy(m))
+            .map(|m| errs::lossy(&m))
             .collect();
         let settled = self.settle(result) && passes;
         if !settled {

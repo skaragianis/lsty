@@ -39,11 +39,11 @@ pub fn stop(
 }
 
 fn stop_task(tx: &mut Tx, id: TaskId) -> Result<()> {
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let task = tx.task(id).ok_or_else(gone)?;
     let (state, line) = (task.state(), tx.snapshot().line(task).clone());
     if state != State::Doing {
-        tx.say(format!("{handle} is not underway"));
+        tx.say(name.then(" is not underway"));
         return Ok(());
     }
     let (stopped, _) = tx.remove_where(id, &line, is_claim_tag)?;
@@ -51,6 +51,6 @@ fn stop_task(tx: &mut Tx, id: TaskId) -> Result<()> {
         return Err(emptied(tx, id));
     }
     tx.set(id, stopped.raw(), Path::Action);
-    tx.say(format!("{handle} stopped"));
+    tx.say(name.then(" stopped"));
     Ok(())
 }

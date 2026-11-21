@@ -14,7 +14,7 @@ use crate::{
     config::Config,
     dates::{Clock, format_elapsed},
     discover::Found,
-    errs::{Nr, Ref, Source, lossy},
+    errs::{Name, Nr, Place, Ref, Source, lossy},
     todotxt::{File, Line, Tags},
 };
 
@@ -408,6 +408,16 @@ impl Snapshot {
             source: task.source,
             id: self.id_of(task).map(lossy),
         }
+    }
+
+    /// `task` as a message about the list read names it, for the command
+    /// line as `typed`.
+    pub fn name(&self, task: &Task, typed: String) -> Name {
+        let id = self.id_of(task).map(lossy);
+        let mut name =
+            Name::new(typed, id, task.source, Some(Place::Read(task.nr)));
+        name.row = Some((task.source, task.nr.index()));
+        name
     }
 
     /// The typed tags of `task`'s line.

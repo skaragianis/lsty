@@ -8,8 +8,8 @@ use super::{
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
-    errs::{Error, Result, lossy},
-    list::{Claim, Task, TaskId},
+    errs::{Error, Msg, Result},
+    list::{Claim, Snapshot, Task, TaskId},
     todotxt::{Line, TokenView},
 };
 
@@ -58,7 +58,6 @@ pub(super) fn hollowed(old: &Line, new: &Line) -> bool {
 
 /// The refusal of a change that would leave a task with no description.
 pub(super) fn emptied(tx: &Tx, id: TaskId) -> Error {
-    let handle = tx.handle(id);
     let Some(task) = tx.task(id) else {
         return gone();
     };
@@ -66,7 +65,7 @@ pub(super) fn emptied(tx: &Tx, id: TaskId) -> Error {
         tx.snapshot(),
         task,
         task.state(),
-        format!("{handle} would be empty"),
+        tx.name(id).then(" would be empty"),
         format!("use lsty del {}", tx.given(id)),
     )
 }
@@ -77,22 +76,32 @@ pub(super) fn refuse_blocked(tx: &Tx, id: TaskId, task: &Task) -> Result<()> {
         return Ok(());
     }
     let snap = tx.snapshot();
-    let mut named: Vec<Vec<u8>> = Vec::new();
-    for b in task.blockers().iter().filter_map(|b| snap.task(*b)) {
-        let text = snap.line(b).text();
-        named.push(
-            [b.nr().to_string().as_bytes(), b" (", &text, b")"].concat(),
-        );
-    }
-    let mut message = format!(
-        "task {} is blocked by {}",
-        tx.handle(id),
-        lossy(&named.join(&b", "[..]))
-    );
+    let said = Msg::from("task ").and(tx.name(id)).then(" is blocked by ");
+    let mut said = and_blockers(snap, task, said);
     if task.cycle() {
-        message.push_str(" (dependency cycle)");
+        said = said.then(" (dependency cycle)");
     }
-    Err(blocked_error(snap, task, &message, BLOCKED_HINT))
+    Err(blocked_error(snap, task, said, BLOCKED_HINT))
+}
+
+/// `said` and the blockers of `task`, each with its text.
+pub(super) fn and_blockers(
+    snap: &Snapshot,
+    task: &Task,
+    mut said: Msg,
+) -> Msg {
+    let blockers = task.blockers().iter().filter_map(|b| snap.task(*b));
+    for (i, b) in blockers.enumerate() {
+        if i > 0 {
+            said = said.then(", ");
+        }
+        said = said
+            .and(snap.name(b, b.nr().to_string()))
+            .then(" (")
+            .then(snap.line(b).text())
+            .then(")");
+    }
+    said
 }
 
 /// `line` with a new claim for `actor`: `started:` at `stamp`, and
@@ -135,12 +144,11 @@ pub(super) fn refuse_unstarted(
     if actor.is_human() || task.claim() != Claim::None {
         return Ok(());
     }
-    let handle = tx.handle(id);
     Err(wrong_state(
         tx.snapshot(),
         task,
         task.state(),
-        format!("{handle} is not started"),
+        tx.name(id).then(" is not started"),
         format!("start it first: lsty start {}", tx.given(id)),
     ))
 }
@@ -150,13 +158,9 @@ pub(super) fn say_was_blocked(tx: &mut Tx, id: TaskId) {
     let Some(task) = tx.task(id).filter(|i| i.blocked()) else {
         return;
     };
-    let nrs: Vec<String> = task
-        .blockers()
-        .iter()
-        .filter_map(|b| tx.task(*b))
-        .map(|b| b.nr().to_string())
-        .collect();
-    let message =
-        format!("{} was blocked by {}", tx.handle(id), nrs.join(", "));
-    tx.say(message);
+    let snap = tx.snapshot();
+    let blockers = task.blockers().iter().filter_map(|b| snap.task(*b));
+    let nrs = blockers.map(|b| snap.name(b, b.nr().to_string()));
+    let said = tx.name(id).then(" was blocked by ").and_list(nrs);
+    tx.say(said);
 }

@@ -144,6 +144,11 @@ impl Row {
         (!unedited).then(|| Line::parse_shared(&self.raw))
     }
 
+    /// Whether the line no longer holds a task: it is removed, or blank.
+    pub(super) fn is_gone(&self) -> bool {
+        self.removed || (self.blanked && self.raw.is_empty())
+    }
+
     /// The text after the change; a removed line has none.
     pub(super) fn after(&self) -> &[u8] {
         if self.removed { &[] } else { &self.raw }

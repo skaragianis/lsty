@@ -40,20 +40,18 @@ fn reopen_task(
     stamp: &str,
     opts: ClaimOpts,
 ) -> Result<()> {
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let task = tx.task(id).ok_or_else(gone)?;
     let (state, line) = (task.state(), tx.snapshot().line(task).clone());
     if state != State::Done {
-        tx.say(format!("{handle} is already open"));
+        tx.say(name.then(" is already open"));
         return Ok(());
     }
     let (open, back) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;
     tx.set(id, open.raw(), Path::Action);
-    tx.say([handle.as_bytes(), b" reopened", &back].concat());
+    tx.say(name.clone().then(" reopened").then(back));
     if line.tags().rec.is_some() && !line.has_wontdo() {
-        tx.say(format!(
-            "{handle} has rec:; its next occurrence stays in the list"
-        ));
+        tx.say(name.then(" has rec:; its next occurrence stays in the list"));
     }
     Ok(())
 }
