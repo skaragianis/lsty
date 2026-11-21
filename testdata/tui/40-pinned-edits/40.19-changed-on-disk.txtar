@@ -20,7 +20,7 @@ show_detail = false
 (A) 2026-09-20 Call client +work id:c1 @phone
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│    (A) 2026-09-20 Call client +work ! id:c1                                                      │
+│  1 (A) 2026-09-20 Call client +work ! id:c1                                                      │
 │  1   (A) Call client +work @phone                                                             c1 │
 │                                                                                                  │
 │                                                                                                  │
@@ -30,11 +30,11 @@ show_detail = false
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  I  the list changed — look again  sort(manual)  <CR> commit  <C-w> del word       1|2│35|40  9.9.9
 -- a-cursor --
-│    (A) 2026-09-20 Call client +work ! id:c1                                                      │
+│  1 (A) 2026-09-20 Call client +work ! id:c1                                                      │
                                        ^
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│    (A) 2026-09-20 Call client +work ! id:c1                                                      │
+│  1 (A) 2026-09-20 Call client +work ! id:c1                                                      │
 │  1   (A) Call client +work @phone                                                             c1 │
 │                                                                                                  │
 │                                                                                                  │

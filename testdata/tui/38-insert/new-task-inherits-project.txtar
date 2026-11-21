@@ -14,7 +14,7 @@ Buy milk +home
 -- below --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Call client +work.acme @phone                       │
-│     +work.acme                                           │
+│  2  +work.acme                                           │
 │  1   Buy milk +home                                      │
 │                                                          │
 │                                                          │
@@ -24,7 +24,7 @@ Buy milk +home
  I  sort(manual)  <CR> commit               2|3│1|11  9.9.9
 -- above --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│     +work.acme                                           │
+│  1  +work.acme                                           │
 │  1   Call client +work.acme @phone                       │
 │  2   Buy milk +home                                      │
 │                                                          │

@@ -160,7 +160,7 @@ impl Model {
         self.list_motion(action, count);
     }
 
-    /// Moves the cursor row; a count on `gg` or `G` names a task.
+    /// Moves the cursor row; a count on `gg` or `G` names a place in the list.
     fn list_motion(&mut self, action: Action, count: usize) {
         self.leave_sticky(self.cursor_place());
         let step = Step::of(action, count, self.pane_rows());
@@ -174,11 +174,8 @@ impl Model {
             return;
         };
         let step = match step {
-            Step::Jump(Some(nr), end) => {
-                Step::Jump(Some(self.row_from(nr) + 1), end)
-            }
             Step::By(_) => self.by_screen(action, count, step),
-            Step::Jump(None, _)
+            Step::Jump(..)
             | Step::Scroll(_)
             | Step::Place(_)
             | Step::Row(_) => step,
@@ -222,19 +219,6 @@ impl Model {
         let n = self.sized(|size| size.reach(self.cursor, cells.max(1), down));
         let n = isize::try_from(n).unwrap_or(isize::MAX);
         Step::By(if down { n } else { -n })
-    }
-
-    /// The row of the todo task with NR `nr`, else the one with the
-    /// smallest NR above it, else the last row.
-    fn row_from(&self, nr: usize) -> usize {
-        let wanted = u32::try_from(nr).unwrap_or(u32::MAX);
-        let best = self
-            .rows
-            .iter()
-            .enumerate()
-            .filter(|(_, r)| r.source == Source::Todo && r.nr.get() >= wanted)
-            .min_by_key(|(_, r)| r.nr);
-        best.map_or_else(|| self.rows.len().saturating_sub(1), |(i, _)| i)
     }
 
     /// The line the cursor row shows, if there is a row.

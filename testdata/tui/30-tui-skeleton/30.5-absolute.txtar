@@ -20,11 +20,11 @@ line_numbers = "absolute"
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1 ▷ (B) Send invoice +work                                2d late       2h  │
 │  2   (A) Call client +work @phone                          tomorrow  c1      │
-│  4       Buy milk +home                                                      │
-│  5 ✓     Fix bug +work                                                       │
-│  6 ⧗     Draft report +work dep:c1                                           │
-│  7 ▶     Review PR                                                       !8h │
-│    ✓     Old task +work                                    1d ago            │
+│  3       Buy milk +home                                                      │
+│  4 ✓     Fix bug +work                                                       │
+│  5 ⧗     Draft report +work dep:c1                                           │
+│  6 ▶     Review PR                                                       !8h │
+│  7 ✓     Old task +work                                    1d ago            │
 │                                                                              │
 │                                                                              │
 │                                                                              │

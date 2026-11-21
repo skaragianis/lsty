@@ -23,17 +23,17 @@ banana
 │  3   banana                                              │
 │  2   cherry                                              │
 │  1   fig                                                 │
-│  1   pear                                                │
+│  5   pear                                                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  N  sort(alpha)  x done  t start  T wont         5|5  9.9.9
 -- landed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
-│  2   apple                                               │
-│  1   banana                                              │
-│  4   cherry                                              │
-│  1   fig                                                 │
-│  2   pear                                                │
+│  3   apple                                               │
+│  2   banana                                              │
+│  1   cherry                                              │
+│  4   fig                                                 │
+│  1   pear                                                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- N  sort(alpha)  x done  t start  T wont         3|5  9.9.9
+ N  sort(alpha)  x done  t start  T wont         4|5  9.9.9

@@ -101,7 +101,7 @@ pub(crate) enum Kind {
     Other,
     /// A distance.
     Motion,
-    /// A line number.
+    /// A place in the list.
     Jump,
     /// A distance to move a task.
     Move,

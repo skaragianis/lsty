@@ -83,7 +83,7 @@ Task 019 +p
 Task 020 +p
 -- typing --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│ 21 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
@@ -91,7 +91,7 @@ Task 020 +p
  I  sort(manual)   21|21│116|118  9.9.9
 -- minute --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│ 21 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
@@ -99,7 +99,7 @@ Task 020 +p
  I  sort(manual)   21|21│116|118  9.9.9
 -- outside --
 ┌ [1]─~/todo.txt ──────────────────────┐
-│    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│ 21 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
@@ -109,7 +109,7 @@ Task 020 +p
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2   Task 003 +p                     │
 │  1   Task 004 +p                     │
-│    Task 005 +p                       │
+│  5 Task 005 +p                       │
 │  1   Task 005 +p @outside            │
 └──────────────────────────────────────┘
  I  the list changed — look again

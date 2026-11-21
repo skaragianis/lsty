@@ -42,7 +42,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...t...............................E
 E.mm...t...............................E
-E......................................E
+E.ttt..................................E
 E.mm...t...............................E
 E......................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
@@ -51,8 +51,8 @@ III.mmmmmmmmmmmm........IIIIIIIII.mmmmm.
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1   A                               │
 │  2   B                               │
-│                                      │
-│  3   C                               │
+│  3                                   │
+│  4   C                               │
 │                                      │
 └──────────────────────────────────────┘
  I  sort(manual)         3|4│1|0  9.9.9
@@ -60,7 +60,7 @@ III.mmmmmmmmmmmm........IIIIIIIII.mmmmm.
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...t...............................E
 E.mm...t..........................iiii.E
-E......................................E
+E.ttt..................................E
 E.mm...t...............................E
 E.mm...t...............................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE

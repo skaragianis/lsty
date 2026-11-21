@@ -24,7 +24,7 @@ Three
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   One                                                                                    aaaa │
-│                                                                                                  │
+│  2                                                                                               │
 │  1   Two                                                                                         │
 │  2   Three                                                                                       │
 │                                                                                                  │
@@ -35,7 +35,7 @@ Three
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttt....................................................................................iiii.E
-E..................................................................................................E
+E.ttt..............................................................................................E
 E.mm...ttt.........................................................................................E
 E.mm...ttttt.......................................................................................E
 E..................................................................................................E
@@ -44,7 +44,7 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 III.mmmmmmmmmmmm..tttttttttt..kkkk.yyyyyy..DDDDD.DDDDDDDD..DDDDD.DDDDDDDDDDDD.......IIIIIIIII.mmmmm.
 -- a-cursor --
-│                                                                                                  │
+│  2                                                                                               │
      ^
 -- a-file --
 One id:aaaa

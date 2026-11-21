@@ -23,7 +23,7 @@ C +work @phone
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  2   A +work @phone                                                               │
 │=+work    3/3││  1   Call +work                                                    filtered  t001 │
-├[4]─Contexts─┤│     +work                                                                         │
+├[4]─Contexts─┤│  3  +work                                                                         │
 │=@phone   2/2││  1   C +work @phone                                                               │
 ├[5]─Filters──┤│                                                                                   │
 │ [x] Done    ││                                                                                   │
@@ -31,12 +31,12 @@ C +work @phone
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  I  sort(manual)  2 added as id:t001: Call; hidden when this field closes            3|4│1|6  9.9.9
 -- a-cursor --
-├[4]─Contexts─┤│     +work                                                                         │
+├[4]─Contexts─┤│  3  +work                                                                         │
                     ^
 -- b-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
-│=+work    4/4││  5   C +work @phone                                                               │
+│=+work    4/4││  2   C +work @phone                                                               │
 ├[4]─Contexts─┤│                                                                                   │
 │=@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │

@@ -24,7 +24,7 @@ Two
 -- a-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   One                                                                                    aaaa │
-│     dep:aaaa                                                                                     │
+│  2  dep:aaaa                                                                                     │
 │  1   Two                                                                                         │
 │                                                                                                  │
 │                                                                                                  │
@@ -35,7 +35,7 @@ Two
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm...ttt....................................................................................iiii.E
-E....tmmmmmmmm.....................................................................................E
+E.ttttmmmmmmmm.....................................................................................E
 E.mm...ttt.........................................................................................E
 E..................................................................................................E
 E..................................................................................................E
@@ -44,7 +44,7 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 III.mmmmmmmmmmmm..kkkk.yyyyyy..DDDDD.DDDDDDDD..DDDDD.DDDDDDDDDDDD...................IIIIIIIII.mmmmm.
 -- a-cursor --
-│     dep:aaaa                                                                                     │
+│  2  dep:aaaa                                                                                     │
      ^
 -- a-file --
 One id:aaaa

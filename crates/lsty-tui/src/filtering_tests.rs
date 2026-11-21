@@ -856,8 +856,8 @@ fn a_move_before_the_refilter_goes_by_the_rows_as_drawn() {
 }
 
 // A motion counts from the row drawn, and the timer settles on the first
-// row at or after where it ended. `gg`, `G` and a task's number mean the same
-// whatever is drawn, so they go by the list about to show.
+// row at or after where it ended. `gg`, `G` and a place in the list mean
+// the same whatever is drawn, so they go by the list about to show.
 #[test]
 fn a_motion_before_the_refilter_lands_where_it_means() {
     for (to, key, want) in [
@@ -872,7 +872,7 @@ fn a_motion_before_the_refilter_lands_where_it_means() {
         (BY_GONE, "gg", "Alpha +keep"),
         (BY_GONE, "5G", "Delta +keep"),
         (BY_KEEP, "G", "Zed +gone id:z"),
-        (BY_KEEP, "2gg", "Bravo +gone dep:z"),
+        (BY_KEEP, "2gg", "Charlie +gone"),
     ] {
         let (_dir, model) = across_a_refilter(to, key, "");
         assert_eq!(cursor_text(&model), want, "{to} {key}");

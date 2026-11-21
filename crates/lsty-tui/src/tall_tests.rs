@@ -486,6 +486,19 @@ fn a_field_starts_after_the_number_column_only_when_there_is_one() {
         keys(&mut model, search);
         assert_eq!(model.field_box(), want, "{numbers:?} {archive} {search}");
     }
+    // A row just archived with `:archive` stays drawn after it left the
+    // file: 100 rows over 99 lines still fit their numbers.
+    let todo = (0..100).map(|i| format!("task {i}\n")).collect::<Vec<_>>();
+    let dir = workdir(todo.concat());
+    let config = Config {
+        line_numbers: LineNumbers::Absolute,
+        ..alone()
+    };
+    let mut model = started(deps(dir.path(), config));
+    model.update(Msg::Resize(30, 8));
+    keys(&mut model, "Gx:archive<CR>");
+    assert_eq!((model.rows.len(), model.snap.todo().lines.len()), (100, 99));
+    assert_eq!(model.field_box(), (5, 22), "archived row kept");
 }
 
 /// The rows each entry of the list takes, as (task or None, rows).

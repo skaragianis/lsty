@@ -442,67 +442,32 @@ fn cursor_nr(model: &Model) -> Option<u32> {
     model.cursor_place().map(|(_, nr)| nr.get())
 }
 
+// `:N` goes to place N of the list as drawn, as `NG` does: the rows are
+// lines 1, 2, 4 and 5 of the file, and a place past the end is the last.
 #[test]
-fn a_number_on_the_line_puts_the_cursor_on_that_task() {
-    let (_dir, mut model) = numbered();
-    line(&mut model, "4");
-    assert_eq!(cursor_nr(&model), Some(4));
-    assert!(model.line.is_none());
-    line(&mut model, "  2  ");
-    assert_eq!(cursor_nr(&model), Some(2));
-    line(&mut model, "004");
-    assert_eq!(cursor_nr(&model), Some(4));
-}
-
-#[test]
-fn a_number_lands_in_a_sorted_and_a_filtered_view() {
-    let (_dir, mut model) = numbered();
-    line(&mut model, "sort priority");
-    line(&mut model, "1");
-    assert_eq!(cursor_nr(&model), Some(1));
-    assert_eq!(model.cursor, 2, "the row of (C) in priority order");
-    line(&mut model, "5");
-    assert_eq!(cursor_nr(&model), Some(5));
-    assert_eq!(model.cursor, 1);
-    keys(&mut model, "/o<CR>");
-    assert_eq!(model.rows.len(), 3);
-    line(&mut model, "2");
-    assert_eq!(cursor_nr(&model), Some(2));
-    line(&mut model, "5");
-    assert_eq!(cursor_nr(&model), Some(5));
-    line(&mut model, "4");
-    assert_eq!(cursor_nr(&model), Some(5), "task 4 is filtered out");
-}
-
-#[test]
-fn a_number_without_a_shown_task_leaves_the_cursor() {
-    let (_dir, mut model) = numbered();
-    line(&mut model, "2");
-    let cases = [
-        ("6", "task 6 is not shown"),
-        ("3", "no task 3"),
-        ("0", "no task 0"),
-        ("7", "no task 7"),
-        ("99999999999999999999999", "no task 99999999999999999999999"),
-        ("do 1 --expect nope", "expected \"nope\""),
-    ];
-    for (typed, said) in cases {
-        line(&mut model, typed);
-        assert_eq!(cursor_nr(&model), Some(2), "{typed}");
-        assert!(model.line.is_some(), "{typed}");
-        let shown = format!("{} {}", above(&model), status(&model));
-        assert!(shown.contains(said), "{typed}: {shown}");
-        keys(&mut model, "<Esc>");
-    }
-}
-
-#[test]
-fn a_number_moves_the_list_cursor_from_a_panel() {
+fn a_number_goes_to_that_place_in_the_list() {
     let (_dir, mut model) = numbered();
     model.set_focus(Focus::Projects);
-    line(&mut model, "5");
-    assert_eq!(model.focus, Focus::List);
-    assert_eq!(cursor_nr(&model), Some(5));
+    for (typed, row) in [
+        ("3", 2),
+        ("  2  ", 1),
+        ("004", 3),
+        ("0", 0),
+        ("9", 3),
+        ("99999999999999999999999", 3),
+    ] {
+        line(&mut model, typed);
+        assert_eq!(model.cursor, row, "{typed}");
+        assert_eq!(model.focus, Focus::List, "{typed}");
+        assert!(model.line.is_none(), "{typed}");
+    }
+    line(&mut model, "sort priority");
+    line(&mut model, "3");
+    assert_eq!(cursor_nr(&model), Some(1), "(A) (B) (C) three: place 3");
+    line(&mut model, "do 1 --expect nope");
+    assert!(model.line.is_some(), "a refused command keeps the prompt");
+    let shown = format!("{} {}", above(&model), status(&model));
+    assert!(shown.contains("expected \"nope\""), "{shown}");
 }
 
 #[test]

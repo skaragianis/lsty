@@ -32,7 +32,7 @@ Task 019 +p
 Task 020 +p
 -- small --
 ┌ [1]─~/todo.txt ────────────┐
-│    xxxxxxxxxxxxxxxxxxxxxxx │
+│ 21 xxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxx │
 │     +p                     │
@@ -46,7 +46,7 @@ Task 020 +p
 │  3   Task 018 +p                                         │
 │  2   Task 019 +p                                         │
 │  1   Task 020 +p                                         │
-│    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
+│ 21 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxx +p                                          │
 └──────────────────────────────────────────────────────────┘
