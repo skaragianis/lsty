@@ -176,7 +176,7 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
         "\nC\nB\n",
         false,
         "\nC\nA id:a\nB\n",
-        "2 changed since; dep:a not restored",
+        "a dependent of a changed since; dep:a not restored",
     ),
     (
         "\nB\nB\nC\n",
@@ -188,14 +188,14 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
         "\nB\nB\nC\n",
         false,
         "\nB\nB\nC\nA id:a\n",
-        "2 changed since; dep:a not restored",
+        "a dependent of a changed since; dep:a not restored",
     ),
     ("\nC\n", true, "\nC\nA id:a\n", "a dependent of a is gone"),
     (
         "\nC\n",
         false,
         "\nC\nA id:a\n",
-        "2 changed since; dep:a not restored",
+        "a dependent of a changed since; dep:a not restored",
     ),
 ];
 
@@ -247,6 +247,11 @@ fn the_kept_links_are_used_by_one_paste() {
     let copied = "\nB dep:a\nC\n2026-09-29 A id:a\n2026-09-29 A id:t001\n";
     for (typed, file, said) in [
         ("jjpp", copied, "pasted 1 task"),
+        (
+            "P",
+            "\n2026-09-29 A id:a\nB dep:a\nC\n",
+            "pasted 1 task (1 moved); relinked 3",
+        ),
         ("Gpup", linked, "pasted 1 task (1 moved); relinked 2"),
         ("Gpupup", linked, "pasted 1 task (1 moved); relinked 2"),
         ("Gpupu<C-r>", linked, "redid: pasted 1 task (1 moved)"),

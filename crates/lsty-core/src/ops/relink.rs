@@ -97,8 +97,8 @@ impl Tx {
         let Some(nr) = relink.nr else {
             return gone(&text);
         };
-        let changed = |nr: Nr| {
-            let why = format!("{nr} changed since; dep:{text} not restored");
+        let changed = |name: String| {
+            let why = format!("{name} changed since; dep:{text} not restored");
             Err(why.into_bytes())
         };
         let landed = self.landing.as_ref().map_or_else(
@@ -106,7 +106,7 @@ impl Tx {
             |landing| landing.line(Source::Todo, nr.index()),
         );
         let Some(index) = landed else {
-            return changed(nr);
+            return changed(format!("a dependent of {text}"));
         };
         let Some(row) = self.todo.rows().get(index) else {
             return gone(&text);
@@ -114,12 +114,15 @@ impl Tx {
         if Line::is_blank_text(&row.orig) {
             return gone(&text);
         }
-        let nr = Nr::from_index(index).unwrap_or(nr);
+        let Some(nr) = self.todo.position(index).and_then(Nr::from_index)
+        else {
+            return gone(&text);
+        };
         if *row.raw == *relink.before {
             return Ok(nr);
         }
         if relink.lost || *row.orig != *relink.after {
-            return changed(nr);
+            return changed(nr.to_string());
         }
         let dependent = id_text(&relink.before);
         let graph = graph.get_or_insert_with(|| graph_of(self));
