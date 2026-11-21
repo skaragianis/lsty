@@ -257,25 +257,21 @@ impl Model {
         put(buf, (x + 1, y), inner, &spans, self.styles.row(true));
     }
 
-    /// What goes before a row of the field: the number of the task it
-    /// stands in the place of, or blanks.
+    /// What goes before a row of the field: its place in the list, or
+    /// `0` in relative mode on a task it replaces, or blanks.
     fn field_number(&self, first: bool) -> Span<'static> {
         let left = self.field_box().0;
         let gutter = self.gutter_width();
-        let numbered = self
-            .edit
-            .as_ref()
-            .is_some_and(super::insert::Draft::replacing);
-        self.rows
-            .get(self.cursor)
-            .filter(|_| first && numbered && gutter > 0)
-            .map_or_else(
-                || Span::blanks(left - 1, None),
-                |row| {
-                    let span = self.number(row, self.cursor, gutter);
-                    Span::new(format!("{} ", span.text), span.slot)
-                },
-            )
+        let replacing = !self.new_field();
+        let n = if self.deps.config.line_numbers == LineNumbers::Relative {
+            replacing.then_some(0)
+        } else {
+            Some(self.field_at() + 1)
+        };
+        match n.filter(|_| first && gutter > 0) {
+            Some(n) => Span::new(format!("{n:>gutter$} "), Some(Slot::Text)),
+            None => Span::blanks(left - 1, None),
+        }
     }
 
     /// The message of a list that holds nothing though the file has
@@ -289,7 +285,9 @@ impl Model {
         vec![Span::new(format!(" {NOTHING}"), Some(Slot::Muted))]
     }
 
-    /// The width of the number column, 0 when numbers are off.
+    /// The width of the number column, 0 when numbers are off: that of the
+    /// lines of the files shown or of the rows drawn (a new task's
+    /// included), whichever is more, whatever the filter.
     pub(crate) fn gutter_width(&self) -> usize {
         if self.deps.config.line_numbers == LineNumbers::Off {
             return 0;
@@ -300,17 +298,25 @@ impl Model {
         if archived {
             lines += self.snap.file(Source::Done).lines.len();
         }
-        lines.to_string().len().max(MIN_GUTTER)
+        let shown = self.rows.len() + usize::from(self.new_field());
+        lines.max(shown).to_string().len().max(MIN_GUTTER)
+    }
+
+    /// Whether a new task's field is open, in a row of its own.
+    pub(crate) fn new_field(&self) -> bool {
+        self.edit.as_ref().is_some_and(|d| !d.replacing())
+    }
+
+    /// The place of row `index` in the list as drawn, from 1: an open new
+    /// task takes the place it stands in and moves the rows from there on.
+    fn place(&self, index: usize) -> usize {
+        index + 1 + usize::from(self.new_field() && index >= self.field_at())
     }
 
     /// Whether row `index` is the current one: the cursor row, unless an
     /// open new task stands beside it.
     fn is_current(&self, index: usize) -> bool {
-        index == self.cursor
-            && self
-                .edit
-                .as_ref()
-                .is_none_or(super::insert::Draft::replacing)
+        index == self.cursor && !self.new_field()
     }
 
     /// How far row `index` is from the current row; an open new task
@@ -325,27 +331,23 @@ impl Model {
         }
     }
 
-    /// The number of a row: the line of a todo file task, the distance to
-    /// the current row, or blank; a done-file row has no line.
-    fn number(&self, row: &Row, index: usize, gutter: usize) -> Span<'static> {
+    /// The number of a row: its place in the list or its distance to the
+    /// current row.
+    fn number(&self, index: usize, gutter: usize) -> Span<'static> {
         let style = self.deps.config.line_numbers;
-        let nr = (row.source != Source::Done).then(|| row.nr.get() as usize);
         let (n, slot) = if self.is_current(index) {
             let n = if style == LineNumbers::Relative {
-                Some(0)
+                0
             } else {
-                nr
+                self.place(index)
             };
             (n, Slot::Text)
         } else if style == LineNumbers::Absolute {
-            (nr, Slot::Muted)
+            (self.place(index), Slot::Muted)
         } else {
-            (Some(self.distance(index)), Slot::Muted)
+            (self.distance(index), Slot::Muted)
         };
-        match n {
-            Some(n) => Span::new(format!("{n:>gutter$}"), Some(slot)),
-            None => Span::blanks(gutter, Some(Slot::Muted)),
-        }
+        Span::new(format!("{n:>gutter$}"), Some(slot))
     }
 
     /// The spans of line `n` of task `index`: the first through
@@ -382,7 +384,7 @@ impl Model {
         let gap = Span::new(" ", row.base);
         let mut out = vec![Span::new(" ", None)];
         if layout.gutter > 0 {
-            out.push(self.number(row, index, layout.gutter));
+            out.push(self.number(index, layout.gutter));
             out.push(Span::new(" ", None));
         }
         out.push(row.marker.clone());

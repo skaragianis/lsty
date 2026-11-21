@@ -113,8 +113,7 @@ impl Model {
             mode,
             Mode::Normal | Mode::Visual | Mode::Insert | Mode::Completion
         ) {
-            let new = self.edit.as_ref().is_some_and(|e| !e.replacing());
-            let of = self.rows.len() + usize::from(new);
+            let of = self.rows.len() + usize::from(self.new_field());
             let at = (self.field_at() + 1).min(of);
             let field = self.edit.as_ref().map_or(String::new(), |e| {
                 format!(

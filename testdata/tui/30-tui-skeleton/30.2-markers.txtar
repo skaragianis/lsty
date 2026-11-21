@@ -19,7 +19,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │  3       Buy milk +home                                                      │
 │  2 ✓     Fix bug +work                                                       │
 │  1 ⧗     Draft report +work dep:c1                                           │
-│  7 ▶     Review PR                                                       !8h │
+│  6 ▶     Review PR                                                       !8h │
 │                                                                              │
 │                                                                              │
 │                                                                              │

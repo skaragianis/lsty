@@ -16,7 +16,7 @@ Buy +home
 (B) Other +work
 -- a-frame --
 ┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  2   (B) Sell                                                            filtered │
+│ +home    1/1││  1   (B) Sell                                                            filtered │
 │=+work    0/0││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │

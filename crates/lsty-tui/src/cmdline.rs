@@ -4,7 +4,8 @@
 use lsty_cli::{Inline, inline_command, inline_names, run_inline};
 use lsty_core::{
     case::lower,
-    errs::{self, Code, Error, Nr, Source, quote},
+    errs::{self, Code, Error, quote},
+    keys::Action,
     list::SortField,
     ops, theme,
 };
@@ -164,8 +165,9 @@ impl Model {
             return Vec::new();
         };
         if words.len() == 1 && first.bytes().all(|b| b.is_ascii_digit()) {
-            let done = self.goto_line(first);
-            self.end_line(done);
+            self.set_focus(Focus::List);
+            self.motion(Action::GoTop, first.parse().unwrap_or(usize::MAX));
+            self.close_input();
             return Vec::new();
         }
         let first = match full_name(first) {
@@ -219,24 +221,6 @@ impl Model {
             Ok(()) => self.close_input(),
             Err(e) => self.fail_line(&e),
         }
-    }
-
-    /// `:N`: puts the list cursor on the todo task with number `digits`.
-    fn goto_line(&mut self, digits: &str) -> errs::Result<()> {
-        let say = |text: String| Error::new(Code::NoTask, text);
-        let at = digits
-            .parse()
-            .ok()
-            .and_then(Nr::new)
-            .map(|nr| (Source::Todo, nr))
-            .filter(|at| self.snap.at(at.0, at.1).is_some())
-            .ok_or_else(|| say(format!("no task {digits}")))?;
-        let row = self
-            .row_at(at)
-            .ok_or_else(|| say(format!("task {digits} is not shown")))?;
-        self.set_focus(Focus::List);
-        self.cursor_to_row(row);
-        Ok(())
     }
 
     /// Runs a command of the command line as one write, or shows what

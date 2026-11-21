@@ -31,7 +31,7 @@ C +work @phone
 -- b-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
-│=+work    2/2││     +work                                                                         │
+│=+work    2/2││  2  +work                                                                         │
 ├[4]─Contexts─┤│  1   C +work @phone                                                               │
 │=@phone   2/2││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │
@@ -40,7 +40,7 @@ C +work @phone
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                    2|3│1|6  9.9.9
 -- b-cursor --
-│=+work    2/2││     +work                                                                         │
+│=+work    2/2││  2  +work                                                                         │
                     ^
 -- c-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐

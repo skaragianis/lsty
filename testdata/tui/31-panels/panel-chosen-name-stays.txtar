@@ -41,7 +41,7 @@ show_detail = false
  N  sort(manual)  1 deleted  x done  t start  T wont  o new  a append  dd delete         0|0  9.9.9
 -- unchosen --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  2   Buy milk +home @shop                                                         │
+│ +home    1/1││  1   Buy milk +home @shop                                                         │
 ├[4]─Contexts─┤│                                                                                   │
 │ @shop    1/1││                                                                                   │
 ├[5]─Filters──┤│                                                                                   │

@@ -108,35 +108,15 @@ fn the_cursor_stops_at_the_ends_and_counts_move_it() {
 }
 
 #[test]
-fn a_count_on_go_top_is_an_nr_of_the_todo_file() {
+fn a_count_on_go_top_is_a_place_in_the_list() {
     let todo = "A\n\nC\nD\n";
     let (_dir, mut model) = workdir_model(todo, Config::default());
-    press(&mut model, "2G");
-    assert_eq!(model.cursor, 1, "NR 2 is blank: the next one is NR 3");
+    press(&mut model, "3G");
+    assert_eq!(model.cursor, 2, "line 3 is C, place 3 is D");
     press(&mut model, "1gg");
     assert_eq!(model.cursor, 0);
     press(&mut model, "9G");
-    assert_eq!(model.cursor, 2, "no NR from 9 up: the last row");
-}
-
-#[test]
-fn only_todo_tasks_have_an_nr_to_go_to() {
-    let dir = workdir("Low task\n(A) Top task\n");
-    fs::write(
-        dir.path().join("done.txt"),
-        "x 2026-09-01 One\nx 2026-09-02 Two\nx 2026-09-03 Three\n",
-    )
-    .unwrap_or_else(|e| panic!("{e}"));
-    let config = Config {
-        hidden_tasks: Vec::new(),
-        ..Config::default()
-    };
-    let mut model = started(deps(dir.path(), config));
-    assert_eq!(model.rows.len(), 5);
-    press(&mut model, "4G");
-    assert_eq!(model.cursor, 4, "no todo task has NR 4 or more");
-    press(&mut model, "2G");
-    assert_eq!(model.cursor, 1);
+    assert_eq!(model.cursor, 2, "past the end: the last row");
 }
 
 #[test]

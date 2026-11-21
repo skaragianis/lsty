@@ -26,7 +26,7 @@ S
  N  sort(manual)  1 done: A; archived to done.txt as done:1; 2 done: B; archived to done.txt as done
 -- selecting --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
-│  4   Q                                                                                           │
+│  1   Q                                                                                           │
 │  1   R                                                                                           │
 │  2   S                                                                                           │
 │                                                                                                  │

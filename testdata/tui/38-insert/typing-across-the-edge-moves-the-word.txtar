@@ -14,7 +14,7 @@ First
 -- before --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
 │  1   First                                     │
-│    123456789 abcdefghij klmnopqrstuvwxyzabcde  │
+│  2 123456789 abcdefghij klmnopqrstuvwxyzabcde  │
 │                                                │
 │                                                │
 │                                                │
@@ -27,12 +27,12 @@ First
 └────────────────────────────────────────────────┘
  I  sort(manual)  <CR> commit    2|2│43|42  9.9.9
 -- before-cursor --
-│    123456789 abcdefghij klmnopqrstuvwxyzabcde  │
+│  2 123456789 abcdefghij klmnopqrstuvwxyzabcde  │
                                                ^
 -- after --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
 │  1   First                                     │
-│    123456789 abcdefghij                        │
+│  2 123456789 abcdefghij                        │
 │    klmnopqrstuvwxyzabcdef                      │
 │                                                │
 │                                                │

@@ -31,7 +31,7 @@ x 2026-11-01 Old parser +work id:d1
 -- project --
 ┌ [1]─-+work ──────────────────────────────────────────────────────────────────────────────────────┐
 │  1   A +home @phone                                                                              │
-│  6 ⧗ E needs parser dep:p1                                                                       │
+│  2 ⧗ E needs parser dep:p1                                                                       │
 │  1   F dep:d1                                                                                    │
 │  2   G dep:gone                                                                                  │
 │                                                                                                  │
@@ -43,14 +43,14 @@ x 2026-11-01 Old parser +work id:d1
 │  3   A +home @phone                                                                              │
 │  2   B +work                                                                                     │
 │  1   Write parser +work @desk                                                          12-24  p1 │
-│  6 ⧗ E needs parser dep:p1                                                                       │
+│  4 ⧗ E needs parser dep:p1                                                                       │
 │  1   F dep:d1                                                                                    │
 │  2   G dep:gone                                                                                  │
 +work  +work.acme
  C  /-+work.acme  <CR> keep  <Tab> next  <Esc> cancel
 -- state --
 ┌ [1]─/is:done|is:later ───────────────────────────────────────────────────────────────────────────┐
-│  4   D t:2099-01-01 +home                                                                        │
+│  1   D t:2099-01-01 +home                                                                        │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -60,7 +60,7 @@ is:later
  C  /is:done|is:later  <CR> keep  <Tab> next  <Esc> cancel
 -- dep --
 ┌ [1]─/dep:p1 ─────────────────────────────────────────────────────────────────────────────────────┐
-│  6 ⧗ E needs parser dep:p1                                                                       │
+│  1 ⧗ E needs parser dep:p1                                                                       │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
