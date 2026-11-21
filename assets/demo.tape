@@ -26,7 +26,7 @@ Set CursorBlink false
 
 # Prepare the list, environment, and cleanup without recording the shell.
 Hide
-Type@1ms `set -eu; demo=$(mktemp -d); trap 'tmux -L lsty-demo kill-server 2>/dev/null || :; rm -rf "$demo"' EXIT; cp assets/demo.todo.txt "$demo/todo.txt"; export SHELL="$(command -v bash)" HOME="$demo" XDG_CONFIG_HOME="$demo/config" XDG_STATE_HOME="$demo/state" PATH="$PWD/target/release:$PATH" TZ=UTC LSTY_NOW=2026-10-07T1000Z TERM=xterm-256color COLORTERM=truecolor TODO_FILE="$demo/todo.txt" TODOTXT_CFG_FILE=/dev/null; unset DONE_FILE LSTY_OWNER LSTY_CONFIG LSTY_TODAY LSTY_NONINTERACTIVE NO_COLOR TMUX TODOTXT_AUTO_ARCHIVE TODOTXT_DATE_ON_ADD TODOTXT_PLAIN TODOTXT_PRESERVE_LINE_NUMBERS; clear`
+Type@1ms `set -eu; demo=$(mktemp -d); trap 'tmux -L lsty-demo kill-server 2>/dev/null || :; rm -rf "$demo"' EXIT; cp assets/demo.todo.txt "$demo/todo.txt"; export SHELL="$(command -v bash)" HOME="$demo" XDG_CONFIG_HOME="$demo/config" XDG_STATE_HOME="$demo/state" PATH="$PWD/target/release:$PATH" TZ=UTC LSTY_NOW=2026-10-07T1000Z TERM=xterm-256color COLORTERM=truecolor TODO_FILE="$demo/todo.txt" TODOTXT_CFG_FILE=/dev/null; unset DONE_FILE LSTY_OWNER LSTY_CONFIG LSTY_TODAY LSTY_NONINTERACTIVE NO_COLOR TMUX TODOTXT_AUTO_ARCHIVE TODOTXT_DATE_ON_ADD TODOTXT_PLAIN TODOTXT_PRESERVE_LINE_NUMBERS; mkdir -p "$demo/config/lsty"; printf 'theme = "lsty-80s"\n' > "$demo/config/lsty/config.toml"; clear`
 Enter
 Sleep 500ms
 

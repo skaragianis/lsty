@@ -1,10 +1,7 @@
 //! Where the keyboard is, and what shows the sidebar.
 
 use lsty_core::{
-    config::{
-        DEFAULT_LIST_ROWS,
-        DetailPosition::{Bottom, Right},
-    },
+    config::DetailPosition::{Bottom, Right},
     keys::{Action, Mode},
 };
 
@@ -282,9 +279,10 @@ impl Model {
     }
 
     /// Whether `0` changes the rows a task may take: it does when they
-    /// are not the default, even where the list is too short to show it.
+    /// are not the `list_rows` of the config, even where the list is too
+    /// short to show it.
     pub(crate) fn can_default_rows(&self) -> bool {
-        self.deps.config.list_rows != DEFAULT_LIST_ROWS
+        self.deps.config.list_rows != self.configured_rows
     }
 
     /// A task may take `rows` rows. The cursor row stays on its line of
@@ -317,10 +315,10 @@ impl Model {
         }
     }
 
-    /// `0`: a task may take the default rows again.
+    /// `0`: a task may take the rows of the config again.
     pub(crate) fn default_rows(&mut self) {
         if self.can_default_rows() {
-            self.set_list_rows(DEFAULT_LIST_ROWS);
+            self.set_list_rows(self.configured_rows);
         }
     }
 
