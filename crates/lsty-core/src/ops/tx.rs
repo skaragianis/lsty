@@ -10,7 +10,7 @@ use super::{
 };
 use crate::{
     discover::FileState,
-    errs::{Code, Error, Field, Result, Source},
+    errs::{Code, Error, Field, Msg, Name, Result, Source},
     list::{Snapshot, State, Task, TaskId},
     todotxt::{Line, share},
 };
@@ -45,7 +45,7 @@ pub(super) struct Tx {
     pub(super) side: Vec<LineRef>,
     /// Lines the operation created as a by-product.
     pub(super) spawned: Vec<LineRef>,
-    pub(super) messages: Vec<Vec<u8>>,
+    pub(super) messages: Vec<Msg>,
     /// Messages about an id the operation may remove: the message's
     /// index and the id.
     pub(super) lost: Vec<(usize, Vec<u8>)>,
@@ -155,6 +155,16 @@ impl Tx {
     pub(super) fn line_ref(&self, id: TaskId) -> Result<LineRef> {
         let task = self.snap.task(id).ok_or_else(gone)?;
         Ok(self.file(task.source()).line_ref(task.nr().index()))
+    }
+
+    /// The task as a message names it: by the reference its target used,
+    /// or its number, for the command line. The line it is in the list
+    /// the write leaves is filled in when the result is built.
+    pub(super) fn name(&self, id: TaskId) -> Name {
+        match self.line_ref(id) {
+            Ok(at) => self.row_name(at),
+            Err(_) => Name::new(self.handle(id), None, Source::Todo, None),
+        }
     }
 
     /// How messages name a task: the reference its target used, or its
@@ -384,9 +394,8 @@ impl Tx {
         self.file_mut(source).relocate(&rows, after);
     }
 
-    /// Adds a message to the result. It is bytes, because it can carry
-    /// the text of a line.
-    pub(super) fn say(&mut self, message: impl Into<Vec<u8>>) {
+    /// Adds a message to the result.
+    pub(super) fn say(&mut self, message: impl Into<Msg>) {
         self.messages.push(message.into());
     }
 
@@ -412,10 +421,10 @@ pub(super) fn wrong_state(
     snap: &Snapshot,
     task: &Task,
     state: State,
-    message: String,
+    said: Msg,
     hint: String,
 ) -> Error {
-    Error::new(Code::WrongState, message)
+    Error::named(Code::WrongState, said)
         .with_hint(hint)
         .with_task(snap.ref_of(task))
         .with_field("state", Field::Str(state.as_str().to_owned()))
@@ -430,7 +439,8 @@ pub(super) fn archived_error(
         snap,
         task,
         State::Done,
-        format!("{handle} is read-only history"),
+        snap.name(task, handle.to_owned())
+            .then(" is read-only history"),
         format!("{handle} is archived; use restore"),
     )
 }
@@ -445,6 +455,8 @@ pub(super) fn stamped(
     let Some(task) = snap.task(id) else {
         return gone();
     };
-    let message = format!("{handle}: a text edit can't change a stamp");
-    wrong_state(snap, task, task.state(), message, hint.to_owned())
+    let said = snap
+        .name(task, handle.to_owned())
+        .then(": a text edit can't change a stamp");
+    wrong_state(snap, task, task.state(), said, hint.to_owned())
 }

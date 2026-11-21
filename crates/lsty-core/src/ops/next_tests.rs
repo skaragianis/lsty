@@ -324,7 +324,7 @@ fn next_reads_the_first_ready_task() {
             .and_then(|id| got.snapshot.task(id))
             .map(|i| i.nr().get());
         assert_eq!(nr, case.nr, "{}", case.name);
-        assert_eq!(got.messages, said(case.messages), "{}", case.name);
+        assert_eq!(got.messages(), said(case.messages), "{}", case.name);
         let stale: Vec<u32> =
             got.seen.stale.iter().map(|r| r.nr.get()).collect();
         assert_eq!(stale, case.stale, "{}", case.name);
@@ -344,7 +344,7 @@ fn next_ignores_the_done_file() {
     let env = dir.env();
     let got = next_read(&env, &by_priority()).expect("next");
     assert_eq!(got.task, None);
-    assert_eq!(got.messages, said(&["nothing ready"]));
+    assert_eq!(got.messages(), said(&["nothing ready"]));
 }
 
 #[test]

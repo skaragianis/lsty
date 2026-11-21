@@ -5,12 +5,12 @@ use std::{collections::HashSet, sync::Arc};
 use super::{
     env::Env,
     run::Sealed,
-    staged::{LineRef, SealedFile},
+    staged::{LineRef, Row, SealedFile},
     tx::Tx,
     undo::UndoRecord,
 };
 use crate::{
-    errs::{Nr, Source},
+    errs::{Msg, Nr, Part, Place, Source},
     list::{Snapshot, Task, TaskId},
 };
 
@@ -27,7 +27,7 @@ pub struct Outcome {
     spawned: Vec<TaskId>,
     changed: Vec<TaskId>,
     renumbered: bool,
-    messages: Vec<Vec<u8>>,
+    messages: Vec<Msg>,
     no_op: bool,
     undo: Option<UndoRecord>,
     read: Snapshot,
@@ -65,8 +65,16 @@ impl Outcome {
         self.renumbered
     }
 
-    /// What the operation said, then the warnings about touched tasks.
-    pub fn messages(&self) -> &[Vec<u8>] {
+    /// What the operation said, then the warnings about touched tasks,
+    /// as the command line prints it.
+    pub fn messages(&self) -> Vec<Vec<u8>> {
+        self.messages.iter().map(Msg::cli).collect()
+    }
+
+    /// What the operation said as data: each message names the tasks it
+    /// is about, by their line in the list the write left, or by their
+    /// line as read for a task the write removed.
+    pub fn said(&self) -> &[Msg] {
         &self.messages
     }
 
@@ -135,15 +143,12 @@ impl Sealed {
             .flatten()
             .filter_map(|id| after.task(*id));
         let mut messages = tx.messages.clone();
-        messages.extend(
-            after
-                .warnings_for(touched)
-                .into_iter()
-                .map(String::into_bytes),
-        );
+        messages
+            .extend(after.warnings_for(touched).into_iter().map(Msg::from));
         if no_op && tx.messages.is_empty() {
-            messages.push(NOTHING_CHANGED.as_bytes().to_vec());
+            messages.push(NOTHING_CHANGED.into());
         }
+        tx.place_names(&mut messages);
         let undo = (env.record_undo && !no_op)
             .then(|| tx.undo(action, written, (&todo, &done), &after));
         Outcome {
@@ -177,6 +182,32 @@ impl Tx {
                 after.at(r.source, Nr::from_index(at)?).map(Task::task_id)
             })
             .collect()
+    }
+
+    /// Gives the names in `messages` the line their row has in the list
+    /// the write leaves, from one lookup of the positions of each file; a
+    /// row the write removed or blanked keeps the line it was read at.
+    fn place_names(&self, messages: &mut [Msg]) {
+        let (todo, done) = (self.todo.positions(), self.done.positions());
+        let names =
+            messages
+                .iter_mut()
+                .flat_map(Msg::parts_mut)
+                .filter_map(|part| match part {
+                    Part::Name(name) => Some(name),
+                    Part::Text(_) => None,
+                });
+        for name in names {
+            let Some((source, index)) = name.row.take() else {
+                continue;
+            };
+            let gone =
+                self.file(source).rows().get(index).is_none_or(Row::is_gone);
+            let at = source.pick(&todo, &done).get(index).copied().flatten();
+            if let (false, Some(nr)) = (gone, at.and_then(Nr::from_index)) {
+                name.place = Some(Place::Written(nr));
+            }
+        }
     }
 
     /// The tasks the primary lines were when read.

@@ -388,6 +388,11 @@ fn a_dependency_cycle_in_pasted_text_is_warned_about() {
             "2 is now part of a dependency cycle"
         ]
     );
+    let Some(crate::errs::Part::Name(name)) = out.said()[1].parts().first()
+    else {
+        panic!("{:?}", out.said());
+    };
+    assert_eq!(name.id.as_deref(), Some("b"));
 }
 
 #[test]

@@ -12,7 +12,7 @@ use super::{
     tx::{Tx, gone, wrong_state},
 };
 use crate::{
-    errs::{Code, Error, Field, Result},
+    errs::{Code, Error, Field, Name, Result},
     list::{State, Task, TaskId},
     todotxt::{Line, Priority},
 };
@@ -38,7 +38,7 @@ pub fn pri(env: &Env<'_>, pairs: &[PriPair]) -> Result<Outcome> {
             };
             match given.insert(id, pair.priority) {
                 Some(prev) if prev != pair.priority => {
-                    return Err(conflicting(&tx.handle(id)));
+                    return Err(conflicting(tx.name(id)));
                 }
                 Some(_) => {}
                 None => edit_priority(tx, env, id, pair.priority)?,
@@ -81,11 +81,8 @@ pub fn parse_letter(text: &str) -> Result<Priority> {
     })
 }
 
-fn conflicting(handle: &str) -> Error {
-    Error::new(
-        Code::Usage,
-        format!("{handle} is given two different priorities"),
-    )
+fn conflicting(name: Name) -> Error {
+    Error::named(Code::Usage, name.then(" is given two different priorities"))
 }
 
 /// The task's line as read; a done task is refused.
@@ -99,12 +96,11 @@ fn open_line(tx: &Tx, id: TaskId) -> Result<&Line> {
 
 /// The refusal of a change to the priority of a done task.
 pub(super) fn reopen_first(tx: &Tx, id: TaskId, task: &Task) -> Error {
-    let handle = tx.handle(id);
     wrong_state(
         tx.snapshot(),
         task,
         task.state(),
-        format!("{handle} is done; reopen it first"),
+        tx.name(id).then(" is done; reopen it first"),
         format!("use lsty reopen {}", tx.given(id)),
     )
 }
@@ -117,15 +113,15 @@ fn put_priority(
 ) -> Result<()> {
     let line = open_line(tx, id)?;
     let (cur, raw) = (line.priority(), line.shared());
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let (text, said) = match (cur, want) {
-        (None, None) => (None, format!("{handle} has no priority")),
+        (None, None) => (None, " has no priority".to_owned()),
         (Some(cur), Some(want)) if cur == want => {
-            (None, format!("{handle} already has priority ({want})"))
+            (None, format!(" already has priority ({want})"))
         }
         (None, Some(want)) => (
             Some([format!("({want}) ").as_bytes(), &raw].concat()),
-            format!("{handle} prioritized ({want})"),
+            format!(" prioritized ({want})"),
         ),
         (Some(cur), Some(want)) => (
             Some(
@@ -135,16 +131,16 @@ fn put_priority(
                 ]
                 .concat(),
             ),
-            format!("{handle} re-prioritized from ({cur}) to ({want})"),
+            format!(" re-prioritized from ({cur}) to ({want})"),
         ),
         (Some(_), None) => (
             Some(raw.get(4..).unwrap_or_default().to_vec()),
-            format!("{handle} deprioritized"),
+            " deprioritized".to_owned(),
         ),
     };
     if let Some(text) = text {
         tx.set(id, text, Path::Action);
     }
-    tx.say(said);
+    tx.say(name.then(said));
     Ok(())
 }

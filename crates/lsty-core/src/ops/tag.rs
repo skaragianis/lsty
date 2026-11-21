@@ -95,21 +95,20 @@ fn tag_task(
     tags: &[Tag],
 ) -> Result<()> {
     let mut line = tx.line_of(id)?.clone();
-    let handle = tx.handle(id);
-    let head = handle.as_bytes();
+    let name = tx.name(id);
     for tag in tags {
         let said = match apply_tag(tx, id, &line, tag)? {
             Applied::Added(next) => {
                 line = next;
-                [head, b" tagged ", &tag.text].concat()
+                [b" tagged ", &tag.text[..]].concat()
             }
             Applied::Set(next, old) => {
                 line = next;
-                [head, b" ", &old, b" is now ", &tag.text].concat()
+                [b" ", &old[..], b" is now ", &tag.text].concat()
             }
-            Applied::Kept => [head, b" already has ", &tag.text].concat(),
+            Applied::Kept => [b" already has ", &tag.text[..]].concat(),
         };
-        tx.say(said);
+        tx.say(name.clone().then(said));
     }
     tx.set_edited(&env.actor, id, line.raw().to_vec())?;
     Ok(())
@@ -218,16 +217,16 @@ fn untag_task(
     removals: &[Untag],
 ) -> Result<()> {
     let mut line = tx.line_of(id)?.clone();
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     for removal in removals {
         let (next, removed) =
             tx.remove_where(id, &line, |t| removal.matches(t))?;
         line = next;
         if removed == 0 {
-            tx.say(format!("{handle} has no {}", removal.given));
+            tx.say(name.clone().then(format!(" has no {}", removal.given)));
             continue;
         }
-        let said = format!("{handle} untagged {}", removal.given);
+        let said = name.clone().then(format!(" untagged {}", removal.given));
         if removal.given.starts_with("id:") {
             tx.allow_id_loss(id);
             let lost = lost_id(tx, id, &removal.given);

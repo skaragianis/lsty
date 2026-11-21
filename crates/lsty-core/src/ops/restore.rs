@@ -69,8 +69,8 @@ fn restore_task(
             finish_restore(tx, left);
             return Ok(());
         }
-        let (handle, name) = (tx.handle(id), tx.file_name(Source::Todo));
-        tx.say(format!("{handle} is already in {name}"));
+        let file = tx.file_name(Source::Todo);
+        tx.say(tx.name(id).then(format!(" is already in {file}")));
         return Ok(());
     }
     if tx.copy_in(Source::Todo, id).is_some() {
@@ -99,16 +99,7 @@ fn move_back(
     let line = tx.snapshot().line(task).clone();
     let (line, suffix) = unfinished(tx, &env.actor, (id, &line), stamp, opts)?;
     let (line_ref, _) = tx.send_to(Source::Todo, id, line.shared())?;
-    let handle = tx.handle(id);
-    let nr = tx.written_nr(line_ref);
-    tx.say(
-        [
-            handle.as_bytes(),
-            b" reopened as ",
-            nr.to_string().as_bytes(),
-            &suffix,
-        ]
-        .concat(),
-    );
+    let at = tx.written_name(line_ref)?;
+    tx.say(tx.name(id).then(" reopened as ").and(at).then(suffix));
     Ok(())
 }

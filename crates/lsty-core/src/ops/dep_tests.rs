@@ -4,7 +4,7 @@ use super::{
     test_util::{Sequence, folder, parts, said, strings},
     undep, untag,
 };
-use crate::errs::{Code, Error, Field};
+use crate::errs::{Code, Error, Field, Nr, Part, Place};
 
 const PLAIN: ClaimOpts = ClaimOpts { takeover: false };
 const TAKEOVER: ClaimOpts = ClaimOpts { takeover: true };
@@ -751,7 +751,7 @@ fn path_nrs(err: &Error) -> Option<Vec<u32>> {
     Some(refs.iter().map(|r| r.nr.get()).collect())
 }
 
-fn check_refused(at: &str, err: &Error, want: &Refused) {
+fn check_refused(at: &str, err: &Error, want: &Refused, read: usize) {
     let (code, message, hint) = parts(err);
     assert_eq!(code, want.code, "{at}: {err:?}");
     if let Some(hint_want) = want.hint {
@@ -763,6 +763,27 @@ fn check_refused(at: &str, err: &Error, want: &Refused) {
     if let Some(path) = want.path {
         assert_eq!(path_nrs(err).as_deref(), Some(path), "{at} path");
         assert!(err.task().is_some(), "{at}");
+        check_path_names(at, err, path, read);
+    }
+}
+
+/// The refusal names every task of the path, by id, and by its line in the
+/// list read (`read` lines) unless the write added it. No line moves, and
+/// an add appends, so a step numbered past `read` is an added line.
+fn check_path_names(at: &str, err: &Error, path: &[u32], read: usize) {
+    let said = err.said().expect("names the path").parts();
+    let names: Vec<_> = said
+        .iter()
+        .filter_map(|p| match p {
+            Part::Name(n) => Some(n),
+            Part::Text(_) => None,
+        })
+        .collect();
+    assert_eq!(names.len(), path.len(), "{at} names");
+    for (n, &p) in names.into_iter().zip(path) {
+        let place = usize::try_from(p).is_ok_and(|p| p <= read);
+        let want = place.then(|| Place::Read(Nr::new(p).unwrap()));
+        assert!(n.id.is_some() && n.place == want, "{at} {n:?}");
     }
 }
 
@@ -780,7 +801,7 @@ fn run_case(case: &Case) {
                 check_done(&at, &out, want, &dir.todo());
             }
             (Err(err), Want::Refused(want)) => {
-                check_refused(&at, &err, want);
+                check_refused(&at, &err, want, before.lines().count());
                 assert_eq!(dir.todo(), before, "{at}: the file changed");
             }
             (Ok(out), Want::Refused(_)) => {

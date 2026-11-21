@@ -34,9 +34,9 @@ pub fn del(
         }
         tx.each_guarded(targets, guard, |tx, id| {
             let held = tx.id_bytes(id).unwrap_or_default();
-            let handle = tx.handle(id);
+            let name = tx.name(id);
             tx.blank(id);
-            tx.say_lost(&held, format!("{handle} deleted"));
+            tx.say_lost(&held, name.then(" deleted"));
             Ok(())
         })
     })

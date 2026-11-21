@@ -13,7 +13,7 @@ use super::{
 };
 use crate::{
     dates::{self, Date},
-    errs::{Code, Error, Field, Result, Source, lossy},
+    errs::{Code, Error, Field, Msg, Result, Source, lossy},
     list::{Snapshot, Task, TaskId},
     todotxt::{Kind, Line, Rec, TokenView, trim},
 };
@@ -117,25 +117,16 @@ pub(super) fn check_rec(line: &Line) -> Result<()> {
     )
 }
 
-/// The warnings for a typed text that repeats a key `old` already has.
-pub(super) fn repeat_warnings(
-    handle: &str,
-    old: &Line,
-    typed: &[u8],
-) -> Vec<Vec<u8>> {
+/// The warnings for a typed text that repeats a key `old` already has,
+/// each after the name of the task.
+pub(super) fn repeat_warnings(old: &Line, typed: &[u8]) -> Vec<Vec<u8>> {
     let typed = Line::parse(typed);
     SETTABLE_KEYS
         .iter()
         .filter(|key| typed.tokens().any(|t| t.is_tag(key)))
         .filter_map(|key| old.tokens().find(|t| t.is_tag(key)))
         .map(|held| {
-            [
-                handle.as_bytes(),
-                b" already has ",
-                held.text,
-                b"; the first one counts",
-            ]
-            .concat()
+            [b" already has ", held.text, b"; the first one counts"].concat()
         })
         .collect()
 }
@@ -144,7 +135,7 @@ pub(super) fn repeat_warnings(
 pub(super) fn blocked_error(
     after: &Snapshot,
     task: &Task,
-    message: &str,
+    said: Msg,
     hint: &str,
 ) -> Error {
     let blockers = task
@@ -153,7 +144,7 @@ pub(super) fn blocked_error(
         .filter_map(|id| after.task(*id))
         .map(|b| after.ref_of(b))
         .collect();
-    Error::new(Code::Blocked, message)
+    Error::named(Code::Blocked, said)
         .with_hint(hint)
         .with_field("blockers", Field::Refs(blockers))
 }
@@ -255,12 +246,12 @@ impl Tx {
         } else {
             "use lsty stop"
         };
-        let handle = self.handle(id);
+        let said = self.name(id).then(": a text edit can't change a claim");
         Err(wrong_state(
             &self.snap,
             task,
             task.state(),
-            format!("{handle}: a text edit can't change a claim"),
+            said,
             hint.to_owned(),
         ))
     }
@@ -284,7 +275,7 @@ impl Tx {
                 return Err(blocked_error(
                     &after,
                     task,
-                    &format!("{} is blocked", self.handle(id)),
+                    self.name(id).then(" is blocked"),
                     "finish what it waits for first",
                 ));
             }

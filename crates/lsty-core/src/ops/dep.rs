@@ -82,7 +82,6 @@ fn prerequisite_id(
     chosen: Option<&str>,
     taken: &mut Taken,
 ) -> Result<Vec<u8>> {
-    let handle = tx.handle(pre);
     let task = tx.task(pre).ok_or_else(gone)?;
     if let Some(have) = tx.id_bytes(pre) {
         keep_id(tx, pre, &have, chosen)?;
@@ -93,7 +92,7 @@ fn prerequisite_id(
             tx.snapshot(),
             task,
             task.state(),
-            format!("{handle} has no id and is archived"),
+            tx.name(pre).then(" has no id and is archived"),
             "restore it first, then give it an id".to_owned(),
         ));
     }
@@ -123,15 +122,14 @@ fn add_deps(
     pres: &[TaskId],
     ids: &[Vec<u8>],
 ) -> Result<()> {
-    let handle = tx.handle(task);
     let mut line = tx.current(task).ok_or_else(gone)?;
     for (&pre, id) in pres.iter().zip(ids) {
-        let prereq = tx.handle(pre);
+        let (name, prereq) = (tx.name(task), tx.name(pre));
         if let Some(waiting) = with_dep(tx, task, &line, id)? {
             line = waiting;
-            tx.say(format!("{handle} now waits for {prereq}"));
+            tx.say(name.then(" now waits for ").and(prereq));
         } else {
-            tx.say(format!("{handle} already waits for {prereq}"));
+            tx.say(name.then(" already waits for ").and(prereq));
         }
     }
     tx.set(task, line.raw(), Path::Action);
@@ -191,19 +189,18 @@ pub fn undep(
 }
 
 fn drop_deps(tx: &mut Tx, task: TaskId, pres: &[TaskId]) -> Result<()> {
-    let handle = tx.handle(task);
     let mut line = tx.current(task).ok_or_else(gone)?;
     for &pre in pres {
-        let prereq = tx.handle(pre);
+        let (name, prereq) = (tx.name(task), tx.name(pre));
         let id = tx.id_bytes(pre).unwrap_or_default();
         let (next, removed) = tx.remove_where(task, &line, |t| {
             t.is_tag(b"dep") && t.value == id
         })?;
         line = next;
         if removed == 0 {
-            tx.say(format!("{handle} does not wait for {prereq}"));
+            tx.say(name.then(" does not wait for ").and(prereq));
         } else {
-            tx.say(format!("{handle} no longer waits for {prereq}"));
+            tx.say(name.then(" no longer waits for ").and(prereq));
         }
     }
     tx.set(task, line.raw(), Path::Action);
