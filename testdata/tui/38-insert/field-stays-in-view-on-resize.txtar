@@ -31,7 +31,7 @@ Task 018 +p
 Task 019 +p
 Task 020 +p
 -- small --
-┌ [1]─~/todo.txt ────────────┐
+┌[1]─~/todo.txt──────────────┐
 │ 21 xxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxxxxxxxxx │
@@ -39,7 +39,7 @@ Task 020 +p
 └────────────────────────────┘
  I  sort(manual)  <CR> commit
 -- large --
-┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────┐
 │  6   Task 015 +p                                         │
 │  5   Task 016 +p                                         │
 │  4   Task 017 +p                                         │

@@ -15,7 +15,7 @@ Buy +x
 Sell +y
 x (A) 2026-10-01 Old +y
 -- none --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─~/todo.txt─────────────────────────────────────────────────┐
 │ +x       1/1││  1   Buy +x                                                   │
 │ +y       1/2││  1   Sell +y                                                  │
 ├[4]─Contexts─┤│  2 ✓ Old +y                                                   │
@@ -30,7 +30,7 @@ x (A) 2026-10-01 Old +y
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  N  sort(manual)  x done  t start  T wont  o new  a append           1|3  9.9.9
 -- one --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─~/todo.txt─────────────────────────────────────────────────┐
 │ +x       1/1││  1   (D) Buy +x                                               │
 │ +y       1/2││  1       Sell +y                                              │
 ├[4]─Contexts─┤│  2 ✓     Old +y                                               │
@@ -60,7 +60,7 @@ e.ttttt.......eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.mmmmmmmmmmmm..wwwwwwwwwwwwwwwww..k.yyyy..k.yyyyy..k.yyyy........NNNNN.mmmmm.
 -- filtered --
-┌[3]─Projects─┐┌ [1]─+y ───────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+y─────────────────────────────────────────────────────────┐
 │ +x       1/1││  1   Sell +y                                                  │
 │=+y       1/2││  1 ✓ Old +y                                                   │
 ├[4]─Contexts─┤│                                                               │

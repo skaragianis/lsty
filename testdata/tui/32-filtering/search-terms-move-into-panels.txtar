@@ -11,7 +11,7 @@ frame kept
 Call client again +home @email
 Buy milk +home t:2026-10-05
 -- typing --
-┌[3]─Projects─┐┌ [1]─+work|+home  -@email  /-+gone  /"call client" ───────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work|+home  -@email  /-+gone  /"call client"─────────────────────────┐┌[2]─Detail───────────────────────────┐
 │ +home    2/2││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
 │ ▾+work   2/2││                                                                          ││ due:2026-09-29                      │
 │   .acme  1/1││                                                                          ││ ─────────────────────────────────── │
@@ -32,7 +32,7 @@ Buy milk +home t:2026-10-05
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  C  /+work|+home -@email -+gone "call client"  <CR> keep  <Tab> next  <Esc> cancel
 -- kept --
-┌[3]─Projects─┐┌ [1]─+work|+home  -@email  /-+gone  /"call client" ───────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work|+home  -@email  /-+gone  /"call client"─────────────────────────┐┌[2]─Detail───────────────────────────┐
 │|+home    2/2││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
 │=▾+work   2/2││                                                                          ││ due:2026-09-29                      │
 │   .acme  1/1││                                                                          ││ ─────────────────────────────────── │

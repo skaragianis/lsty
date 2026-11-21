@@ -10,7 +10,7 @@ Review the ledger id:ledger started:2026-09-29T0700Z due:2026-09-30
 Pay the run id:run dep:ledger
 Buy milk
 -- off --
-┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────┐
 │  1 ▷ Review the ledger                      tomorrow  2h │
 │  1 ⧗ Pay the run                                         │
 │  2   Buy milk                                            │

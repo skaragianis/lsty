@@ -12,7 +12,7 @@ Open https://example.com/a/very/long/path/that/is/cut +work @home
 Open file:docs/a.md file:docs/b.md +work
 x 2026-09-29 Read https://x.org +work
 -- frame --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────┐
 │  1   See https://x.org +work @home                  tomorrow │
 │  1   Open https://example.com/a/very/… @home +work           │
 │  2   Open file:docs/a.md file:docs/b.md +work                │

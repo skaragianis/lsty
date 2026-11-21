@@ -24,7 +24,7 @@ E..........tttttttttttttttttttt........E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.mmmmmmmmmmmm..k.yyyy....NNNNN.mmmmm.
 -- frame --
-┌ [1]─~/todo.txt ──────────────────────┐
+┌[1]─~/todo.txt────────────────────────┐
 │  1       Buy milk                    │
 │  1       Draft the quarterly         │
 │          planning review for the     │
@@ -34,7 +34,7 @@ NNN.mmmmmmmmmmmm..k.yyyy....NNNNN.mmmmm.
 └──────────────────────────────────────┘
  N  sort(manual)  x done     1|4  9.9.9
 -- second-whole --
-┌ [1]─~/todo.txt ──────────────────────┐
+┌[1]─~/todo.txt────────────────────────┐
 │  1       Buy milk                    │
 │  2       Draft the quarterly         │
 │          planning review for the     │

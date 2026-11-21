@@ -27,7 +27,7 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.mmmmmmmmmmmm..gggggggggggg..D.DDDD..k.yyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy......NNNNN.mmmmm.
 -- stopped --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
 │  1   Blocker                                                                                   b │
 │  2 ⧗ Stuck dep:b                                                                                 │
 │                                                                                                  │
@@ -48,7 +48,7 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNN.mmmmmmmmmmmm..kkkkk.yyyyyy..D.DDDD..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy...NNNNN.mmmmm.
 -- window-over --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
 │  1   Blocker                                                                                   b │
 │  2 ⧗ Stuck dep:b                                                                                 │
 │                                                                                                  │
@@ -62,7 +62,7 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNN.mmmmmmmmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy...NNNNN.mmmmm.
 -- refused --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
 │  1   Blocker                                                                                   b │
 │  2 ⧗ Stuck dep:b                                                                                 │
 │                                                                                                  │

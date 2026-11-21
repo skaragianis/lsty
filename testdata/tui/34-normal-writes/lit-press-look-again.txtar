@@ -30,7 +30,7 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..D.DDDD...........NNNNN.mmmmm.
 -- b-frame --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
 │  1   Blocker                                                                                   b │
 │  2 ⧗ Free dep:b                                                                                  │
 │                                                                                                  │
@@ -51,7 +51,7 @@ NNN.xxxxxxxxxxxxxxxxxxxxxxxxxxxxx..mmmmmmmmmmmm..D.DDDD..D.DDDDD..k.yyyy..k.yyy.
 Blocker id:b
 Free dep:b
 -- c-frame --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
 │  1   Blocker                                                                                   b │
 │  2 ⧗ Free dep:b                                                                                  │
 │                                                                                                  │

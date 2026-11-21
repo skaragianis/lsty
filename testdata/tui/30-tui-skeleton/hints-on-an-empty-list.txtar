@@ -14,7 +14,7 @@ show_sidebar = false
 show_detail = false
 -- todo.txt --
 -- no-tasks --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -35,14 +35,14 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNN.mmmmmmmmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..DD.DDDDDD...NNNNN.mmmmm.
 -- x-says-nothing --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            0|0  9.9.9
 -- no-hit-colour --
-EEEEEEhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+EEEEEhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E..................................................................................................E
 E..................................................................................................E
 E..................................................................................................E

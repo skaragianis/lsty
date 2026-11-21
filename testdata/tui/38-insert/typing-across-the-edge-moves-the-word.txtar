@@ -12,7 +12,7 @@ cursor space-cursor
 -- todo.txt --
 First
 -- before --
-┌ [1]─~/todo.txt ────────────────────────────────┐
+┌[1]─~/todo.txt──────────────────────────────────┐
 │  1   First                                     │
 │  2 123456789 abcdefghij klmnopqrstuvwxyzabcde  │
 │                                                │
@@ -30,7 +30,7 @@ First
 │  2 123456789 abcdefghij klmnopqrstuvwxyzabcde  │
                                                ^
 -- after --
-┌ [1]─~/todo.txt ────────────────────────────────┐
+┌[1]─~/todo.txt──────────────────────────────────┐
 │  1   First                                     │
 │  2 123456789 abcdefghij                        │
 │    klmnopqrstuvwxyzabcdef                      │

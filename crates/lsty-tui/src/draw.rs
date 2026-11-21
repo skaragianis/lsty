@@ -19,7 +19,7 @@ use crate::{
     rows::{Inline, Row, Shape, text_spans},
     styles::Styles,
     tall::{Entry, Tall, lay_out},
-    text::{RULE, Span, fit, pad, prefix, put, width},
+    text::{RULE, Span, fit, pad, prefix, put},
 };
 
 pub(crate) const MIN_WIDTH: u16 = 20;
@@ -147,18 +147,11 @@ impl Model {
         Layout::new(self.natural, self.gutter_width(), room)
     }
 
-    /// `┌ [1]─todo.txt ───┐`: the top border, titled by `Model::title`.
+    /// `┌[1]─todo.txt───┐`: the top border, titled by `Model::title`.
     fn draw_top(&self, buf: &mut Buffer, area: Rect, slot: Option<Slot>) {
         let w = usize::from(area.width);
-        let room = w.saturating_sub(FRAME);
-        let title =
-            fit(self.title(Some(self.title_slot(Focus::List)), room), room);
-        let dashes = w.saturating_sub(FRAME + width(&title));
-        let mut spans = vec![Span::new("┌ ", slot)];
-        spans.extend(title);
-        spans.push(Span::new(" ", slot));
-        spans.push(Span::new(format!("{}┐", RULE.repeat(dashes)), slot));
-        put(buf, (area.x, area.y), w, &spans, &self.styles);
+        let top = self.top_spans(w, Some(self.title_slot(Focus::List)), slot);
+        put(buf, (area.x, area.y), w, &top, &self.styles);
     }
 
     /// Draws the first `shown` rows of list row `index` from screen row

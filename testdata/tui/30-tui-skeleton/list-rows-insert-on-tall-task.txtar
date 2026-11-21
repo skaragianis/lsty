@@ -28,7 +28,7 @@ E.mm.......ttttttttttt.................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 III.mmmmmmmmmmmm.......IIIIIIIIII.mmmmm.
 -- insert --
-┌ [1]─~/todo.txt ──────────────────────┐
+┌[1]─~/todo.txt────────────────────────┐
 │  1       Buy milk                    │
 │  2 Draft the quarterly planning      │
 │    review for the whole finance      │
@@ -41,7 +41,7 @@ III.mmmmmmmmmmmm.......IIIIIIIIII.mmmmm.
 └──────────────────────────────────────┘
  I  sort(manual)        2|4│1|93  9.9.9
 -- normal --
-┌ [1]─~/todo.txt ──────────────────────┐
+┌[1]─~/todo.txt────────────────────────┐
 │  1       Buy milk                    │
 │  2       Draft the quarterly         │
 │          planning review for the     │

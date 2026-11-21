@@ -17,7 +17,7 @@ x 2026-09-29 2026-09-20 Fix bug +work pri:B
 Draft report +work dep:c1
 Review PR started:2026-09-29T0100Z owner:agent1
 -- nr6 --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────┐
 │  5 ▷ (B) Send invoice +work                                2d late       2h  │
 │  4   (A) Call client +work @phone                          tomorrow  c1      │
 │  3       Buy milk +home                                                      │
@@ -42,7 +42,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 └──────────────────────────────────────────────────────────────────────────────┘
  N  sort(manual)  ▶ 2 in doing (1 stale)  x done  t stop  T wont     6|6  9.9.9
 -- nr4 --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────┐
 │  2 ▷ (B) Send invoice +work                                2d late       2h  │
 │  1   (A) Call client +work @phone                          tomorrow  c1      │
 │  3       Buy milk +home                                                      │
@@ -67,7 +67,7 @@ Review PR started:2026-09-29T0100Z owner:agent1
 └──────────────────────────────────────────────────────────────────────────────┘
  N  sort(manual)  ▶ 2 in doing (1 stale)  x done  t start  T wont    3|6  9.9.9
 -- beyond --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────┐
 │  5 ▷ (B) Send invoice +work                                2d late       2h  │
 │  4   (A) Call client +work @phone                          tomorrow  c1      │
 │  3       Buy milk +home                                                      │

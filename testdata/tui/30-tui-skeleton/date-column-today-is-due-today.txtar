@@ -12,7 +12,7 @@ Due today +work due:2026-09-29
 x 2026-09-29 Done today +work
 x 2026-09-28 Done yesterday +work
 -- beside --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────┐
 │  1   Due today +work                                                  today  │
 │  1 ✓ Done today +work                                                        │
 │  2 ✓ Done yesterday +work                                             1d ago │
@@ -37,7 +37,7 @@ x 2026-09-28 Done yesterday +work
 └──────────────────────────────────────────────────────────────────────────────┘
  N  sort(manual)  x done  t start  T wont  o new  a append           1|3  9.9.9
 -- only-done --
-┌ [1]─/Done  /today ───────────────────────────────────────────────────────────┐
+┌[1]─/Done  /today─────────────────────────────────────────────────────────────┐
 │  1 ✓ Done today +work                                                        │
 │                                                                              │
 │                                                                              │

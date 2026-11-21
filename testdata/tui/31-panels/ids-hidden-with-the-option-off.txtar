@@ -17,7 +17,7 @@ Write parser id:p +work
 Add CLI dep:p +work
 Buy milk
 -- shown --
-┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────┐
 │  1   Write parser +work                                p │
 │  1 ⧗ Add CLI dep:p +work                                 │
 │  2   Buy milk                                            │
@@ -26,7 +26,7 @@ Buy milk
 └──────────────────────────────────────────────────────────┘
  N  sort(manual)  x done  t start  T wont        1|3  9.9.9
 -- hidden --
-┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────┐
 │  1   Write parser +work                                  │
 │  1 ⧗ Add CLI +work                                       │
 │  2   Buy milk                                            │
@@ -35,7 +35,7 @@ Buy milk
 └──────────────────────────────────────────────────────────┘
  N  sort(manual)  x done  t start  T wont        1|3  9.9.9
 -- shown-again --
-┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────┐
 │  1   Write parser +work                                p │
 │  1 ⧗ Add CLI dep:p +work                                 │
 │  2   Buy milk                                            │

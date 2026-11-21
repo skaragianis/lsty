@@ -18,7 +18,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- combined --
-┌[3]─Projects─┐┌ [1]─+work  Today  /call ─────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work  Today  /call───────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
 │ +spec01  2/2││                                                                          ││ due:2026-09-29                      │
 │=▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
@@ -49,7 +49,7 @@ x 2026-09-01 Old task +work
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  N  sort(manual)  ▶ 1 in doing  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo        1|1  9.9.9
 -- combined_fg --
-emmmmmmmmmmmmeeEEEEEEhhhhhEEhhhhhEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmmeeEEEEEhhhhhEEhhhhhEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmeE.tt...AAA.ttttttttttttppppptcccccc..................................TTTTT.Ee.ttttttttttttppppptcccccc............e
 e.ppppppp..mmmeE..........................................................................Ee.TTTTTTTTTTTTTT......................e
 esssssss...mmmeE..........................................................................Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e

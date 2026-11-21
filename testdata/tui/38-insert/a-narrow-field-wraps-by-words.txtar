@@ -9,7 +9,7 @@ cursor space-cursor
 -- todo.txt --
 First
 -- narrow --
-┌ [1]─~/todo.txt ────────────┐
+┌[1]─~/todo.txt──────────────┐
 │  1   First                 │
 │  2 a bcd                   │
 │    efghijklmnopqrstuvwxyza │

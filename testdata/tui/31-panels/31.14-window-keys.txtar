@@ -27,7 +27,7 @@ x 2026-09-04 2026-08-30 Old task four +work
 -- config.toml --
 show_detail = false
 -- projects --
-EEEEEEEEEEEEEEEeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+EEEEEEEEEEEEEEEemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 E.ppppp....mmmEe.tt.g.BBB.tttttttttttttppppptcccccc...........OOOOOOO.......gg.e
 E.ppppp....mmmEe.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..ii.....e
 E.mppppp..mmmmEe..........ppppptcccccc.........................................e
@@ -52,7 +52,7 @@ e.tttttttt....ee...............................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNN.mmmmmmmmmmmm..gggggggggggg..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD...mmmmm.
 -- contexts --
-emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmmeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.tt.g.BBB.tttttttttttttppppptcccccc...........OOOOOOO.......gg.e
 e.ppppp....mmmee.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..ii.....e
 e.mppppp..mmmmee..........ppppptcccccc.........................................e
@@ -102,7 +102,7 @@ e.tttttttt....eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.mmmmmmmmmmmm..gggggggggggg..k.yyyy..k.yyyy..k.yyyy..k.yyy......NNNNNN.mmmmm.
 -- contexts-again --
-emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmmeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.tt.g.BBB.tttttttttttttppppptcccccc...........OOOOOOO.......gg.e
 e.ppppp....mmmee.mm...AAA.tttttttttttttttttttttttttttttttt....SSSSSSSS..ii.....e
 e.mppppp..mmmmee..........ppppptcccccc.........................................e

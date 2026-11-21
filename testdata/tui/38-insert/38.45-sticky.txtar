@@ -15,7 +15,7 @@ show_detail = false
 Buy +home
 (B) Other +work
 -- a-frame --
-┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work──────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (B) Sell                                                            filtered │
 │=+work    0/0││                                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
@@ -26,7 +26,7 @@ Buy +home
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  N  sort(manual)  2 (B) Sell; hidden by current filters in 2 seconds or at the next key        1|1
 -- a-fg --
-emmmmmmmmmmmmeeEEEEEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
+emmmmmmmmmmmmeeEEEEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.ppppp....mmmeE.tt..mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.E
 essssss....mmmeE...................................................................................E
 emmmmmmmmmmmmeeE...................................................................................E
