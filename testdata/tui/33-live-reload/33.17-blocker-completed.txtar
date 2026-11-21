@@ -14,7 +14,7 @@ Ship +p dep:prep
 x 2026-09-29 Prepare +p id:prep
 Ship +p dep:prep
 -- before --
-┌[1]─~/todo.txt────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────┐
 │  1   Prepare +p                                     prep │
 │  1 ⧗ Ship +p dep:prep                                    │
 │                                                          │
@@ -25,7 +25,7 @@ Ship +p dep:prep
 └──────────────────────────────────────────────────────────┘
  N  sort(manual)  x done  t start  T wont        1|2  9.9.9
 -- after --
-┌[1]─~/todo.txt────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────┐
 │  1 ✓ Prepare +p                                     prep │
 │  1   Ship +p dep:prep                                    │
 │                                                          │

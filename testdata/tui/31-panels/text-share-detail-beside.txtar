@@ -8,7 +8,7 @@ list_rows = 1
 (B) 2026-09-20 Prepare the quarterly planning review +work @phone due:2026-09-30 started:2026-09-29T0700Z owner:agent-long-name
 Buy milk +home
 -- beside --
-┌[1]─~/todo.txt───────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[1]─"~/todo.txt"─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │  1 ▶ (B) Prepare the quarterly planning review +work @phone                tomorrow  2h ││ Prepare the quarterly planning      │
 │  1       Buy milk +home                                                                 ││ review +work @phone due:2026-09-30  │
 │                                                                                         ││ started:2026-09-29T0700Z            │

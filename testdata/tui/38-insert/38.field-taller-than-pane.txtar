@@ -12,7 +12,7 @@ show_detail = false
 -- todo.txt --
 word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word word end
 -- a-frame --
-┌[1]─~/todo.txt────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────┐
 │  1 word word word word word word     │
 │    word word word word word word     │
 │    word word word word word end      │
@@ -22,7 +22,7 @@ word word word word word word word word word word word word word word word word 
 │    word word word word word end      │
                                  ^
 -- b-frame --
-┌[1]─~/todo.txt────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────┐
 │  1 word word word word word word     │
 │    word word word word word word     │
 │    word word word word word word     │

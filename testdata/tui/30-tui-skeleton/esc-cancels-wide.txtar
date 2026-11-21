@@ -43,7 +43,7 @@ E.mm...tttttt..................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNN.mmmmmmmmmmmm..kkkkk.yyyyyy..k.yyyy..k.yyyyy..k.yyyy..k.yyy....NNNNN.mmmmm.
 -- visual --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────┐
 │  1   A                                                                       │
 │  2   Also A                                                                  │
 └──────────────────────────────────────────────────────────────────────────────┘
@@ -55,7 +55,7 @@ E.tt...tttttt..................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 VVVVV.tttttttttt..mmmmmmmmmmmm..kkkkk.yyyyyy..k.yyyy..k.yyyyy.......VVVVV.mmmmm.
 -- visual-pending --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────┐
 │  1   A                                                                       │
 │  2   Also A                                                                  │
 └──────────────────────────────────────────────────────────────────────────────┘

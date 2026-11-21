@@ -7,7 +7,7 @@ show_detail = false
 -- work/clients/acme/quarterly/reports/archive/todo.txt --
 Call client
 -- cut --
-┌[1]─…/reports/archive/todo.txt────────┐
+┌[1]─"…/reports/archive/todo.txt"──────┐
 │  1   Call client                     │
 │                                      │
 │                                      │

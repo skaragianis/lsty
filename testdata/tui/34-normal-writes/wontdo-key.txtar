@@ -20,7 +20,7 @@ Open one
 Doing one started:2026-09-29T0800Z owner:agent1
 x 2026-09-01 Plain done
 -- on-todo-moves-on --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ✗ Open one wontdo:true                                                                        │
 │  2 ▶ Doing one                                                                                1h │
 │  1 ✓ Plain done                                                                      28d ago     │
@@ -34,7 +34,7 @@ x 2026-09-29 Open one wontdo:true
 Doing one started:2026-09-29T0800Z owner:agent1
 x 2026-09-01 Plain done
 -- on-doing --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  2 ✗ Open one wontdo:true                                                                        │
 │  1 ✗ Doing one wontdo:true                                                                    1h │
 │  3 ✓ Plain done                                                                      28d ago     │
@@ -48,7 +48,7 @@ x 2026-09-29 Open one wontdo:true
 x 2026-09-29 Doing one started:2026-09-29T0800Z wontdo:true ended:2026-09-29T0900Z
 x 2026-09-01 Plain done
 -- T-refused --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ✗ Open one wontdo:true                                                                        │
 │  1 ✗ Doing one wontdo:true                                                                    1h │
 │  2 ✓ Plain done                                                                      28d ago     │
@@ -58,7 +58,7 @@ x 2026-09-01 Plain done
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  N  Open one is done — x reopens it  sort(manual)  x reopen  o new  a append             1|3  9.9.9
 -- x-reopens --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open one                                                                                    │
 │  1 ✗ Doing one wontdo:true                                                                    1h │
 │  2 ✓ Plain done                                                                      28d ago     │

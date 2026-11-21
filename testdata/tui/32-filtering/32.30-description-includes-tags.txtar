@@ -15,7 +15,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- parser --
-┌[3]─Projects─┐┌[1]─/parser───────────────────────────────────────────────────────────────┐┌[2]─Detail (id:parser)───────────────┐
+┌[3]─Projects─┐┌[1]─/parser───────────────────────────────────────────────────────────────┐┌[2]─Detail "id:parser"───────────────┐
 │ +home    1/1││  1   Write parser +spec01                                     parser     ││ Write parser +spec01 id:parser      │
 │ +spec01  2/2││  1 ⧗ Add CLI ls +spec01 dep:parser                                    1h ││ ─────────────────────────────────── │
 │ ▾+work   2/4││                                                                          ││ state  todo                         │

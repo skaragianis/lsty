@@ -101,9 +101,11 @@ fn the_title_names_the_id_only_when_it_fits_whole() {
     let title = |m: &Model, w| {
         let spans = m.title_spans(w);
         let text: String = spans.iter().map(|s| s.text.as_ref()).collect();
-        (text, spans.last().and_then(|s| s.slot))
+        let id = spans.iter().find(|s| s.slot == Some(Slot::Id));
+        (text, id.map(|s| s.text.to_string()))
     };
-    let (plain_title, id) = ("[2]─Detail", Some(Slot::Id));
-    assert_eq!(title(&m, 22), ("[2]─Detail (id:65f9)".into(), id));
+    let plain_title = "[2]─Detail";
+    let named = ("[2]─Detail \"id:65f9\"".into(), Some("id:65f9".into()));
+    assert_eq!(title(&m, 22), named);
     assert_eq!(title(&m, 21).0, plain_title);
 }

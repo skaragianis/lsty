@@ -34,7 +34,7 @@ E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy.......NNNNN.mmmmm.
 -- open --
-┌[1]─~/todo.txt────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────┐
 │  1   Call +work @desk                                    │
 │  1   Pay +home ┌ Theme ─────────────────┐          today │
 │                │ monokai                │                │
@@ -47,7 +47,7 @@ NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy.......NNNNN.mmmmm.
 └──────────────────────────────────────────────────────────┘
  N  sort(manual)  <CR> save  / search  <Esc> close    9.9.9
 -- moved --
-┌[1]─~/todo.txt────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────┐
 │  1   Call +work @desk                                    │
 │  1   Pay +home ┌ Theme ─────────────────┐          today │
 │                │ nord                   │                │
@@ -73,7 +73,7 @@ E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.tttttttttttt..kkkk.yyyy..k.yyyyyy..kkkkk.yyyyy....ttttt.
 -- closed --
-┌[1]─~/todo.txt────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────┐
 │  1   Call +work @desk                                    │
 │  1   Pay +home                                     today │
 │                                                          │

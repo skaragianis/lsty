@@ -78,9 +78,13 @@ fn no_file_is_created_for_a_missing_file_or_folder() {
         let status = screen.last().map_or("", String::as_str);
         assert!(!status.contains("todo.txt"), "{status}");
         assert!(screen[0].contains("[1]─[New] "), "{}", screen[0]);
-        // Narrow, the path is cut in what `[New] ` leaves.
-        let narrow = self::screen(&model, 20, 24);
-        assert!(narrow[0].contains("[1]─[New] todo.txt"), "{}", narrow[0]);
+        // Narrow, the path is cut in what `[New] ` and the quotes leave.
+        let narrow = self::screen(&model, 22, 24);
+        assert!(
+            narrow[0].contains("[1]─[New] \"todo.txt\""),
+            "{}",
+            narrow[0]
+        );
         let entries = fs::read_dir(dir.path()).map(Iterator::count);
         assert_eq!(entries.ok(), Some(0), "folder missing: {folder_missing}");
     }
