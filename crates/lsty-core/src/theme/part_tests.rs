@@ -66,13 +66,13 @@ fn each_part_of_a_task_has_its_slot() {
 }
 
 #[test]
-fn a_due_date_is_soon_within_a_week_or_the_days_set() {
+fn a_due_date_is_soon_within_the_days_set() {
     for (days, soon, slot) in [
         (-1, 0, Slot::DueOverdue),
         (0, 0, Slot::DueToday),
-        (1, 0, Slot::DueSoon),
-        (6, 0, Slot::DueSoon),
-        (7, 0, Slot::Text),
+        (1, 0, Slot::Text),
+        (3, 3, Slot::DueSoon),
+        (4, 3, Slot::Text),
         (7, 7, Slot::DueSoon),
         (8, 7, Slot::Text),
     ] {

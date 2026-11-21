@@ -10,9 +10,6 @@ use crate::{
     todotxt::{Kind, Line, TokenView, inside_span, is_claim_key},
 };
 
-/// Days that always count as soon, whatever `upcoming_days` says.
-pub const WEEK: i32 = 7;
-
 /// Today and the number of days that count as soon.
 #[derive(Clone, Copy, Debug)]
 pub struct Today {
@@ -28,9 +25,7 @@ pub fn due_slot(days: i32, soon: u64) -> Slot {
     match days {
         ..=-1 => Slot::DueOverdue,
         0 => Slot::DueToday,
-        _ if days < WEEK || i128::from(days) <= i128::from(soon) => {
-            Slot::DueSoon
-        }
+        _ if i128::from(days) <= i128::from(soon) => Slot::DueSoon,
         _ => Slot::Text,
     }
 }

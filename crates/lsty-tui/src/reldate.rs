@@ -6,7 +6,7 @@ pub(crate) use lsty_core::theme::Today;
 use lsty_core::{
     dates::{Date, format_elapsed},
     list::{State, Task},
-    theme::{Slot, WEEK, due_slot},
+    theme::{Slot, due_slot},
     todotxt::Line,
 };
 
@@ -27,6 +27,8 @@ impl Cell {
     }
 }
 
+/// Days from today up to which a due date shows as a weekday.
+const WEEK: i32 = 7;
 const WEEKDAYS: [&str; 7] = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
 
 /// The date column of a task: its due date, or for a done task its

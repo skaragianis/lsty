@@ -23,7 +23,7 @@ mod load_tests;
 mod slot_tests;
 
 pub use load::{COLOUR_KEYS, DEFAULT_NAME, FALLBACK, FLAG_KEYS, load, names};
-pub use part::{Parts, Today, WEEK, claim_slot, due_slot, state_slot};
+pub use part::{Parts, Today, claim_slot, due_slot, state_slot};
 pub use profile::Profile;
 pub use slot::Slot;
 pub use style::{Colour, Style};
