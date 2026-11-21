@@ -26,7 +26,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; hidden by current filters in 2 seconds or at the next key
+ N  sort(manual)  1 done: A; hidden by current filters in 2 seconds or at the next key   2|3  9.9.9
 -- a-file --
 x 2026-09-29 A
 B
@@ -39,7 +39,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   2|2  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            2|2  9.9.9
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.mm.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.E
@@ -48,7 +48,7 @@ E.mm...t........................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.....
+NNN.mmmmmmmmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww..NNNNN.mmmmm.
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   B                                                                                           │
@@ -57,7 +57,7 @@ NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  <Esc> exit  t start  T wont  d delete     1|2  9.9.9
+ V  2 selected  sort(manual)  x done  <Esc> exit  t start  T wont  d delete  y yank      1|2  9.9.9
 -- d-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2 ✓ C                                                                                  filtered │
@@ -66,4 +66,4 @@ NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  1 selected  todo.txt  manual  3 moved to 2  x reopen  <Esc> exit  d delete      1|2  9.9.9
+ V  1 selected  sort(manual)  3 moved to 2  x reopen  <Esc> exit  d delete  y yank       1|2  9.9.9

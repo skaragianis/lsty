@@ -28,7 +28,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 todo.txt is busy (locked by another writer) — nothing changed, try again
- COMMAND  :do 1  <CR> run  <Tab> next  <Esc> cancel
+ C  :do 1  <CR> run  <Tab> next  <Esc> cancel
 -- busy-file --
 A
 B id:b
@@ -43,7 +43,7 @@ E
 │  2   D                                                                                           │
 │  3   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A  x done  t start  T wont  o new  a append           2|5  9.9.9
+ N  sort(manual)  1 done: A  x done  t start  T wont  o new  a append  dd delete         2|5  9.9.9
 -- ok-file --
 x 2026-09-29 A
 B id:b

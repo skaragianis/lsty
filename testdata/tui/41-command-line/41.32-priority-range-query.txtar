@@ -24,4 +24,4 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  priority_range=F  x done  t start  T wont  o new  a append    1|5  9.9.9
+ N  sort(manual)  priority_range=F  x done  t start  T wont  o new  a append             1|5  9.9.9

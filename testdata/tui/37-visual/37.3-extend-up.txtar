@@ -24,7 +24,7 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  <Esc> exit  t start  T wont  d delete     1|5  9.9.9
+ V  2 selected  sort(manual)  x done  <Esc> exit  t start  T wont  d delete  y yank      1|5  9.9.9
 -- a-bg --
 ....................................................................................................
 .ssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss.

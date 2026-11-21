@@ -24,7 +24,7 @@ Buy +home
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 (B) Sell; hidden by current filters in 2 seconds or at the next key
+ N  sort(manual)  2 (B) Sell; hidden by current filters in 2 seconds or at the next key        1|1
 -- a-fg --
 emmmmmmmmmmmmeeEEEEEEhhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.ppppp....mmmeE.tt..mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.E
@@ -35,7 +35,7 @@ emmmmmmmmmmmeeeE................................................................
 e.tttttttt....eE...................................................................................E
 e.ttttttttt...eE...................................................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww....
+NNN.mmmmmmmmmmmm..wwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwwww.......NNNNN.
 -- a-file --
 Buy +home
 (B) Sell

@@ -24,7 +24,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 unclosed quote
- COMMAND  :add "open quote  <CR> run  <Tab> next  <Esc> cancel
+ C  :add "open quote  <CR> run  <Tab> next  <Esc> cancel
 -- closed-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
@@ -33,7 +33,7 @@ unclosed quote
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|5  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|5  9.9.9
 -- a-file --
 A
 B id:b

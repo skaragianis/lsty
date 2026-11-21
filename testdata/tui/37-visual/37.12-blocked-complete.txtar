@@ -22,7 +22,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  task 2 is blocked by 1 (A)  2 selected  todo.txt  manual  x done  <Esc> exit    3|3  9.9.9
+ V  task 2 is blocked by 1 (A)  2 selected  sort(manual)  x done  <Esc> exit  t start    3|3  9.9.9
 -- a-file --
 A id:a
 B dep:a

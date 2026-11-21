@@ -23,7 +23,7 @@ S
 │  4   Q                                                                                           │
 │  1   R                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; archived to done.txt as done:1; 2 done: B; archived to done.tx
+ N  sort(manual)  1 done: A; archived to done.txt as done:1; 2 done: B; archived to done.txt as done
 -- selecting --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  4   Q                                                                                           │
@@ -32,4 +32,4 @@ S
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  1 selected  todo.txt  manual  x done  <Esc> exit  t start  T wont  d delete     1|3  9.9.9
+ V  1 selected  sort(manual)  x done  <Esc> exit  t start  T wont  d delete  y yank      1|3  9.9.9

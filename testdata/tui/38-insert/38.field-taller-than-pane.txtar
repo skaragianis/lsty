@@ -17,7 +17,7 @@ word word word word word word word word word word word word word word word word 
 │    word word word word word word     │
 │    word word word word word end      │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ I  sort(manual)     1|1│299|298  9.9.9
 -- a-cursor --
 │    word word word word word end      │
                                  ^
@@ -27,7 +27,7 @@ word word word word word word word word word word word word word word word word 
 │    word word word word word word     │
 │    word word word word word word     │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ I  sort(manual)     1|1│179|298  9.9.9
 -- b-cursor --
 │  1 word word word word word word     │
                                  ^

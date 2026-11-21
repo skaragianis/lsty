@@ -22,7 +22,7 @@ x 2026-09-28 Fix pri:B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start         1|1│23|22  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                  1|1│23|22  9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 x 2026-09-28 Fix pri:A                                                                        │
@@ -33,6 +33,6 @@ x 2026-09-28 Fix pri:B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  1 is done; reopen it first — use lsty reopen 1  todo.txt  manual          1|1│23|22  9.9.9
+ I  1 is done; reopen it first — use lsty reopen 1  sort(manual)  <CR> commit      1|1│23|22  9.9.9
 -- a-file --
 x 2026-09-28 Fix pri:B

@@ -19,7 +19,7 @@ B
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  priority  x done  t start  T wont       2|2  9.9.9
+ N  sort(priority)  x done  t start  T wont  o new         2|2  9.9.9
 -- after-todo --
 A
 B

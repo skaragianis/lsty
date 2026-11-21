@@ -21,7 +21,7 @@ B dep:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  2 is blocked — finish what it waits for first  todo.txt  manual           2|2│33|32  9.9.9
+ I  2 is blocked — finish what it waits for first  sort(manual)  <CR> commit       2|2│33|32  9.9.9
 -- a-file --
 A id:a
 B dep:a

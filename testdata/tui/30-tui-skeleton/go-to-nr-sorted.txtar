@@ -22,7 +22,7 @@ Low task
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  priority        3|3
+ N  sort(priority)  x done   3|3  9.9.9
 -- mid --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1   (A) Top task                    │
@@ -31,4 +31,4 @@ Low task
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  priority        2|3
+ N  sort(priority)  x done   2|3  9.9.9

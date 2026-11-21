@@ -27,7 +27,7 @@ C +y
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
+ N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                           9.9.9
 -- before_cursor --
 ....................................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.
@@ -53,7 +53,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │ [x] Blocked ││ state  todo                                                                       │
 │ [ ] Archive ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
+ N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                           9.9.9
 -- after_cursor --
 ....................................................................................................
 ................uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

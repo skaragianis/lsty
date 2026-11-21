@@ -21,28 +21,28 @@ Also A
 │  1   A                               │
 │  1   Also A                          │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual    1|2  9.9.9
+ N  sort(manual)             1|2  9.9.9
 -- pending --
 ┌ [1]─/A ──────────────────────────────┐
 │  1   A                               │
 │  1   Also A                          │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual    1|2  9.9.9
+ N  sort(manual)             1|2  9.9.9
 -- count --
 ┌ [1]─/A ──────────────────────────────┐
 │  1   A                               │
 │  1   Also A                          │
 └──────────────────────────────────────┘
- NORMAL 2  todo.txt  manual        1|2
+ N 2  sort(manual)  x done   1|2  9.9.9
 -- visual --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1   A                               │
 │  2   Also A                          │
 └──────────────────────────────────────┘
- VISUAL 3  2 selected  todo.txt  manual
+ V 3  2 selected  sort(manual)     2|2
 -- visual-pending --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1   A                               │
 │  2   Also A                          │
 └──────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual
+ V  2 selected  sort(manual)       2|2

@@ -24,7 +24,7 @@ x 2026-09-28 Fix
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start         1|1│14|16  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                  1|1│14|16  9.9.9
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tttmmtttttttttttttt..............................................................................E
@@ -35,7 +35,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy........IIIIIIIIIII.mmmmm.
+III.mmmmmmmmmmmm..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy.................IIIIIIIIIII.mmmmm.
 -- a-cursor --
 │  1 x 2026-09-28 Fix                                                                              │
                   ^
@@ -49,7 +49,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy......
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start           1|1│3|5  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                    1|1│3|5  9.9.9
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 x x                                                                                           │
@@ -60,7 +60,7 @@ IIIIIIII.tttttttt..mmmmmm..kkkk.yyyyyy..kkkkk.yyyyyyyy..kkkkk.yyyyyyyyyyyy......
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start           1|1│3|3  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                    1|1│3|3  9.9.9
 -- b-cursor --
 │  1 x x                                                                                           │
        ^

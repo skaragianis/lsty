@@ -20,7 +20,7 @@ Gamma
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  priority  x done  t start  T wont  o new  a append  dd delete         2|3  9.9.9
+ N  sort(priority)  x done  t start  T wont  o new  a append  dd delete  u undo          2|3  9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   (A) Alpha                                                                                   │
@@ -29,7 +29,7 @@ Gamma
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  sorted by priority — press s for manual order  todo.txt  priority  x done       2|3  9.9.9
+ N  sorted by priority — press s for manual order  sort(priority)  x done  t start       2|3  9.9.9
 -- a-file --
 Beta
 (A) Alpha

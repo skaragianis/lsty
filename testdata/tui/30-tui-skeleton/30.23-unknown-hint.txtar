@@ -1,5 +1,5 @@
 start
-status config\.toml: hints\.normal: unknown action "frob"  todo\.txt
+status config\.toml: hints\.normal: unknown action "frob"  sort\(manual\)
 keys j
 frame cleared
 -- todo.txt --
@@ -34,4 +34,4 @@ normal = ["frob"]
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual                                            2|2  9.9.9
+ N  sort(manual)                                                     2|2  9.9.9

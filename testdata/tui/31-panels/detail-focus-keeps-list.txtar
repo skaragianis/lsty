@@ -27,7 +27,7 @@ a
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  <CR> link  <Tab> projects  dd delete  <C-w>1 list                                        9.9.9
+ N  sort(manual)  x done  <CR> link  <Tab> projects  dd delete  <C-w>1 list                                                 9.9.9
 -- list --
 ┌ [1]─~/todo.txt ─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │  1   First                                                                              ││ Second file:a.md                    │
@@ -42,4 +42,4 @@ a
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help               2|3  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help                        2|3  9.9.9

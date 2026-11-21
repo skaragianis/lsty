@@ -37,7 +37,7 @@ x 2026-11-01 Old parser +work id:d1
 │                                                                                                  │
 │                                                                                                  │
 +work  +work.acme
- COMMAND  /-+work  <CR> keep  <Tab> next  <Esc> cancel
+ C  /-+work  <CR> keep  <Tab> next  <Esc> cancel
 -- next --
 ┌ [1]─-+work.acme ─────────────────────────────────────────────────────────────────────────────────┐
 │  3   A +home @phone                                                                              │
@@ -47,7 +47,7 @@ x 2026-11-01 Old parser +work id:d1
 │  1   F dep:d1                                                                                    │
 │  2   G dep:gone                                                                                  │
 +work  +work.acme
- COMMAND  /-+work.acme  <CR> keep  <Tab> next  <Esc> cancel
+ C  /-+work.acme  <CR> keep  <Tab> next  <Esc> cancel
 -- state --
 ┌ [1]─/is:done|is:later ───────────────────────────────────────────────────────────────────────────┐
 │  4   D t:2099-01-01 +home                                                                        │
@@ -57,7 +57,7 @@ x 2026-11-01 Old parser +work id:d1
 │                                                                                                  │
 │                                                                                                  │
 is:later
- COMMAND  /is:done|is:later  <CR> keep  <Tab> next  <Esc> cancel
+ C  /is:done|is:later  <CR> keep  <Tab> next  <Esc> cancel
 -- dep --
 ┌ [1]─/dep:p1 ─────────────────────────────────────────────────────────────────────────────────────┐
 │  6 ⧗ E needs parser dep:p1                                                                       │
@@ -67,4 +67,4 @@ is:later
 │                                                                                                  │
 │                                                                                                  │
 Old parser  +work  dep:gone  5  Write parser  +work @desk  12-24
- COMMAND  /dep:p1  <CR> keep  <Tab> next  <Esc> cancel
+ C  /dep:p1  <CR> keep  <Tab> next  <Esc> cancel

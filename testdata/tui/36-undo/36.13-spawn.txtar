@@ -20,7 +20,7 @@ Z
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Pay; 2 next: Pay (due 2026-10-06)
+ N  sort(manual)  1 done: Pay; 2 next: Pay (due 2026-10-06)      3|3
 -- done-todo --
 x 2026-09-29 Pay rec:1w due:2026-09-30
 2026-09-29 Pay rec:1w due:2026-10-06 id:t001
@@ -33,7 +33,7 @@ Z
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: Pay  x done      1|2  9.9.9
+ N  sort(manual)  undid: 1 done: Pay  x done  t start      1|2  9.9.9
 -- after-todo --
 Pay rec:1w due:2026-09-30
 Z

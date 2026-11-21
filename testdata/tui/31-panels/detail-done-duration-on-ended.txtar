@@ -48,7 +48,7 @@ show_sidebar = false
 │ ended      2026-09-29 08:30 (2h)                                   │
 │ claim      finished (by you)                                       │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x reopen  o new  a append       1|1  9.9.9
+ N  sort(manual)  x reopen  o new  a append  dd delete     1|1  9.9.9
 -- colours --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt.ddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd.E
@@ -91,4 +91,4 @@ e.mmmmmmmmmmmtttttttttttttttt........................................e
 e.mmmmmmmmmmmttttttttttttttttttttt...................................e
 e.mmmmmmmmmmmttttttttttttttttt.......................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..k.yyy..k.yyyyyy......NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyyyy..k.yyy..k.yyyyyy..kk.yyyyyy....NNNNN.mmmmm.

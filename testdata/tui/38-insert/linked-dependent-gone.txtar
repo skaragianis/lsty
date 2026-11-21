@@ -29,7 +29,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  the list changed — <Esc> drops it, or delete the dep:  todo.txt  manual    2|3│4|12  9.9.9
+ I  the list changed — <Esc> drops it, or delete the dep:  sort(manual)             2|3│4|12  9.9.9
 -- a-file --
 One id:aaaa
 Three
@@ -43,7 +43,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  the list changed — <Esc> drops it, or delete the dep:  todo.txt  manual    2|3│4|12  9.9.9
+ I  the list changed — <Esc> drops it, or delete the dep:  sort(manual)             2|3│4|12  9.9.9
 -- b-file --
 One id:aaaa
 Three

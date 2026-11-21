@@ -23,7 +23,7 @@ Last
 │ https://example.com/a/very/long/address/that/d │
 │ …                                              │
 └────────────────────────────────────────────────┘
- INSERT  todo.txt  manual      2|3│138|137  9.9.9
+ I  sort(manual)               2|3│138|137  9.9.9
 -- end-cursor --
 │    t/does/not/fit/in/a/row ok                  │
                                ^

@@ -88,7 +88,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ I  sort(manual)   21|21│116|118  9.9.9
 -- minute --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
@@ -96,7 +96,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ I  sort(manual)   21|21│116|118  9.9.9
 -- outside --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
@@ -104,7 +104,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxxxxxxxxx +p               │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit
+ I  sort(manual)   21|21│116|118  9.9.9
 -- refused --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2   Task 003 +p                     │
@@ -112,4 +112,4 @@ Task 020 +p
 │    Task 005 +p                       │
 │  1   Task 005 +p @outside            │
 └──────────────────────────────────────┘
- INSERT  the list changed — look again
+ I  the list changed — look again

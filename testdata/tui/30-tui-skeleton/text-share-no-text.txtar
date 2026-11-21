@@ -16,7 +16,7 @@ E................................................E
 E................................................E
 E................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..gggggggggggg.....NNNNN.
+NNN.mmmmmmmmmmmm..gggggggggggg........NNNNN.mmmmm.
 -- no-text --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
 │  1 ▶ +work-project-long @office   tomorrow  2h │
@@ -25,4 +25,4 @@ NNNNNNNN.tttttttt..mmmmmm..gggggggggggg.....NNNNN.
 │                                                │
 │                                                │
 └────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing      1|2
+ N  sort(manual)  ▶ 1 in doing         1|2  9.9.9

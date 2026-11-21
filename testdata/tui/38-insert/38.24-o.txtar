@@ -24,7 +24,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start           2|4│1|0  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                    2|4│1|0  9.9.9
 -- a-cursor --
 │                                                                                                  │
      ^
@@ -38,7 +38,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added as id:t001: New task  x done  t start  T wont         2|4  9.9.9
+ N  sort(manual)  2 added as id:t001: New task  x done  t start  T wont  o new           2|4  9.9.9
 -- a-file --
 A
 2026-09-29 New task id:t001

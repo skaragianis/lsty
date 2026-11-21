@@ -32,7 +32,7 @@ x 2026-09-28 C
 │  3   D                                                                                           │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  archived 2 to done.txt; removed 1 blank line; hidden by current filters i
+ N  sort(manual)  archived 2 to done.txt; removed 1 blank line; hidden by current filters in 2 secon
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   B                                                                                           │
@@ -41,7 +41,7 @@ x 2026-09-28 C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  can't undo: the list changed — look again  todo.txt  manual  x done  t start    1|2  9.9.9
+ N  can't undo: the list changed — look again  sort(manual)  x done  t start  T wont     1|2  9.9.9
 -- b-todo --
 B
 D

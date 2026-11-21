@@ -1,6 +1,6 @@
 start
 frame rows
-status ^ NORMAL  todo\.txt  manual  ▶ 2 in doing \(1 stale\)
+status ^ N  sort\(manual\)  ▶ 2 in doing \(1 stale\)
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -36,4 +36,4 @@ Review PR started:2026-09-29T0100Z owner:agent1
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 2 in doing (1 stale)  x done  t stop    1|6  9.9.9
+ N  sort(manual)  ▶ 2 in doing (1 stale)  x done  t stop  T wont     1|6  9.9.9

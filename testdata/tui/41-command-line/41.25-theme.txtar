@@ -34,7 +34,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..D.DDDD..NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..D.DDDD...........NNNNN.mmmmm.
 -- after-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Call +work @desk                                                                            │
@@ -43,7 +43,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|2  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|2  9.9.9
 -- after --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.yy...yyyyyPPPPPyppppp............................................................................E
@@ -52,7 +52,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.mmmmmmmm..tttttt..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..D.DDDD..NNNNN.ttttt.
+NNN.tttttttttttt..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..D.DDDD...........NNNNN.ttttt.
 -- typing --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.yy...yyyyyPPPPPyppppp............................................................................E
@@ -61,7 +61,7 @@ E...............................................................................
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-MMMMMMMMM.mmmmcccccmTTTTTTTTTTTTTT..kkkk.yyy..kkkkk.yyyy..kkkkk.yyyyyy..............................
+MMM.mmmmcccccmTTTTTTTTTTTTTT..kkkk.yyy..kkkkk.yyyy..kkkkk.yyyyyy....................................
 -- panels --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   Call +work @desk                                                             │
@@ -78,7 +78,7 @@ MMMMMMMMM.mmmmcccccmTTTTTTTTTTTTTT..kkkk.yyy..kkkkk.yyyy..kkkkk.yyyyyy..........
 │ Overdue     ││ state  todo                                                                       │
 │ Upcoming    ││ nr     1                                                                          │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
+ N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                           9.9.9
 -- panel --
 EEEEEEEEEEEEEEEeetttttttttttttteeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 E.PPPPP....tttEe.yy...yyyyyPPPPPyppppp.............................................................e
@@ -95,4 +95,4 @@ e.mmmmm.......ee.ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
 e.mmmmmmm.....ee.tttttttmmmm.......................................................................e
 e.mmmmmmmm....ee.tttttttm..........................................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.mmmmmmmm..tttttt..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD..................ttttt.
+NNN.tttttttttttt..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD...........................ttttt.

@@ -24,7 +24,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start           3|4│5|4  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                    3|4│5|4  9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   One                                                                                    aaaa │
@@ -35,7 +35,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  3 added as id:t002: New  x done  t start  T wont  o new       3|4  9.9.9
+ N  sort(manual)  3 added as id:t002: New  x done  t start  T wont  o new  a append      3|4  9.9.9
 -- a-file --
 One id:aaaa
 Two

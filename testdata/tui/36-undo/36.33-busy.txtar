@@ -23,7 +23,7 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt is busy (locked by another writer) — nothing change…
+ N  todo.txt is busy (locked by another writer) — nothing changed, tr…
 -- busy-todo --
 x 2026-09-29 Buy
 -- after --
@@ -34,6 +34,6 @@ x 2026-09-29 Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: Buy  x done      1|1  9.9.9
+ N  sort(manual)  undid: 1 done: Buy  x done  t start      1|1  9.9.9
 -- after-todo --
 Buy

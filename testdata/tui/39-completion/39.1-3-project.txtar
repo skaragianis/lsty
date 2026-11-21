@@ -37,7 +37,7 @@ x 2026-09-03 Pitch +work.acme
 │                +work.acme                                                                        │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close                   5|5│14|13  9.9.9
+ I  sort(manual)  <Tab> accept  <C-n> next  <Esc> close                            5|5│14|13  9.9.9
 -- a-bg --
 ....................................................................................................
 ....................................................................................................
@@ -67,7 +67,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close                   5|5│15|14  9.9.9
+ I  sort(manual)  <Tab> accept  <C-n> next  <Esc> close                            5|5│15|14  9.9.9
 -- c-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  4   Write parser +spec01                                                                 parser │
@@ -82,7 +82,7 @@ GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start         5|5│18|17  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                  5|5│18|17  9.9.9
 -- c-cursor --
 │  5 Call client +work                                                                             │
                       ^
@@ -100,4 +100,4 @@ E................pppppttttt.....................................................
 E................pppppppppp........................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm..kkkkk.yyyyyy..kkkkk.yyyy..kkkkk.yyyyy..................IIIIIIIIIII.mmmmm.
+III.mmmmmmmmmmmm..kkkkk.yyyyyy..kkkkk.yyyy..kkkkk.yyyyy...........................IIIIIIIIIII.mmmmm.

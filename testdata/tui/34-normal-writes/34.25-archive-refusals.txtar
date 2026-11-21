@@ -27,7 +27,7 @@ x 2026-09-01 Old task
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  Old task is archived — x reopens it  todo.txt  manual  x reopen  o new          2|2  9.9.9
+ N  Old task is archived — x reopens it  sort(manual)  x reopen  o new  a append         2|2  9.9.9
 -- a-file --
 Buy
 -- b-frame --
@@ -38,7 +38,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  Old task is archived — x reopens it  todo.txt  manual  x reopen  o new          2|2  9.9.9
+ N  Old task is archived — x reopens it  sort(manual)  x reopen  o new  a append         2|2  9.9.9
 -- b-file --
 Buy
 -- c-frame --
@@ -49,7 +49,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  Old task is archived — x reopens it  todo.txt  manual  x reopen  o new          2|2  9.9.9
+ N  Old task is archived — x reopens it  sort(manual)  x reopen  o new  a append         2|2  9.9.9
 -- c-file --
 Buy
 -- c-done --

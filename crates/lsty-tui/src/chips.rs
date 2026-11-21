@@ -9,10 +9,13 @@ use crate::{
     layout::{BORDER, FRAME},
     model::Model,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
-    text::{ELLIPSIS, Span, ending, fit, width_of},
+    text::{ELLIPSIS, Span, ending, fit, width, width_of},
 };
 
 const GAP: &str = "  ";
+/// What the title begins with while the todo file does not exist.
+const NEW: &str = "[New] ";
+
 /// The number of the list, before its title, as the key that focuses it.
 const NUMBER: &str = "[1]─";
 
@@ -95,18 +98,22 @@ impl Model {
             .collect()
     }
 
-    /// The number of the list, then the chips, or the path of the file
-    /// when no filter is active, cut from the left to fit `room` cells.
-    /// `slot` styles the number, the path and the gaps.
+    /// The number of the list, `[New] ` while the file is not there, then
+    /// the chips, or the path of the file when no filter is active, cut
+    /// from the left to fit `room` cells. `slot` styles the number, the
+    /// path and the gaps.
     pub(crate) fn title(
         &self,
         slot: Option<Slot>,
         room: usize,
     ) -> Vec<Span<'static>> {
         let mut out = vec![Span::new(NUMBER, slot)];
+        if !self.file_exists() {
+            out.push(Span::new(NEW, slot));
+        }
         let chips = self.chips();
         if chips.is_empty() {
-            let left = room.saturating_sub(width_of(NUMBER));
+            let left = room.saturating_sub(width(&out));
             out.push(Span::new(left_cut(&self.path, left), slot));
             return out;
         }

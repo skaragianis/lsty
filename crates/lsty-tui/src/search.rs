@@ -19,7 +19,7 @@ use crate::{
     msg::Cmd,
     panel::Panel,
     sidebar::{CONTEXTS, PROJECTS},
-    text::width_of,
+    text::{width, width_of},
 };
 
 /// A panel's selection from before a kept search moved names into it,
@@ -354,8 +354,8 @@ impl Model {
             return self.theme_cursor();
         }
         let line = self.line.as_ref()?;
-        let mode = width_of(self.mode().as_str()) + 2;
-        let x = mode + 1 + width_of(line.kind.label()) + line.field.cells();
+        let start = width(&self.status_start());
+        let x = start + width_of(line.kind.label()) + line.field.cells();
         let y = self.height.checked_sub(1)?;
         Some((u16::try_from(x).ok()?.min(self.width.saturating_sub(1)), y))
     }

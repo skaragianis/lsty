@@ -28,7 +28,7 @@ e.ttttttttttt.ee...............................................................e
 e.mmmmmmmmmmm.ee...............................................................e
 e.ttttt.......ee...............................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD........mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD.......mmmmm.
 -- filters --
 emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.tt...ttppppptcccccc...........................................e
@@ -43,7 +43,7 @@ E.ttttttttttt.Ee...............................................................e
 E.mmmmmmmmmmm.Ee...............................................................e
 E.ttttt.......Ee...............................................................e
 EEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD........mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD.......mmmmm.
 -- projects --
 EEEEEEEEEEEEEEEeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 E.ppppp....mmmEe.tt...ttppppptcccccc...........................................e
@@ -58,7 +58,7 @@ e.ttttttttttt.ee...............................................................e
 e.mmmmmmmmmmm.ee...............................................................e
 e.ttttt.......ee...............................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNNNNNNN.tttttttt..mmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD........mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD.......mmmmm.
 -- list --
 emmmmmmmmmmmmeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 e.ppppp....mmmeE.tt...ttppppptcccccc...........................................E
@@ -73,7 +73,7 @@ e.ttttttttttt.eE...............................................................E
 e.mmmmmmmmmmm.eE...............................................................E
 e.ttttt.......eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy...........NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..........NNNNN.mmmmm.
 -- list-frame --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                           │
@@ -88,4 +88,4 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy...........NNNNN.mmmmm.
 │ ─────────── ││                                                               │
 │ Today       ││                                                               │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new            1|2  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append           1|2  9.9.9

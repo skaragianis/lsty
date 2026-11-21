@@ -16,6 +16,6 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  due:   <CR> set  <Tab> next  <Esc> cancel
+ C  due:   <CR> set  <Tab> next  <Esc> cancel
 -- a-file --
 Call

@@ -19,7 +19,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 2 deleted  x done        2|3  9.9.9
+ N  sort(manual)  undid: 2 deleted  x done  t start        2|3  9.9.9
 -- after-todo --
 A
 B

@@ -25,7 +25,7 @@ A
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  can't undo: the list changed — look again  todo.txt  manual
+ N  can't undo: the list changed — look again  sort(manual)      3|3
 -- after-todo --
 B
 C

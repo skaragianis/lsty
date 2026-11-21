@@ -18,4 +18,4 @@ Buy milk +home
 │                                                          │
 │                                                          │
 :set: unknown option "inline_projects"
- COMMAND  :set inline_projects  <CR> run  <Tab> next
+ C  :set inline_projects  <CR> run  <Tab> next  <Esc> cancel

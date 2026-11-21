@@ -32,7 +32,7 @@ E..........................................................E
 E..........................................................E
 E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy......NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy.......NNNNN.mmmmm.
 -- open --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Call +work @desk                                    │
@@ -45,7 +45,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy......NNNNN.mmmmm.
 │                └ 9-13 of 17 ────────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> save  / search        9.9.9
+ N  sort(manual)  <CR> save  / search  <Esc> close    9.9.9
 -- moved --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Call +work @desk                                    │
@@ -58,7 +58,7 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy......NNNNN.mmmmm.
 │                └ 10-14 of 17 ───────────┘                │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <CR> save  / search        9.9.9
+ N  sort(manual)  <CR> save  / search  <Esc> close    9.9.9
 -- previewed --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.yy...yyyyyPPPPPyppppp....................................E
@@ -71,7 +71,7 @@ E................Emmmmmmm.................E................E
 E................EEEEEEEEEEEEEEEEEEEEEEEEEE................E
 E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.mmmmmmmm..tttttt..kkkk.yyyy..k.yyyyyy........ttttt.
+NNN.tttttttttttt..kkkk.yyyy..k.yyyyyy..kkkkk.yyyyy....ttttt.
 -- closed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   Call +work @desk                                    │
@@ -84,7 +84,7 @@ NNNNNNNN.mmmmmmmm..tttttt..kkkk.yyyy..k.yyyyyy........ttttt.
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start       1|2  9.9.9
+ N  sort(manual)  x done  t start  T wont        1|2  9.9.9
 -- closed-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E.tt...tttttppppptccccc....................................E
@@ -97,7 +97,7 @@ E..........................................................E
 E..........................................................E
 E..........................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy..k.yyyyy......NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy.......NNNNN.mmmmm.
 -- config-after --
 # my settings
 theme = "probe"

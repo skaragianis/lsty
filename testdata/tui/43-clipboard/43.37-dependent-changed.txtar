@@ -27,7 +27,7 @@ C +x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  pasted 1 task (1 moved); relinked 3; 2 changed since; dep:a not restored
+ N  sort(manual)  pasted 1 task (1 moved); relinked 3; 2 changed since; dep:a not restored     2|3
 -- a-file --
 
 B +y

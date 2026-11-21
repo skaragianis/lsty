@@ -28,7 +28,7 @@ E.tttttttttttttttttttttttttttttttttttt.E
 E....tttttttttttttttttttttttttttttttt..E
 E....tttt..............................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-IIIIIIII.tttttttt..mmmmmm...IIIIIIIIIII.
+III.mmmmmmmmmmmm......IIIIIIIIIII.mmmmm.
 -- field --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  2       Draft the quarterly         │
@@ -41,7 +41,7 @@ IIIIIIII.tttttttt..mmmmmm...IIIIIIIIIII.
 │    with the landlord and file them   │
 │    away                              │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual    3|3│70|69
+ I  sort(manual)       3|3│70|69  9.9.9
 -- field-cursor --
 │    away                              │
          ^
@@ -57,7 +57,7 @@ IIIIIIII.tttttttt..mmmmmm...IIIIIIIIIII.
 │    with thXe landlord and file them  │
 │    away                              │
 └──────────────────────────────────────┘
- INSERT  todo.txt  manual    3|3│42|70
+ I  sort(manual)       3|3│42|70  9.9.9
 -- clicked-cursor --
 │    with thXe landlord and file them  │
              ^

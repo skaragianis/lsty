@@ -24,7 +24,7 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 todo.txt is busy (locked by another writer) — nothing changed, try again
- COMMAND  due: fri  <CR> set  <Tab> next  <Esc> cancel
+ C  due: fri  <CR> set  <Tab> next  <Esc> cancel
 -- a-file --
 Call
 -- b-frame --
@@ -35,6 +35,6 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 due 2026-10-02  x done  t start  T wont  o new  a append    1|1  9.9.9
+ N  sort(manual)  1 due 2026-10-02  x done  t start  T wont  o new  a append             1|1  9.9.9
 -- b-file --
 Call due:2026-10-02

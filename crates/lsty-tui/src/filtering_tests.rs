@@ -507,8 +507,8 @@ fn the_prompt_has_a_text_cursor() {
     let (_dir, mut model) = workdir_model(LIST, alone());
     assert_eq!(model.cursor_at(), None);
     keys(&mut model, "/ab");
-    // " COMMAND " (9), a space, then "/ab".
-    assert_eq!(model.cursor_at(), Some((9 + 1 + 3, 23)));
+    // " C " (3), a space, then "/ab".
+    assert_eq!(model.cursor_at(), Some((3 + 1 + 3, 23)));
 }
 
 fn field(text: &str) -> Field {

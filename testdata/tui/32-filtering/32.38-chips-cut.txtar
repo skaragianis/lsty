@@ -33,4 +33,4 @@ Plan a long trip due:2026-09-30 +averyverylongprojectname @averyverylongcontextn
 │ state  todo                                              │
 │ …                                                        │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> clear search    1|1  9.9.9
+ N  sort(manual)  <Esc> clear search  x done     1|1  9.9.9

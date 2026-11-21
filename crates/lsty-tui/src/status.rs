@@ -1,4 +1,4 @@
-//! The status line: the mode, the file, the doing count, a message, the
+//! The status line: the mode, the sort, the doing count, a message, the
 //! hints, the position and the version.
 
 use lsty_core::{
@@ -145,17 +145,27 @@ impl Model {
                 && self.message.tone != Tone::Notice
     }
 
-    /// The status line before the hints.
-    pub(crate) fn status_base(&self) -> Vec<Span<'_>> {
-        let name = self.mode().as_str().to_uppercase();
-        let mode = match self.typed_count() {
+    /// The label at the start of the status line: the mode's letter, then
+    /// the count typed so far.
+    fn mode_label(&self) -> String {
+        let name = self.mode().as_str().get(..1).unwrap_or("").to_uppercase();
+        match self.typed_count() {
             0 => format!(" {name} "),
             count => format!(" {name} {count} "),
-        };
-        let mut out = vec![
-            Span::new(mode, Some(mode_slot(self.mode()))),
+        }
+    }
+
+    /// The mode label and the space after it, where the status line starts.
+    pub(crate) fn status_start(&self) -> Vec<Span<'_>> {
+        vec![
+            Span::new(self.mode_label(), Some(mode_slot(self.mode()))),
             Span::new(" ", None),
-        ];
+        ]
+    }
+
+    /// The status line before the hints.
+    pub(crate) fn status_base(&self) -> Vec<Span<'_>> {
+        let mut out = self.status_start();
         let w = usize::from(self.width);
         let warned = self.line.is_none() && self.warned();
         for (i, part) in self.status_parts().into_iter().enumerate() {
@@ -191,8 +201,8 @@ impl Model {
             let text = format!("{} selected", hi - lo + 1);
             parts.push(vec![Span::new(text, Some(Slot::Text))]);
         }
-        parts.push(vec![Span::new(self.file_name(), Some(Slot::Text))]);
-        parts.push(vec![Span::new(self.sort.name(), Some(Slot::Muted))]);
+        let sort = format!("sort({})", self.sort.name());
+        parts.push(vec![Span::new(sort, Some(Slot::Muted))]);
         if let Some(blocking) = self.blocking() {
             parts.push(vec![Span::new(blocking, Some(Slot::Text))]);
         }

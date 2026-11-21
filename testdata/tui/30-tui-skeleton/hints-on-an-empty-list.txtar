@@ -19,32 +19,32 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   0|0  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            0|0  9.9.9
 -- no-tasks-colour --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E..................................................................................................E
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..DD.DDDDDD..D.DDDD..NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..DD.DDDDDD..D.DDDD...........NNNNN.mmmmm.
 -- a-count-colour --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E..................................................................................................E
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD.....NNNNN.mmmmm.
+NNNNN.mmmmmmmmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..DD.DDDDDD...NNNNN.mmmmm.
 -- x-says-nothing --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   0|0  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            0|0  9.9.9
 -- no-hit-colour --
 EEEEEEhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 E..................................................................................................E
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy...........NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..........NNNNN.mmmmm.

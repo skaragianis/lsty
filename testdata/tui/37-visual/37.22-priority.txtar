@@ -22,7 +22,7 @@ A
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (D); 2 deprioritized; 3 re-prioritized from (C) to (B)
+ N  sort(manual)  1 prioritized (D); 2 deprioritized; 3 re-prioritized from (C) to (B)   1|3  9.9.9
 -- a-file --
 (D) A
 B

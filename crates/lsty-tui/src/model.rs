@@ -379,16 +379,6 @@ impl Model {
         self.snap.found().state == FileState::Exists
     }
 
-    /// The name of the todo file as the status line shows it.
-    pub(crate) fn file_name(&self) -> String {
-        let name = self.base_name();
-        if self.file_exists() {
-            name
-        } else {
-            format!("[New] {name}")
-        }
-    }
-
     /// The name of the todo file.
     pub(crate) fn base_name(&self) -> String {
         self.snap

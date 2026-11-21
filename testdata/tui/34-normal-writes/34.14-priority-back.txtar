@@ -22,7 +22,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (A)  x done  t start  T wont  o new  a append   1|2  9.9.9
+ N  sort(manual)  1 prioritized (A)  x done  t start  T wont  o new  a append            1|2  9.9.9
 -- a-file --
 (A) Buy
 (A) Buy
@@ -34,7 +34,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 re-prioritized from (A) to (B)  x done  t start  T wont     2|2  9.9.9
+ N  sort(manual)  2 re-prioritized from (A) to (B)  x done  t start  T wont  o new       2|2  9.9.9
 -- b-file --
 (A) Buy
 (B) Buy

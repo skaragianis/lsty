@@ -27,7 +27,7 @@ Open
 │ state    doing                                                                                   │
 │ …                                                                                                │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 started  t stop  T wont  x done                    9.9.9
+ N  sort(manual)  ▶ 1 in doing  1 started  t stop  T wont  x done                             9.9.9
 -- wontdo --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ✗ Open wontdo:true                                                                         0m │
@@ -40,6 +40,6 @@ Open
 │ state      done                                                                                  │
 │ …                                                                                                │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 won't do: Open  x reopen                                         9.9.9
+ N  sort(manual)  1 won't do: Open  x reopen                                                  9.9.9
 -- wontdo-file --
 x 2026-09-29 Open started:2026-09-29T0900Z wontdo:true ended:2026-09-29T0900Z

@@ -56,7 +56,7 @@ Task 015 +p
 │  2   Task 012 +p                     │
 │  3   Task 013 +p                     │
 └──────────────────────────────────────┘
- VISUAL  6 selected  todo.txt  manual
+ V  6 selected  sort(manual)     10|20
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │ 10   Task 016 +p                     │
@@ -64,4 +64,4 @@ Task 015 +p
 │  2   Task 018 +p                     │
 │  3   Task 019 +p                     │
 └──────────────────────────────────────┘
- VISUAL  6 selected  todo.txt  manual
+ V  6 selected  sort(manual)     10|19

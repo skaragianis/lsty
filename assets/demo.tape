@@ -33,7 +33,7 @@ Sleep 500ms
 # The agent starts typing a few seconds in; its pauses track the tape.
 Type@1ms `assets/demo-agent.sh & tmux -u -L lsty-demo -f assets/demo.tmux.conf new-session -s demo -x 100 -y 36 lsty \; select-pane -T "human: lsty" \; split-window -v -l 5 'PS1="$ " exec bash --norc --noprofile' \; select-pane -T "agent: lsty CLI" \; select-pane -t 0`
 Enter
-Wait+Screen /NORMAL/
+Wait+Screen /sort\(manual\)/
 Show
 Sleep 2s
 

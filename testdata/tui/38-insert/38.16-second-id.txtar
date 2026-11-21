@@ -20,6 +20,6 @@ show_detail = false
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  1 already has id:c1 — a task has one id  todo.txt  manual  <CR> commit    1|1│60|59  9.9.9
+ I  1 already has id:c1 — a task has one id  sort(manual)  <CR> commit             1|1│60|59  9.9.9
 -- a-file --
 (A) 2026-09-20 Call client +work id:c1 due:2026-10-01

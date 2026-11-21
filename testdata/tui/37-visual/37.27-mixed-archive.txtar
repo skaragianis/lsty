@@ -30,7 +30,7 @@ x 2026-09-02 Old two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  some are archived — nothing changed  2 selected  todo.txt  manual  x done       3|4  9.9.9
+ V  some are archived — nothing changed  2 selected  sort(manual)  x done  <Esc> exit    3|4  9.9.9
 -- b-frame --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   A                                                                                           │
@@ -43,7 +43,7 @@ x 2026-09-02 Old two
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  some are archived — nothing changed  2 selected  todo.txt  manual  x done       3|4  9.9.9
+ V  some are archived — nothing changed  2 selected  sort(manual)  x done  <Esc> exit    3|4  9.9.9
 -- a-file --
 A
 B
@@ -59,7 +59,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done; 1 already done  x reopen  o new  a append             4|4  9.9.9
+ N  sort(manual)  1 done; 1 already done  x reopen  o new  a append  dd delete  u undo   4|4  9.9.9
 -- c-file --
 A
 x 2026-09-29 B

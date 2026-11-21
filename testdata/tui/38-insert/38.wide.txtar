@@ -18,7 +18,7 @@ show_detail = false
 │                            │
 │                            │
 └────────────────────────────┘
- INSERT  todo.txt  manual
+ I  sort(manual)   1|1│27|26
 -- a-cursor --
 │    説明です                │
              ^

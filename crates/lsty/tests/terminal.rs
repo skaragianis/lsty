@@ -249,7 +249,7 @@ fn busy_list_never_opens_the_screen() -> Check {
 fn stop_by(sig: Signal) -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
-    screen.wait_for("NORMAL")?;
+    screen.wait_for("sort(manual)")?;
     signal(&child, sig)?;
     screen.ends_with(&mut child, 0)?;
     screen.finish();
@@ -393,7 +393,7 @@ fn eof_before_the_screen_opens() -> Check {
 fn a_closed_terminal_ends_the_program() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
-    screen.wait_for("NORMAL")?;
+    screen.wait_for("sort(manual)")?;
     drop(screen);
     ends_with(&mut child, 1)?;
     if fs::read_to_string(work.root.join("todo.txt"))? != LIST {
@@ -405,7 +405,7 @@ fn a_closed_terminal_ends_the_program() -> Check {
 fn q_quits_and_restores() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
-    screen.wait_for("NORMAL")?;
+    screen.wait_for("sort(manual)")?;
     screen.wait_for(env!("CARGO_PKG_VERSION"))?;
     screen.type_keys(b"q")?;
     screen.ends_with(&mut child, 0)?;
@@ -421,7 +421,7 @@ fn q_quits_and_restores() -> Check {
 fn ctrl_h_deletes_a_character() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
-    screen.wait_for("NORMAL")?;
+    screen.wait_for("sort(manual)")?;
     screen.type_keys(b":set nomousee\x08\r")?;
     screen.wait_for("\x1b[?1006l\x1b[?1002l")?;
     screen.type_keys(b"q")?;
@@ -432,7 +432,7 @@ fn ctrl_h_deletes_a_character() -> Check {
 fn a_digit_shows_at_once() -> Check {
     let work = Work::new()?;
     let (mut child, mut screen) = start(&work.root)?;
-    screen.wait_for("NORMAL")?;
+    screen.wait_for("sort(manual)")?;
     screen.seen.clear();
     screen.type_keys(b"7531")?;
     // The digits may come in separate frames, each writing only its own.
@@ -466,14 +466,14 @@ fn mouse_reports_follow_the_option() -> Check {
     screen.ends_with(&mut child, 0)?;
     let work = Work::new()?.config("mouse = false\n")?;
     let (mut child, mut screen) = start(&work.root)?;
-    screen.wait_for("NORMAL")?;
+    screen.wait_for("sort(manual)")?;
     screen.type_keys(b":set mouse\r")?;
     screen.wait_for(ON)?;
     screen.type_keys(b"q")?;
     screen.ends_with(&mut child, 0)?;
     screen.finish();
     let text = screen.text();
-    if text.find("NORMAL") > text.find(ON) {
+    if text.find("sort(manual)") > text.find(ON) {
         return Err(format!("reports asked too early: {text:?}").into());
     }
     Ok(())
@@ -524,7 +524,7 @@ fn editor_round_trip(interrupt: bool) -> Check {
     let (work, editor) = with_held_editor()?;
     let (mut child, mut screen) =
         start_with(&work.root, &[("EDITOR", &editor)], &[])?;
-    screen.wait_for("NORMAL")?;
+    screen.wait_for("sort(manual)")?;
     screen.type_keys(b"gx")?;
     wait_for_file(&work.root.join("ran"))?;
     screen.wait_for(LEAVE)?;
@@ -539,7 +539,7 @@ fn editor_round_trip(interrupt: bool) -> Check {
     // The screen is entered twice: the text after the second entry is
     // the one taken back.
     screen.wait_until("screen taken back", |text| {
-        taken_back(text).contains("NORMAL")
+        taken_back(text).contains("sort(manual)")
     })?;
     if !taken_back(&screen.text()).contains("\x1b[?1002h") {
         return Err("the mouse was not asked for again".into());
@@ -555,7 +555,7 @@ fn gx_on_a_url_without_a_display() -> Check {
     fs::write(work.root.join("todo.txt"), "Read https://x.org/a\n")?;
     let (mut child, mut screen) =
         start_with(&work.root, &[("DISPLAY", Path::new(""))], &[])?;
-    screen.wait_for("NORMAL")?;
+    screen.wait_for("sort(manual)")?;
     screen.type_keys(b"gx")?;
     screen.wait_for("can't open https://x.org/a: no display; copied it")?;
     // The terminal is asked to copy it: OSC 52, then the URL in base64.

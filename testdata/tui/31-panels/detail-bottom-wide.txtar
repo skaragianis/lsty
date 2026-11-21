@@ -27,4 +27,4 @@ detail_position = "bottom"
 │ No project  ││ state     todo                                                                                                  │
 │ Won't do    ││ …                                                                                                               │
 └─────────────┘└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help               1|3  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo  / search  ? help                        1|3  9.9.9

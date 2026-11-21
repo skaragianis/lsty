@@ -25,7 +25,7 @@ show_detail = false
 │ [ ] Later   ││                                                                                   │
 │ [x] Blocked ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|1  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|1  9.9.9
 -- stays --
 ┌[3]─Projects─┐┌ [1]─+solo ────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││ nothing matches                                                                   │
@@ -38,7 +38,7 @@ show_detail = false
 │ [x] Blocked ││                                                                                   │
 │ [ ] Archive ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 deleted  x done  t start  T wont  o new  a append           0|0  9.9.9
+ N  sort(manual)  1 deleted  x done  t start  T wont  o new  a append  dd delete         0|0  9.9.9
 -- unchosen --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  2   Buy milk +home @shop                                                         │
@@ -51,4 +51,4 @@ show_detail = false
 │ [ ] Archive ││                                                                                   │
 │ ─────────── ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|1  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|1  9.9.9

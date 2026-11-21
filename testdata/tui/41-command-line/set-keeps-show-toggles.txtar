@@ -33,7 +33,7 @@ C
 │ Today       ││                                                                                   │
 │ Overdue     ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
+ N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                           9.9.9
 -- after-reload --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │             ││  1   A                                                                            │
@@ -48,4 +48,4 @@ C
 │ Today       ││                                                                                   │
 │ Overdue     ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
+ N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                           9.9.9

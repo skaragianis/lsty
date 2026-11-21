@@ -48,7 +48,7 @@ x 2026-09-01 Old task +work
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- COMMAND  /invoice  <CR> keep  <Tab> next  <Esc> cancel
+ C  /invoice  <CR> keep  <Tab> next  <Esc> cancel
 -- restored --
 ┌[3]─Projects─┐┌ [1]─/inv ────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │ +home    1/1││  2   (B) Send Invoice +work.acme @email                          2d late ││ Send Invoice +work.acme @email      │
@@ -79,4 +79,4 @@ x 2026-09-01 Old task +work
 │ No project  ││                                                                          ││                                     │
 │ Won't do    ││                                                                          ││                                     │
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete       1|1  9.9.9
+ N  sort(manual)  ▶ 1 in doing  <Esc> clear search  x done  t start  T wont  o new  a append  dd delete  u undo        1|1  9.9.9

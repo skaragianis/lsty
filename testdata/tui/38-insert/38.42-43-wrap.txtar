@@ -35,7 +35,7 @@ Last
 │ No project  ││ word word word word word word word word word word word word   │
 │ Won't do    ││ …                                                             │
 └─────────────┘└───────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word       2|3│299|298  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word                2|3│299|298  9.9.9
 -- a-cursor --
 ├[4]─Contexts─┤│    word word word word end                                    │
                                            ^

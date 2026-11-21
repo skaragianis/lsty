@@ -27,7 +27,7 @@ C +work @phone
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|2  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|2  9.9.9
 -- b-frame --
 ┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
@@ -38,7 +38,7 @@ C +work @phone
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start           2|3│1|6  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                    2|3│1|6  9.9.9
 -- b-cursor --
 │=+work    2/2││     +work                                                                         │
                     ^
@@ -52,7 +52,7 @@ C +work @phone
 │ [x] Done    ││                                                                                   │
 │ [ ] Later   ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 added as id:t001: Call; hidden by current filters in 2 seconds or at th
+ N  sort(manual)  2 added as id:t001: Call; hidden by current filters in 2 seconds or at the next ke
 -- a-file --
 A +work @phone
 2026-09-29 Call +work id:t001
