@@ -17,7 +17,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- selected --
-┌[3]─Projects─┐┌ [1]─+work.acme ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work.acme────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │ +home    1/1││  1   (B) Send Invoice +work.acme @email                          2d late ││ Send Invoice +work.acme @email      │
 │ +spec01  2/2││                                                                          ││ due:2026-09-27                      │
 │ ▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
@@ -48,7 +48,7 @@ x 2026-09-01 Old task +work
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  N  sort(manual)  ▶ 1 in doing  x filter  <CR> list  <Tab> next  h fold  l unfold                                           9.9.9
 -- cleared --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─~/todo.txt────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                    today               ││ Send Invoice +work.acme @email      │
 │ +spec01  2/2││  2   (B) Send Invoice +work.acme @email              2d late             ││ due:2026-09-27                      │
 │ ▾+work   2/4││  1 ✓     Fix bug +work                               1d ago              ││ ─────────────────────────────────── │

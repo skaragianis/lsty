@@ -20,7 +20,7 @@ A +work @phone
 B +home
 C +work @phone
 -- a-frame --
-┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work  @phone──────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  2   A +work @phone                                                               │
 │=+work    3/3││  1   Call +work                                                    filtered  t001 │
 ├[4]─Contexts─┤│  3  +work                                                                         │
@@ -34,7 +34,7 @@ C +work @phone
 ├[4]─Contexts─┤│  3  +work                                                                         │
                     ^
 -- b-frame --
-┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work  @phone──────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
 │=+work    4/4││  2   C +work @phone                                                               │
 ├[4]─Contexts─┤│                                                                                   │

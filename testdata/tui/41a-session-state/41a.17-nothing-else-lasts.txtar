@@ -34,7 +34,7 @@ C
 D
 E
 -- before --
-┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
 │  1   B                                                                                         b │
 │  2   C                                                                                           │
@@ -68,7 +68,7 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..D.DDDD...........NNNNN.mmmmm.
 -- changed --
-┌[3]─Projects─┐┌ [1]─Today  /B ────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─Today  /B──────────────────────────────────────────────────────────────────────┐
 │             ││ nothing matches                                                                   │
 ├[4]─Contexts─┤│                                                                                   │
 │             ││                                                                                   │

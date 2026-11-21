@@ -7,7 +7,7 @@ show_detail = false
 -- todo.txt --
 See https://x.org/a, (ftp://h/p) mailto:a@b.org
 -- list --
-┌ [1]─~/todo.txt ────────────────────────────────────────────────────┐
+┌[1]─~/todo.txt──────────────────────────────────────────────────────┐
 │  1   See https://x.org/a, (ftp://h/p) mailto:a@b.org               │
 │                                                                    │
 │                                                                    │

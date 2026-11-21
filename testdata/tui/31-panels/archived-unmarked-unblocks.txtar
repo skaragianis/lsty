@@ -10,7 +10,7 @@ Write the report dep:draft
 -- done.txt --
 Draft id:draft
 -- view --
-┌ [1]─~/todo.txt ──────────────────────────────────────────┐
+┌[1]─~/todo.txt────────────────────────────────────────────┐
 │  1   Write the report dep:draft                          │
 │  1 ✓ Draft                                         draft │
 └──────────────────────────────────────────────────────────┘

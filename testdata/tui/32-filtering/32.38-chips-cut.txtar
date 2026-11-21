@@ -10,7 +10,7 @@ frame cut
 -- todo.txt --
 Plan a long trip due:2026-09-30 +averyverylongprojectname @averyverylongcontextname
 -- cut --
-┌ [1]─+averyverylongprojectname  @averyverylongcontextnam… ┐
+┌[1]─+averyverylongprojectname  @averyverylongcontextname …┐
 │  1   Plan a long trip                           tomorrow │
 │      +averyverylongprojectname                           │
 │      @averyverylongcontextname                           │

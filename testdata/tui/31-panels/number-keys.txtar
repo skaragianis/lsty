@@ -15,7 +15,7 @@ show_detail = false
 A +work @phone
 B +home
 -- contexts --
-emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmmeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.tt...ttppppptcccccc...........................................e
 e.ppppp....mmmee.mm...ttppppp..................................................e
 EEEEEEEEEEEEEEEe...............................................................e
@@ -30,7 +30,7 @@ e.ttttt.......ee...............................................................e
 eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNN.mmmmmmmmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD.......mmmmm.
 -- filters --
-emmmmmmmmmmmmeeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmmeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.tt...ttppppptcccccc...........................................e
 e.ppppp....mmmee.mm...ttppppp..................................................e
 emmmmmmmmmmmmeee...............................................................e
@@ -45,7 +45,7 @@ E.ttttt.......Ee...............................................................e
 EEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 NNN.mmmmmmmmmmmm..k.yyyyyy..kkkk.yyyy..kkkkk.yyyy..D.DDDD..D.DDDDDD.......mmmmm.
 -- projects --
-EEEEEEEEEEEEEEEeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+EEEEEEEEEEEEEEEemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 E.ppppp....mmmEe.tt...ttppppptcccccc...........................................e
 E.ppppp....mmmEe.mm...ttppppp..................................................e
 EmmmmmmmmmmmmEEe...............................................................e
@@ -75,7 +75,7 @@ e.ttttt.......eE...............................................................E
 eeeeeeeeeeeeeeeEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy..k.yyyy..k.yyy..k.yyyyyy..........NNNNN.mmmmm.
 -- list-frame --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─~/todo.txt─────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                           │
 │ +work    1/1││  1   B +home                                                  │
 ├[4]─Contexts─┤│                                                               │

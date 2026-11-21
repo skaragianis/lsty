@@ -18,7 +18,7 @@ A +work @phone
 B +home
 C +work @phone
 -- a-frame --
-┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work  @phone──────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
 │=+work    2/2││  1   C +work @phone                                                               │
 ├[4]─Contexts─┤│                                                                                   │
@@ -29,7 +29,7 @@ C +work @phone
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|2  9.9.9
 -- b-frame --
-┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work  @phone──────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
 │=+work    2/2││  2  +work                                                                         │
 ├[4]─Contexts─┤│  1   C +work @phone                                                               │
@@ -43,7 +43,7 @@ C +work @phone
 │=+work    2/2││  2  +work                                                                         │
                     ^
 -- c-frame --
-┌[3]─Projects─┐┌ [1]─+work  @phone ────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work  @phone──────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   A +work @phone                                                               │
 │=+work    3/3││  2   Call +work                                                    filtered  t001 │
 ├[4]─Contexts─┤│  1   C +work @phone                                                               │

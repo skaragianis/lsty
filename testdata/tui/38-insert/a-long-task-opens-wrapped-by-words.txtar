@@ -10,7 +10,7 @@ First
 buy milk and bread for the week +shopping @store due:2026-12-24 see https://example.com/a/very/long/address/that/does/not/fit/in/a/row ok
 Last
 -- opened --
-┌ [1]─~/todo.txt ────────────────────────────────┐
+┌[1]─~/todo.txt──────────────────────────────────┐
 │  1   First                                     │
 │  2 buy milk and bread for the week +shopping   │
 │    @store due:2026-12-24 see                   │

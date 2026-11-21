@@ -15,7 +15,7 @@ Low task
 (C) Mid task
 (A) Top task
 -- low --
-┌ [1]─~/todo.txt ──────────────────────┐
+┌[1]─~/todo.txt────────────────────────┐
 │  1   (A) Top task                    │
 │  1   (C) Mid task                    │
 │  2       Low task                    │
@@ -24,7 +24,7 @@ Low task
 └──────────────────────────────────────┘
  N  sort(priority)  x done   1|3  9.9.9
 -- mid --
-┌ [1]─~/todo.txt ──────────────────────┐
+┌[1]─~/todo.txt────────────────────────┐
 │  1   (A) Top task                    │
 │  2   (C) Mid task                    │
 │  1       Low task                    │

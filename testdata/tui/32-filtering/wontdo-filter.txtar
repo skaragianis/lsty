@@ -23,7 +23,7 @@ x 2026-09-28 Decided against wontdo:true
 x 2026-09-01 Old plain
 x 2026-09-01 Old decided wontdo:true
 -- done_off --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─~/todo.txt────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  1   Open task                                                           ││ Open task                           │
 │             ││  1   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
 │             ││                                                                          ││ state  todo                         │
@@ -54,7 +54,7 @@ x 2026-09-01 Old decided wontdo:true
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                                                         9.9.9
 -- filter_shows_only_wontdo --
-┌[3]─Projects─┐┌ [1]─Won't do ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─Won't do──────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  1 ✗ Decided against wontdo:true                                  1d ago ││ Decided against wontdo:true         │
 │             ││                                                                          ││ ─────────────────────────────────── │
 │             ││                                                                          ││ state      done                     │
@@ -85,7 +85,7 @@ x 2026-09-01 Old decided wontdo:true
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  N  sort(manual)  x reopen  o new  a append  dd delete  u undo  / search  ? help                                       1|1  9.9.9
 -- archive_on --
-┌[3]─Projects─┐┌ [1]─Won't do ────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─Won't do──────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  1 ✗ Decided against wontdo:true                                 1d ago  ││ Decided against wontdo:true         │
 │             ││  1 ✗ Old decided wontdo:true                                     28d ago ││ ─────────────────────────────────── │
 │             ││                                                                          ││ state      done                     │
@@ -116,7 +116,7 @@ x 2026-09-01 Old decided wontdo:true
 └─────────────┘└──────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
  N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                                                         9.9.9
 -- filter_off_again --
-┌[3]─Projects─┐┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
+┌[3]─Projects─┐┌[1]─~/todo.txt────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
 │             ││  1   Open task                                                           ││ Tagged but open wontdo:true         │
 │             ││  2   Tagged but open wontdo:true                                         ││ ─────────────────────────────────── │
 │             ││  1 ✓ Old plain                                                   28d ago ││ state   todo                        │

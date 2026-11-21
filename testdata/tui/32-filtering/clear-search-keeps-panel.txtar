@@ -18,7 +18,7 @@ Plan offsite due:2026-10-03
 -- done.txt --
 x 2026-09-01 Old task +work
 -- both --
-┌[3]─Projects─┐┌ [1]─+work  /inv ──────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work  /inv────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (B) Send Invoice +work.acme @email                                   2d late │
 │ +spec01  2/2││                                                                                   │
 │=▾+work   2/4││                                                                                   │
@@ -31,7 +31,7 @@ x 2026-09-01 Old task +work
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
  N  sort(manual)  ▶ 1 in doing  <Esc> clear search  x done  t start  T wont  o new       1|1  9.9.9
 -- panel-kept --
-┌[3]─Projects─┐┌ [1]─+work ────────────────────────────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─+work──────────────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                                         today   │
 │ +spec01  2/2││  2   (B) Send Invoice +work.acme @email                                   2d late │
 │=▾+work   2/4││  1 ✓     Fix bug +work                                                    1d ago  │

@@ -391,8 +391,8 @@ fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
     let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     model.search = "日本語".to_owned();
     // "[1]─" and "/日" and "…" leave one blank cell of the nine.
-    assert_eq!(model.chip_cells(13), vec![(6, 4)]);
-    assert_eq!(model.chip_cells(30), vec![(6, 7)]);
+    assert_eq!(model.chip_cells(11), vec![(5, 4)]);
+    assert_eq!(model.chip_cells(30), vec![(5, 7)]);
 }
 
 /// A model of A to E after `typed`, which holds a row, and the timer its
@@ -958,7 +958,7 @@ fn a_cell_of_the_top_row_hits_the_chip_it_shows() {
     let chip = target(Kind::Chip, Pane::List, 0, 0);
     assert_eq!(model.hit(Position::new(22, 0)), chip);
     let border =
-        "sssssssssssssssllllllCCCCClllllllllllllldddddddddddddddddddd";
+        "ssssssssssssssslllllCCCCCllllllllllllllldddddddddddddddddddd";
     assert_eq!(hit_map(&model)[0], border);
 }
 
@@ -969,10 +969,10 @@ fn each_chip_of_the_top_row_is_hit_by_its_place_in_the_line() {
     model.search = "Call".to_owned();
     model.rebuild();
     let border =
-        "sssssssssssssssllllllCCCCCllCCCCCllllllldddddddddddddddddddd";
+        "ssssssssssssssslllllCCCCCllCCCCClllllllldddddddddddddddddddd";
     assert_eq!(hit_map(&model)[0], border);
     let chip = |at| target(Kind::Chip, Pane::List, 0, at);
-    for (x, at) in [(21, 0), (25, 0), (28, 1), (32, 1)] {
+    for (x, at) in [(20, 0), (24, 0), (27, 1), (31, 1)] {
         assert_eq!(model.hit(Position::new(x, 0)), chip(at), "{x}");
     }
 }

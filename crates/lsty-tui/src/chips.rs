@@ -6,10 +6,10 @@ use lsty_core::{errs::lossy_path, theme::Slot};
 
 use crate::{
     connective,
-    layout::{BORDER, FRAME},
+    layout::BORDER,
     model::Model,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
-    text::{ELLIPSIS, Span, ending, fit, width, width_of},
+    text::{ELLIPSIS, Span, ending, framed, width, width_of},
 };
 
 const GAP: &str = "  ";
@@ -86,9 +86,8 @@ impl Model {
     /// of a list pane `w` cells wide shows them; a chip that is cut
     /// has the cells that are left, with its ellipsis.
     pub(crate) fn chip_cells(&self, w: usize) -> Vec<(usize, usize)> {
-        let mut at = BORDER;
-        let room = w.saturating_sub(FRAME);
-        fit(self.title(None, room), room)
+        let mut at = 0;
+        self.top_spans(w, None, None)
             .iter()
             .filter_map(|s| {
                 let from = at;
@@ -96,6 +95,18 @@ impl Model {
                 (s.slot == Some(Slot::Chip)).then_some((from, s.cells()))
             })
             .collect()
+    }
+
+    /// The top border of a list pane `w` cells wide: its title between
+    /// the corners, `title` styling the title and `line` the border.
+    pub(crate) fn top_spans(
+        &self,
+        w: usize,
+        title: Option<Slot>,
+        line: Option<Slot>,
+    ) -> Vec<Span<'static>> {
+        let title = self.title(title, w.saturating_sub(BORDER));
+        framed(("┌", title, "┐"), w, line)
     }
 
     /// The number of the list, `[New] ` while the file is not there, then
