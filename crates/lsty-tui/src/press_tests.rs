@@ -199,7 +199,8 @@ impl Pressed<'_> {
         let (Err(e), expected) = self.on_a_copy(command) else {
             panic!("{name}: {command:?} did not refuse");
         };
-        assert_eq!(self.model.message.text(), Some(e.message()), "{name}");
+        let said = self.model.named(e.message().as_bytes());
+        assert_eq!(self.model.message.text(), Some(said.as_str()), "{name}");
         assert_eq!(expected, self.before, "{name}: the command wrote");
     }
 
@@ -958,9 +959,8 @@ fn what_the_commands_do() {
         match named(&model, command, &tasks) {
             Ok((outcome, _)) => {
                 assert_eq!(code, None, "{kind} {command:?}");
-                let said = errs::lossy(
-                    outcome.messages().first().map_or(&[][..], |m| m),
-                );
+                let said = model
+                    .named(outcome.messages().first().map_or(&[][..], |m| m));
                 assert!(said.starts_with(says), "{command:?}: {said}");
             }
             Err(e) => assert_eq!(Some(e.code()), code, "{kind} {command:?}"),

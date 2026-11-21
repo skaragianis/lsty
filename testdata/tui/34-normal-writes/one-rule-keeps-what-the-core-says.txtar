@@ -5,7 +5,7 @@ status 1 done: Daily; 2 next: Daily \(due 2026-09-30\); 1 already done\b
 frame rec-and-done
 file todo.txt rec-file
 keys u
-status undid: 1 done: Daily
+status undid: done: Daily
 keys g g j j j
 keys v j x
 status 5 done: Theirs; 5 was claimed by agent2; 1 already done\b

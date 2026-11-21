@@ -24,7 +24,7 @@ B
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  1 done: A; archived to done.txt as done:1; hidden by
+ N  sort(manual)  1 done: A; archived to done.txt as 1; hidden by curr
 -- archived-todo --
 
 B
@@ -38,7 +38,7 @@ x 2026-09-29 A
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 done: A  x done  t start        1|2  9.9.9
+ N  sort(manual)  undid: done: A  x done  t start          1|2  9.9.9
 -- after-todo --
 A
 B

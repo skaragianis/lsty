@@ -32,6 +32,6 @@ Buy +x
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 tagged +x  x done  t start      1|1  9.9.9
+ N  sort(manual)  undid: tagged +x  x done  t start        1|1  9.9.9
 -- after-todo --
 Buy

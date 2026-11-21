@@ -72,7 +72,7 @@ pub use relink::Relink;
 pub use reopen::reopen;
 pub use report::report;
 pub use restore::restore;
-pub use result::Outcome;
+pub use result::{Outcome, name_lines, name_read};
 pub use seen::Seen;
 pub use staged::ChangeKind;
 pub use start::start;

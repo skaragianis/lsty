@@ -1,6 +1,6 @@
 size 130 16
 start
-keys j
+keys s k
 keys t
 frame a-frame
 fg a-fg
@@ -11,12 +11,12 @@ file todo.txt b-file
 -- config.toml --
 show_sidebar = false
 -- todo.txt --
-Write `the parser` id:p
+(C) Write `the parser` id:p
 (B) Add CLI dep:p id:q due:2026-09-28
 -- a-frame --
 ┌[1]─"~/todo.txt"─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail "id:q"────────────────────┐
-│  1       Write `the parser`                                                           p ││ Add CLI dep:p id:q due:2026-09-28   │
-│  2 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ ─────────────────────────────────── │
+│  1 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ Add CLI dep:p id:q due:2026-09-28   │
+│  1   (C) Write `the parser`                                                           p ││ ─────────────────────────────────── │
 │                                                                                         ││ state       blocked                 │
 │                                                                                         ││ nr          2                       │
 │                                                                                         ││ priority    B                       │
@@ -29,14 +29,14 @@ Write `the parser` id:p
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- N  task 2 is blocked by 1 (Write `the parser`)  sort(manual)  x done  t start  T wont  o new  a append  dd delete     2|2  9.9.9
+ N  task 1 is blocked by 2 (Write `the parser`)  sort(priority)  x done  t start  T wont  o new  a append  dd delete   1|2  9.9.9
 -- a-file --
-Write `the parser` id:p
+(C) Write `the parser` id:p
 (B) Add CLI dep:p id:q due:2026-09-28
 -- b-frame --
 ┌[1]─"~/todo.txt"─────────────────────────────────────────────────────────────────────────┐┌[2]─Detail "id:q"────────────────────┐
-│  1       Write `the parser`                                                           p ││ Add CLI dep:p id:q due:2026-09-28   │
-│  2 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ ─────────────────────────────────── │
+│  1 ⧗ (B) Add CLI dep:p                                                       1d late  q ││ Add CLI dep:p id:q due:2026-09-28   │
+│  1   (C) Write `the parser`                                                           p ││ ─────────────────────────────────── │
 │                                                                                         ││ state       blocked                 │
 │                                                                                         ││ nr          2                       │
 │                                                                                         ││ priority    B                       │
@@ -49,14 +49,14 @@ Write `the parser` id:p
 │                                                                                         ││                                     │
 │                                                                                         ││                                     │
 └─────────────────────────────────────────────────────────────────────────────────────────┘└─────────────────────────────────────┘
- N  task 2 is blocked by 1 (Write `the parser`)  sort(manual)  x done  t start  T wont  o new  a append  dd delete     2|2  9.9.9
+ N  task 1 is blocked by 2 (Write `the parser`)  sort(priority)  x done  t start  T wont  o new  a append  dd delete   1|2  9.9.9
 -- b-file --
-Write `the parser` id:p
+(C) Write `the parser` id:p
 (B) Add CLI dep:p id:q due:2026-09-28
 -- a-fg --
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEemmmmmmmmmmmmiiiimeeeeeeeeeeeeeeeeeeeee
-E.mm.......ttttttqqqqqqqqqqqq...........................................................i.Ee.ttttttttmmmmmtmmmmtOOOOOOOOOOOOOO...e
-E.tt.bbBBBbbbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbOOOOOOObbi.Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
+E.tt.bbBBBbbbbbbbbbmmmmmbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbOOOOOOObbi.Ee.ttttttttmmmmmtmmmmtOOOOOOOOOOOOOO...e
+E.mm...CCC.ttttttqqqqqqqqqqqq...........................................................i.Ee.mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm.e
 E.........................................................................................Ee.mmmmmmmmmmmmbbbbbbb.................e
 E.........................................................................................Ee.mmmmmmmmmmmmt.......................e
 E.........................................................................................Ee.mmmmmmmmmmmmB.......................e
@@ -69,4 +69,4 @@ E...............................................................................
 E.........................................................................................Ee.....................................e
 E.........................................................................................Ee.....................................e
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
-NNN.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..mmmmmmmmmmmm..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy....NNNNN.mmmmm.
+NNN.xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx..mmmmmmmmmmmmmm..D.DDDD..D.DDDDD..k.yyyy..k.yyy..k.yyyyyy..kk.yyyyyy..NNNNN.mmmmm.

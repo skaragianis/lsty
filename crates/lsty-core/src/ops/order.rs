@@ -240,7 +240,7 @@ impl Tx {
         let prev = head.last();
         self.relocate(&block.tasks, prev.map_or(0, |p| p + 1));
         for (i, &id) in block.tasks.iter().enumerate() {
-            let new_nr = at + i + 1;
+            let new_nr = self.line_name(Source::Todo, at + i + 1);
             let handle = self.handle(id);
             self.say(format!("{handle} moved to {new_nr}"));
             self.note_claim(&env.actor, id, ClaimMode::Edit);

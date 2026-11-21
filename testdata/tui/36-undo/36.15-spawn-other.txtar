@@ -23,7 +23,7 @@ Z +x
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 done: Pay  x done  t start      1|2  9.9.9
+ N  sort(manual)  undid: done: Pay  x done  t start        1|2  9.9.9
 -- after-todo --
 Pay rec:1w due:2026-09-30
 Z +x

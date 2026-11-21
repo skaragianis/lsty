@@ -49,7 +49,7 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  ▶ 1 in doing  undid: 1 stopped  x done  t stop  T wont  o new          1|2  9.9.9
+ N  sort(manual)  ▶ 1 in doing  undid: stopped  x done  t stop  T wont  o new            1|2  9.9.9
 -- back --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▶ Call                                                                                     1h │

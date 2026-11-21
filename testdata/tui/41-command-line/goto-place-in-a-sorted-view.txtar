@@ -8,6 +8,10 @@ keys :
 type 4
 keys <CR>
 frame landed
+keys :
+type add aa
+keys <CR>
+frame added-by-line
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -37,3 +41,13 @@ banana
 │                                                          │
 └──────────────────────────────────────────────────────────┘
  N  sort(alpha)  x done  t start  T wont         4|5  9.9.9
+-- added-by-line --
+┌[1]─"~/todo.txt"──────────────────────────────────────────┐
+│  4   aa                                             t001 │
+│  3   apple                                               │
+│  2   banana                                              │
+│  1   cherry                                              │
+│  5   fig                                                 │
+│  1   pear                                                │
+└──────────────────────────────────────────────────────────┘
+ N  sort(alpha)  6 added as id:t001: aa          5|6  9.9.9

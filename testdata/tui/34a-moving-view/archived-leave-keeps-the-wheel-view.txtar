@@ -48,7 +48,7 @@ task30
 │ 11   task17                                                                                      │
 │ 12   task18                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  5 done: task05; archived to done.txt as done:1; hidden by current filters in 2 sec
+ N  sort(manual)  5 done: task05; archived to done.txt as 5; hidden by current filters in 2 seconds
 -- after --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  8   task14                                                                                      │

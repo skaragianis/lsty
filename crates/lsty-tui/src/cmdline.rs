@@ -228,8 +228,14 @@ impl Model {
     /// alert tone.
     fn run_cli(&mut self, words: &[String]) {
         let home = self.deps.home.clone();
-        let result =
-            self.attempt(|env| run_inline(env, home.as_deref(), words));
+        // A command names lines, as the command line does.
+        let result = self.attempt(|env| {
+            let env = ops::Env {
+                by_place: false,
+                ..env.clone()
+            };
+            run_inline(&env, home.as_deref(), words)
+        });
         match result {
             Err(e) => self.fail_line(&e),
             Ok((inline, clock)) => {

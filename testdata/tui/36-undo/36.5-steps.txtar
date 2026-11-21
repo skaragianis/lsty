@@ -38,7 +38,7 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 re-prioritized from (C) to (B)        1|1
+ N  sort(manual)  undid: re-prioritized from (C) to (B)    1|1  9.9.9
 -- u1-todo --
 (C) Buy
 -- u2 --
@@ -49,7 +49,7 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 re-prioritized from (D) to (C)        1|1
+ N  sort(manual)  undid: re-prioritized from (D) to (C)    1|1  9.9.9
 -- u2-todo --
 (D) Buy
 -- u3 --
@@ -60,6 +60,6 @@ Buy
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 prioritized (D)  x done         1|1  9.9.9
+ N  sort(manual)  undid: prioritized (D)  x done           1|1  9.9.9
 -- u3-todo --
 Buy

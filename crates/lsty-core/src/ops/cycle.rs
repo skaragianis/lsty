@@ -10,7 +10,7 @@ use super::{
 };
 use crate::{
     errs::{Code, Error, Field, Ref, Result, Source},
-    list::{Snapshot, TaskId},
+    list::{Snapshot, Task, TaskId},
     todotxt::Line,
 };
 
@@ -38,7 +38,7 @@ impl Tx {
                 continue;
             };
             if rules != Rules::WarnCycles {
-                return Err(cycle_error(&after, &path));
+                return Err(self.cycle_error(&after, &path));
             }
             let handle = self.row_handle(row.at);
             self.say(format!("{handle} is now part of a dependency cycle"));
@@ -97,20 +97,31 @@ fn new_deps(row: &Row) -> Vec<Vec<u8>> {
         .collect()
 }
 
-/// The refusal, with the numbers the lines will have.
-fn cycle_error(after: &Snapshot, path: &[TaskId]) -> Error {
-    let refs: Vec<Ref> = path
-        .iter()
-        .filter_map(|id| after.task(*id))
-        .map(|task| after.ref_of(task))
-        .collect();
-    let steps: Vec<String> = refs.iter().map(|r| r.nr.to_string()).collect();
-    let mut err = Error::new(
-        Code::Cycle,
-        format!("{} would be a dependency cycle", steps.join(" → ")),
-    );
-    if let Some(first) = refs.first() {
-        err = err.with_task(first.clone());
+impl Tx {
+    /// The refusal, with the numbers the lines will have; those of a
+    /// caller that names lines by place are the lines as they were read,
+    /// which its list still shows.
+    fn cycle_error(&self, after: &Snapshot, path: &[TaskId]) -> Error {
+        let tasks = || path.iter().filter_map(|id| after.task(*id));
+        let refs: Vec<Ref> = tasks().map(|task| after.ref_of(task)).collect();
+        let steps: Vec<String> = tasks().map(|task| self.step(task)).collect();
+        let mut err = Error::new(
+            Code::Cycle,
+            format!("{} would be a dependency cycle", steps.join(" → ")),
+        );
+        if let Some(first) = refs.first() {
+            err = err.with_task(first.clone());
+        }
+        err.with_field("path", Field::Refs(refs))
     }
-    err.with_field("path", Field::Refs(refs))
+
+    /// How the refusal names the line of `task` in `after`.
+    fn step(&self, task: &Task) -> String {
+        let file = self.file(task.source());
+        let row = file.order().get(task.nr().index());
+        match row.and_then(|&i| file.rows().get(i)?.nr) {
+            Some(nr) if self.by_place => self.read_name(task.source(), nr),
+            _ => task.nr().to_string(),
+        }
+    }
 }

@@ -166,7 +166,7 @@ impl Side {
             m.message.text()
         );
         let wrote = self.files();
-        let named = named(m.message.text());
+        let named = named(m, m.message.text());
         assert!(
             history || kept_lines(&before.0, &wrote, &seen, &named, !moves),
             "wrote on lines not seen: {name}"
@@ -382,17 +382,27 @@ fn kept_lines(
     })
 }
 
-/// The todo lines a message names as dependents it unblocked or relinked,
-/// by their number before the press.
-fn named(message: Option<&str>) -> Vec<(usize, usize)> {
+/// The lines a message names as dependents it unblocked or relinked, by
+/// their place in the list now, or their id or line when they have none.
+fn named(model: &Model, message: Option<&str>) -> Vec<(usize, usize)> {
     let message = message.unwrap_or_default();
     let said = ["unblocked ", "relinked "]
         .into_iter()
         .flat_map(|word| message.split(word).skip(1));
     let nrs =
         said.flat_map(|s| s.split(';').next().unwrap_or_default().split(", "));
-    let at = |n: &str| n.trim().parse::<usize>().ok()?.checked_sub(1);
-    nrs.filter_map(at).map(|i| (0, i)).collect()
+    let at = |n: &str| {
+        let n = n.trim();
+        let id = n.strip_prefix("id:");
+        let place = n.parse::<usize>().ok().and_then(|p| p.checked_sub(1));
+        let task = match (id, place) {
+            (Some(id), _) => model.snap.by_id(id).ok()?,
+            (None, place) => model.snap.task(model.rows.get(place?)?.id)?,
+        };
+        let file = usize::from(task.source() == Source::Done);
+        Some((file, task.nr().index()))
+    };
+    nrs.filter_map(at).collect()
 }
 
 /// The words of a line but its `dep:` tags.

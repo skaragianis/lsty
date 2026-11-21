@@ -5,9 +5,9 @@ status 1 done; 9 already done\b
 frame selection
 file todo.txt selection-file
 keys u
-status undid: 1 done: Open
+status undid: done: Open
 keys <C-r>
-status redid: 1 done: Open
+status redid: done: Open
 keys u g g
 keys 1 0 x
 status 1 done; 9 already done\b

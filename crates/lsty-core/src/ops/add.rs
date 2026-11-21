@@ -404,13 +404,13 @@ fn announce(tx: &mut Tx, env: &Env<'_>, placed: &[Placed]) -> Result<()> {
         {
             return Err(blocked_start(&after, task));
         }
-        tx.say(message(one.how, &after, task));
+        tx.say(message(tx, one.how, &after, task));
     }
     Ok(())
 }
 
-fn message(how: How, after: &Snapshot, task: &Task) -> Vec<u8> {
-    let nr = task.nr();
+fn message(tx: &Tx, how: How, after: &Snapshot, task: &Task) -> Vec<u8> {
+    let nr = tx.line_name(Source::Todo, task.nr());
     let text = after.line(task).text();
     let id = after.id_of(task);
     let head = match (how, id) {

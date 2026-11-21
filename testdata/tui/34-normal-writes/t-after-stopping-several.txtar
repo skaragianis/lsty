@@ -67,7 +67,7 @@ Mail started:2026-09-29T0700Z owner:agent2
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  ▶ 2 in doing  undid: 1 stopped  x done  t stop  T wont  o new          1|2  9.9.9
+ N  sort(manual)  ▶ 2 in doing  undid: stopped  x done  t stop  T wont  o new            1|2  9.9.9
 -- selection-then-selection --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▷ Call                                                                                     0m │

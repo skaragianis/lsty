@@ -27,7 +27,7 @@ x 2026-09-30 Later
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 done: A  x done  t start        1|2  9.9.9
+ N  sort(manual)  undid: done: A  x done  t start          1|2  9.9.9
 -- after-todo --
 A
 B

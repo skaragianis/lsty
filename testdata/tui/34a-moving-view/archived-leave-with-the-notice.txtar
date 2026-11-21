@@ -20,7 +20,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  1 done: A; archived to done.txt as done:1; hidden by current filters in 2 seconds
+ N  sort(manual)  1 done: A; archived to done.txt as 1; hidden by current filters in 2 seconds or at
 -- after --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  1   B                                                                                           │

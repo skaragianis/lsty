@@ -55,7 +55,10 @@ pub(super) fn relink(tx: &mut Tx, moved: &[Moved<'_>]) {
     if !nrs.is_empty() {
         tx.say(format!(
             "relinked {}",
-            nrs.iter().map(Nr::to_string).collect::<Vec<_>>().join(", ")
+            nrs.iter()
+                .map(|nr| tx.line_name(Source::Todo, nr))
+                .collect::<Vec<_>>()
+                .join(", ")
         ));
     }
     for warning in warns {
@@ -97,8 +100,8 @@ impl Tx {
         let Some(nr) = relink.nr else {
             return gone(&text);
         };
-        let changed = |nr: Nr| {
-            let why = format!("{nr} changed since; dep:{text} not restored");
+        let changed = |name: String| {
+            let why = format!("{name} changed since; dep:{text} not restored");
             Err(why.into_bytes())
         };
         let landed = self.landing.as_ref().map_or_else(
@@ -106,7 +109,7 @@ impl Tx {
             |landing| landing.line(Source::Todo, nr.index()),
         );
         let Some(index) = landed else {
-            return changed(nr);
+            return changed(self.unlanded(relink, nr));
         };
         let Some(row) = self.todo.rows().get(index) else {
             return gone(&text);
@@ -114,16 +117,17 @@ impl Tx {
         if Line::is_blank_text(&row.orig) {
             return gone(&text);
         }
-        let nr = Nr::from_index(index).unwrap_or(nr);
+        let nr = self.written_at(index, nr);
         if *row.raw == *relink.before {
             return Ok(nr);
         }
         if relink.lost || *row.orig != *relink.after {
-            return changed(nr);
+            return changed(self.line_name(Source::Todo, nr));
         }
         let dependent = id_text(&relink.before);
         let graph = graph.get_or_insert_with(|| graph_of(self));
         if closes_cycle(graph, id, &dependent) {
+            let nr = self.line_name(Source::Todo, nr);
             let why =
                 format!("{nr}: dep:{text} would close a cycle; not restored");
             return Err(why.into_bytes());
@@ -141,6 +145,32 @@ impl Tx {
         };
         self.side.push(at);
         Ok(nr)
+    }
+}
+
+impl Tx {
+    /// The number the line of row `index` has when written, else `nr`.
+    fn written_at(&self, index: usize, nr: Nr) -> Nr {
+        let at = self.todo.position(index);
+        at.and_then(Nr::from_index).unwrap_or(nr)
+    }
+
+    /// How a warning names a dependent with no known line: by the place of
+    /// the one line that reads as the delete left it, else by its id, else
+    /// by the line the record holds.
+    fn unlanded(&self, relink: &Relink, nr: Nr) -> String {
+        let rows = self.todo.rows().iter().enumerate();
+        let mut same = rows
+            .filter(|(_, r)| !r.removed && *r.raw == *relink.after)
+            .map(|(index, _)| index);
+        let id = id_text(&relink.before);
+        match (same.next(), same.next()) {
+            (Some(index), None) => {
+                self.line_name(Source::Todo, self.written_at(index, nr))
+            }
+            _ if !id.is_empty() => format!("id:{}", lossy(&id)),
+            _ => nr.to_string(),
+        }
     }
 }
 

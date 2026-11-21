@@ -37,7 +37,7 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  ▶ 1 in doing  undid: 1 stopped  x done  t stop  T wont  o new          1|2  9.9.9
+ N  sort(manual)  ▶ 1 in doing  undid: stopped  x done  t stop  T wont  o new            1|2  9.9.9
 -- claim-file --
 Call started:2026-09-29T0800Z owner:agent1
 Other

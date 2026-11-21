@@ -1,0 +1,23 @@
+size 100 8
+start
+keys /
+type A
+keys <CR>
+keys d d
+frame a-frame
+-- config.toml --
+show_sidebar = false
+show_detail = false
+-- todo.txt --
+A id:a
+B dep:a id:b
+C dep:a
+-- a-frame --
+┌[1]─/A────────────────────────────────────────────────────────────────────────────────────────────┐
+│ nothing matches                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ N  sort(manual)  1 deleted; unblocked id:b, 3  <Esc> clear search  x done  t start      0|0  9.9.9

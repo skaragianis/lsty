@@ -76,7 +76,7 @@ Three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 2 added as id:t001: New  x done  t start  T wont  o new         2|3  9.9.9
+ N  sort(manual)  undid: added as id:t001: New  x done  t start  T wont  o new           2|3  9.9.9
 -- c-file --
 One id:aaaa
 Two

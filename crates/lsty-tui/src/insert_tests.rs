@@ -152,8 +152,20 @@ fn u_brings_a_discarded_draft_back_once() {
     keys(&mut model, "<Esc>");
     assert_eq!(todo_of(dir.path()), "zzzBuy\nCall\n");
     press(&mut model, "u");
-    assert_eq!(model.message.text(), Some("undid: 1 zzzBuy"));
+    assert_eq!(model.message.text(), Some("undid: zzzBuy"));
     assert_eq!(todo_of(dir.path()), LIST);
+    // The task's own words stay, whatever they end or start with.
+    for (todo, typed, said) in [
+        ("Buy\n", "x", "undid: done: Buy"),
+        ("Talk to\n", "x", "undid: done: Talk to"),
+        ("3  eggs\n", "A x<CR>", "undid: 3  eggs x"),
+    ] {
+        let dir = workdir(todo);
+        let mut model = model_of(dir.path());
+        keys(&mut model, typed);
+        press(&mut model, "u");
+        assert_eq!(model.message.text(), Some(said), "{typed}");
+    }
 }
 
 // 38.35: the task is gone when `u` brings the draft back.

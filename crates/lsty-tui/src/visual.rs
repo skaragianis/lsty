@@ -71,7 +71,7 @@ impl Model {
     }
 
     /// The row of the task `id`.
-    fn row_of(&self, id: TaskId) -> Option<usize> {
+    pub(crate) fn row_of(&self, id: TaskId) -> Option<usize> {
         self.rows.iter().position(|r| r.id == id)
     }
 

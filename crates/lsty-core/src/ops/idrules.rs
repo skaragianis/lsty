@@ -5,7 +5,7 @@ use std::collections::HashMap;
 
 use super::{
     env::Actor,
-    refs::{Target, invalid_id},
+    refs::invalid_id,
     staged::{LineRef, Row},
     tx::Tx,
 };
@@ -193,8 +193,12 @@ impl Tx {
         if let Some(handle) = row.and_then(|r| r.handle.clone()) {
             return handle;
         }
-        let nr = self.row_nr(at).map_or(0, |nr| i64::from(nr.get()));
-        Target::at(at.source, nr).handle()
+        let nr = self.row_nr(at).map_or(0, Nr::get);
+        if row.is_some_and(|r| r.nr.is_some()) {
+            self.read_name(at.source, nr)
+        } else {
+            self.line_name(at.source, nr)
+        }
     }
 
     /// Whether a line of either file that will be written carries `id`.

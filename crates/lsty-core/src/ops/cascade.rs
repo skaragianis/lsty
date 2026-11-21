@@ -65,7 +65,10 @@ impl Tx {
             };
             let nr = self.row_nr(at).map_or(0, Nr::get);
             for id in cut {
-                freed.entry(id).or_default().push(nr.to_string());
+                freed
+                    .entry(id)
+                    .or_default()
+                    .push(self.line_name(Source::Todo, nr));
             }
         }
         for (at, id) in std::mem::take(&mut self.lost) {

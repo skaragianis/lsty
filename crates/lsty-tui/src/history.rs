@@ -9,7 +9,7 @@ use std::{
 
 use jiff::Timestamp;
 use lsty_core::{
-    errs::{Code, Error, Source},
+    errs::{self, Code, Error, Source},
     keys::{Action, Outcome},
     list::Snapshot,
     ops::{self, FileRecord, UndoRecord},
@@ -217,8 +217,8 @@ impl Model {
                 let Some(step) = self.hist.stack(way).pop() else {
                     return;
                 };
-                self.message
-                    .say(format!("{}: {}", way.past(), step.message));
+                let said = without_places(&step.message);
+                self.message.say(format!("{}: {said}", way.past()));
                 self.rewound(outcome, clock, way, step);
             }
             Err(e) => {
@@ -452,4 +452,35 @@ impl<'a> Origins<'a> {
             .iter()
             .find_map(|todo| self.emptied.get_mut(todo)?.pop_front())
     }
+}
+
+/// What stands for a task a message names, while it is cut out.
+const GONE: &str = "\0";
+
+/// What goes with a task left out of a message, when it stands right
+/// before it, longest first.
+const CUTS: [&str; 8] = [
+    "; unblocked \0",
+    "unblocked \0",
+    ", \0",
+    " to \0",
+    " as \0",
+    " \0",
+    "\0 ",
+    "\0",
+];
+
+/// `message` as it was said, with the tasks it names left out: the places
+/// they had are not the ones an undo leaves. A `:` command's message has
+/// no marks and starts with a file line, which goes too.
+fn without_places(message: &str) -> String {
+    let gone = |_, _| GONE.to_owned();
+    let text = ops::name_read(message.as_bytes(), gone);
+    let text = errs::lossy(&ops::name_lines(&text, gone));
+    if !text.contains(GONE) {
+        let (nr, rest) = text.split_once(' ').unwrap_or_default();
+        let is_nr = !nr.is_empty() && nr.bytes().all(|b| b.is_ascii_digit());
+        return if is_nr { rest } else { &text }.to_owned();
+    }
+    CUTS.iter().fold(text, |text, cut| text.replace(cut, ""))
 }

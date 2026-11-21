@@ -3,7 +3,7 @@ use std::{
 };
 
 use super::{
-    Change, ChangeKind, Env, Outcome, Target, pri,
+    Change, ChangeKind, Env, Outcome, Target, name_lines, pri,
     run::run,
     staged::{Path, Row},
     test_util::{folder, pair, said, shared},
@@ -21,6 +21,16 @@ use crate::{
 fn id(tx: &Tx, source: Source, nr: u32) -> TaskId {
     let at = Nr::new(nr).and_then(|nr| tx.snapshot().at(source, nr));
     at.expect("task").task_id()
+}
+
+#[test]
+fn a_mark_names_a_line_and_a_stray_one_stays() {
+    let named = |text: &str| {
+        let name = |source: Source, nr| format!("<{}>", source.numbered(nr));
+        errs::lossy(&name_lines(text.as_bytes(), name))
+    };
+    assert_eq!(named("\u{1f}3\u{1f} \u{1f}done:4\u{1f}"), "<3> <done:4>");
+    assert_eq!(named("a\u{1f}b \u{1f}3\u{1f}"), "a\u{1f}b <3>");
 }
 
 #[test]

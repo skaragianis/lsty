@@ -14,6 +14,66 @@ use crate::{
     list::{Snapshot, Task, TaskId},
 };
 
+/// What encloses a line's name in a message of an operation that was given
+/// `Env::by_place`, as the files are written, for [`name_lines`] to name.
+pub(super) const MARK: char = '\u{1f}';
+
+/// What encloses the name of a line as it was read: the report turns it
+/// into a mark of the line as written, and leaves it for a task with none
+/// (see [`name_read`]).
+pub(super) const READ: char = '\u{1e}';
+
+/// `message` with each marked line named by `name`, which gets its file
+/// and its number as the files are written. The marks stand where a
+/// message names a line the operation read, made, moved or freed; a caller
+/// that gave `Env::by_place` names them as its list does. A mark that
+/// holds no line, as one in the text of a task, stays as it is.
+pub fn name_lines(
+    message: &[u8],
+    name: impl FnMut(Source, Nr) -> String,
+) -> Vec<u8> {
+    marked(message, MARK, name)
+}
+
+/// `message` with each line it marks as read, of a task the operation left
+/// no line, named by `name` from the list the operation read.
+pub fn name_read(
+    message: &[u8],
+    name: impl FnMut(Source, Nr) -> String,
+) -> Vec<u8> {
+    marked(message, READ, name)
+}
+
+/// [`name_lines`] for the marks `mark`.
+pub(super) fn marked(
+    message: &[u8],
+    mark: char,
+    mut name: impl FnMut(Source, Nr) -> String,
+) -> Vec<u8> {
+    let mark = mark as u8;
+    let (mut out, mut rest) = (Vec::new(), message);
+    while let Some(open) = rest.iter().position(|b| *b == mark) {
+        let inner = &rest[open + 1..];
+        let line = inner.iter().position(|b| *b == mark).and_then(|close| {
+            let line = std::str::from_utf8(&inner[..close]).ok()?;
+            let (source, digits) = match line.strip_prefix("done:") {
+                Some(digits) => (Source::Done, digits),
+                None => (Source::Todo, line),
+            };
+            Some((close, name(source, Nr::new(digits.parse().ok()?)?)))
+        });
+        let (kept, name, left) = match line {
+            Some((close, name)) => (open, name, &inner[close + 1..]),
+            None => (open + 1, String::new(), inner),
+        };
+        out.extend_from_slice(&rest[..kept]);
+        out.extend(name.into_bytes());
+        rest = left;
+    }
+    out.extend_from_slice(rest);
+    out
+}
+
 /// The message of an operation that changed nothing and said nothing.
 const NOTHING_CHANGED: &str = "nothing changed";
 
@@ -134,7 +194,9 @@ impl Sealed {
             .into_iter()
             .flatten()
             .filter_map(|id| after.task(*id));
-        let mut messages = tx.messages.clone();
+        let mut messages: Vec<_> = (tx.messages.iter())
+            .map(|m| marked(m, READ, |source, nr| tx.written_name(source, nr)))
+            .collect();
         messages.extend(
             after
                 .warnings_for(touched)
@@ -162,6 +224,30 @@ impl Sealed {
 }
 
 impl Tx {
+    /// How a message names the line `nr` of `source` as it was read, once
+    /// the files are written: the line its task has then, else it stays
+    /// as read.
+    fn written_name(&self, source: Source, nr: Nr) -> String {
+        let task = self.snap.at(source, nr);
+        match task.and_then(|t| self.written_line(t.task_id())) {
+            Some((source, at)) => self.line_name(source, at + 1),
+            None => self.read_name(source, nr),
+        }
+    }
+
+    /// The file and the position the task `id` has once written, in
+    /// whichever file it is, unless it is gone or blank there.
+    fn written_line(&self, id: TaskId) -> Option<(Source, usize)> {
+        [Source::Todo, Source::Done].into_iter().find_map(|source| {
+            let file = self.file(source);
+            let rows = file.rows().iter().enumerate();
+            rows.filter(|(_, row)| {
+                row.was() == Some(id) && !row.removed && !row.blanked
+            })
+            .find_map(|(index, _)| Some((source, file.position(index)?)))
+        })
+    }
+
     /// The tasks the lines of `refs` are in `after`.
     pub(super) fn tasks_after(
         &self,

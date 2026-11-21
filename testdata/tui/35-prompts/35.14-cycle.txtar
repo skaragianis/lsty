@@ -1,6 +1,6 @@
 size 100 8
 start
-keys j g t
+keys s k g t
 type dep:a
 keys <CR>
 frame a-frame
@@ -9,17 +9,17 @@ file todo.txt a-file
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-A id:a dep:b
-B id:b
+(B) A id:a dep:b
+(A) B id:b
 -- a-frame --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
-│  1 ⧗ A dep:b                                                                                   a │
-│  2   B                                                                                         b │
+│  1   (A) B                                                                                     b │
+│  1 ⧗ (B) A dep:b                                                                               a │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
-2 → 1 → 2 would be a dependency cycle
+1 → 2 → 1 would be a dependency cycle
  C  tag: dep:a  <CR> add  <Tab> next  <Esc> cancel
 -- a-file --
-A id:a dep:b
-B id:b
+(B) A id:a dep:b
+(A) B id:b

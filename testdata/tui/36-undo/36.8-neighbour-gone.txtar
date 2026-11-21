@@ -22,7 +22,7 @@ C
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 2 deleted  x done  t start        1|2  9.9.9
+ N  sort(manual)  undid: deleted  x done  t start          1|2  9.9.9
 -- after-todo --
 B
 C

@@ -24,7 +24,7 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 Re-Call  x done  t start  T wont  o new  a append             1|1  9.9.9
+ N  sort(manual)  undid: Re-Call  x done  t start  T wont  o new  a append  dd delete    1|1  9.9.9
 -- a-file --
 Call
 -- b-frame --
@@ -37,6 +37,6 @@ Call
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  redid: 1 Re-Call  x done  t start  T wont  o new  a append             1|1  9.9.9
+ N  sort(manual)  redid: Re-Call  x done  t start  T wont  o new  a append  dd delete    1|1  9.9.9
 -- b-file --
 Re-Call

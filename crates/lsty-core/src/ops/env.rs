@@ -96,6 +96,10 @@ impl Toggle {
 /// Everything an operation reads from outside the list: the files, the
 /// configuration, the clock and how to wait for the lock.
 #[derive(Clone)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "the flags are independent switches of one run"
+)]
 pub struct Env<'a> {
     /// The todo and done files.
     pub found: &'a Found,
@@ -124,6 +128,10 @@ pub struct Env<'a> {
     /// of its lines, and what it finds under the lock must still be that
     /// line. `None` takes a number as one of the file as it is.
     pub aim: Option<&'a Snapshot>,
+    /// Whether the messages name the lines the write made, moved or freed
+    /// with a mark, for [`name_lines`](super::name_lines) to name as the
+    /// caller's list does.
+    pub by_place: bool,
     /// The lines of `aim` a selection took, written or not: one that is
     /// not its line now writes nothing.
     pub aimed: &'a [Target],
@@ -170,6 +178,7 @@ impl<'a> Env<'a> {
             hooks: &OsHooks,
             ids: &OsIds,
             aim: None,
+            by_place: false,
             aimed: &[],
             dry: false,
             read_back: None,

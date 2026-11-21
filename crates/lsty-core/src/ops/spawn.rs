@@ -114,7 +114,7 @@ pub(super) fn say_nexts(tx: &mut Tx, pending: Vec<Pending>) {
             }
         };
         let message = [
-            nr.to_string().as_bytes(),
+            tx.line_name(Source::Todo, nr).as_bytes(),
             b" next: ",
             &next.text(),
             b" (",

@@ -4,6 +4,8 @@ keys s
 frame a-frame
 keys J
 frame b-frame
+keys G h
+frame raised
 file todo.txt a-file
 -- config.toml --
 show_sidebar = false
@@ -33,4 +35,13 @@ Gamma
 -- a-file --
 Beta
 (A) Alpha
-Gamma
+(A) Gamma
+-- raised --
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
+│  1   (A) Alpha                                                                                   │
+│  2   (A) Gamma                                                                                   │
+│  1       Beta                                                                                    │
+│                                                                                                  │
+│                                                                                                  │
+└──────────────────────────────────────────────────────────────────────────────────────────────────┘
+ N  sort(priority)  2 prioritized (A)  x done  t start  T wont  o new  a append          2|3  9.9.9

@@ -155,7 +155,7 @@ fn archive_done(tx: &mut Tx, id: TaskId, done: Arc<[u8]>) -> Result<()> {
     let (name, nr) = (tx.file_name(Source::Done), tx.written_nr(line));
     tx.say(format!(
         "archived to {name} as {}",
-        Source::Done.numbered(nr)
+        tx.line_name(Source::Done, nr)
     ));
     if over && let Some(key) = tx.id_bytes(id) {
         tx.say_interrupted(&key);

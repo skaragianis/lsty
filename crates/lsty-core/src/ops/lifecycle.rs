@@ -80,9 +80,8 @@ pub(super) fn refuse_blocked(tx: &Tx, id: TaskId, task: &Task) -> Result<()> {
     let mut named: Vec<Vec<u8>> = Vec::new();
     for b in task.blockers().iter().filter_map(|b| snap.task(*b)) {
         let text = snap.line(b).text();
-        named.push(
-            [b.nr().to_string().as_bytes(), b" (", &text, b")"].concat(),
-        );
+        let nr = tx.read_name(b.source(), b.nr());
+        named.push([nr.as_bytes(), b" (", &text, b")"].concat());
     }
     let mut message = format!(
         "task {} is blocked by {}",
@@ -154,7 +153,7 @@ pub(super) fn say_was_blocked(tx: &mut Tx, id: TaskId) {
         .blockers()
         .iter()
         .filter_map(|b| tx.task(*b))
-        .map(|b| b.nr().to_string())
+        .map(|b| tx.read_name(b.source(), b.nr()))
         .collect();
     let message =
         format!("{} was blocked by {}", tx.handle(id), nrs.join(", "));

@@ -158,37 +158,43 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
         "X\nY\n\nB\nC\n",
         true,
         "X\nY\n\nB dep:a\nC\nA id:a\n",
-        "relinked 4",
+        "relinked 3",
     ),
     (
         "X\nY\n\nB\nC\n",
         false,
         "X\nY\n\nB dep:a\nC\nA id:a\n",
-        "relinked 4",
+        "relinked 3",
     ),
     (
         "\nC\nB\n",
         true,
         "\nC\nB\nA id:a\n",
-        "3 changed since; dep:a not restored",
+        "2 changed since; dep:a not restored",
     ),
     (
         "\nC\nB\n",
         false,
         "\nC\nA id:a\nB\n",
-        "2 changed since; dep:a not restored",
+        "3 changed since; dep:a not restored",
     ),
     (
         "\nB\nB\nC\n",
         true,
         "\nB\nB\nC\nA id:a\n",
-        "2 changed since; dep:a not restored",
+        "1 changed since; dep:a not restored",
     ),
     (
         "\nB\nB\nC\n",
         false,
         "\nB\nB\nC\nA id:a\n",
         "2 changed since; dep:a not restored",
+    ),
+    (
+        "\nB id:b\nB id:b\nC\n",
+        false,
+        "\nB id:b\nB id:b\nC\nA id:a\n",
+        "id:b changed since; dep:a not restored",
     ),
     ("\nC\n", true, "\nC\nA id:a\n", "a dependent of a is gone"),
     (
@@ -205,7 +211,9 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
 fn a_kept_dependent_through_an_outside_change() {
     for (edit, read, want, said) in OUTSIDE_EDITS {
         let name = format!("{edit:?}, read {read}");
-        let dir = workdir("A id:a\nB dep:a\nC\n");
+        // A dependent with an id is named by it when no line is its own.
+        let b = if edit.contains("id:b") { "B id:b" } else { "B" };
+        let dir = workdir(format!("A id:a\n{b} dep:a\nC\n"));
         let board = Board::default();
         let mut model = model_with(dir.path(), &board);
         board.take(&press(&mut model, "dd"));
@@ -219,6 +227,21 @@ fn a_kept_dependent_through_an_outside_change() {
         let message = format!("pasted 1 task (1 moved); {said}");
         assert_eq!(model.message.text(), Some(message.as_str()), "{name}");
     }
+}
+
+// A pasted task that closes a cycle is named by its place, in a sorted list.
+#[test]
+fn a_pasted_task_in_a_cycle_is_named_by_its_place() {
+    let dir = workdir("(A) D id:d dep:c\n(B) B\nC id:c\n");
+    let board = Board::default();
+    let mut model = model_with(dir.path(), &board);
+    keys(&mut model, "s");
+    board.take(&press(&mut model, "gg dd"));
+    fs::write(dir.path().join("todo.txt"), "\n(B) B\nC id:c dep:d\n")
+        .unwrap_or_else(|e| panic!("{e}"));
+    keys(&mut model, "ggp");
+    let said = "pasted 1 task (1 moved); 1 is now part of a dependency cycle";
+    assert_eq!(model.message.text(), Some(said));
 }
 
 // A refused delete reads with the last yank in its place, which follows it.
@@ -247,15 +270,15 @@ fn the_kept_links_are_used_by_one_paste() {
     let copied = "\nB dep:a\nC\n2026-09-29 A id:a\n2026-09-29 A id:t001\n";
     for (typed, file, said) in [
         ("jjpp", copied, "pasted 1 task"),
-        ("Gpup", linked, "pasted 1 task (1 moved); relinked 2"),
-        ("Gpupup", linked, "pasted 1 task (1 moved); relinked 2"),
+        ("Gpup", linked, "pasted 1 task (1 moved); relinked 1"),
+        ("Gpupup", linked, "pasted 1 task (1 moved); relinked 1"),
         ("Gpupu<C-r>", linked, "redid: pasted 1 task (1 moved)"),
         ("Gpu<C-r>p", copied, "pasted 1 task"),
         // an add of the cut's text is not its paste coming back
         (
             "Go2026-09-29 A id:a<CR><Esc>uGp",
             linked,
-            "pasted 1 task (1 moved); relinked 2",
+            "pasted 1 task (1 moved); relinked 1",
         ),
     ] {
         let dir = workdir("2026-09-29 A id:a\nB dep:a\nC\n");

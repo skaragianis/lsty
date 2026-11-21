@@ -105,7 +105,7 @@ fn move_back(
         [
             handle.as_bytes(),
             b" reopened as ",
-            nr.to_string().as_bytes(),
+            tx.line_name(Source::Todo, nr).as_bytes(),
             &suffix,
         ]
         .concat(),

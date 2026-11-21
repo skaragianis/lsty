@@ -1,11 +1,12 @@
 //! The changes of one operation, staged until it has passed every check.
 
-use std::{collections::HashSet, path::PathBuf, sync::Arc};
+use std::{collections::HashSet, fmt::Display, path::PathBuf, sync::Arc};
 
 use super::{
     env::Env,
     landing::Landing,
     refs::{Target, find, no_task},
+    result::{MARK, READ},
     staged::{LineRef, Path, Row, StagedFile},
 };
 use crate::{
@@ -46,6 +47,9 @@ pub(super) struct Tx {
     /// Lines the operation created as a by-product.
     pub(super) spawned: Vec<LineRef>,
     pub(super) messages: Vec<Vec<u8>>,
+    /// Whether messages mark the lines they name, for the caller to name
+    /// them as its list does (see [`super::name_lines`]).
+    pub(super) by_place: bool,
     /// Messages about an id the operation may remove: the message's
     /// index and the id.
     pub(super) lost: Vec<(usize, Vec<u8>)>,
@@ -111,6 +115,7 @@ impl Tx {
             side: Vec::new(),
             spawned: Vec::new(),
             messages: Vec::new(),
+            by_place: false,
             lost: Vec::new(),
             paired: HashSet::new(),
             log: None,
@@ -166,7 +171,7 @@ impl Tx {
         let row = self.row(task);
         match row.and_then(|r| r.handle.as_ref()) {
             Some(handle) => handle.clone(),
-            None => task.handle(),
+            None => self.read_name(task.source(), task.nr()),
         }
     }
 
@@ -212,6 +217,11 @@ impl Tx {
                 "deleted"
             };
             return Ok(Picked::Gone(format!("{handle} already {word}")));
+        };
+        let handle = if self.by_place {
+            self.read_name(task.source(), task.nr())
+        } else {
+            handle
         };
         if task.source() == Source::Done && !target.archived {
             return Err(archived_error(&self.snap, task, &handle));
@@ -382,6 +392,41 @@ impl Tx {
         let source = first.source();
         let rows: Vec<usize> = tasks.iter().map(|i| i.nr().index()).collect();
         self.file_mut(source).relocate(&rows, after);
+    }
+
+    /// How a message names the line `nr` of `source` as the files will be
+    /// written: its number, or a mark for the caller to name.
+    pub(super) fn line_name(
+        &self,
+        source: Source,
+        nr: impl Display,
+    ) -> String {
+        self.enclosed(MARK, source, nr)
+    }
+
+    /// How a message names the line `nr` of `source` as it was read: its
+    /// number, or a mark for the report to turn into the name the line
+    /// has when written.
+    pub(super) fn read_name(
+        &self,
+        source: Source,
+        nr: impl Display,
+    ) -> String {
+        self.enclosed(READ, source, nr)
+    }
+
+    fn enclosed(
+        &self,
+        mark: char,
+        source: Source,
+        nr: impl Display,
+    ) -> String {
+        let name = source.numbered(nr);
+        if self.by_place {
+            format!("{mark}{name}{mark}")
+        } else {
+            name
+        }
     }
 
     /// Adds a message to the result. It is bytes, because it can carry

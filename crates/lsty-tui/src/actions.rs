@@ -122,12 +122,13 @@ impl Model {
             };
             self.perform(&env, command, &changing)
         });
-        let said: Vec<String> = result
+        let raw: Vec<Vec<u8>> = result
             .iter()
             .flat_map(|(outcome, _)| outcome.messages())
-            .map(|m| errs::lossy(m))
+            .map(|m| self.read_named(m))
             .collect();
         let settled = self.settle(result) && passes;
+        let said = self.said(&raw);
         if !settled {
             self.message.tone = Tone::Alert;
             self.cursor = cursor;
@@ -140,6 +141,38 @@ impl Model {
         }
         self.scroll();
         true
+    }
+
+    /// The messages of an operation, naming the lines they mark as the list
+    /// shows them: a task by its place, else by its id, else by its line.
+    pub(crate) fn said(&self, raw: &[Vec<u8>]) -> Vec<String> {
+        raw.iter().map(|m| self.named(m)).collect()
+    }
+
+    /// `text` with the lines its marks hold named so. A line named as read
+    /// is one a refusal left, as the list shows it.
+    pub(crate) fn named(&self, text: &[u8]) -> String {
+        let text = self.read_named(text);
+        errs::lossy(&ops::name_lines(&text, |s, nr| self.place_name(s, nr)))
+    }
+
+    /// `text` with the lines it names as read, of tasks the write left no
+    /// line, named by the place they have in the list shown now: the one
+    /// the person pressed on. Call it before the write is shown.
+    fn read_named(&self, text: &[u8]) -> Vec<u8> {
+        ops::name_read(text, |s, nr| self.place_name(s, nr))
+    }
+
+    /// How the list shows the line `nr` of `source` of the snapshot: its
+    /// place, else its id, else the line.
+    fn place_name(&self, source: Source, nr: Nr) -> String {
+        let task = self.snap.at(source, nr);
+        let place = task.and_then(|t| self.row_of(t.task_id()));
+        match (place, task.and_then(|t| self.snap.id_of(t))) {
+            (Some(row), _) => (row + 1).to_string(),
+            (None, Some(id)) => format!("id:{}", errs::lossy(id)),
+            (None, None) => source.numbered(nr),
+        }
     }
 
     /// Takes what an operation did, or shows why it did not run. Tells
@@ -191,6 +224,7 @@ impl Model {
         env.cancel = self.cancel.clone();
         env.ids = self.deps.ids.as_ref();
         env.aim = Some(&self.snap);
+        env.by_place = true;
         let read = Cell::new(None);
         env.read_back = Some(&read);
         let ran = run(&env);
@@ -240,14 +274,19 @@ impl Model {
     /// Takes the files an operation wrote as the state shown, keeps its
     /// undo record and shows its messages.
     pub(crate) fn adopt(&mut self, mut outcome: Outcome, clock: Clock) {
-        let said: Vec<String> =
-            outcome.messages().iter().map(|m| errs::lossy(m)).collect();
+        let marked = outcome
+            .messages()
+            .first()
+            .map_or_else(String::new, |m| errs::lossy(m));
         // A key the list showed would change nothing read no files.
         if outcome.read().serial() != self.snap.serial() {
             self.accept(outcome.read().clone(), clock.clone());
         }
+        let raw: Vec<_> = (outcome.messages().iter())
+            .map(|m| self.read_named(m))
+            .collect();
         if outcome.no_op() {
-            self.message.put(join(&said));
+            self.message.put(join(&self.said(&raw)));
             return;
         }
         let touched = touched(&outcome);
@@ -263,6 +302,7 @@ impl Model {
         if let Some(record) = &record {
             self.keep_links(record);
         }
+        let said = self.said(&raw);
         self.message.put(join(&said));
         if !landed {
             self.stick_cursor(&touched, from);
@@ -270,8 +310,7 @@ impl Model {
         self.keep_sticky(&touched);
         if let Some(record) = record {
             let pairs = pairs_of(&record, &touched);
-            let first = said.first().cloned().unwrap_or_default();
-            self.hist.record(record, first, pairs);
+            self.hist.record(record, marked, pairs);
         }
     }
 
@@ -332,7 +371,7 @@ impl Model {
         let text = if e.code() == Code::LockTimeout {
             messages::busy(&self.base_name())
         } else {
-            e.message().to_owned()
+            self.named(e.message().as_bytes())
         };
         self.alert(text);
     }
@@ -341,6 +380,7 @@ impl Model {
     pub(crate) fn fail_hinted(&mut self, e: &errs::Error) {
         self.fail(e);
         if let Some(hint) = e.hint() {
+            let hint = self.named(hint.as_bytes());
             self.message.edit(|message| format!("{message} — {hint}"));
         }
     }

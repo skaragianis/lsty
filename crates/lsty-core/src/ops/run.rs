@@ -92,6 +92,7 @@ where
         Some(snap) => Tx::new(snap.clone(), false),
         None => open(env, done_mode)?,
     };
+    tx.by_place = env.by_place;
     if let Err(e) = planned(env, &mut tx, rules, plan) {
         // Only a reading made here is worth showing: it says what is there.
         let slot = env.read_back.filter(|_| held.is_none());

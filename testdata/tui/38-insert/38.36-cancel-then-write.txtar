@@ -27,7 +27,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 done: Buy  x done  t start  T wont  o new  a append           1|1  9.9.9
+ N  sort(manual)  undid: done: Buy  x done  t start  T wont  o new  a append             1|1  9.9.9
 -- a-file --
 Buy
 -- b-frame --
