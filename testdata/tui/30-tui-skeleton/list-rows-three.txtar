@@ -22,7 +22,7 @@ E..........ttttttttttttttttttttttttttttttttttttt.E
 E................................................E
 E................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..k.yyyy.....NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyy..k.yyyyy.....NNNNN.mmmmm.
 -- frame --
 ┌ [1]─~/todo.txt ────────────────────────────────┐
 │  1       Draft the quarterly planning review   │
@@ -35,4 +35,4 @@ NNNNNNNN.tttttttt..mmmmmm..k.yyyy.....NNNNN.mmmmm.
 │                                                │
 │                                                │
 └────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done      1|3  9.9.9
+ N  sort(manual)  x done  t start      1|3  9.9.9

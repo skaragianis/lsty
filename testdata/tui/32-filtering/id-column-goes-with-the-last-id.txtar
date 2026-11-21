@@ -20,7 +20,7 @@ Call client
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start       1|3  9.9.9
+ N  sort(manual)  x done  t start  T wont        1|3  9.9.9
 -- without --
 ┌ [1]─/milk ───────────────────────────────────────────────┐
 │  2   Buy milk                                            │
@@ -29,4 +29,4 @@ Call client
 │                                                          │
 │                                                          │
 └──────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> clear search    1|1  9.9.9
+ N  sort(manual)  <Esc> clear search  x done     1|1  9.9.9

@@ -17,7 +17,7 @@ A
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 prioritized (D); 2 deprioritized  x done  t start  T wont   1|2  9.9.9
+ N  sort(manual)  1 prioritized (D); 2 deprioritized  x done  t start  T wont  o new     1|2  9.9.9
 -- a-file --
 (D) A
 B

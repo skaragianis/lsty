@@ -43,7 +43,7 @@ C
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                                       1|3│21|20  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                                                1|3│21|20  9.9.9
 -- frame-bg --
 ..................................................................................................................................
 .uuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuuu.

@@ -42,7 +42,7 @@ Call client
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                                                                                                             5|5│21|20  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                                                                                                                      5|5│21|20  9.9.9
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
 │  4   Write parser +spec01                                                                                                                                                                     parser │
@@ -57,7 +57,7 @@ Call client
 │                                                                                                                                                                                                      │
 │                                                                                                                                                                                                      │
 └──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  the list changed — <Esc> drops it, or delete the dep:  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start                                                      5|5│21|20  9.9.9
+ I  the list changed — <Esc> drops it, or delete the dep:  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                                                               5|5│21|20  9.9.9
 -- result --
 Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser

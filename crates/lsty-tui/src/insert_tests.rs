@@ -148,7 +148,7 @@ fn u_brings_a_discarded_draft_back_once() {
     assert_eq!(model.message.text(), Some("edit discarded — u restores"));
     press(&mut model, "u");
     assert!(model.cursor_at().is_some());
-    assert!(mode_of(&model).contains("INSERT"));
+    assert!(mode_of(&model).starts_with(" I "));
     keys(&mut model, "<Esc>");
     assert_eq!(todo_of(dir.path()), "zzzBuy\nCall\n");
     press(&mut model, "u");

@@ -29,7 +29,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 alpha  created  done  due  file  manual  priority
- COMMAND  :sort alpha  <CR> run  <Tab> next  <Esc> cancel
+ C  :sort alpha  <CR> run  <Tab> next  <Esc> cancel
 -- set --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
@@ -38,7 +38,7 @@ alpha  created  done  due  file  manual  priority
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 hidden_tasks
- COMMAND  :set hidden_tasks  <CR> run  <Tab> next  <Esc> cancel
+ C  :set hidden_tasks  <CR> run  <Tab> next  <Esc> cancel
 -- option --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   A                                                                                           │
@@ -47,4 +47,4 @@ hidden_tasks
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 --ignore-blocked
- COMMAND  :do 1 --ignore-blocked  <CR> run  <Tab> next  <Esc> cancel
+ C  :do 1 --ignore-blocked  <CR> run  <Tab> next  <Esc> cancel

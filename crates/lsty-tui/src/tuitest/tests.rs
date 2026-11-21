@@ -72,13 +72,13 @@ fn mouse_result(commands: &str) -> Done {
 #[test]
 fn mouse_commands_find_text_and_take_cells() {
     let ok = [
-        "clickon B\nstatus NORMAL",
-        "clickon \"B\"\nshiftclickon A\nstatus VISUAL",
-        "dblclickon A\nstatus INSERT",
-        "rightclickon A\nstatus NORMAL",
-        "dragon A B\nstatus VISUAL",
-        "drag 5 1 5 2\nstatus VISUAL",
-        "down 5 1\nmove 5 2\nup 5 2\nstatus VISUAL",
+        "clickon B\nstatus ^ N ",
+        "clickon \"B\"\nshiftclickon A\nstatus ^ V ",
+        "dblclickon A\nstatus ^ I ",
+        "rightclickon A\nstatus ^ N ",
+        "dragon A B\nstatus ^ V ",
+        "drag 5 1 5 2\nstatus ^ V ",
+        "down 5 1\nmove 5 2\nup 5 2\nstatus ^ V ",
         "wheel down 5 2 3\nwheel up 5 2",
         "click 5 1\nshiftclick 5 2\ndblclick 5 2",
     ];

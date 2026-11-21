@@ -26,7 +26,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  can't undo: the list changed — look again  todo.txt  manual  x done  t start    1|2  9.9.9
+ N  can't undo: the list changed — look again  sort(manual)  x done  t start  T wont     1|2  9.9.9
 -- a-file --
 Buy +x +y
 B

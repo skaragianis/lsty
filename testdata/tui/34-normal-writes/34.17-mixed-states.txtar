@@ -18,7 +18,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  2 done; 1 already done  x reopen  o new  a append             3|3  9.9.9
+ N  sort(manual)  2 done; 1 already done  x reopen  o new  a append  dd delete  u undo   3|3  9.9.9
 -- a-file --
 x 2026-09-29 A
 x 2026-09-28 B

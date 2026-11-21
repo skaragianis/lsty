@@ -22,7 +22,7 @@ First
 │ state  todo                │
 │ nr     1                   │
 └────────────────────────────┘
- INSERT  todo.txt  manual
+ I  sort(manual)   2|2│36|35
 -- narrow-cursor --
 │    bcdefg                  │
            ^

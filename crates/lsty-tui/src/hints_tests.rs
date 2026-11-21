@@ -85,66 +85,66 @@ fn the_insert_row() {
         "[insert]\ndelete_word_back = [\"<C-h>\"]\ndelete_to_start = []\n";
     let all = "<CR> commit  <C-w> del word  <C-u> del to start";
     let rows = [
-        ("default", "", &[][..], 100, all),
+        ("default", "", &[][..], 91, all),
         (
             "no room for the last",
             "",
             &[],
-            80,
+            71,
             "<CR> commit  <C-w> del word",
         ),
-        ("room for the first only", "", &[], 60, "<CR> commit"),
+        ("room for the first only", "", &[], 51, "<CR> commit"),
         (
             "remapped and unbound",
             remap,
             &[],
-            90,
+            81,
             "<CR> commit  <C-h> del word",
         ),
         (
             "configured",
             "",
             &["delete_to_start"],
-            90,
-            "manual  <C-u> del to start",
+            81,
+            "manual)  <C-u> del to start",
         ),
     ];
     for (name, keys, hints, width, end) in rows {
         let row = insert_row(keys, hints, width);
-        assert!(row.starts_with("INSERT"), "{name}: {row}");
+        assert!(row.starts_with("I "), "{name}: {row}");
         let hints = row.split("   ").next().unwrap_or_default();
         assert!(hints.ends_with(end), "{name}: {row}");
     }
 }
 
-/// The position and the version at the right end: " NORMAL  todo.txt
-/// manual" is 25 cells; the position takes 2 + 6, the version 6 more, and
+/// The position and the version at the right end: " N  sort(manual)" is 16
+/// cells; the position takes 2 + 6, the version 6 more, and
 /// the version gives way first.
 #[test]
 fn the_right_end_needs_the_whole_left_part_and_a_gap() {
     let rows = [
-        ("both", "A\nB\n", "j", 39, "manual   2|2  9.9.9"),
-        ("version gives way", "A\n", "", 38, "     1|1"),
-        ("position alone", "A\n", "", 33, "manual   1|1"),
-        ("neither", "A\n", "", 32, "manual"),
-        ("empty list", "", "", 45, "manual   0|0  9.9.9"),
+        ("both", "A\nB\n", "j", 30, "manual)   2|2  9.9.9"),
+        ("version gives way", "A\n", "", 29, "     1|1"),
+        ("position alone", "A\n", "", 24, "manual)   1|1"),
+        ("neither", "A\n", "", 23, "manual)"),
+        ("empty list", "", "", 30, "manual)   0|0  9.9.9"),
         (
             "insert, chars",
             "\u{e9}\u{e9}\n",
             "A",
-            43,
-            "manual   1|1\u{2502}3|2  9.9.9",
+            34,
+            "manual)   1|1\u{2502}3|2  9.9.9",
         ),
-        ("new row", "A\n", "o", 43, "manual   2|2\u{2502}1|0  9.9.9"),
+        ("new row", "A\n", "o", 34, "manual)   2|2\u{2502}1|0  9.9.9"),
         (
             "new row above",
             "A\n",
             "O",
-            43,
-            "manual   1|2\u{2502}1|0  9.9.9",
+            34,
+            "manual)   1|2\u{2502}1|0  9.9.9",
         ),
-        ("panel", "A +p\n", "<C-w>3", 39, "      9.9.9"),
-        (": open", "A\n", ":", 39, "<Tab> next"),
+        ("panel", "A +p\n", "<C-w>3", 30, "      9.9.9"),
+        (": open", "A\n", ":", 30, "<Tab> next"),
     ];
     for (name, todo, typed, width, tail) in rows {
         let dir = workdir(todo);
@@ -161,20 +161,20 @@ fn the_right_end_needs_the_whole_left_part_and_a_gap() {
 fn clear_search_shows_while_a_search_is_in_effect() {
     let clear = "<Esc> clear search";
     let rows = [
-        ("none", "gg", 80, "manual  x done"),
+        ("none", "gg", 80, "manual)  x done"),
         ("kept text", "/A<CR>", 80, "<Esc> clear search  x done"),
         ("moved names only", "/+work<CR>", 80, clear),
-        ("cleared", "/+work A<CR><Esc>", 80, "manual  x done"),
+        ("cleared", "/+work A<CR><Esc>", 80, "manual)  x done"),
         (
             "by hand",
             "/+work<CR><C-w>3<Space><Esc>",
             80,
-            "manual  x done",
+            "manual)  x done",
         ),
         // An unchanged search keeps what the one before it moved.
         ("resubmitted", "/+work<CR>/<CR>", 80, clear),
         // Only the first hint fits beside the version.
-        ("narrow", "/A<CR>", 62, "manual  <Esc> clear search   "),
+        ("narrow", "/A<CR>", 53, "manual)  <Esc> clear search   "),
         ("search prompt", "/A", 80, "/A  <CR> keep  <Tab> next"),
         (": line", ":", 80, ":  <CR> run  <Tab> next"),
         ("due prompt", "gd", 80, "due:   <CR> set  <Tab> next"),
@@ -667,29 +667,29 @@ fn status_after(model: &Model, width: u16) -> String {
 fn a_count_shows_until_a_key_ends_it() {
     let (_dir, mut model) = hinted(("A\nB\nC\n", ""), None, "", "");
     let plain = status_after(&model, 80);
-    assert!(plain.starts_with(" NORMAL  todo.txt"), "{plain}");
+    assert!(plain.starts_with(" N  sort(manual)"), "{plain}");
     for (typed, want) in [
-        ("2", " NORMAL 2  todo.txt"),
-        ("5", " NORMAL 25  todo.txt"),
-        ("<Esc>", " NORMAL  todo.txt"),
-        ("2", " NORMAL 2  todo.txt"),
-        ("x", " NORMAL  todo.txt"),
-        ("2", " NORMAL 2  todo.txt"),
-        ("g", " NORMAL 2  todo.txt"),
-        ("<Esc>", " NORMAL  todo.txt"),
-        ("2d", " NORMAL 2  todo.txt"),
-        ("<Esc>", " NORMAL  todo.txt"),
-        ("g2", " NORMAL  todo.txt"),
-        ("z2", " NORMAL  todo.txt"),
-        ("j20", " NORMAL 20  todo.txt"),
-        ("<Esc>", " NORMAL  todo.txt"),
-        ("0", " NORMAL  todo.txt"),
-        ("j99999", " NORMAL 9999  todo.txt"),
-        ("<Esc>", " NORMAL  todo.txt"),
-        ("ggvj3", " VISUAL 3  2 selected"),
-        ("<Esc>", " VISUAL  2 selected"),
-        ("<Esc><C-w>24", " NORMAL 4  todo.txt"),
-        ("<Esc><C-w>32", " NORMAL 2  todo.txt"),
+        ("2", " N 2  sort(manual)"),
+        ("5", " N 25  sort(manual)"),
+        ("<Esc>", " N  sort(manual)"),
+        ("2", " N 2  sort(manual)"),
+        ("x", " N  sort(manual)"),
+        ("2", " N 2  sort(manual)"),
+        ("g", " N 2  sort(manual)"),
+        ("<Esc>", " N  sort(manual)"),
+        ("2d", " N 2  sort(manual)"),
+        ("<Esc>", " N  sort(manual)"),
+        ("g2", " N  sort(manual)"),
+        ("z2", " N  sort(manual)"),
+        ("j20", " N 20  sort(manual)"),
+        ("<Esc>", " N  sort(manual)"),
+        ("0", " N  sort(manual)"),
+        ("j99999", " N 9999  sort(manual)"),
+        ("<Esc>", " N  sort(manual)"),
+        ("ggvj3", " V 3  2 selected"),
+        ("<Esc>", " V  2 selected"),
+        ("<Esc><C-w>24", " N 4  sort(manual)"),
+        ("<Esc><C-w>32", " N 2  sort(manual)"),
     ] {
         keys(&mut model, typed);
         let line = status_after(&model, 80);
@@ -714,7 +714,7 @@ fn a_count_says_esc_cancels() {
     let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", "/A<CR>");
     assert!(says(&model, "<Esc> clear search"));
     keys(&mut model, "2");
-    assert!(says(&model, "manual  <Esc> cancel  x done"));
+    assert!(says(&model, "manual)  <Esc> cancel  x done"));
     assert!(!says(&model, "clear search"));
     keys(&mut model, "<Esc>");
     assert!(says(&model, "<Esc> clear search"), "the search stays");
@@ -722,7 +722,7 @@ fn a_count_says_esc_cancels() {
     let (_dir, mut model) = hinted(("A\nB\n", ""), None, "", "vj");
     assert!(says(&model, "<Esc> exit"));
     keys(&mut model, "3");
-    assert!(says(&model, "manual  <Esc> cancel  x done"));
+    assert!(says(&model, "manual)  <Esc> cancel  x done"));
     assert!(!says(&model, "<Esc> exit"));
     keys(&mut model, "<Esc>");
     assert_eq!(model.mode(), Mode::Visual);
@@ -737,7 +737,7 @@ fn a_count_brings_the_esc_hint() {
         assert!(!says(&model, "<Esc>"), "{first}");
         keys(&mut model, "2");
         let line = status_after(&model, 200);
-        assert!(line.contains("manual  <Esc> cancel  "), "{first}: {line}");
+        assert!(line.contains("manual)  <Esc> cancel  "), "{first}: {line}");
         keys(&mut model, "<Esc>");
         assert!(!says(&model, "<Esc>"), "{first}");
     }
@@ -785,11 +785,11 @@ fn a_count_adds_no_hint_to_an_empty_row() {
 #[test]
 fn cancel_gives_way_to_the_next_hint() {
     let (_dir, model) = hinted((STUCK, ""), None, "", "2");
-    assert_eq!(shown_dim(&model, 49), "x done");
-    assert_eq!(shown_dim(&model, 62), "x done t start");
-    assert!(!says_at(&model, 62, "<Esc>"));
-    assert_eq!(shown_dim(&model, 63), "x done");
-    assert!(says_at(&model, 63, "<Esc> cancel"));
+    assert_eq!(shown_dim(&model, 40), "x done");
+    assert_eq!(shown_dim(&model, 53), "x done t start");
+    assert!(!says_at(&model, 53, "<Esc>"));
+    assert_eq!(shown_dim(&model, 54), "x done");
+    assert!(says_at(&model, 54, "<Esc> cancel"));
 
     let (_dir, model) = hinted(("A\nAlso A\n", ""), None, "", "/A<CR>2");
     assert!(says_at(&model, 50, "x done"));
@@ -803,13 +803,13 @@ fn cancel_gives_way_to_the_next_hint() {
 fn cancel_follows_the_bindings() {
     let moved = "[normal]\nclear_search = [\"<C-l>\"]\n";
     let (_dir, model) = hinted(("A\nB\n", ""), None, moved, "/A<CR>2");
-    assert!(says(&model, "manual  <Esc> cancel  <C-l> clear search"));
+    assert!(says(&model, "manual)  <Esc> cancel  <C-l> clear search"));
 
     let others = [("<esc>", "<esc> cancel"), ("<C-c>", "<C-c> cancel")];
     for (key, want) in others {
         let keymap = format!("[normal]\nclear_search = [\"{key}\"]\n");
         let (_dir, model) = hinted(("A\n", ""), None, &keymap, "/A<CR>2");
-        assert!(says(&model, &format!("manual  {want}  x done")), "{key}");
+        assert!(says(&model, &format!("manual)  {want}  x done")), "{key}");
         assert!(!says(&model, "clear search"), "{key}");
         let line = status_after(&model, 200);
         assert_eq!(line.matches("cancel").count(), 1, "{key}: {line}");
@@ -855,7 +855,7 @@ fn a_digit_in_a_field_shows_no_count() {
 #[test]
 fn a_count_is_cut_with_the_mode() {
     let (_dir, model) = hinted(("A\n", ""), None, "", "9999");
-    for (width, want) in [(10, " NORMAL 99"), (4, " NOR")] {
+    for (width, want) in [(10, " N 9999  s"), (4, " N 9")] {
         assert_eq!(status_after(&model, width), want);
     }
 }

@@ -28,7 +28,7 @@ A id:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  can't undo: the list changed — look again  todo.txt  manual  x done  t start    3|3  9.9.9
+ N  can't undo: the list changed — look again  sort(manual)  x done  t start  T wont     3|3  9.9.9
 -- a-file --
 
 B dep:a +z

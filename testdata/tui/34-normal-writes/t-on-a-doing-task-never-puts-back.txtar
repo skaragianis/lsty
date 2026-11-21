@@ -32,7 +32,7 @@ Call +x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  the list changed — look again  todo.txt  manual  x done  t start  T wont        1|1  9.9.9
+ N  the list changed — look again  sort(manual)  x done  t start  T wont  o new          1|1  9.9.9
 -- an-ordinary-stop --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Call +x                                                                                     │
@@ -40,4 +40,4 @@ Call +x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 stopped; 1 was claimed by agent1  x done  t start  T wont   1|1  9.9.9
+ N  sort(manual)  1 stopped; 1 was claimed by agent1  x done  t start  T wont  o new     1|1  9.9.9

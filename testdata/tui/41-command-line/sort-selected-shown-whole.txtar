@@ -16,4 +16,4 @@ B
 │  1   B                │
 │                       │
 created  done  due  file…
- COMMAND  :sort due
+ C  :sort due  <CR> run

@@ -23,25 +23,25 @@ Other
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new            0|0  9.9.9
+ N  sort(manual)  <Esc> clear search  x done  t start  T wont  o new  a append           0|0  9.9.9
 -- no-hit-colour --
 EEEEEEhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 Emmmmmmmmmmmmmmmm..................................................................................E
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy...........NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..........NNNNN.mmmmm.
 -- a-repeat-says-nothing --
 ┌ [1]─/Zzz ────────────────────────────────────────────────────────────────────────────────────────┐
 │ nothing matches                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new            0|0  9.9.9
+ N  sort(manual)  <Esc> clear search  x done  t start  T wont  o new  a append           0|0  9.9.9
 -- a-repeat-colour --
 EEEEEEhhhhEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 Emmmmmmmmmmmmmmmm..................................................................................E
 E..................................................................................................E
 E..................................................................................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy...........NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..kkkkk.yyyyyyyyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..........NNNNN.mmmmm.

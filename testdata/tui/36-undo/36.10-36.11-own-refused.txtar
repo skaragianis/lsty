@@ -32,7 +32,7 @@ x 2026-09-29 Z
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 deleted; unblocked 2, 3       1|3  9.9.9
+ N  sort(manual)  1 deleted; unblocked 2, 3  x done        1|3  9.9.9
 -- deleted-todo --
 
 B
@@ -46,7 +46,7 @@ x 2026-09-29 Z
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  can't undo: the list changed — look again  todo.txt  manual
+ N  can't undo: the list changed — look again  sort(manual)      1|3
 -- refused-todo --
 
 B +x
@@ -60,7 +60,7 @@ x 2026-09-29 Z
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 4 done: Z  x done        3|3  9.9.9
+ N  sort(manual)  undid: 4 done: Z  x done  t start        3|3  9.9.9
 -- earlier-todo --
 
 B +x

@@ -6,7 +6,7 @@ keys <Esc><C-w>2
 keys 23
 frame detail
 keys <Esc>
-status  NORMAL  todo.txt
+status  N  sort\(manual\)
 -- todo.txt --
 Blocker id:b
 Stuck dep:b
@@ -21,7 +21,7 @@ Other
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL 2  todo.txt  manual  <Esc> cancel  x done  t start  T wont  o new  a append      1|3  9.9.9
+ N 2  sort(manual)  <Esc> cancel  x done  t start  T wont  o new  a append  dd delete    1|3  9.9.9
 -- detail --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │             ││  1   Blocker                                                                    b │
@@ -32,4 +32,4 @@ Other
 │ [ ] Later   ││ state  todo                                                                       │
 │ [x] Blocked ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL 23  todo.txt  manual  <Esc> cancel  x done  <CR> link  <Tab> projects  dd delete      9.9.9
+ N 23  sort(manual)  <Esc> cancel  x done  <CR> link  <Tab> projects  dd delete  <C-w>1 list  9.9.9

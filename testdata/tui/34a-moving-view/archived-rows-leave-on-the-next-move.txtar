@@ -22,7 +22,7 @@ E
 │  4   D                                                                                           │
 │  1   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; archived to done.txt as done:1; 2 done: B; archived to done.tx
+ N  sort(manual)  1 done: A; archived to done.txt as done:1; 2 done: B; archived to done.txt as done
 -- after --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   D                                                                                           │
@@ -31,4 +31,4 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   2|2  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            2|2  9.9.9

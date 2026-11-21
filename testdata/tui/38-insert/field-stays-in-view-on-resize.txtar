@@ -37,7 +37,7 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxx │
 │     +p                     │
 └────────────────────────────┘
- INSERT  todo.txt  manual
+ I  sort(manual)  <CR> commit
 -- large --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  6   Task 015 +p                                         │
@@ -50,4 +50,4 @@ Task 020 +p
 │    xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx │
 │    xxxxxxxxx +p                                          │
 └──────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual              21|21│116|118  9.9.9
+ I  sort(manual)  <CR> commit          21|21│116|118  9.9.9

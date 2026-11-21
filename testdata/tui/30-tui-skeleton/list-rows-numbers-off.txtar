@@ -23,7 +23,7 @@ E.........tttttttttttttttttttt.........E
 E.........ttttttttttttttttttttttppppp..E
 E.......ttttttttttt....................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm...NNNNN.mmmmm.
+NNN.mmmmmmmmmmmm..k.yyyy....NNNNN.mmmmm.
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │       Draft the quarterly planning   │
@@ -35,4 +35,4 @@ NNNNNNNN.tttttttt..mmmmmm...NNNNN.mmmmm.
 │         bathroom and ask for… +home  │
 │       Fix the tap                    │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual    1|4  9.9.9
+ N  sort(manual)  x done     1|4  9.9.9

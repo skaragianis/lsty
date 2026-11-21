@@ -20,7 +20,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  :  <CR> run  <Tab> next  <Esc> cancel
+ C  :  <CR> run  <Tab> next  <Esc> cancel
 -- a-cursor --
- COMMAND  :  <CR> run  <Tab> next  <Esc> cancel
-           ^
+ C  :  <CR> run  <Tab> next  <Esc> cancel
+     ^

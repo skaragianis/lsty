@@ -26,7 +26,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|5  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|5  9.9.9
 -- recalled --
 ┌ [1]─/inv ────────────────────────────────────────────────────────────────────────────────────────┐
 │ nothing matches                                                                                  │
@@ -35,4 +35,4 @@ E
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  /inv  <CR> keep  <Tab> next  <Esc> cancel
+ C  /inv  <CR> keep  <Tab> next  <Esc> cancel

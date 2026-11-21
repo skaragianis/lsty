@@ -26,7 +26,7 @@ x 2026-09-01 F wontdo:true
 │  3 ✗ F wontdo:true                                                                   28d ago     │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  1 won't do: A; 2 won't do: B  x done  t stop    3|6  9.9.9
+ N  sort(manual)  ▶ 1 in doing  1 won't do: A; 2 won't do: B  x done  t stop  T wont     3|6  9.9.9
 -- open-file --
 x 2026-09-29 A wontdo:true
 x 2026-09-29 B wontdo:true
@@ -44,4 +44,4 @@ x 2026-09-01 F wontdo:true
 │  4 ✗ F wontdo:true                                                                   28d ago     │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  all are done — x reopens them  2 selected  todo.txt  manual  ▶ 1 in doing       2|6  9.9.9
+ V  all are done — x reopens them  2 selected  sort(manual)  ▶ 1 in doing  x reopen      2|6  9.9.9

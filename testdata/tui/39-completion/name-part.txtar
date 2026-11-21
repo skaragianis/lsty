@@ -28,7 +28,7 @@ Call back @people.russ
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <Tab> accept  <C-n> next            3|3│13|12  9.9.9
+ I  sort(manual)  <Tab> accept  <C-n> next  <Esc> close        3|3│13|12  9.9.9
 -- accepted --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  2   Ask about lunch @people.russ                                            │
@@ -39,4 +39,4 @@ Call back @people.russ
 │                                                                              │
 │                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word         3|3│23|22  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word                  3|3│23|22  9.9.9

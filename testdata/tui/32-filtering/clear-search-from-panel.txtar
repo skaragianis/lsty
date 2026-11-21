@@ -28,4 +28,4 @@ x 2026-09-01 Old task +work
 │ [x] Done    ││ state     todo                                                                    │
 │ [ ] Later   ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing  x filter  <CR> list  <Tab> next  h fold  l unfold    9.9.9
+ N  sort(manual)  ▶ 1 in doing  x filter  <CR> list  <Tab> next  h fold  l unfold             9.9.9

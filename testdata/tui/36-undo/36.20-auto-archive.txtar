@@ -24,7 +24,7 @@ B
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; archived to done.txt as done:1;
+ N  sort(manual)  1 done: A; archived to done.txt as done:1; hidden by
 -- archived-todo --
 
 B
@@ -38,7 +38,7 @@ x 2026-09-29 A
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  undid: 1 done: A  x done        1|2  9.9.9
+ N  sort(manual)  undid: 1 done: A  x done  t start        1|2  9.9.9
 -- after-todo --
 A
 B

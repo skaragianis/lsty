@@ -74,8 +74,13 @@ fn no_file_is_created_for_a_missing_file_or_folder() {
             s.found.state = lsty_core::discover::FileState::DirMissing;
         }
         let model = started_from(s, d);
-        let status = screen(&model, 80, 24).pop().unwrap_or_default();
-        assert!(status.contains("[New] todo.txt"), "{status}");
+        let screen = screen(&model, 80, 24);
+        let status = screen.last().map_or("", String::as_str);
+        assert!(!status.contains("todo.txt"), "{status}");
+        assert!(screen[0].contains("[1]─[New] "), "{}", screen[0]);
+        // Narrow, the path is cut in what `[New] ` leaves.
+        let narrow = self::screen(&model, 22, 24);
+        assert!(narrow[0].contains("[1]─[New] todo.txt"), "{}", narrow[0]);
         let entries = fs::read_dir(dir.path()).map(Iterator::count);
         assert_eq!(entries.ok(), Some(0), "folder missing: {folder_missing}");
     }
@@ -509,7 +514,7 @@ fn drawing_into_a_smaller_buffer_stays_inside_it() {
         assert_eq!(lines.len(), usize::from(h), "{w}x{h}");
     }
     let lines = screen(&model, 80, 20);
-    assert!(lines[19].contains("NORMAL"), "the status line is last");
+    assert!(lines[19].starts_with(" N "), "the status line is last");
 }
 
 /// Control characters in a line must not move the columns after them,

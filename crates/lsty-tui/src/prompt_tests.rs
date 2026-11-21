@@ -98,13 +98,13 @@ fn the_cursor_sits_after_the_label_and_the_text() {
     let mut model = model_of(dir.path());
     assert_eq!(model.cursor_at(), None);
     press(&mut model, "gd");
-    assert_eq!(model.cursor_at(), Some((15, 23)));
+    assert_eq!(model.cursor_at(), Some((9, 23)));
     press(&mut model, "fri");
-    assert_eq!(model.cursor_at(), Some((18, 23)));
+    assert_eq!(model.cursor_at(), Some((12, 23)));
     keys(&mut model, "<Esc>gt");
-    assert_eq!(model.cursor_at(), Some((15, 23)));
+    assert_eq!(model.cursor_at(), Some((9, 23)));
     press(&mut model, "漢");
-    assert_eq!(model.cursor_at(), Some((17, 23)));
+    assert_eq!(model.cursor_at(), Some((11, 23)));
 }
 
 #[test]
@@ -280,14 +280,14 @@ fn said(w: u16, keys_typed: &str) -> Option<String> {
 fn many_tasks_are_counted_when_their_messages_do_not_fit_the_status_line() {
     // The message is 24 cells; the status line keeps 25 and two spare.
     let message = "1 tagged +x; 2 tagged +x";
-    assert_eq!(said(51, "Vjgt+x<CR>").as_deref(), Some(message));
-    assert_eq!(said(50, "Vjgt+x<CR>").as_deref(), Some("2 tasks changed"));
-    let some = said(50, "gt+x<CR>Vjgt+x<CR>");
+    assert_eq!(said(42, "Vjgt+x<CR>").as_deref(), Some(message));
+    assert_eq!(said(41, "Vjgt+x<CR>").as_deref(), Some("2 tasks changed"));
+    let some = said(41, "gt+x<CR>Vjgt+x<CR>");
     assert_eq!(some.as_deref(), Some("1 task changed; 1 unchanged"));
     // Changing none, they say why, whatever the room, and so does `.`.
     let none = "1 already has +x; 2 already has +x";
-    assert_eq!(said(50, "Vjgt+x<CR>Vjgt+x<CR>").as_deref(), Some(none));
-    assert_eq!(said(50, "Vjgt+x<CR>.").as_deref(), Some(none));
+    assert_eq!(said(41, "Vjgt+x<CR>Vjgt+x<CR>").as_deref(), Some(none));
+    assert_eq!(said(41, "Vjgt+x<CR>.").as_deref(), Some(none));
 }
 
 #[test]

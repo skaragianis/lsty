@@ -25,7 +25,7 @@ Old task started:2026-09-29T0900Z owner:agent1
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- NORMAL  can't undo: the list changed — look again  todo.txt  manual
+ N  can't undo: the list changed — look again  sort(manual)
 -- refused-todo --
 Buy
 Old task started:2026-09-29T0900Z owner:agent1

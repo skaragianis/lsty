@@ -26,7 +26,7 @@ x 2026-09-28 fig
 │                                                          │
 │                                                          │
 task 3 is not shown
- COMMAND  :3  <CR> run  <Tab> next  <Esc> cancel
+ C  :3  <CR> run  <Tab> next  <Esc> cancel
 -- no-task --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────┐
 │  1   pear                                                │
@@ -36,4 +36,4 @@ task 3 is not shown
 │                                                          │
 │                                                          │
 no task 9
- COMMAND  :9  <CR> run  <Tab> next  <Esc> cancel
+ C  :9  <CR> run  <Tab> next  <Esc> cancel

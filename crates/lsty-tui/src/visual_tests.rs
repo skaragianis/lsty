@@ -91,7 +91,7 @@ fn the_status_line_counts_the_selection() {
     let lines = screen(&model, 80, 24);
     let status = lines.last().map_or("", String::as_str);
     assert!(
-        status.starts_with(" VISUAL  2 selected  todo.txt"),
+        status.starts_with(" V  2 selected  sort(manual)"),
         "{status}"
     );
 }

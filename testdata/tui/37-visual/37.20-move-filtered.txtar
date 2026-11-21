@@ -27,7 +27,7 @@ C +x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  1 moved to 3; 3 moved to 4  x done  <Esc> exit    3|3  9.9.9
+ V  2 selected  sort(manual)  1 moved to 3; 3 moved to 4  x done  <Esc> exit  t start    3|3  9.9.9
 -- a-file --
 H
 C +x

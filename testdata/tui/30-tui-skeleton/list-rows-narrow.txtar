@@ -25,7 +25,7 @@ E..................................E
 E..................................E
 E..................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm.....NNNNN.
+NNN.mmmmmmmmmmmm........NNNNN.mmmmm.
 -- frame --
 ┌ [1]─~/todo.txt ──────────────────┐
 │  1       Draft the quarterly     │
@@ -40,4 +40,4 @@ NNNNNNNN.tttttttt..mmmmmm.....NNNNN.
 │                                  │
 │                                  │
 └──────────────────────────────────┘
- NORMAL  todo.txt  manual      1|4
+ N  sort(manual)         1|4  9.9.9

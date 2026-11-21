@@ -34,7 +34,7 @@ B due:2026-10-01
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  due  x done  t start  T wont  o new  a append  dd delete  u undo      3|3  9.9.9
+ N  sort(due)  x done  t start  T wont  o new  a append  dd delete  u undo  / search     3|3  9.9.9
 -- manual --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   C                                                                                           │
@@ -43,7 +43,7 @@ B due:2026-10-01
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|3  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|3  9.9.9
 -- file --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   C                                                                                           │
@@ -52,7 +52,7 @@ B due:2026-10-01
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|3  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|3  9.9.9
 -- size --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   C                                                                                           │
@@ -61,4 +61,4 @@ B due:2026-10-01
 │                                                                                                  │
 │                                                                                                  │
 :sort: "size" is not one of manual, file, priority, due, created, alpha, done
- COMMAND  :sort size  <CR> run  <Tab> next  <Esc> cancel
+ C  :sort size  <CR> run  <Tab> next  <Esc> cancel

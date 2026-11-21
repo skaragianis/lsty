@@ -29,7 +29,7 @@ detail_position = "bottom"
 │ No project  ││ state     todo                                                                    │
 │ Won't do    ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|2  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|2  9.9.9
 -- h-goes-to-sidebar --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │ +home    1/1││  1   (A) Call client +work @phone                                        tomorrow │
@@ -50,4 +50,4 @@ detail_position = "bottom"
 │ No project  ││ state     todo                                                                    │
 │ Won't do    ││ …                                                                                 │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x filter  <CR> list  <Tab> next  h fold  l unfold                  9.9.9
+ N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                           9.9.9

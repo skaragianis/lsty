@@ -33,7 +33,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  Plain is done — x reopens it  todo.txt  manual  x reopen  o new  a append       2|3  9.9.9
+ N  Plain is done — x reopens it  sort(manual)  x reopen  o new  a append  dd delete     2|3  9.9.9
 -- wontdo-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Open                                                                                        │
@@ -44,7 +44,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  Decided is done — x reopens it  todo.txt  manual  x reopen  o new  a append     3|3  9.9.9
+ N  Decided is done — x reopens it  sort(manual)  x reopen  o new  a append  dd delete   3|3  9.9.9
 -- count-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open                                                                                        │
@@ -55,7 +55,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  all are done — x reopens them  todo.txt  manual  x reopen  o new  a append      2|3  9.9.9
+ N  all are done — x reopens them  sort(manual)  x reopen  o new  a append  dd delete    2|3  9.9.9
 -- selection-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Open                                                                                        │
@@ -66,7 +66,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  all are done — x reopens them  2 selected  todo.txt  manual  x reopen           3|3  9.9.9
+ V  all are done — x reopens them  2 selected  sort(manual)  x reopen  <Esc> exit        3|3  9.9.9
 -- mixed-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1   Open                                                                                        │
@@ -77,7 +77,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- VISUAL  some are done — nothing changed  2 selected  todo.txt  manual  x done           2|3  9.9.9
+ V  some are done — nothing changed  2 selected  sort(manual)  x done  <Esc> exit        2|3  9.9.9
 -- untouched-file --
 Open
 x 2026-09-01 Plain
@@ -92,7 +92,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  nothing to undo  todo.txt  manual  x reopen  o new  a append  dd delete         2|3  9.9.9
+ N  nothing to undo  sort(manual)  x reopen  o new  a append  dd delete  u undo          2|3  9.9.9
 -- repeat-refused --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────────────────────────┐
 │  1 ▷ Open                                                                                     0m │
@@ -103,7 +103,7 @@ x 2026-09-01 Decided wontdo:true
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  Plain is done — x reopens it  todo.txt  manual  ▶ 1 in doing  x reopen  o new   2|3  9.9.9
+ N  Plain is done — x reopens it  sort(manual)  ▶ 1 in doing  x reopen  o new            2|3  9.9.9
 -- started-file --
 Open started:2026-09-29T0900Z
 x 2026-09-01 Plain

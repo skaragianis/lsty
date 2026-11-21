@@ -15,4 +15,4 @@ Plain task
 │  1   Plain task                                          │
 │                                                          │
 no task 9
- COMMAND  :do 9  <CR> run  <Tab> next  <Esc> cancel
+ C  :do 9  <CR> run  <Tab> next  <Esc> cancel

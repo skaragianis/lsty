@@ -28,7 +28,7 @@ C three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <CR> commit  <C-w> del word  <C-u> del to start           3|3│5|4  9.9.9
+ I  sort(manual)  <CR> commit  <C-w> del word  <C-u> del to start                    3|3│5|4  9.9.9
 -- b-frame --
 ┌ [1]─/A ──────────────────────────────────────────────────────────────────────────────────────────┐
 │  1   A one                                                                                       │
@@ -39,7 +39,7 @@ C three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  <Esc> clear search  x done  t start  T wont  o new            1|1  9.9.9
+ N  sort(manual)  <Esc> clear search  x done  t start  T wont  o new  a append           1|1  9.9.9
 -- a-file --
 A one
 2026-09-29 Other id:t001

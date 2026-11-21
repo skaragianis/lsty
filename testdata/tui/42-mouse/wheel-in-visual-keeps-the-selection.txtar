@@ -51,7 +51,7 @@ Task 030 +p
 │ state  todo                                                                  │
 │ nr     2                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  <Esc> exit           2|30  9.9.9
+ V  2 selected  sort(manual)  x done  <Esc> exit  t start  T wont   2|30  9.9.9
 -- revealed --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  1   Task 002 +p                                                             │
@@ -64,4 +64,4 @@ Task 030 +p
 │ state  todo                                                                  │
 │ nr     3                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  3 selected  todo.txt  manual  x done  <Esc> exit           3|30  9.9.9
+ V  3 selected  sort(manual)  x done  <Esc> exit  t start  T wont   3|30  9.9.9

@@ -23,7 +23,7 @@ B
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; hidden by current filters in 2 seconds or at the next key
+ N  sort(manual)  1 done: A; hidden by current filters in 2 seconds or at the next key   2|2  9.9.9
 -- a-file --
 x 2026-09-29 A edited
 B

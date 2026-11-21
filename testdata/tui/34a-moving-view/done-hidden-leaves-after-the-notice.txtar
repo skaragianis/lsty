@@ -23,7 +23,7 @@ C
 │ [ ] Archive ││                                                                                   │
 │ ─────────── ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  x done  t start  T wont  o new  a append  dd delete  u undo   1|2  9.9.9
+ N  sort(manual)  x done  t start  T wont  o new  a append  dd delete  u undo            1|2  9.9.9
 -- before --
 ┌[3]─Projects─┐┌ [1]─~/todo.txt ───────────────────────────────────────────────────────────────────┐
 │             ││  1 ✓ A                                                                   filtered │
@@ -36,4 +36,4 @@ C
 │ [ ] Archive ││                                                                                   │
 │ ─────────── ││                                                                                   │
 └─────────────┘└───────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: A; hidden by current filters in 2 seconds or at the next key
+ N  sort(manual)  1 done: A; hidden by current filters in 2 seconds or at the next key   2|3  9.9.9

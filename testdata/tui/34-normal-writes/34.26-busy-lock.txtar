@@ -22,7 +22,7 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt is busy (locked by another writer) — nothing changed, try again  todo.txt  manual
+ N  todo.txt is busy (locked by another writer) — nothing changed, try again  sort(manual)     1|1
 -- a-file --
 Buy
 -- b-frame --
@@ -33,6 +33,6 @@ Buy
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 done: Buy  x reopen  o new  a append  dd delete  u undo     1|1  9.9.9
+ N  sort(manual)  1 done: Buy  x reopen  o new  a append  dd delete  u undo  / search    1|1  9.9.9
 -- b-file --
 x 2026-09-29 Buy

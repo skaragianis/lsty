@@ -24,4 +24,4 @@ baz three
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- COMMAND  /foo  <CR> keep  <Tab> next  <Esc> cancel
+ C  /foo  <CR> keep  <Tab> next  <Esc> cancel

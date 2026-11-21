@@ -31,4 +31,4 @@ x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- INSERT  todo.txt  manual  <Tab> accept  <C-n> next  <Esc> close                   2|2│19|18  9.9.9
+ I  sort(manual)  <Tab> accept  <C-n> next  <Esc> close                            2|2│19|18  9.9.9

@@ -17,7 +17,7 @@ E......................................E
 E......................................E
 E......................................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
-NNNNNNNN.tttttttt..mmmmmm..gggggggggggg.
+NNN.mmmmmmmmmmmm..gggggggggggg....NNNNN.
 -- duration-gone --
 ┌ [1]─~/todo.txt ──────────────────────┐
 │  1 ▶ (B) Pre… @phone +work  tomorrow │
@@ -26,4 +26,4 @@ NNNNNNNN.tttttttt..mmmmmm..gggggggggggg.
 │                                      │
 │                                      │
 └──────────────────────────────────────┘
- NORMAL  todo.txt  manual  ▶ 1 in doing
+ N  sort(manual)  ▶ 1 in doing     1|2

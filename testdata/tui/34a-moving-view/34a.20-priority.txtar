@@ -21,7 +21,7 @@ Top = "pri:A"
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- NORMAL  todo.txt  manual  1 deprioritized; hidden by current filters in 2 seconds or at the next ke
+ N  sort(manual)  1 deprioritized; hidden by current filters in 2 seconds or at the next key   1|2
 -- a-file --
 X
 (A) Y

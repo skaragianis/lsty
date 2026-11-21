@@ -81,7 +81,7 @@ Task 028 +p
 │ state  todo                                                                  │
 │ nr     4                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  <Esc> exit           4|28  9.9.9
+ V  2 selected  sort(manual)  x done  <Esc> exit  t start  T wont   4|28  9.9.9
 -- before --
 ┌ [1]─~/todo.txt ──────────────────────────────────────────────────────────────┐
 │  7   Task 011 +p                                                             │
@@ -94,4 +94,4 @@ Task 028 +p
 │ state  todo                                                                  │
 │ nr     4                                                                     │
 └──────────────────────────────────────────────────────────────────────────────┘
- VISUAL  2 selected  todo.txt  manual  x done  <Esc> exit           4|30  9.9.9
+ V  2 selected  sort(manual)  x done  <Esc> exit  t start  T wont   4|30  9.9.9
