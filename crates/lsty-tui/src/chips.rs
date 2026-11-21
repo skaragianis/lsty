@@ -128,11 +128,25 @@ impl Model {
             out.push(Span::new(left_cut(&self.path, left), slot));
             return out;
         }
+        // The title ends on the last chip that fits, never in the gap: the
+        // ellipsis belongs to that chip.
+        let mut cut = false;
+        let n = chips.len();
         for (i, chip) in chips.into_iter().enumerate() {
+            let more = width_of(GAP) + width_of(&chip.text);
+            // Another chip after this one needs a cell for the ellipsis.
+            let room = room.saturating_sub(usize::from(i + 1 < n));
+            cut = i > 0 && width(&out) + more > room;
+            if cut {
+                break;
+            }
             if i > 0 {
                 out.push(Span::new(GAP, slot));
             }
             out.push(Span::new(chip.text, Some(Slot::Chip)));
+        }
+        if cut && let Some(last) = out.last_mut() {
+            last.text.to_mut().push_str(ELLIPSIS);
         }
         out
     }

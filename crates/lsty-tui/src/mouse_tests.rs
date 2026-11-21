@@ -391,8 +391,16 @@ fn a_cut_wide_chip_has_no_hit_on_the_blank_after_its_ellipsis() {
     let (_dir, mut model) = workdir_model(SAMPLE, Config::default());
     model.search = "日本語".to_owned();
     // "[1]─" and "/日" and "…" leave one blank cell of the nine.
+    assert_eq!(model.chip_cells(7), vec![(5, 1)]);
     assert_eq!(model.chip_cells(11), vec![(5, 4)]);
     assert_eq!(model.chip_cells(30), vec![(5, 7)]);
+    // A cut that falls in the gap before the next chip ends on the chip,
+    // and a click on the ellipsis is a click on that chip.
+    model.search = "日本語 abc".to_owned();
+    assert_eq!(model.chip_cells(15), vec![(5, 8)]);
+    // A chip that fills the title, with another after it, gives way too.
+    model.search = "日本語 abc x".to_owned();
+    assert_eq!(model.chip_cells(19), vec![(5, 8)]);
 }
 
 /// A model of A to E after `typed`, which holds a row, and the timer its
