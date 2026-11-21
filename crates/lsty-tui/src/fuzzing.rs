@@ -166,9 +166,18 @@ impl Side {
             m.message.text()
         );
         let wrote = self.files();
-        let named = named(m.message.text());
+        let said = m.message.text();
+        let (named, written) =
+            (named(said, "unblocked "), named(said, "relinked "));
         assert!(
-            history || kept_lines(&before.0, &wrote, &seen, &named, !moves),
+            history
+                || kept_lines(
+                    &before.0,
+                    &wrote,
+                    &seen,
+                    [&named, &written],
+                    !moves
+                ),
             "wrote on lines not seen: {name}"
         );
         match asked {
@@ -353,12 +362,13 @@ fn behind(
 /// and a line each): all still there, in their order, and, `in_place`
 /// when it moves no line and keeps their number, each where it was. Lines
 /// it adds may go anywhere. A `named` line, a dependent the press says it
-/// unblocked or relinked, may change in its `dep:` but nowhere else.
+/// unblocked (by its line before the press) or relinked (by its line after
+/// the write), may change in its `dep:` but nowhere else.
 fn kept_lines(
     before: &[Vec<u8>; 2],
     after: &[Vec<u8>; 2],
     seen: &[(usize, usize)],
-    named: &[(usize, usize)],
+    [named, written]: [&[(usize, usize)]; 2],
     in_place: bool,
 ) -> bool {
     (0..2).all(|file| {
@@ -368,27 +378,23 @@ fn kept_lines(
             .iter()
             .enumerate()
             .filter(|(i, _)| !seen.contains(&(file, *i)));
-        let same = |i: usize, line: &[u8], now: &[u8]| {
+        let same = |i: usize, line: &[u8], (j, now): (usize, &[u8])| {
             now == line
-                || named.contains(&(file, i))
+                || (named.contains(&(file, i)) || written.contains(&(file, j)))
                     && but_deps(now) == but_deps(line)
         };
         if in_place && was.len() == now.len() {
-            others.all(|(i, line)| same(i, line, now[i]))
+            others.all(|(i, line)| same(i, line, (i, now[i])))
         } else {
-            let mut rest = now.iter();
+            let mut rest = now.iter().map(|l| &l[..]).enumerate();
             others.all(|(i, line)| rest.any(|l| same(i, line, l)))
         }
     })
 }
 
-/// The todo lines a message names as dependents it unblocked or relinked,
-/// by their number before the press.
-fn named(message: Option<&str>) -> Vec<(usize, usize)> {
-    let message = message.unwrap_or_default();
-    let said = ["unblocked ", "relinked "]
-        .into_iter()
-        .flat_map(|word| message.split(word).skip(1));
+/// The todo lines a message names after `word`, as numbers.
+fn named(message: Option<&str>, word: &str) -> Vec<(usize, usize)> {
+    let said = message.unwrap_or_default().split(word).skip(1);
     let nrs =
         said.flat_map(|s| s.split(';').next().unwrap_or_default().split(", "));
     let at = |n: &str| n.trim().parse::<usize>().ok()?.checked_sub(1);
