@@ -17,7 +17,7 @@ Write parser +spec01 id:parser
 Add CLI ls +spec01 dep:parser
 Write docs +spec01
 -- open --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Write parser +spec01                                                                 parser │
 │  1 ⧗ Add CLI ls +spec01 dep:parser                                                               │
 │  3 Write docs +spec01 +s                                                                         │
@@ -32,7 +32,7 @@ Write docs +spec01
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
  I  sort(manual)  <Tab> accept  <C-n> next  <Esc> close                            3|3│22|21  9.9.9
 -- a-frame --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Write parser +spec01                                                                 parser │
 │  1 ⧗ Add CLI ls +spec01 dep:parser                                                               │
 │  3 Write docs +spec01 +s                                                                         │
@@ -50,7 +50,7 @@ Write docs +spec01
 │  3 Write docs +spec01 +s                                                                         │
                           ^
 -- b-frame --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  2   Write parser +spec01                                                                 parser │
 │  1 ⧗ Add CLI ls +spec01 dep:parser                                                               │
 │  3   Write docs +spec01 +s                                                                       │

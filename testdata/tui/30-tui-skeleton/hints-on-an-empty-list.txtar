@@ -14,7 +14,7 @@ show_sidebar = false
 show_detail = false
 -- todo.txt --
 -- no-tasks --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
@@ -35,7 +35,7 @@ E...............................................................................
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 NNNNN.mmmmmmmmmmmm..kkkkk.yyyyyy..D.DDDD..D.DDDDD..D.DDDD..k.yyy..D.DDDDDD..DD.DDDDDD...NNNNN.mmmmm.
 -- x-says-nothing --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │

@@ -9,7 +9,7 @@ Review the ledger id:ledger started:2026-09-29T0700Z owner:agent1 due:2026-09-30
 Pay the run id:run
 Buy milk
 -- beside --
-┌[1]─~/todo.txt────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────┐
 │  1 ▶ Review the ledger              tomorrow  ledger  2h │
 │  1   Pay the run                              run        │
 │  2   Buy milk                                            │

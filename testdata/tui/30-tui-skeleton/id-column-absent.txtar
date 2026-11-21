@@ -8,7 +8,7 @@ show_detail = false
 Review the ledger dep:ledger started:2026-09-29T0700Z due:2026-09-30
 Buy milk
 -- absent --
-┌[1]─~/todo.txt────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────┐
 │  1 ▷ Review the ledger dep:ledger           tomorrow  2h │
 │  1   Buy milk                                            │
 │                                                          │

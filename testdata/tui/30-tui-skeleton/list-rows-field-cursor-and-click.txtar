@@ -30,7 +30,7 @@ E....tttt..............................E
 EEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE
 III.mmmmmmmmmmmm......IIIIIIIIIII.mmmmm.
 -- field --
-┌[1]─~/todo.txt────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────┐
 │  2       Draft the quarterly         │
 │          planning review for the     │
 │          whole finance… @phone +work │
@@ -46,7 +46,7 @@ III.mmmmmmmmmmmm......IIIIIIIIIII.mmmmm.
 │    away                              │
          ^
 -- clicked --
-┌[1]─~/todo.txt────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────┐
 │  2       Draft the quarterly         │
 │          planning review for the     │
 │          whole finance… @phone +work │

@@ -12,7 +12,7 @@ show_detail = false
 -- todo.txt --
 A
 -- opened --
-┌[1]─~/┌ Theme ─────────────────┐──────┐
+┌[1]─"~┌ Theme ─────────────────┐──────┐
 │  1   │ ansi                   │      │
 │      │ catppuccin-frappe      │      │
 │      │ catppuccin-latte       │      │
@@ -20,7 +20,7 @@ A
 └──────└ 1-4 of 17 ─────────────┘──────┘
  N  sort(manual)  <CR> save       9.9.9
 -- moved --
-┌[1]─~/┌ Theme ─────────────────┐──────┐
+┌[1]─"~┌ Theme ─────────────────┐──────┐
 │  1   │ catppuccin-latte       │      │
 │      │ catppuccin-macchiato   │      │
 │      │ catppuccin-mocha       │      │

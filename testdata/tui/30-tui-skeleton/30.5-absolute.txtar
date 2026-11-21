@@ -17,7 +17,7 @@ show_detail = false
 hidden_tasks = ["later"]
 line_numbers = "absolute"
 -- absolute --
-┌[1]─~/todo.txt────────────────────────────────────────────────────────────────┐
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────┐
 │  1 ▷ (B) Send invoice +work                                2d late       2h  │
 │  2   (A) Call client +work @phone                          tomorrow  c1      │
 │  3       Buy milk +home                                                      │

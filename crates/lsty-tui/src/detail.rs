@@ -17,7 +17,7 @@ use crate::{
     layout::{BORDER, FRAME, cells},
     model::Model,
     open::exists_mark,
-    text::{ELLIPSIS, RULE, Span, cut, framed, pad, put, width_of},
+    text::{ELLIPSIS, RULE, Span, cut, framed, pad, put, width, width_of},
     wrap::wrap_words,
 };
 
@@ -172,9 +172,14 @@ impl Model {
         let mut spans = vec![Span::new(TITLE, title)];
         let id = self.cursor_task().and_then(|t| self.snap.line(t).tags().id);
         if let Some(id) = id {
-            let text = format!(" (id:{})", lossy(id));
-            if width_of(TITLE) + width_of(&text) + BORDER <= w {
-                spans.push(Span::new(text, Some(Slot::Id)));
+            let text = format!("id:{}", lossy(id));
+            let id = [
+                Span::new(" \"", title),
+                Span::new(text, Some(Slot::Id)),
+                Span::new("\"", title),
+            ];
+            if width_of(TITLE) + width(&id) + BORDER <= w {
+                spans.extend(id);
             }
         }
         spans

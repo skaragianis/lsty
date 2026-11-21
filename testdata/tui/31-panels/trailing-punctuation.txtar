@@ -9,7 +9,7 @@ Typo +a..b
 -- config.toml --
 show_detail = false
 -- sidebar --
-┌[3]─Projects─┐┌[1]─~/todo.txt─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─"~/todo.txt"───────────────────────────────────────────────┐
 │ +a..b    1/1││  1   Ship it for +work.                                       │
 │ ▾+work   2/2││  1   Plan +work.acme, then call @phone.                       │
 │   .acme  1/1││  2   Mail the team (+work).                                   │

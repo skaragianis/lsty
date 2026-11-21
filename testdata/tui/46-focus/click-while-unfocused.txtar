@@ -11,7 +11,7 @@ fg regained
 Call client +work
 Buy milk +home
 -- clicked --
-┌[3]─Projects─┐┌[1]─~/todo.txt─────────────────────────────────────────────────┐
+┌[3]─Projects─┐┌[1]─"~/todo.txt"───────────────────────────────────────────────┐
 │ +home    1/1││  1   Call client +work                                        │
 │ +work    1/1││  2   Buy milk +home                                           │
 ├[4]─Contexts─┤│                                                               │
@@ -26,7 +26,7 @@ Buy milk +home
 └─────────────┘└───────────────────────────────────────────────────────────────┘
  N  sort(manual)  x done  t start  T wont  o new  a append           2|2  9.9.9
 -- clicked-fg --
-emmmmmmmmmmmmeeemmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+emmmmmmmmmmmmeeemmmmmmmmmmmmmmmmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
 e.ppppp....mmmee.mm...ttttttttttttppppp........................................e
 e.ppppp....mmmee.tt...tttttttttppppp...........................................e
 emmmmmmmmmmmmeee...............................................................e

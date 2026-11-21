@@ -15,6 +15,8 @@ use crate::{
 const GAP: &str = "  ";
 /// What the title begins with while the todo file does not exist.
 const NEW: &str = "[New] ";
+/// What quotes the path in the title.
+const QUOTE: &str = "\"";
 
 /// The number of the list, before its title, as the key that focuses it.
 const NUMBER: &str = "[1]─";
@@ -124,30 +126,41 @@ impl Model {
         }
         let chips = self.chips();
         if chips.is_empty() {
-            let left = room.saturating_sub(width(&out));
-            out.push(Span::new(left_cut(&self.path, left), slot));
+            let quotes = 2 * width_of(QUOTE);
+            let left = room.saturating_sub(width(&out) + quotes);
+            out.push(Span::new(
+                format!("{QUOTE}{}{QUOTE}", left_cut(&self.path, left)),
+                slot,
+            ));
             return out;
         }
-        // The title ends on the last chip that fits, never in the gap: the
-        // ellipsis belongs to that chip.
-        let mut cut = false;
-        let n = chips.len();
-        for (i, chip) in chips.into_iter().enumerate() {
-            let more = width_of(GAP) + width_of(&chip.text);
-            // Another chip after this one needs a cell for the ellipsis.
-            let room = room.saturating_sub(usize::from(i + 1 < n));
-            cut = i > 0 && width(&out) + more > room;
-            if cut {
-                break;
-            }
-            if i > 0 {
-                out.push(Span::new(GAP, slot));
-            }
-            out.push(Span::new(chip.text, Some(Slot::Chip)));
-        }
-        if cut && let Some(last) = out.last_mut() {
-            last.text.to_mut().push_str(ELLIPSIS);
-        }
+        out.extend(chip_spans(chips, slot, room.saturating_sub(width(&out))));
         out
     }
+}
+
+/// The chips with a gap between, ending on the last one that fits `room`
+/// cells, never in the gap: the ellipsis belongs to that chip.
+fn chip_spans(
+    chips: Vec<Chip>,
+    slot: Option<Slot>,
+    room: usize,
+) -> Vec<Span<'static>> {
+    let mut out = Vec::new();
+    let n = chips.len();
+    for (i, chip) in chips.into_iter().enumerate() {
+        let more = width_of(GAP) + width_of(&chip.text);
+        // Another chip after this one needs a cell for the ellipsis.
+        let room = room.saturating_sub(usize::from(i + 1 < n));
+        let over = i > 0 && width(&out) + more > room;
+        if let Some(last) = out.last_mut().filter(|_| over) {
+            last.text.to_mut().push_str(ELLIPSIS);
+            break;
+        }
+        if i > 0 {
+            out.push(Span::new(GAP, slot));
+        }
+        out.push(Span::new(chip.text, Some(Slot::Chip)));
+    }
+    out
 }
