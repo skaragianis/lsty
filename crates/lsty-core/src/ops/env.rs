@@ -131,8 +131,8 @@ pub struct Env<'a> {
     /// writes nothing: what it would say of the list on screen. Without
     /// `aim` it reads under the lock; it never writes.
     pub dry: bool,
-    /// Where a refusal of lines that changed leaves the lists it read
-    /// under the lock, so that the caller can show them.
+    /// Where a refusal leaves the lists it read under the lock, so that
+    /// the caller can show them and name its tasks by them.
     pub read_back: Option<&'a Cell<Option<Snapshot>>>,
 }
 

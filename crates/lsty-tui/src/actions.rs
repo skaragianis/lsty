@@ -1,11 +1,11 @@
 //! The keys that write: each one runs the single command it resolves to,
 //! as the human.
 
-use std::cell::Cell;
+use std::{cell::Cell, collections::HashMap};
 
 use lsty_core::{
     dates::Clock,
-    errs::{self, Code, Nr, Source},
+    errs::{self, Code, Msg, Nr, Part, Source},
     keys::Action,
     list::{Claim, Snapshot, State, TaskId},
     ops::{self, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, Target},
@@ -19,6 +19,9 @@ use crate::{
     press::{Answer, Command, Refusal},
     track::{Place, Touched, Wrote, place_of},
 };
+
+/// The place each task has in the list shown, by the line it is.
+type Lines = HashMap<Place, usize>;
 
 /// A task an action is about, as the list showed it.
 pub(crate) struct Chosen {
@@ -122,40 +125,35 @@ impl Model {
             };
             self.perform(&env, command, &changing)
         });
-        let said: Vec<String> = result
-            .iter()
-            .flat_map(|(outcome, _)| outcome.messages())
-            .map(|m| errs::lossy(&m))
-            .collect();
-        let settled = self.settle(result) && passes;
-        if !settled {
+        // The messages that say where a task went are no line of the count.
+        let moves = result.as_ref().map_or(0, |(outcome, _)| {
+            outcome.said().iter().filter(|m| moved(m).is_some()).count()
+        });
+        let Some(said) = self.settle(result).filter(|_| passes) else {
             self.message.tone = Tone::Alert;
             self.cursor = cursor;
             return false;
-        }
+        };
         if let Some(words) = command.words().filter(|_| there > 0) {
-            let short = shortened(&said, &changing, there, words);
+            let lines = said.len() - moves;
             self.message
-                .edit(|m| m.replacen(&said.join("; "), &short, 1));
+                .say(shortened(&said, lines, &changing, there, words));
         }
         self.scroll();
         true
     }
 
-    /// Takes what an operation did, or shows why it did not run. Tells
-    /// whether the operation ran.
+    /// Takes what an operation did, or shows why it did not run. Gives
+    /// the messages shown when the operation ran.
     pub(crate) fn settle(
         &mut self,
         result: errs::Result<(Outcome, Clock)>,
-    ) -> bool {
+    ) -> Option<Vec<String>> {
         match result {
-            Ok((outcome, clock)) => {
-                self.adopt(outcome, clock);
-                true
-            }
+            Ok((outcome, clock)) => Some(self.adopt(outcome, clock)),
             Err(e) => {
                 self.fail(&e);
-                false
+                None
             }
         }
     }
@@ -185,6 +183,8 @@ impl Model {
         run: impl FnOnce(&Env<'_>) -> errs::Result<T>,
     ) -> errs::Result<(T, Clock)> {
         let clock = self.clock_now()?;
+        // A reading of an earlier refusal in this input is out of date.
+        self.live.read.take();
         let mut env = Env::new(self.snap.found(), &self.deps.config, &clock);
         env.create = true;
         env.record_undo = true;
@@ -238,17 +238,35 @@ impl Model {
     }
 
     /// Takes the files an operation wrote as the state shown, keeps its
-    /// undo record and shows its messages.
-    pub(crate) fn adopt(&mut self, mut outcome: Outcome, clock: Clock) {
-        let said: Vec<String> =
-            outcome.messages().iter().map(|m| errs::lossy(m)).collect();
+    /// undo record and shows its messages, which it gives back.
+    pub(crate) fn adopt(
+        &mut self,
+        outcome: Outcome,
+        clock: Clock,
+    ) -> Vec<String> {
+        self.adopt_then(outcome, clock, |_| ())
+    }
+
+    /// `adopt`, running `then` once the list is installed and before the
+    /// messages name its rows.
+    pub(crate) fn adopt_then(
+        &mut self,
+        mut outcome: Outcome,
+        clock: Clock,
+        then: impl FnOnce(&mut Self),
+    ) -> Vec<String> {
         // A key the list showed would change nothing read no files.
         if outcome.read().serial() != self.snap.serial() {
             self.accept(outcome.read().clone(), clock.clone());
         }
+        // The rows a removed task had are those of the list read.
+        let was = self.lines();
+        let msgs = outcome.said().to_vec();
         if outcome.no_op() {
+            then(self);
+            let said = self.rendered(&msgs, &was);
             self.message.put(join(&said));
-            return;
+            return said;
         }
         let touched = touched(&outcome);
         let record = outcome.take_undo();
@@ -263,6 +281,8 @@ impl Model {
         if let Some(record) = &record {
             self.keep_links(record);
         }
+        then(self);
+        let said = self.rendered(&msgs, &was);
         self.message.put(join(&said));
         if !landed {
             self.stick_cursor(&touched, from);
@@ -273,6 +293,54 @@ impl Model {
             let first = said.first().cloned().unwrap_or_default();
             self.hist.record(record, first, pairs);
         }
+        said
+    }
+
+    /// Names the tasks of the message of a refusal by their places in the
+    /// list shown, which is the one the core read.
+    pub(crate) fn name_refusal(&mut self) {
+        if let Some((said, tail)) = self.live.refused.take() {
+            let text = self.rendered(&[said], &self.lines());
+            self.message.edit(|_| format!("{}{tail}", text[0]));
+        }
+    }
+
+    /// The place each shown task has, by its line: the number its row has in
+    /// the column.
+    fn lines(&self) -> Lines {
+        let rows = self.rows.iter().enumerate();
+        rows.map(|(i, row)| (row.place(), self.place(i))).collect()
+    }
+
+    /// `msgs` with each task named by its place in the list shown, or in
+    /// `was` when the write removed it; a task with no row by its `id:`,
+    /// else its line. The clause that says where an archived task went is
+    /// left out when it shows at the row it had.
+    fn rendered(&self, msgs: &[Msg], was: &Lines) -> Vec<String> {
+        let now = self.lines();
+        let row = |source, place| match place? {
+            errs::Place::Written(nr) => now.get(&(source, nr)),
+            errs::Place::Read(nr) => was.get(&(source, nr)),
+        };
+        // A task the write only adds is the field open for it.
+        let name = |name: &errs::Name| match name.place {
+            None if self.new_field() => (self.field_at() + 1).to_string(),
+            place => row(name.source, place)
+                .map_or_else(|| unshown(name), usize::to_string),
+        };
+        let text = |msg: &Msg| errs::lossy(&msg.render(name));
+        msgs.iter()
+            .map(|msg| match moved(msg) {
+                Some(((source, place), to))
+                    if row(source, Some(place)).is_some()
+                        && row(source, Some(place))
+                            == row(to.source, to.place) =>
+                {
+                    text(&msg.without_last(2))
+                }
+                _ => text(msg),
+            })
+            .collect()
     }
 
     /// Whether the rule refuses `action` over the tasks of `count`, having
@@ -329,6 +397,10 @@ impl Model {
         if e.code() == Code::ExpectMismatch {
             self.exit_visual();
         }
+        // Its names are lines of the list the core refused against, which
+        // `show_read` names them by once it is shown.
+        self.live.refused =
+            e.said().cloned().map(|said| (said, String::new()));
         let text = if e.code() == Code::LockTimeout {
             messages::busy(&self.base_name())
         } else {
@@ -341,7 +413,11 @@ impl Model {
     pub(crate) fn fail_hinted(&mut self, e: &errs::Error) {
         self.fail(e);
         if let Some(hint) = e.hint() {
-            self.message.edit(|message| format!("{message} — {hint}"));
+            let tail = format!(" — {hint}");
+            self.message.edit(|message| format!("{message}{tail}"));
+            if let Some((_, said)) = &mut self.live.refused {
+                *said = tail;
+            }
         }
     }
 }
@@ -351,6 +427,7 @@ impl Model {
 /// there. `words` are how the command says each.
 fn shortened(
     said: &[String],
+    lines: usize,
     changing: &[&Chosen],
     there: usize,
     (did, already): (&str, &str),
@@ -358,8 +435,7 @@ fn shortened(
     let change = changing.len();
     // Taking a claim over has one line, which the count would lose.
     let plain = !changing.iter().any(|t| matches!(t.claim, Claim::Agent));
-    let lines = said.iter().filter(|l| !l.starts_with("archived to "));
-    let head = if plain && lines.count() == change {
+    let head = if plain && lines == change {
         format!("{change} {did}")
     } else {
         said.join("; ")
@@ -369,6 +445,18 @@ fn shortened(
 
 fn join(said: &[String]) -> Option<String> {
     Some(said.join("; ")).filter(|m| !m.is_empty())
+}
+
+/// Where a task went, and the name that says it: the task before the write,
+/// and where it is after.
+type Moved<'a> = ((Source, errs::Place), &'a errs::Name);
+
+/// What a message that says where a task went names.
+fn moved(msg: &Msg) -> Option<Moved<'_>> {
+    match msg.parts().last()? {
+        Part::Name(to) => Some((to.from?, to)),
+        Part::Text(_) => None,
+    }
 }
 
 /// The lines the operation was about, each with the place it stands in
@@ -402,6 +490,21 @@ fn named(tasks: &[Chosen], one: fn(&str) -> String, many: &str) -> String {
         [task] => one(&task.name),
         _ => many.to_owned(),
     }
+}
+
+/// How a message names a task no row shows: by its `id:`, else by its line,
+/// `line 3` for a todo line, or as the command line does when it has none.
+fn unshown(name: &errs::Name) -> String {
+    let line = || match name.place {
+        Some(errs::Place::Written(nr) | errs::Place::Read(nr)) => {
+            match name.source {
+                Source::Todo => format!("line {nr}"),
+                Source::Done => name.source.numbered(nr),
+            }
+        }
+        None => name.cli(),
+    };
+    name.id.as_ref().map_or_else(line, |id| format!("id:{id}"))
 }
 
 /// The priority after `cur` in the cycle none, `last`, … A, none when

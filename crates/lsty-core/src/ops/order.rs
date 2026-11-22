@@ -241,7 +241,7 @@ impl Tx {
         self.relocate(&block.tasks, prev.map_or(0, |p| p + 1));
         for &id in &block.tasks {
             let to = self.written_name(self.line_ref(id)?)?;
-            self.say(self.name(id).then(" moved to ").and(to));
+            self.say(self.name(id).read().then(" moved to ").and(to));
             self.note_claim(&env.actor, id, ClaimMode::Edit);
         }
         Ok(())

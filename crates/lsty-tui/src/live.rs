@@ -136,10 +136,12 @@ struct Shown {
 pub(crate) struct Live {
     watcher: Option<Box<dyn Watcher>>,
     phase: Phase,
-    /// The lists the core read when it refused a write on lines that
-    /// changed, and the clock it read them by, shown once the input is
-    /// over.
+    /// The lists the core read when it refused a write, and the clock it
+    /// read them by, shown once the input is over.
     pub(crate) read: Cell<Option<(Snapshot, Clock)>>,
+    /// The message of that refusal, to name by places once they are shown,
+    /// and what follows it on the status line.
+    pub(crate) refused: Option<(errs::Msg, String)>,
     shown: Shown,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
@@ -298,14 +300,15 @@ impl Model {
         }
     }
 
-    /// Shows the lists the core read when it refused a write on lines that
-    /// changed, as a reading of the watch would be, before the next input
-    /// reads the list.
+    /// Shows the lists the core read when it refused a write, as a reading of
+    /// the watch would be, before the next input reads the list; then names
+    /// the tasks of the refusal by their places in it.
     pub(crate) fn show_read(&mut self) {
         if let Some((snap, clock)) = self.live.read.take() {
             self.unseen = true;
             self.accept(snap, clock);
         }
+        self.name_refusal();
     }
 
     /// Starts a reload now, or after the one under way. The minute does

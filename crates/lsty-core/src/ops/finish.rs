@@ -151,8 +151,12 @@ fn archive_done(tx: &mut Tx, id: TaskId, done: Arc<[u8]>) -> Result<()> {
     tx.dest = Some(Source::Done);
     let (line, over) = tx.send_to(Source::Done, id, done)?;
     let file = tx.file_name(Source::Done);
-    let at = tx.written_name(line)?;
-    tx.say(Msg::from(format!("archived to {file} as ")).and(at));
+    let at = tx.written_name(line)?.moved_from(&tx.name(id));
+    tx.say(
+        Msg::from(format!("archived to {file}"))
+            .then(" as ")
+            .and(at),
+    );
     if over && let Some(key) = tx.id_bytes(id) {
         tx.say_interrupted(&key);
     }

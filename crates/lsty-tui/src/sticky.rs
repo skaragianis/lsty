@@ -171,7 +171,11 @@ impl Model {
         if self.visual.is_none()
             && touched.iter().any(|t| stuck.contains(&t.now))
         {
-            self.note(messages::STICKY);
+            self.note(if self.new_field() {
+                messages::STICKY_IN_FIELD
+            } else {
+                messages::STICKY
+            });
         }
     }
 

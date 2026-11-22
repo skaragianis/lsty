@@ -302,7 +302,7 @@ impl Model {
 
     /// The place of row `index` in the list as drawn, from 1: an open new
     /// task takes the place it stands in and moves the rows from there on.
-    fn place(&self, index: usize) -> usize {
+    pub(crate) fn place(&self, index: usize) -> usize {
         index + 1 + usize::from(self.new_field() && index >= self.field_at())
     }
 

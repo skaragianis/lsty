@@ -803,6 +803,7 @@ fn a_refused_key_says_what_it_always_said() {
     const NO_ID: &str = "Old is archived and has no id — x reopens it first";
     const SOME: &str = "some are archived — nothing changed";
     const THREE: &str = "A\nB\nC\n";
+    const BLOCKED: &str = "task 2 is blocked by 1 (A)";
     const SORTED: &str = "sorted by priority — press s for manual order";
     let rows = [
         ("", OLD, "", "a", ONE, true),
@@ -829,6 +830,8 @@ fn a_refused_key_says_what_it_always_said() {
         (TODO, "", "", "p", "nothing to paste", false),
         (TODO, "", "", "gx", "no link on this task", false),
         (TODO, OLD, "gtk:v<CR>j", ".", ONE, true),
+        // a blank line first, with a block between the tasks
+        ("\nA id:a\nB dep:a\nC\n", "", "jv", "x", BLOCKED, true),
     ];
     for (todo, done, first, key, said, alert) in rows {
         let name = format!("{key} on {todo:?} {done:?} after {first}");
@@ -840,6 +843,84 @@ fn a_refused_key_says_what_it_always_said() {
         assert_eq!(model.message.text(), Some(said), "{name}");
         assert_eq!(model.message.tone == Tone::Alert, alert, "{name}");
         assert_eq!(files(dir.path()), before, "{name}");
+    }
+}
+
+/// A message names each task by its place in the list: after the write for a
+/// task still shown, before it for one the write removed, in the list the
+/// core read when that is not the one drawn. A hint keeps the file line.
+#[test]
+#[expect(clippy::too_many_lines, reason = "a table")]
+fn a_message_names_tasks_by_their_place() {
+    let rows = [
+        // archived to a row other than the one it left
+        (
+            "A\nB\nC\n",
+            "",
+            ":set auto_archive<CR>x",
+            "1 done: A; archived to done.txt as 3",
+        ),
+        // a refused new task has no line yet, which no row shows
+        (
+            "\n\nA id:a dep:x\nB\n",
+            "",
+            "GoX id:x dep:a<CR>",
+            "3 → 1 → 3 would be a dependency cycle",
+        ),
+        // a second id on a new task, named by the field
+        (
+            "\n\nA\nB\n",
+            "",
+            "ggOX id:a id:b<CR>",
+            "1 already has id:a — a task has one id",
+        ),
+        // a task whose text holds the sticky notice is not rewritten
+        (
+            "A\n",
+            "",
+            ":set keep_adding<CR>ohidden by current filters in 2 seconds or at the next key<CR>",
+            "2 added as id:t001: hidden by current filters in 2 seconds or at the next key",
+        ),
+        // a task no row shows and no id names, by its file line
+        (
+            "A +x\nB id:b\nC\n",
+            "",
+            "/+x<CR>:set auto_archive<CR>:do 3<CR>",
+            "line 3 done: C; archived to done.txt as 2; hidden by current \
+             filters in 2 seconds or at the next key",
+        ),
+        // raised to the top of a priority sort
+        (
+            "(D) A\n(D) B\n(D) C\n",
+            "",
+            "sjjgp",
+            "1 re-prioritized from (D) to (C)",
+        ),
+        // a new task refused for a taken id, below the field that is open
+        (
+            "Buy\nCall id:c1\n",
+            "",
+            "jOX id:c1<CR>",
+            "id:c1 is taken by 3",
+        ),
+        // a delete in the list read, which an outside edit moved down
+        ("A\nB\nC\n", "X\nA\nB\nC\n", "jdd", "3 deleted"),
+        (
+            "A id:a\nB dep:a\n",
+            "X\nA id:a\nB dep:a\n",
+            "dd",
+            "2 deleted; unblocked 2",
+        ),
+    ];
+    for (todo, outside, key, said) in rows {
+        let name = format!("{key} on {todo:?}");
+        let (dir, mut model, _opened) = watched((todo, ""), &Board::default());
+        if !outside.is_empty() {
+            fs::write(dir.path().join("todo.txt"), outside)
+                .unwrap_or_else(|e| panic!("{e}"));
+        }
+        keys(&mut model, key);
+        assert_eq!(model.message.text(), Some(said), "{name}");
     }
 }
 

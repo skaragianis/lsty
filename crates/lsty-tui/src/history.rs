@@ -316,7 +316,7 @@ impl Model {
             self.fail(&Error::new(Code::ExpectMismatch, ops::LIST_CHANGED));
             return false;
         }
-        if !self.settle(result) {
+        if self.settle(result).is_none() {
             return false;
         }
         self.message.say(messages::PUT_BACK.to_owned());
