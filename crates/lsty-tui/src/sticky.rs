@@ -15,6 +15,7 @@ use crate::{
     line::{Line, LineKind},
     messages,
     model::Model,
+    motion::View,
     rows::Row,
     track::{Place, Remap, Touched, place_of},
 };
@@ -245,8 +246,14 @@ impl Model {
         let view = self.view_offset();
         let [going_on, visual, press] = self.under_way();
         let keep = [keep, going_on, visual, press];
+        let top = self.rows.get(self.top).map(Row::place);
         if self.sticky.drop_aged(&keep) {
             self.rebuild_at(place, view);
+            // A view with the cursor out of it keeps its top task.
+            let kept = top.and_then(|at| self.row_at(at));
+            if let (View::Top(_), Some(i)) = (view, kept) {
+                self.keep_top(i);
+            }
         }
     }
 }

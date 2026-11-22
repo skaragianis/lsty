@@ -9,14 +9,18 @@ use lsty_core::{
     errs::Source,
     theme::Slot,
 };
-use ratatui::{buffer::Buffer, layout::Rect, style::Color};
+use ratatui::{
+    buffer::Buffer,
+    layout::{Position, Rect},
+    style::Color,
+};
 use tempfile::TempDir;
 
 use crate::{
     focus::Focus,
     layout::Size,
     model::Model,
-    msg::Msg,
+    msg::{Gesture, Mouse, Msg},
     sidebar::panel_heights,
     test_util::{
         cursor_text, deps, expiry, keys, plain, press, reload, screen,
@@ -855,13 +859,14 @@ fn held(m: &Model) -> usize {
 }
 
 // A row held in view after an action leaves at the next key or mouse
-// input, whatever the key does, or when the notice of the action ends;
-// the key that holds a row does not release it.
+// input that takes the message down or puts up another, or when the notice
+// of the action ends; the key that holds a row does not release it, and a
+// wheel turn or a paste leaves both up.
 #[test]
 fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
-    const THEN: [&str; 12] = [
+    const THEN: [&str; 14] = [
         "", "j", "<C-w>1", "<C-w>2", "<C-w>5", ":", "i", "?", "zz", "x", "g",
-        "3",
+        "3", "wheel", "paste",
     ];
     for then in THEN {
         for (pane, archive) in
@@ -878,13 +883,26 @@ fn rows_held_in_view_leave_at_the_next_key_or_with_the_notice() {
             keys(&mut m, if pane { "j<C-w>2" } else { "j" });
             let timer = expiry(&keys(&mut m, "x"));
             assert_eq!(held(&m), 1, "{what}: held");
-            if then.is_empty() {
-                m.update(timer.expect("a timer was set"));
-            } else {
-                keys(&mut m, then);
+            let said = m.message.text().map(str::to_owned);
+            let wheel = Msg::Mouse(Mouse {
+                gesture: Gesture::Wheel { up: false },
+                at: Position::new(0, 0),
+                shift: false,
+            });
+            match then {
+                "" => drop(m.update(timer.expect("a timer was set"))),
+                "wheel" => drop(m.update(wheel)),
+                "paste" => drop(m.update(Msg::Paste("Z".to_owned()))),
+                _ => drop(keys(&mut m, then)),
             }
-            // A second `x` completes the next task and holds that one.
-            assert_eq!(held(&m), usize::from(then == "x"), "{what}: left");
+            // A second `x` completes the next task and holds it too; a
+            // wheel turn and a paste leave the row and its message up.
+            let kept = then == "wheel" || then == "paste";
+            let rows = if then == "x" { 2 } else { usize::from(kept) };
+            assert_eq!(held(&m), rows, "{what}: left");
+            // The message that names the rows goes when they do.
+            let same = m.message.text() == said.as_deref();
+            assert!(same == kept || then == "x", "{what}");
         }
     }
 }

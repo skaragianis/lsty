@@ -853,6 +853,25 @@ fn a_refused_key_says_what_it_always_said() {
 #[expect(clippy::too_many_lines, reason = "a table")]
 fn a_message_names_tasks_by_their_place() {
     let rows = [
+        // a key that writes keeps the rows an earlier key kept in sight
+        (
+            "A\nB\nC\n",
+            "",
+            ":set hidden_tasks=done<CR>xJu",
+            "undid: 2 moved back from 3",
+        ),
+        (
+            "A\nB\nC\n",
+            "",
+            ":set hidden_tasks=done<CR>x<Del>u",
+            "undid: 2 deleted",
+        ),
+        (
+            "A\nB id:b\nC dep:b\n",
+            "",
+            ":set hidden_tasks=done<CR>x<Del>",
+            "2 deleted; unblocked 2",
+        ),
         // archived to a row other than the one it left
         (
             "A\nB\nC\n",
@@ -910,15 +929,58 @@ fn a_message_names_tasks_by_their_place() {
             "dd",
             "2 deleted; unblocked 2",
         ),
+        // put back, and done again, by the places in the sorted list
+        (
+            "(D) A\n(D) B\n(D) C\n",
+            "",
+            "sjjgpu",
+            "undid: 3 re-prioritized from (D) to (C)",
+        ),
+        (
+            "(D) A\n(D) B\n(D) C\n",
+            "",
+            "sjjgpu<C-r>",
+            "redid: 1 re-prioritized from (D) to (C)",
+        ),
+        // after `|` an outside edit moves the lines down: the keys before
+        // it wrote, the keys after it are an undo and a redo
+        ("A\nB\nC\n", "X\nA\n\nC\n", "jdd|u", "undid: 3 deleted"),
+        (
+            "A\nB\nC\n",
+            "X\nA\nB\nC\n",
+            "jdd|u<C-r>",
+            "redid: 3 deleted",
+        ),
+        (
+            "A\nB\nC\n",
+            "X\nB\nA\nC\n",
+            "J|u",
+            "undid: 2 moved back from 3",
+        ),
+        (
+            "A\nB\nC\n",
+            "X\nB\nA\nC\n",
+            "J|u<C-r>",
+            "redid: 2 moved to 3",
+        ),
+        // the tasks it unblocked, in the list it left
+        (
+            "A id:a\nB dep:a\nC dep:a\n",
+            "X\n\nB\nC\n",
+            "dd|u",
+            "undid: 2 deleted; unblocked 3, 4",
+        ),
     ];
     for (todo, outside, key, said) in rows {
         let name = format!("{key} on {todo:?}");
         let (dir, mut model, _opened) = watched((todo, ""), &Board::default());
+        let (first, rest) = key.split_once('|').unwrap_or(("", key));
+        keys(&mut model, first);
         if !outside.is_empty() {
             fs::write(dir.path().join("todo.txt"), outside)
                 .unwrap_or_else(|e| panic!("{e}"));
         }
-        keys(&mut model, key);
+        keys(&mut model, rest);
         assert_eq!(model.message.text(), Some(said), "{name}");
     }
 }

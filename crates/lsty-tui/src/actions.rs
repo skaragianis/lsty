@@ -288,8 +288,7 @@ impl Model {
         self.keep_sticky(&touched);
         if let Some(record) = record {
             let pairs = pairs_of(&record, &touched);
-            let first = said.first().cloned().unwrap_or_default();
-            self.hist.record(record, first, pairs);
+            self.hist.record(record, msgs.into_iter().next(), pairs);
         }
         said
     }
@@ -298,6 +297,7 @@ impl Model {
     /// list shown, which is the one the core read.
     pub(crate) fn name_refusal(&mut self) {
         if let Some((said, tail)) = self.live.refused.take() {
+            self.release_sticky();
             let text = self.rendered(&[said], &self.lines());
             self.message.edit(|_| format!("{}{tail}", text[0]));
         }
@@ -314,7 +314,7 @@ impl Model {
     /// `was` when the write removed it; a task with no row by its `id:`,
     /// else its line. The clause that says where an archived task went is
     /// left out when it shows at the row it had.
-    fn rendered(&self, msgs: &[Msg], was: &Places) -> Vec<String> {
+    pub(crate) fn rendered(&self, msgs: &[Msg], was: &Places) -> Vec<String> {
         let now = self.lines();
         let row = |source, place| match place? {
             errs::Place::Written(nr) => now.get(&(source, nr)),

@@ -9,10 +9,12 @@ use std::{
 
 use jiff::Timestamp;
 use lsty_core::{
-    errs::{Code, Error, Source},
+    errs::{self, Code, Error, Msg, Nr, Part, Source},
     keys::{Action, Outcome},
+    lineid,
     list::Snapshot,
     ops::{self, FileRecord, UndoRecord},
+    todotxt::File,
 };
 
 use crate::{
@@ -22,7 +24,7 @@ use crate::{
     msg::Cmd,
     prompt::Kind as PromptKind,
     rows::Row,
-    track::{Place, Remap, Touched, Wrote},
+    track::{Place, Remap, Touched, Wrote, same},
 };
 
 /// A todo line and the done line it moved to or came from.
@@ -36,7 +38,8 @@ pub(crate) struct Pair {
 #[derive(Debug)]
 pub(crate) struct Step {
     pub(crate) rec: UndoRecord,
-    message: String,
+    /// What it said, as data: shown again, naming each task by its place.
+    msg: Msg,
     pairs: Vec<Pair>,
     /// Whether `rec` lands on the reading of this serial, kept so that a
     /// hint drawn every frame checks the file once per reading.
@@ -44,15 +47,11 @@ pub(crate) struct Step {
 }
 
 impl Step {
-    fn new(rec: UndoRecord, message: String, pairs: Vec<Pair>) -> Self {
-        let message = if message.is_empty() {
-            rec.action.clone()
-        } else {
-            message
-        };
+    fn new(rec: UndoRecord, msg: Option<Msg>, pairs: Vec<Pair>) -> Self {
+        let msg = msg.unwrap_or_else(|| Msg::from(rec.action.as_str()));
         Self {
             rec,
-            message,
+            msg,
             pairs,
             landed: Cell::new(None),
         }
@@ -96,10 +95,10 @@ impl History {
     pub(crate) fn record(
         &mut self,
         rec: UndoRecord,
-        message: String,
+        msg: Option<Msg>,
         pairs: Vec<Pair>,
     ) {
-        self.undo.push(Step::new(rec, message, pairs));
+        self.undo.push(Step::new(rec, msg, pairs));
         self.redo.clear();
     }
 
@@ -217,8 +216,6 @@ impl Model {
                 let Some(step) = self.hist.stack(way).pop() else {
                     return;
                 };
-                self.message
-                    .say(format!("{}: {}", way.past(), step.message));
                 self.rewound(outcome, clock, way, step);
             }
             Err(e) => {
@@ -243,7 +240,15 @@ impl Model {
             return;
         };
         self.accept(outcome.read().clone(), clock.clone());
+        let was = self.lines();
         let touched = moves_of(&record, &step.pairs);
+        let mut msg = step.msg;
+        turn(
+            &mut msg,
+            &step.rec,
+            &record,
+            (outcome.read(), outcome.after()),
+        );
         let snap = outcome.into_after();
         let wrote = Wrote {
             record: &record,
@@ -251,9 +256,11 @@ impl Model {
             undone: true,
         };
         self.install(snap, clock, Some(&wrote));
+        let said = self.rendered(std::slice::from_ref(&msg), &was).remove(0);
+        self.message.say(format!("{}: {said}", way.past()));
         self.keep_sticky(&touched);
         self.keep_links(&record);
-        let next = Step::new(record, step.message, step.pairs);
+        let next = Step::new(record, Some(msg), step.pairs);
         self.hist.stack(way.back()).push(next);
     }
 
@@ -321,7 +328,7 @@ impl Model {
         }
         self.message.say(messages::PUT_BACK.to_owned());
         if let Some(step) = self.hist.undo.last_mut() {
-            messages::PUT_BACK.clone_into(&mut step.message);
+            step.msg = Msg::from(messages::PUT_BACK);
         }
         true
     }
@@ -346,6 +353,72 @@ impl Model {
             }
         }
         Vec::new()
+    }
+}
+
+/// Where the lines a record wrote and read stand in the lists the
+/// operation after it read and left.
+#[derive(Default)]
+struct Lines {
+    post: Vec<Option<usize>>,
+    pre: Vec<Option<usize>>,
+}
+
+/// Where each of the `kept` lines is in `file`: where it was, without a
+/// diff, when the file is as they were.
+fn follow(kept: &[Arc<[u8]>], file: &File) -> Vec<Option<usize>> {
+    if same(&file.lines, kept) {
+        return (0..kept.len()).map(Some).collect();
+    }
+    lineid::remap(kept, &file.lines)
+}
+
+/// Moves the names of `msg`, said of the write `rec`, to the list the
+/// operation `undone` left, `left`, which ran over `read`: a task there by
+/// the line it has (the lines `rec` read stand where they did, as the file
+/// is now), or, when the operation removed it, by its line in `read`.
+/// Another writer may have moved lines since, so each is followed. It
+/// turns an undo and a redo alike: the record of the one is the other's.
+fn turn(
+    msg: &mut Msg,
+    rec: &UndoRecord,
+    undone: &UndoRecord,
+    (read, left): (&Snapshot, &Snapshot),
+) {
+    let remap = Remap::new(read, left, Some(undone), &[]);
+    let maps = [Source::Todo, Source::Done].map(|source| {
+        let file = rec.files.iter().find(|f| f.source == source);
+        file.map_or_else(Lines::default, |f| Lines {
+            post: follow(f.post(), read.file(source)),
+            pre: follow(f.pre(), left.file(source)),
+        })
+    });
+    let to = |lines: &[Option<usize>], nr: Nr| {
+        Nr::from_index(lines.get(nr.index()).copied().flatten()?)
+    };
+    let turned = |source: Source, place, held: bool| {
+        let lines = source.pick(&maps[0], &maps[1]);
+        Some(match place {
+            errs::Place::Read(nr) => errs::Place::Written(to(&lines.pre, nr)?),
+            errs::Place::Written(nr) => {
+                let was = to(&lines.post, nr)?;
+                let kept = remap.track((source, was)).filter(|_| !held);
+                kept.map_or(errs::Place::Read(was), |(_, now)| {
+                    errs::Place::Written(now)
+                })
+            }
+        })
+    };
+    // A moved task is at the row it was moved from, not the one it left.
+    let held = msg.turn_move();
+    for (i, part) in msg.parts_mut().iter_mut().enumerate() {
+        if let Part::Name(name) = part {
+            let held = held == Some(i);
+            let at =
+                |(source, p)| (source, turned(source, p, held).unwrap_or(p));
+            name.place = name.place.map(|p| at((name.source, p)).1);
+            name.from = name.from.map(at);
+        }
     }
 }
 

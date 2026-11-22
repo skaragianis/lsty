@@ -146,6 +146,8 @@ pub(crate) struct Live {
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
     serial: u64,
+    /// Whether the input being handled wrote the files.
+    pub(crate) wrote: bool,
 }
 
 /// Reads both files under shared locks. A folder that is missing has
@@ -342,6 +344,7 @@ impl Model {
         let gone = was || self.live.shown.deleted;
         self.live.shown.deleted = gone && !self.file_exists();
         self.live.serial += 1;
+        self.live.wrote |= wrote.is_some();
         self.clock = clock;
         self.hist.follow(&moves.remap);
         self.remap_clip(&moves);

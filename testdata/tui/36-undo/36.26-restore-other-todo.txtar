@@ -6,6 +6,8 @@ keys u
 frame after
 file todo.txt after-todo
 file done.txt after-done
+keys <C-r>
+frame redone
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -33,3 +35,12 @@ Buy +t
 More
 -- after-done --
 x 2026-09-01 Old task
+-- redone --
+┌[1]─"~/todo.txt"────────────────────────────────────────────────────┐
+│  2   Buy +t                                                        │
+│  1   More                                                          │
+│  3   Old task                                                      │
+│                                                                    │
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
+ N  sort(manual)  redid: 3 reopened as 3  x done           3|3  9.9.9
