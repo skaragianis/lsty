@@ -158,19 +158,19 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
         "X\nY\n\nB\nC\n",
         true,
         "X\nY\n\nB dep:a\nC\nA id:a\n",
-        "relinked 4",
+        "relinked 3",
     ),
     (
         "X\nY\n\nB\nC\n",
         false,
         "X\nY\n\nB dep:a\nC\nA id:a\n",
-        "relinked 4",
+        "relinked 3",
     ),
     (
         "\nC\nB\n",
         true,
         "\nC\nB\nA id:a\n",
-        "3 changed since; dep:a not restored",
+        "2 changed since; dep:a not restored",
     ),
     (
         "\nC\nB\n",
@@ -182,7 +182,7 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
         "\nB\nB\nC\n",
         true,
         "\nB\nB\nC\nA id:a\n",
-        "2 changed since; dep:a not restored",
+        "1 changed since; dep:a not restored",
     ),
     (
         "\nB\nB\nC\n",
@@ -250,17 +250,17 @@ fn the_kept_links_are_used_by_one_paste() {
         (
             "P",
             "\n2026-09-29 A id:a\nB dep:a\nC\n",
-            "pasted 1 task (1 moved); relinked 3",
+            "pasted 1 task (1 moved); relinked 2",
         ),
-        ("Gpup", linked, "pasted 1 task (1 moved); relinked 2"),
-        ("Gpupup", linked, "pasted 1 task (1 moved); relinked 2"),
+        ("Gpup", linked, "pasted 1 task (1 moved); relinked 1"),
+        ("Gpupup", linked, "pasted 1 task (1 moved); relinked 1"),
         ("Gpupu<C-r>", linked, "redid: pasted 1 task (1 moved)"),
         ("Gpu<C-r>p", copied, "pasted 1 task"),
         // an add of the cut's text is not its paste coming back
         (
             "Go2026-09-29 A id:a<CR><Esc>uGp",
             linked,
-            "pasted 1 task (1 moved); relinked 2",
+            "pasted 1 task (1 moved); relinked 1",
         ),
     ] {
         let dir = workdir("2026-09-29 A id:a\nB dep:a\nC\n");

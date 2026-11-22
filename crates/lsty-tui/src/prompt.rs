@@ -325,7 +325,7 @@ impl Model {
             Ok((outcome, _)) if !outcome.no_op() => Some(unchanged(outcome)),
             Ok(_) | Err(_) => None,
         };
-        if self.settle(result) && kept.is_none() {
+        if self.settle(result).is_some() && kept.is_none() {
             self.message.tone = messages::Tone::Alert;
         }
         kept

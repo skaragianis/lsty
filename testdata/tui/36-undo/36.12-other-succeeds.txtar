@@ -25,7 +25,7 @@ D
 │  3   D                                                             │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 1 deleted; unblocked 2, 3         1|4  9.9.9
+ N  sort(manual)  undid: 1 deleted; unblocked 1, 2         1|4  9.9.9
 -- after-todo --
 A id:a
 B dep:a

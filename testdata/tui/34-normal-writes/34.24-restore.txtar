@@ -21,7 +21,7 @@ x 2026-09-01 Old task
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  done:1 reopened as 2  x done  t start  T wont  o new  a append         2|2  9.9.9
+ N  sort(manual)  2 reopened as 2  x done  t start  T wont  o new  a append  dd delete   2|2  9.9.9
 -- a-file --
 Buy
 Old task

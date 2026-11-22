@@ -29,6 +29,9 @@ pub struct Name {
     pub place: Option<Place>,
     /// The staged row it is, while the operation runs.
     pub(crate) row: Option<(Source, usize)>,
+    /// The line the task had before the write, for a name that says where
+    /// the task went.
+    pub from: Option<(Source, Place)>,
 }
 
 impl Name {
@@ -50,6 +53,7 @@ impl Name {
             source,
             place,
             row: None,
+            from: None,
         }
     }
 
@@ -58,6 +62,22 @@ impl Name {
     pub(crate) fn written(mut self, nr: Nr, row: (Source, usize)) -> Self {
         self.place = Some(Place::Written(nr));
         self.row = Some(row);
+        self
+    }
+
+    /// This name for the line the operation read, even when the task is
+    /// still in the list the write leaves: the one a message that says
+    /// where it went starts with.
+    #[must_use]
+    pub(crate) fn read(mut self) -> Self {
+        self.row = None;
+        self
+    }
+
+    /// This name for the task that was `from` before the write.
+    #[must_use]
+    pub(crate) fn moved_from(mut self, from: &Self) -> Self {
+        self.from = from.place.map(|place| (from.source, place));
         self
     }
 
@@ -96,6 +116,12 @@ impl Msg {
     /// The parts, to place the names.
     pub(crate) fn parts_mut(&mut self) -> &mut [Part] {
         &mut self.0
+    }
+
+    /// This message without its last `n` parts.
+    #[must_use]
+    pub fn without_last(&self, n: usize) -> Self {
+        Self(self.0[..self.0.len().saturating_sub(n)].to_vec())
     }
 
     /// This message and `text`.

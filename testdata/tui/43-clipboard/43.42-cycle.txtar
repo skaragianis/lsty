@@ -27,7 +27,7 @@ C id:c dep:b
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  pasted 1 task (1 moved); 2: dep:a would close a cycle; not restored    2|3  9.9.9
+ N  sort(manual)  pasted 1 task (1 moved); 1: dep:a would close a cycle; not restored    2|3  9.9.9
 -- a-file --
 
 B id:b

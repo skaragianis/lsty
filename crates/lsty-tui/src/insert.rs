@@ -400,7 +400,7 @@ impl Model {
         let result = self.attempt(|env| {
             ops::edit_typed(env, &target, text.as_bytes(), &grants)
         });
-        self.finish(result);
+        self.finish(result, false);
     }
 
     fn commit_new(&mut self, text: &str) {
@@ -427,13 +427,7 @@ impl Model {
             ..AddParams::default()
         };
         let result = self.attempt(|env| ops::add(env, &params));
-        let added = self.finish(result);
-        if let Some(at) = added.filter(|_| self.deps.config.keep_adding) {
-            self.open_new_at(Some(at), true);
-            self.message.edit(|said| {
-                said.replace(messages::STICKY, messages::STICKY_IN_FIELD)
-            });
-        }
+        self.finish(result, self.deps.config.keep_adding);
     }
 
     /// Refuses a commit of a field whose line changed: says why the field
@@ -462,19 +456,13 @@ impl Model {
     }
 
     /// Takes what a write did and ends the field, or shows why it was
-    /// refused and keeps the field open. Gives the first place the write
-    /// touched.
-    fn finish(
-        &mut self,
-        result: errs::Result<(Outcome, Clock)>,
-    ) -> Option<Place> {
+    /// refused and keeps the field open. A new task's field opens again
+    /// below the task added when `again`.
+    fn finish(&mut self, result: errs::Result<(Outcome, Clock)>, again: bool) {
         match result {
             Err(e) => {
                 let e = match self.regrant(&e) {
-                    Ok(true) => {
-                        self.commit();
-                        return None;
-                    }
+                    Ok(true) => return self.commit(),
                     Ok(false) => e,
                     Err(other) => other,
                 };
@@ -488,14 +476,16 @@ impl Model {
                 if e.code() == Code::ExpectMismatch {
                     self.refuse_field(said);
                 }
-                None
             }
             Ok((outcome, clock)) => {
                 let first = first_touched(&outcome);
-                self.adopt(outcome, clock);
-                self.end_edit();
+                // The field is as the person will see it when the message
+                // names rows and notes the sticky one.
+                self.adopt_then(outcome, clock, |m| {
+                    m.end_edit();
+                    again.then(|| m.open_new_at(first, true));
+                });
                 self.cursor_to(first);
-                first
             }
         }
     }

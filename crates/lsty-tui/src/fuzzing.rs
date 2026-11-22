@@ -2,7 +2,7 @@
 //! the files sometimes changed behind its back, against what the hint of
 //! each key said the key would do.
 
-use std::{cmp::Ordering, fs, path::Path};
+use std::{cmp::Ordering, collections::HashMap, fs, path::Path};
 
 use lsty_core::{
     config::Config,
@@ -158,6 +158,7 @@ impl Side {
         let seen = self.seen(key);
         let sticky = self.model.rows.iter().any(|r| r.sticky);
         let before = self.kept();
+        let was = shown(&self.model);
         keys(&mut self.model, key);
         screen(&self.model, self.model.width, self.model.height);
         let m = &self.model;
@@ -167,17 +168,9 @@ impl Side {
         );
         let wrote = self.files();
         let said = m.message.text();
-        let (named, written) =
-            (named(said, "unblocked "), named(said, "relinked "));
+        let written = self.named(said, &was, &seen, &name);
         assert!(
-            history
-                || kept_lines(
-                    &before.0,
-                    &wrote,
-                    &seen,
-                    [&named, &written],
-                    !moves
-                ),
+            history || kept_lines(&before.0, &wrote, &seen, &written, !moves),
             "wrote on lines not seen: {name}"
         );
         match asked {
@@ -230,6 +223,30 @@ impl Side {
             Source::Todo => vec![(0, at)],
         })
         .collect()
+    }
+
+    /// The lines a message names after the write (a dependent unblocked or
+    /// relinked, by its place now); a delete names a row of the list as it
+    /// was before the key, one the key acted on, when no one changed the file
+    /// behind the list. A number that is no row fails.
+    fn named(
+        &self,
+        said: Option<&str>,
+        was: &HashMap<usize, (usize, usize)>,
+        seen: &[(usize, usize)],
+        name: &str,
+    ) -> Vec<(usize, usize)> {
+        if self.moved.is_empty() {
+            let gone = lines_of(deleted(said), was, name);
+            assert!(
+                seen.is_empty() || gone.iter().all(|line| seen.contains(line)),
+                "named a row the key did not act on: {name}"
+            );
+        }
+        let now = shown(&self.model);
+        ["unblocked ", "relinked "]
+            .map(|word| lines_of(after(said, word), &now, name))
+            .concat()
     }
 
     /// Whether the list is shown, no field open.
@@ -361,14 +378,14 @@ fn behind(
 /// Whether a press kept every line of `before` but the `seen` ones (a file
 /// and a line each): all still there, in their order, and, `in_place`
 /// when it moves no line and keeps their number, each where it was. Lines
-/// it adds may go anywhere. A `named` line, a dependent the press says it
-/// unblocked (by its line before the press) or relinked (by its line after
-/// the write), may change in its `dep:` but nowhere else.
+/// it adds may go anywhere. A `written` line, a dependent the press says it
+/// unblocked or relinked (by its line after the write), may change in its
+/// `dep:` but nowhere else.
 fn kept_lines(
     before: &[Vec<u8>; 2],
     after: &[Vec<u8>; 2],
     seen: &[(usize, usize)],
-    [named, written]: [&[(usize, usize)]; 2],
+    written: &[(usize, usize)],
     in_place: bool,
 ) -> bool {
     (0..2).all(|file| {
@@ -378,27 +395,55 @@ fn kept_lines(
             .iter()
             .enumerate()
             .filter(|(i, _)| !seen.contains(&(file, *i)));
-        let same = |i: usize, line: &[u8], (j, now): (usize, &[u8])| {
+        let same = |line: &[u8], (j, now): (usize, &[u8])| {
             now == line
-                || (named.contains(&(file, i)) || written.contains(&(file, j)))
+                || written.contains(&(file, j))
                     && but_deps(now) == but_deps(line)
         };
         if in_place && was.len() == now.len() {
-            others.all(|(i, line)| same(i, line, (i, now[i])))
+            others.all(|(i, line)| same(line, (i, now[i])))
         } else {
             let mut rest = now.iter().map(|l| &l[..]).enumerate();
-            others.all(|(i, line)| rest.any(|l| same(i, line, l)))
+            others.all(|(_, line)| rest.any(|l| same(line, l)))
         }
     })
 }
 
-/// The todo lines a message names after `word`, as numbers.
-fn named(message: Option<&str>, word: &str) -> Vec<(usize, usize)> {
+/// The file and line of each row shown, by its place.
+fn shown(model: &Model) -> HashMap<usize, (usize, usize)> {
+    let rows = model.rows.iter().enumerate();
+    rows.map(|(i, r)| {
+        let file = usize::from(r.source == Source::Done);
+        (model.place(i), (file, r.nr.index()))
+    })
+    .collect()
+}
+
+/// The lines of `rows` that the numbers of `nrs` are the places of; a
+/// number that is no row fails.
+fn lines_of(
+    nrs: Vec<usize>,
+    rows: &HashMap<usize, (usize, usize)>,
+    name: &str,
+) -> Vec<(usize, usize)> {
+    let at = |n| rows.get(&n).unwrap_or_else(|| panic!("no row {n}: {name}"));
+    nrs.into_iter().map(|n| *at(n)).collect()
+}
+
+/// The numbers a message names after `word`, up to the next `;`.
+fn after(message: Option<&str>, word: &str) -> Vec<usize> {
     let said = message.unwrap_or_default().split(word).skip(1);
     let nrs =
         said.flat_map(|s| s.split(';').next().unwrap_or_default().split(", "));
-    let at = |n: &str| n.trim().parse::<usize>().ok()?.checked_sub(1);
-    nrs.filter_map(at).map(|i| (0, i)).collect()
+    nrs.filter_map(|n| n.trim().parse().ok()).collect()
+}
+
+/// The numbers of the parts of a message that say `N deleted`.
+fn deleted(message: Option<&str>) -> Vec<usize> {
+    let parts = message.unwrap_or_default().split(';');
+    parts
+        .filter_map(|p| p.trim().strip_suffix(" deleted")?.parse().ok())
+        .collect()
 }
 
 /// The words of a line but its `dep:` tags.

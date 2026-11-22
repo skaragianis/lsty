@@ -235,7 +235,9 @@ impl Model {
             Ok((inline, clock)) => {
                 let none = matches!(&inline, Inline::Wrote(o) if o.no_op());
                 match inline {
-                    Inline::Wrote(outcome) => self.adopt(*outcome, clock),
+                    Inline::Wrote(outcome) => {
+                        self.adopt(*outcome, clock);
+                    }
                     Inline::Read(lines) => {
                         self.open_output(&words.join(" "), &lines);
                     }
