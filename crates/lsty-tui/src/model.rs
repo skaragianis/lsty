@@ -628,6 +628,7 @@ impl Model {
             &self.sticky,
         );
         self.natural = Natural::of(&self.rows);
+        self.relabel_prompt();
     }
 
     /// Today and the days that count as soon.

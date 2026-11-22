@@ -2,16 +2,18 @@ size 120 30
 start
 frame detail
 -- todo.txt --
+x 2026-01-01 Old
 Ship it dep:c1 dep:zz
 Call client id:c1
 -- config.toml --
 show_sidebar = false
+hidden_tasks = ["done"]
 -- detail --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────┐┌[2]─Detail────────────────────────┐
 │  1 ⧗ Ship it dep:c1 dep:zz                                                       ││ Ship it dep:c1 dep:zz            │
 │  1   Call client                                                              c1 ││ ──────────────────────────────── │
 │                                                                                  ││ state       blocked              │
-│                                                                                  ││ nr          1                    │
+│                                                                                  ││ nr          2                    │
 │                                                                                  ││ blocked by  Call client (2)      │
 │                                                                                  ││ missing prerequisite zz          │
 │                                                                                  ││                                  │

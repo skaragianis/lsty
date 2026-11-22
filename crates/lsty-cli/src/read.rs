@@ -36,14 +36,24 @@ impl Numbers {
     /// The number of `task`.
     pub(crate) fn of(&self, snap: &Snapshot, task: &Task) -> String {
         let place = self.places.get(&(task.source(), task.nr()));
-        place.filter(|_| self.same).map_or_else(
-            || {
-                let id = snap.id_of(task).map(lossy);
-                unplaced(task.source(), task.nr(), id.as_deref())
-            },
-            usize::to_string,
-        )
+        place_name(place.copied().filter(|_| self.same), snap, task)
     }
+}
+
+/// How a list names `task`: by its `place` in it, else by `id:`, else by
+/// line.
+pub fn place_name(
+    place: Option<usize>,
+    snap: &Snapshot,
+    task: &Task,
+) -> String {
+    place.map_or_else(
+        || {
+            let id = snap.id_of(task).map(lossy);
+            unplaced(task.source(), task.nr(), id.as_deref())
+        },
+        |place| place.to_string(),
+    )
 }
 
 impl Call<'_> {
