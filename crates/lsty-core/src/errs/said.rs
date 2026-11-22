@@ -115,6 +115,10 @@ pub enum Part {
     Name(Name),
 }
 
+/// What a message that says where a task moved says between its names.
+pub(crate) const MOVED_TO: &[u8] = b" moved to ";
+const MOVED_BACK: &[u8] = b" moved back from ";
+
 /// A message: a template of text and the tasks it names, in order.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub struct Msg(Vec<Part>);
@@ -126,8 +130,24 @@ impl Msg {
     }
 
     /// The parts, to place the names.
-    pub(crate) fn parts_mut(&mut self) -> &mut [Part] {
+    pub fn parts_mut(&mut self) -> &mut [Part] {
         &mut self.0
+    }
+
+    /// Says a move the other way, as when it is undone or done again: the
+    /// task is where it was, then the row it left. Tells which part names
+    /// the row the task is at, when this says where a task moved.
+    pub fn turn_move(&mut self) -> Option<usize> {
+        let [_, Part::Text(text), Part::Name(_), ..] = &mut self.0[..] else {
+            return None;
+        };
+        let (to, held) = match text.as_slice() {
+            MOVED_TO => (MOVED_BACK, 2),
+            MOVED_BACK => (MOVED_TO, 0),
+            _ => return None,
+        };
+        *text = to.to_vec();
+        Some(held)
     }
 
     /// This message without its last `n` parts.

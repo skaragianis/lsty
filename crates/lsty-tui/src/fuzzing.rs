@@ -15,11 +15,13 @@ use crate::{
     hints::dim,
     history::Again,
     insert::Draft,
-    messages::Tone,
+    messages::{STICKY, Tone},
     model::Model,
     msg::Msg,
     press::{Answer, repeats_over, writes_line},
+    rows::Row,
     test_util::{alone, deps, files, keys, reload, screen, started, workdir},
+    track::Place,
 };
 
 /// The lines of a todo file; one may come more than once, as twins.
@@ -102,6 +104,11 @@ const REWRITE: u8 = 0xF0;
 /// seeds hold, so the seeds keep their keys.
 const COLON: std::ops::RangeInclusive<u8> = 0xD1..=0xD6;
 
+/// A step byte in this range is a rewrite as one at `REWRITE` is, but the
+/// key pressed after it is an undo, or with bit 3 a redo, and no byte
+/// follows but the line. The range is none of the bytes the seeds hold.
+const AFTER: std::ops::RangeInclusive<u8> = 0xA0..=0xAF;
+
 /// A list and the folder of its files.
 struct Side {
     dir: TempDir,
@@ -173,7 +180,15 @@ impl Side {
         );
         let wrote = self.files();
         let said = m.message.text();
-        let written = self.named(said, &was, &seen, &name);
+        let way = aim.filter(|_| history);
+        let press = Press {
+            said,
+            was: &was,
+            seen: &seen,
+            way,
+            name: &name,
+        };
+        let written = self.named(&press, &before.0);
         assert!(
             history || kept_lines(&before.0, &wrote, &seen, &written, !moves),
             "wrote on lines not seen: {name}"
@@ -233,25 +248,63 @@ impl Side {
     /// The lines a message names after the write (a dependent unblocked or
     /// relinked, by its place now); a delete names a row of the list as it
     /// was before the key, one the key acted on, when no one changed the file
-    /// behind the list. A number that is no row fails.
-    fn named(
-        &self,
-        said: Option<&str>,
-        was: &HashMap<usize, (usize, usize)>,
-        seen: &[(usize, usize)],
-        name: &str,
-    ) -> Vec<(usize, usize)> {
-        if self.moved.is_empty() {
-            let gone = lines_of(&deleted(said), was, name);
-            assert!(
-                seen.is_empty() || gone.iter().all(|line| seen.contains(line)),
-                "named a row the key did not act on: {name}"
-            );
+    /// behind the list. A number that is no row fails. An undo or redo is
+    /// checked by `history_named`.
+    fn named(&self, press: &Press<'_>, before: &Files) -> Vec<(usize, usize)> {
+        let (said, name) = (press.said.unwrap_or_default(), press.name);
+        let body = press.way.and_then(|_| {
+            let (head, body) = said.split_once(": ")?;
+            ["undid", "redid"].contains(&head).then_some(body)
+        });
+        if let Some(body) = body {
+            self.history_named(press, before, body);
+            return Vec::new();
         }
         let now = shown(&self.model);
+        let gone = if self.moved.is_empty() {
+            lines_of(&deleted(Some(said)), press.was, name)
+        } else {
+            Vec::new()
+        };
+        let seen = press.seen;
+        assert!(
+            seen.is_empty() || gone.iter().all(|line| seen.contains(line)),
+            "named a row the key did not act on: {name}"
+        );
         ["unblocked ", "relinked "]
-            .map(|word| lines_of(&after(said, word), &now, name))
+            .map(|word| lines_of(&after(Some(said), word), &now, name))
             .concat()
+    }
+
+    /// Every task an undo or redo names by its place (see `named_places`)
+    /// is a row, of the list shown now or of the one before the key, and,
+    /// unless its clause says the task was already as asked, a line the
+    /// write changed on disk. Not for a press of a file that changed behind
+    /// the list, but the tasks it unblocked or relinked, which are rows of
+    /// the list it left: a place of the list the key read cannot be rebuilt.
+    fn history_named(&self, press: &Press<'_>, before: &Files, body: &str) {
+        let stale = !self.moved.is_empty();
+        let (now, after) = (shown(&self.model), self.files());
+        for (n, already, listed) in named_places(body) {
+            if stale && !listed {
+                continue;
+            }
+            let lists = if stale {
+                vec![&now]
+            } else {
+                vec![&now, press.was]
+            };
+            let rows: Vec<_> =
+                lists.iter().filter_map(|r| r.get(&n)).collect();
+            assert!(!rows.is_empty(), "no row {n}: {}", press.name);
+            assert!(
+                already
+                    || stale
+                    || rows.iter().any(|at| touched(before, &after, **at)),
+                "{n} unchanged: {}",
+                press.name
+            );
+        }
     }
 
     /// Whether the list is shown, no field open.
@@ -269,7 +322,8 @@ impl Side {
             m.snap.serial(),
             (m.hist.undo.len(), m.hist.redo.len()),
             m.hist.stopped.is_some(),
-            m.selected_rows(),
+            m.selected_rows()
+                .map(|(a, b)| m.rows[a..=b].iter().map(Row::place).collect()),
             m.again.clone(),
             m.key_mode(),
         )
@@ -279,12 +333,27 @@ impl Side {
 /// The action a key runs and what its hint says, when it runs one.
 type Hint = Option<(Action, Answer)>;
 
+/// The bytes of the todo file and the done file.
+type Files = [Vec<u8>; 2];
+
+/// A press and what it said.
+struct Press<'a> {
+    said: Option<&'a str>,
+    /// The places of the rows before the key.
+    was: &'a HashMap<usize, (usize, usize)>,
+    /// The lines the key acts on.
+    seen: &'a [(usize, usize)],
+    /// Undo or redo, when the key is one.
+    way: Option<Action>,
+    name: &'a str,
+}
+
 type Kept = (
-    [Vec<u8>; 2],
+    Files,
     u32,
     (usize, usize),
     bool,
-    Option<(usize, usize)>,
+    Option<Vec<Place>>,
     Option<Again>,
     Mode,
 );
@@ -461,6 +530,62 @@ fn after(message: Option<&str>, word: &str) -> Vec<String> {
     names.map(|n| n.trim().to_owned()).collect()
 }
 
+/// The tasks the clauses of `body` name by their place: the first number of
+/// a clause (`N`, `task N`; not a line, `line N`, or a count), the tasks
+/// after `unblocked ` and `relinked ` (`listed`), and the row after
+/// ` moved to `, ` moved back from ` and ` reopened as `. Each with whether
+/// its clause says the task was already as asked, and whether it is listed.
+fn named_places(body: &str) -> Vec<(usize, bool, bool)> {
+    let body = body.split(STICKY).next().unwrap_or(body);
+    let first = |c: &str| {
+        let words: Vec<_> = c.trim().split([' ', ',']).collect();
+        let skip = usize::from(words[0] == "task");
+        let next = words.get(skip + 1);
+        let counted = next.is_some_and(|n| ["task", "tasks"].contains(n));
+        words[skip].parse().ok().filter(|_| !counted)
+    };
+    let clause = |c: &str| {
+        let already = c.contains(" already ");
+        let at = |words: &[&str], listed| {
+            let names: Vec<_> =
+                words.iter().flat_map(|w| after(Some(c), w)).collect();
+            let numbers: Vec<usize> =
+                names.iter().filter_map(|n| n.parse().ok()).collect();
+            let mut once = numbers.clone();
+            once.sort_unstable();
+            once.dedup();
+            assert_eq!(once.len(), numbers.len(), "{c:?} names a task twice");
+            numbers
+                .into_iter()
+                .map(|n| (n, already, listed))
+                .collect::<Vec<_>>()
+        };
+        let mut named = at(&["unblocked ", "relinked "], true);
+        let rows = [" moved to ", " moved back from ", " reopened as "];
+        named.extend(at(&rows, false));
+        named.extend(first(c).map(|n| (n, already, false)));
+        named
+    };
+    body.split(';').flat_map(clause).collect()
+}
+
+/// Whether the line `at` (a file and a line) is not as it was, or a twin of
+/// the line may be the one changed.
+fn touched(before: &Files, after: &Files, (file, at): (usize, usize)) -> bool {
+    let line = |text: &Files| {
+        text[file]
+            .split(|b| *b == b'\n')
+            .nth(at)
+            .map(<[u8]>::to_vec)
+    };
+    let (was, now) = (line(before), line(after));
+    let twins = after[file]
+        .split(|b| *b == b'\n')
+        .filter(|l| Some(l.to_vec()) == now)
+        .count();
+    was != now || twins > 1
+}
+
 /// The names of the parts of a message that say `N deleted`.
 fn deleted(message: Option<&str>) -> Vec<String> {
     let parts = message.unwrap_or_default().split(';');
@@ -552,8 +677,9 @@ fn but_deps(line: &[u8]) -> Vec<&[u8]> {
 /// and above is, while the list is shown, a rewrite instead, its low bits
 /// picking which (see `rewrite`, `behind`): the next byte picks the
 /// line, the two after it the count and the key pressed then. One in
-/// `COLON` is, while the list is shown, a `:` command instead (see `colon`):
-/// the next byte picks its row.
+/// `AFTER` is the same with an undo or a redo pressed then, and one byte
+/// after it. One in `COLON` is, while the list is shown, a `:` command
+/// instead (see `colon`): the next byte picks its row.
 ///
 /// # Panics
 ///
@@ -585,11 +711,14 @@ pub fn hints_property(data: &[u8]) {
         if COLON.contains(&op) && side.list() {
             let arg = bytes.next().unwrap_or(0);
             colon(&mut side, op, arg, &mut trail);
-        } else if op >= REWRITE && side.list() {
+        } else if (op >= REWRITE || AFTER.contains(&op)) && side.list() {
             let mut next = || usize::from(bytes.next().unwrap_or(0));
-            let (arg, count, key) =
-                (next(), ["", "2", "3"][next() % 3], next());
-            let key = STALE[key % STALE.len()];
+            let arg = next();
+            let (count, key) = if op >= REWRITE {
+                (["", "2", "3"][next() % 3], STALE[next() % STALE.len()])
+            } else {
+                ("", ["u", "<C-r>"][usize::from(op & 8 != 0)])
+            };
             trail.push(format!("rewrite {op} {arg} {count}{key}"));
             behind(&mut side, (op, arg, count, key), &trail);
         } else {

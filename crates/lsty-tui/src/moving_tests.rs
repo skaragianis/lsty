@@ -291,7 +291,7 @@ fn a_completed_task_stays_until_what_the_next_key_starts_is_over() {
         ("vkggG", HELD, FILE),
         ("vk<Esc>", GONE, FILE),
         ("Vx", OPEN, "A\nB\nC\n"),
-        ("vkx", "A|x 2026-09-29 B*", both),
+        ("vkx", "A|x 2026-09-29 B*|x 2026-09-29 C*", both),
         ("2", HELD, FILE),
         ("2<Esc>", GONE, FILE),
         ("2x", OPEN, "A\nB\nC\n"),
@@ -407,15 +407,15 @@ fn escape_releases_the_row_held() {
     assert_eq!(rows_of(&model), ["B", "C"]);
 }
 
-// 34a.18: the next action releases the row held; the task it acts on is
-// the one now under the cursor, and it is held in turn.
+// 34a.18: the next action keeps the row held; the task it acts on is the one
+// now under the cursor, and it is held too.
 #[test]
-fn the_next_action_releases_the_row_held_and_holds_its_own() {
+fn the_next_action_keeps_the_row_held_and_holds_its_own() {
     let dir = workdir("A\nB\n");
     let hidden = [Hidden::Later, Hidden::Archive, Hidden::Done];
     let mut model = model_of(dir.path(), config(&hidden));
     press(&mut model, "xx");
-    assert_eq!(rows_of(&model), ["x 2026-09-29 B*"]);
+    assert_eq!(rows_of(&model), ["x 2026-09-29 A*", "x 2026-09-29 B*"]);
     assert_eq!(todo_of(dir.path()), "x 2026-09-29 A\nx 2026-09-29 B\n");
 }
 

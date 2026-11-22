@@ -279,12 +279,13 @@ impl Model {
             self.pointer.let_go();
         }
         let step = self.refilter.serial;
+        self.live.wrote = false;
         let mut cmds = self.dispatch(msg);
         self.show_read();
         self.note_candidates();
         cmds.extend(self.refilter.timer(step));
         if input {
-            self.after_input(typing);
+            self.after_input(typing, said);
         }
         self.drop_peek();
         if self.message.is_new(said) && self.line.is_none() {
@@ -306,10 +307,21 @@ impl Model {
     }
 
     /// What follows a key or a gesture, once it has acted.
-    fn after_input(&mut self, typing: bool) {
+    fn after_input(&mut self, typing: bool, said: u64) {
         if !typing {
             self.catch_up_day();
         }
+        // The rows go with the message that names them, which this input
+        // took down or replaced.
+        let new = self.message.text().is_none() || self.message.is_new(said);
+        if !self.live.wrote && new {
+            self.release_sticky();
+        }
+    }
+
+    /// Drops the rows an earlier input kept in sight, so that the places a
+    /// message names stay those of the rows left.
+    pub(crate) fn release_sticky(&mut self) {
         // A press that says to look again leaves its row as it found it.
         let looks = self.message.text() == Some(ops::LIST_CHANGED);
         if !self.pointer.pressed() {

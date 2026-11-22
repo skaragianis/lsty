@@ -306,7 +306,7 @@ fn exact(file: &FileRecord) -> Through {
     }
 }
 
-fn same(lines: &[Line], kept: &[Arc<[u8]>]) -> bool {
+pub(crate) fn same(lines: &[Line], kept: &[Arc<[u8]>]) -> bool {
     lines.iter().map(Line::raw).eq(kept.iter().map(|k| &**k))
 }
 

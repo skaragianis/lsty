@@ -60,7 +60,7 @@ x 2026-09-29 Z
 │                                                                    │
 │                                                                    │
 └────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: 4 done: Z  x done  t start        3|3  9.9.9
+ N  sort(manual)  undid: 3 done: Z  x done  t start        3|3  9.9.9
 -- earlier-todo --
 
 B +x
