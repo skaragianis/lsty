@@ -326,8 +326,8 @@ fn a_completed_task_stays_until_what_the_next_key_starts_is_over() {
 #[test]
 fn a_press_over_a_done_row_is_the_same_with_auto_archive() {
     let rows = [
-        ("x", "1 done; 1 already done"),
-        ("T", "1 won't do; 1 already done"),
+        ("x", "1 task done; 1 task already done"),
+        ("T", "1 task won't do; 1 task already done"),
     ];
     for (key, said) in rows {
         for auto_archive in [true, false] {

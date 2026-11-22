@@ -30,7 +30,7 @@ pub(super) fn plan(tx: &mut Tx) -> Result<()> {
     tx.todo.compact();
     if moved > 0 {
         let name = tx.file_name(Source::Done);
-        tx.say(format!("archived {moved} to {name}"));
+        tx.say(format!("archived {} to {name}", counted(moved, "task")));
     } else if blanks == 0 {
         tx.say("nothing to archive");
     }

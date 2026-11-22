@@ -248,16 +248,16 @@ impl Side {
     /// The lines a message names after the write (a dependent unblocked or
     /// relinked, by its place now); a delete names a row of the list as it
     /// was before the key, one the key acted on, when no one changed the file
-    /// behind the list. A number that is no row fails. An undo or redo is
-    /// checked by `history_named`.
+    /// behind the list. Every task it names by its place is checked by
+    /// `history_named`, an undo or redo by what it repeats.
     fn named(&self, press: &Press<'_>, before: &Files) -> Vec<(usize, usize)> {
         let (said, name) = (press.said.unwrap_or_default(), press.name);
         let body = press.way.and_then(|_| {
             let (head, body) = said.split_once(": ")?;
             ["undid", "redid"].contains(&head).then_some(body)
         });
-        if let Some(body) = body {
-            self.history_named(press, before, body);
+        self.history_named(press, before, body.unwrap_or(said));
+        if body.is_some() {
             return Vec::new();
         }
         let now = shown(&self.model);
@@ -276,16 +276,20 @@ impl Side {
             .concat()
     }
 
-    /// Every task an undo or redo names by its place (see `named_places`)
-    /// is a row, of the list shown now or of the one before the key, and,
-    /// unless its clause says the task was already as asked, a line the
-    /// write changed on disk. Not for a press of a file that changed behind
-    /// the list, but the tasks it unblocked or relinked, which are rows of
-    /// the list it left: a place of the list the key read cannot be rebuilt.
+    /// Every task a message names by its place (see `named_places`) is a
+    /// row, of the list shown now or of the one before the key, and, unless
+    /// its clause says the task was already as asked or left alone (`changed
+    /// since`), or a key that is no undo or redo wrote nothing, a line the
+    /// write changed on disk. In such a clause of an ordinary press, other
+    /// than `changed since`, the task is a row the key acted on. Not for a
+    /// press of a file that changed behind the list, but the tasks it
+    /// unblocked or relinked, which are rows of the list it left: a place of
+    /// the list the key read cannot be rebuilt.
     fn history_named(&self, press: &Press<'_>, before: &Files, body: &str) {
         let stale = !self.moved.is_empty();
         let (now, after) = (shown(&self.model), self.files());
-        for (n, already, listed) in named_places(body) {
+        let idle = press.way.is_none() && *before == after;
+        for (n, said, listed) in named_places(body) {
             if stale && !listed {
                 continue;
             }
@@ -298,10 +302,22 @@ impl Side {
                 lists.iter().filter_map(|r| r.get(&n)).collect();
             assert!(!rows.is_empty(), "no row {n}: {}", press.name);
             assert!(
-                already
+                said != Said::Changed
                     || stale
+                    || idle
                     || rows.iter().any(|at| touched(before, &after, **at)),
                 "{n} unchanged: {}",
+                press.name
+            );
+            let asked = said == Said::Already || (idle && said != Said::Left);
+            let acted = |at| press.seen.contains(at);
+            assert!(
+                !asked
+                    || listed
+                    || press.way.is_some()
+                    || press.seen.is_empty()
+                    || press.was.get(&n).is_some_and(acted),
+                "{n} not acted on: {}",
                 press.name
             );
         }
@@ -530,12 +546,21 @@ fn after(message: Option<&str>, word: &str) -> Vec<String> {
     names.map(|n| n.trim().to_owned()).collect()
 }
 
+/// What a clause says of a task it names: changed, already as asked, or
+/// left alone by a paste (`changed since`).
+#[derive(Clone, Copy, PartialEq)]
+enum Said {
+    Changed,
+    Already,
+    Left,
+}
+
 /// The tasks the clauses of `body` name by their place: the first number of
-/// a clause (`N`, `task N`; not a line, `line N`, or a count), the tasks
-/// after `unblocked ` and `relinked ` (`listed`), and the row after
-/// ` moved to `, ` moved back from ` and ` reopened as `. Each with whether
-/// its clause says the task was already as asked, and whether it is listed.
-fn named_places(body: &str) -> Vec<(usize, bool, bool)> {
+/// a clause (`N`, `task N`; not a line, `line N`, or a count, `N task` or
+/// `N tasks`), the tasks after `unblocked ` and `relinked ` (`listed`), and
+/// the row after ` moved to `, ` moved back from ` and ` reopened as `. Each
+/// with what its clause says of the task, and whether it is listed.
+fn named_places(body: &str) -> Vec<(usize, Said, bool)> {
     let body = body.split(STICKY).next().unwrap_or(body);
     let first = |c: &str| {
         let words: Vec<_> = c.trim().split([' ', ',']).collect();
@@ -545,7 +570,13 @@ fn named_places(body: &str) -> Vec<(usize, bool, bool)> {
         words[skip].parse().ok().filter(|_| !counted)
     };
     let clause = |c: &str| {
-        let already = c.contains(" already ");
+        let said = if c.contains(" already ") {
+            Said::Already
+        } else if c.contains(" changed since") {
+            Said::Left
+        } else {
+            Said::Changed
+        };
         let at = |words: &[&str], listed| {
             let names: Vec<_> =
                 words.iter().flat_map(|w| after(Some(c), w)).collect();
@@ -557,13 +588,13 @@ fn named_places(body: &str) -> Vec<(usize, bool, bool)> {
             assert_eq!(once.len(), numbers.len(), "{c:?} names a task twice");
             numbers
                 .into_iter()
-                .map(|n| (n, already, listed))
+                .map(|n| (n, said, listed))
                 .collect::<Vec<_>>()
         };
         let mut named = at(&["unblocked ", "relinked "], true);
         let rows = [" moved to ", " moved back from ", " reopened as "];
         named.extend(at(&rows, false));
-        named.extend(first(c).map(|n| (n, already, false)));
+        named.extend(first(c).map(|n| (n, said, false)));
         named
     };
     body.split(';').flat_map(clause).collect()

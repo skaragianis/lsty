@@ -5,7 +5,7 @@ frame a-frame
 keys u g g v j T
 frame b-frame
 keys u g g v j S
-status 1 stopped; 1 not underway\b
+status 1 task stopped; 1 task not underway\b
 file todo.txt a-file
 -- keys.toml --
 [visual]

@@ -227,7 +227,7 @@ impl Pressed<'_> {
     /// What a write said of the tasks it passed over, and `u` takes it back.
     fn written(&mut self, command: Command, there: usize) {
         if let Some((_, already)) = command.words().filter(|_| there > 0) {
-            let tail = format!("; {there} {already}");
+            let tail = format!("; {} {already}", ops::counted(there, "task"));
             let said = self.model.message.text().unwrap_or_default();
             assert!(said.ends_with(&tail), "{}: {said}", self.name);
             assert!(!said.contains(" is "), "{}: {said}", self.name);
@@ -1234,7 +1234,7 @@ fn a_doing_task_that_is_blocked() {
         ("jx", "task 2 is blocked by 1", false),
         ("jT", "2 won't do: Stuck", true),
         ("jt", "2 stopped", true),
-        ("j2t", "1 started; 1 already underway", true),
+        ("j2t", "1 task started; 1 task already underway", true),
     ];
     let dir = workdir(format!("Blocker id:blk\n{STUCK}\n"));
     let mut model = started(deps(dir.path(), config()));

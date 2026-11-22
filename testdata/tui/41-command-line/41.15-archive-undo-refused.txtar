@@ -32,7 +32,7 @@ x 2026-09-28 C
 │  3   D                                                                                           │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  archived 2 to done.txt; removed 1 blank line; hidden by current filters in 2 secon
+ N  sort(manual)  archived 2 tasks to done.txt; removed 1 blank line; hidden by current filters in 2
 -- b-frame --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  1   B                                                                                           │

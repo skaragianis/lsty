@@ -27,7 +27,7 @@ C +x
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  pasted 1 task (1 moved); relinked 3; 1 changed since; dep:a not restored     2|3
+ N  sort(manual)  moved 1 task; relinked 3; 1 changed since; dep:a not restored          2|3  9.9.9
 -- a-file --
 
 B +y

@@ -22,7 +22,7 @@ C
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  ▶ 2 in doing  1 started; 1 already underway  x done  t stop  T wont    1|3  9.9.9
+ N  sort(manual)  ▶ 2 in doing  1 task started; 1 task already underway  x done          1|3  9.9.9
 -- a-file --
 A started:2026-09-29T0900Z
 B started:2026-09-29T0900Z

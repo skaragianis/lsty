@@ -434,11 +434,11 @@ fn shortened(
     // Taking a claim over has one line, which the count would lose.
     let plain = !changing.iter().any(|t| matches!(t.claim, Claim::Agent));
     let head = if plain && lines == change {
-        format!("{change} {did}")
+        format!("{} {did}", ops::counted(change, "task"))
     } else {
         said.join("; ")
     };
-    format!("{head}; {there} {already}")
+    format!("{head}; {} {already}", ops::counted(there, "task"))
 }
 
 fn join(said: &[String]) -> Option<String> {

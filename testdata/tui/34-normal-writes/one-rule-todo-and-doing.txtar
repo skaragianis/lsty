@@ -7,7 +7,7 @@ status 1 done: Open; 2 done: Mine
 frame x-both
 file todo.txt x-file
 keys u g g v j t
-status 1 started; 1 already underway\b
+status 1 task started; 1 task already underway\b
 frame t-the-todo
 file todo.txt t-file
 keys g g v j t
@@ -40,7 +40,7 @@ x 2026-09-29 Mine started:2026-09-29T0800Z ended:2026-09-29T0900Z
 │                                                                                                        │
 │                                                                                                        │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  ▶ 2 in doing  1 started; 1 already underway  x done  t stop  T wont  o new   1|2  9.9.9
+ N  sort(manual)  ▶ 2 in doing  1 task started; 1 task already underway  x done  t stop        1|2  9.9.9
 -- t-file --
 Open started:2026-09-29T0900Z
 Mine started:2026-09-29T0800Z

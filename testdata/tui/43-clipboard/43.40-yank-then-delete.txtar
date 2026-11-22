@@ -19,7 +19,7 @@ B dep:a
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  pasted 1 task (1 moved); relinked 1  x done  t start  T wont  o new    2|2  9.9.9
+ N  sort(manual)  moved 1 task; relinked 1  x done  t start  T wont  o new  a append     2|2  9.9.9
 -- a-file --
 
 B dep:a

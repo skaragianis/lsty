@@ -1,22 +1,22 @@
 size 130 16
 start
 keys v j x
-status 1 done: Daily; 2 next: Daily \(due 2026-09-30\); 1 already done\b
+status 1 done: Daily; 2 next: Daily \(due 2026-09-30\); 1 task already done\b
 frame rec-and-done
 file todo.txt rec-file
 keys u
 status undid: 1 done: Daily
 keys g g j j j
 keys v j x
-status 5 done: Theirs; 5 was claimed by agent2; 1 already done\b
+status 5 done: Theirs; 5 was claimed by agent2; 1 task already done\b
 frame agents-and-done
 file todo.txt agents-file
 keys u g g j j j j j
 keys v j T
-status 6 won't do: Yearly; 6 has rec:; the series ended; 1 already done\b
+status 6 won't do: Yearly; 6 has rec:; the series ended; 1 task already done\b
 keys u g g j j j j j j j
 keys v j j t
-status 8 started; 9 was claimed by agent3; now yours; 1 already underway\b
+status 8 started; 9 was claimed by agent3; now yours; 1 task already underway\b
 -- config.toml --
 show_sidebar = false
 show_detail = false
@@ -47,7 +47,7 @@ Mine started:2026-09-29T0800Z
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  ▶ 3 in doing  1 done: Daily; 2 next: Daily (due 2026-09-30); 1 already done  x done  t start        4|11  9.9.9
+ N  sort(manual)  ▶ 3 in doing  1 done: Daily; 2 next: Daily (due 2026-09-30); 1 task already done  x done  t start   4|11  9.9.9
 -- rec-file --
 x 2026-09-29 Daily rec:1d
 2026-09-29 Daily rec:1d due:2026-09-30 id:t001
@@ -76,7 +76,7 @@ Mine started:2026-09-29T0800Z
 │                                                                                                                                │
 │                                                                                                                                │
 └────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  ▶ 2 in doing  5 done: Theirs; 5 was claimed by agent2; 1 already done  x done  t start  T wont      6|10  9.9.9
+ N  sort(manual)  ▶ 2 in doing  5 done: Theirs; 5 was claimed by agent2; 1 task already done  x done  t start         6|10  9.9.9
 -- agents-file --
 Daily rec:1d
 x 2026-09-01 Done one
