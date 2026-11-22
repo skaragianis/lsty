@@ -289,7 +289,9 @@ impl Side {
         let stale = !self.moved.is_empty();
         let (now, after) = (shown(&self.model), self.files());
         let idle = press.way.is_none() && *before == after;
+        let deleted = deleted(Some(body));
         for (n, said, listed) in named_places(body) {
+            let gone = deleted.contains(&n.to_string());
             if stale && !listed {
                 continue;
             }
@@ -305,7 +307,9 @@ impl Side {
                 said != Said::Changed
                     || stale
                     || idle
-                    || rows.iter().any(|at| touched(before, &after, **at)),
+                    || rows
+                        .iter()
+                        .any(|at| touched(before, &after, **at, gone)),
                 "{n} unchanged: {}",
                 press.name
             );
@@ -601,8 +605,14 @@ fn named_places(body: &str) -> Vec<(usize, Said, bool)> {
 }
 
 /// Whether the line `at` (a file and a line) is not as it was, or a twin of
-/// the line may be the one changed.
-fn touched(before: &Files, after: &Files, (file, at): (usize, usize)) -> bool {
+/// the line may be the one changed, or, of a deleted task (`gone`), the one
+/// deleted from among twins before the write.
+fn touched(
+    before: &Files,
+    after: &Files,
+    (file, at): (usize, usize),
+    gone: bool,
+) -> bool {
     let line = |text: &Files| {
         text[file]
             .split(|b| *b == b'\n')
@@ -610,11 +620,11 @@ fn touched(before: &Files, after: &Files, (file, at): (usize, usize)) -> bool {
             .map(<[u8]>::to_vec)
     };
     let (was, now) = (line(before), line(after));
-    let twins = after[file]
-        .split(|b| *b == b'\n')
-        .filter(|l| Some(l.to_vec()) == now)
-        .count();
-    was != now || twins > 1
+    let twins = |text: &Files, line: &Option<Vec<u8>>| {
+        let same = |l: &&[u8]| Some(l.to_vec()) == *line;
+        text[file].split(|b| *b == b'\n').filter(same).count() > 1
+    };
+    was != now || twins(after, &now) || gone && twins(before, &was)
 }
 
 /// The names of the parts of a message that say `N deleted`.
