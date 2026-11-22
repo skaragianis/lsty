@@ -50,7 +50,7 @@ cycle_priority = [\"gp\", \"+\"]\ncycle_priority_back = [\"gP\", \"-\"]\n\
 cycle_priority = [\"gp\", \"+\"]\ncycle_priority_back = [\"gP\", \"-\"]\n";
 
 /// The keys pressed: a key, and what is typed after it.
-const KEYS: [(&str, &str); 38] = [
+const KEYS: [(&str, &str); 42] = [
     ("x", ""),
     ("t", ""),
     ("T", ""),
@@ -89,6 +89,10 @@ const KEYS: [(&str, &str); 38] = [
     ("gd", "2030-01-01<CR>"),
     ("gt", "k:v<CR>"),
     ("a", "Z<CR>"),
+    (":", "do 1<CR>"),
+    (":", "del 2,3<CR>"),
+    (":", "do 7<CR>"),
+    (":", "do 99<CR>"),
 ];
 
 /// The keys pressed on a list whose file changed behind its back.
@@ -250,6 +254,25 @@ impl Side {
     }
 
     /// Whether the list is shown, no field open.
+    fn past_end(
+        &self,
+        place: Option<usize>,
+        rows: usize,
+        before: &[Vec<u8>; 2],
+        trail: &[String],
+    ) {
+        let Some(n) = place.filter(|n| *n > rows) else {
+            return;
+        };
+        let want = format!("no task {n}");
+        assert_eq!(
+            self.model.message.text(),
+            Some(want.as_str()),
+            "{trail:?}"
+        );
+        assert_eq!(&self.files(), before, "{trail:?}");
+    }
+
     fn list(&self) -> bool {
         matches!(self.model.key_mode(), Mode::Normal | Mode::Visual)
     }
@@ -503,6 +526,12 @@ pub fn hints_property(data: &[u8]) {
             let (key, then) = KEYS[usize::from(op) % KEYS.len()];
             trail.push(format!("{key}{then}"));
             let opens = side.seen(key);
+            let place = then.strip_prefix("do ").and_then(|n| {
+                let n: usize = n.strip_suffix("<CR>")?.parse().ok()?;
+                (key == ":" && side.list()).then_some(n)
+            });
+            let rows = side.model.rows.len();
+            let before = side.files();
             side.checked(key, &trail);
             match then.strip_suffix("<CR>") {
                 Some(text) if !opens.is_empty() && !side.list() => {
@@ -513,6 +542,7 @@ pub fn hints_property(data: &[u8]) {
                 }
                 _ => {
                     keys(&mut side.model, then);
+                    side.past_end(place, rows, &before, &trail);
                 }
             }
         }

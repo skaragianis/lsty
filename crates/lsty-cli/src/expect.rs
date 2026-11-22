@@ -2,7 +2,7 @@
 //! each number.
 
 use lsty_core::{
-    errs::{Result, Source},
+    errs::{Nr, Result, Source},
     ops::{Target, parse_refs},
 };
 
@@ -40,6 +40,9 @@ impl Call<'_> {
         let expects = self.parsed.opts.all(Opt::Expect);
         let mut nrs: Vec<&mut Target> =
             refs.into_iter().filter(|t| t.id().is_none()).collect();
+        for target in nrs.iter_mut().filter(|_| self.places.is_some()) {
+            **target = target.clone().placed(|n| self.line_at(n, None))?;
+        }
         check_expects(expects, nrs.len())?;
         self.check_by_id(&nrs, expects.len())?;
         let exact = !self.ops.actor.is_human();
@@ -47,6 +50,28 @@ impl Call<'_> {
             target.set_expect(text.as_str(), exact);
         }
         Ok(())
+    }
+
+    /// The task at place `n` of the list a caller shows, as a line, of the
+    /// `only` file when given.
+    fn line_at(&self, n: u32, only: Option<Source>) -> Option<(Source, Nr)> {
+        let n = usize::try_from(n).ok()?;
+        let found = self.places?.iter().find(|(_, place)| **place == n)?;
+        Some(*found.0).filter(|(source, _)| only.is_none_or(|s| s == *source))
+    }
+
+    /// The position of `reorder`: a line of the todo file, or the place of
+    /// a task of the list a caller shows, which is the line that task has;
+    /// a place past the last task is past the end, as a line is.
+    pub(crate) fn position(&self, n: i64) -> i64 {
+        let at = u32::try_from(n)
+            .ok()
+            .and_then(|n| self.line_at(n, Some(Source::Todo)));
+        match (self.places, at) {
+            (Some(_), Some((_, nr))) => i64::from(nr.get()),
+            (Some(_), None) if n >= 1 => i64::MAX,
+            _ => n,
+        }
     }
 
     /// Reads the references of the first argument and binds them: the

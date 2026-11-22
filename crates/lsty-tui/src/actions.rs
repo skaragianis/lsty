@@ -1,8 +1,9 @@
 //! The keys that write: each one runs the single command it resolves to,
 //! as the human.
 
-use std::{cell::Cell, collections::HashMap};
+use std::cell::Cell;
 
+use lsty_cli::Places;
 use lsty_core::{
     dates::Clock,
     errs::{self, Code, Msg, Nr, Part, Source},
@@ -19,9 +20,6 @@ use crate::{
     press::{Answer, Command, Refusal},
     track::{Place, Touched, Wrote, place_of},
 };
-
-/// The place each task has in the list shown, by the line it is.
-type Lines = HashMap<Place, usize>;
 
 /// A task an action is about, as the list showed it.
 pub(crate) struct Chosen {
@@ -307,7 +305,7 @@ impl Model {
 
     /// The place each shown task has, by its line: the number its row has in
     /// the column.
-    fn lines(&self) -> Lines {
+    pub(crate) fn lines(&self) -> Places {
         let rows = self.rows.iter().enumerate();
         rows.map(|(i, row)| (row.place(), self.place(i))).collect()
     }
@@ -316,7 +314,7 @@ impl Model {
     /// `was` when the write removed it; a task with no row by its `id:`,
     /// else its line. The clause that says where an archived task went is
     /// left out when it shows at the row it had.
-    fn rendered(&self, msgs: &[Msg], was: &Lines) -> Vec<String> {
+    fn rendered(&self, msgs: &[Msg], was: &Places) -> Vec<String> {
         let now = self.lines();
         let row = |source, place| match place? {
             errs::Place::Written(nr) => now.get(&(source, nr)),
@@ -493,18 +491,17 @@ fn named(tasks: &[Chosen], one: fn(&str) -> String, many: &str) -> String {
 }
 
 /// How a message names a task no row shows: by its `id:`, else by its line,
-/// `line 3` for a todo line, or as the command line does when it has none.
+/// or as the command line does when it has none.
 fn unshown(name: &errs::Name) -> String {
-    let line = || match name.place {
+    match name.place {
         Some(errs::Place::Written(nr) | errs::Place::Read(nr)) => {
-            match name.source {
-                Source::Todo => format!("line {nr}"),
-                Source::Done => name.source.numbered(nr),
-            }
+            errs::unplaced(name.source, nr, name.id.as_deref())
         }
-        None => name.cli(),
-    };
-    name.id.as_ref().map_or_else(line, |id| format!("id:{id}"))
+        None => name
+            .id
+            .as_ref()
+            .map_or_else(|| name.cli(), |id| format!("id:{id}")),
+    }
 }
 
 /// The priority after `cur` in the cycle none, `last`, … A, none when

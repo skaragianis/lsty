@@ -5,14 +5,14 @@ use lsty_core::{
     config::Config,
     dates::Clock,
     discover::{self, Found, Input},
-    errs::Code,
+    errs::{Code, Nr, Source, lossy},
     ops::{self, Actor},
 };
 use tempfile::TempDir;
 
 use crate::inline::{
-    Inline, inline_command, inline_commands, inline_names, inline_options,
-    run_inline,
+    Inline, Places, inline_command, inline_commands, inline_names,
+    inline_options, run_inline,
 };
 
 struct Fixture {
@@ -70,7 +70,7 @@ fn options_of_the_process_are_refused() {
     let fx = fixture("A\nB\n");
     let env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
     for (line, want) in REFUSED {
-        let err = run_inline(&env, None, &words(line)).err();
+        let err = run_inline(&env, None, &words(line), &Places::new()).err();
         let err = err.unwrap_or_else(|| panic!("{line} ran"));
         assert_eq!(err.code(), Code::Usage, "{line}");
         assert_eq!(err.message(), *want, "{line}");
@@ -94,7 +94,7 @@ fn commands_of_the_process_are_unknown() {
     let fx = fixture("A\n");
     let env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
     for (line, name) in OUTSIDE {
-        let err = run_inline(&env, None, &words(line)).err();
+        let err = run_inline(&env, None, &words(line), &Places::new()).err();
         let err = err.unwrap_or_else(|| panic!("{line} ran"));
         assert_eq!(err.code(), Code::UnknownCommand, "{line}");
         assert_eq!(err.message(), format!("unknown command \"{name}\""));
@@ -106,7 +106,7 @@ fn commands_of_the_process_are_unknown() {
 fn a_missing_argument_hints_the_synopsis() {
     let fx = fixture("A\n");
     let env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
-    let err = run_inline(&env, None, &words("dep 1")).err();
+    let err = run_inline(&env, None, &words("dep 1"), &Places::new()).err();
     let err = err.unwrap_or_else(|| panic!("dep 1 ran"));
     assert_eq!(err.hint(), Some("usage: lsty dep REFS on REFS"));
 }
@@ -115,28 +115,68 @@ fn a_missing_argument_hints_the_synopsis() {
 fn starting_work_needs_an_identity() {
     let fx = fixture("A\n");
     let env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
-    let err = run_inline(&env, None, &words("next --start")).err();
+    let err =
+        run_inline(&env, None, &words("next --start"), &Places::new()).err();
     let err = err.unwrap_or_else(|| panic!("next --start ran"));
     assert_eq!(err.code(), Code::NoIdentity);
 }
 
 #[test]
 fn a_write_hands_back_its_outcome_and_a_read_its_lines() {
-    let fx = fixture("A\nB +w\n");
+    let fx = fixture("A id:b\nB +w\nC +w\nX id:x\nD dep:x\n");
     let mut env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
     env.record_undo = true;
-    let write = run_inline(&env, None, &words("do 1"))
-        .unwrap_or_else(|e| panic!("{}", e.message()));
-    let Inline::Wrote(mut outcome) = write else {
+    let shown = env.load().unwrap_or_else(|e| panic!("{}", e.message()));
+    // The list shown holds `C`, `B`, `X` and `D`, not `A`: a number is a
+    // place.
+    let places = placed(&[3, 2, 4, 5]);
+    let run = |line: &str, env: &ops::Env<'_>| {
+        run_inline(env, None, &words(line), &places)
+            .unwrap_or_else(|e| panic!("{}", e.message()))
+    };
+    let Inline::Wrote(mut outcome) = run("do 1", &env) else {
         panic!("a write hands back no outcome");
     };
     assert!(outcome.take_undo().is_some());
-    let read = run_inline(&env, None, &words("ls +w"))
-        .unwrap_or_else(|e| panic!("{}", e.message()));
-    let Inline::Read(lines) = read else {
-        panic!("a read hands back an outcome");
+    let read = |line: &str, env: &ops::Env<'_>| -> Vec<String> {
+        match run(line, env) {
+            Inline::Read(lines) => lines.iter().map(|l| lossy(l)).collect(),
+            Inline::Wrote(_) => panic!("a read hands back an outcome"),
+        }
     };
-    assert_eq!(lines.first().map(Vec::as_slice), Some(&b"2 B +w"[..]));
+    let first = |line: &str, env: &ops::Env<'_>| -> String {
+        read(line, env).swap_remove(0)
+    };
+    assert_eq!(first("ls +w", &env), "2 B +w");
+    // A task with no row is named by its id, a blocker by its place.
+    assert_eq!(first("ls", &env), "id:b A id:b");
+    assert_eq!(first("next", &env), "id:b A id:b");
+    let shown_task: Vec<String> = read("show 4", &env);
+    assert!(
+        shown_task
+            .iter()
+            .any(|l| l.contains("blocked by") && l.contains("3 X")),
+        "{shown_task:?}"
+    );
+    // A position is a place too, and past the last row it is the end.
+    let todo = || {
+        fs::read_to_string(fx.dir.path().join("todo.txt")).unwrap_or_default()
+    };
+    run("reorder 2 1", &env);
+    assert_eq!(todo().lines().nth(2), Some("B +w"), "{}", todo());
+    run("reorder 2 9", &env);
+    assert!(todo().lines().last().is_some_and(|l| l.starts_with("x ")));
+    // Files that are not the ones the list shows give no place.
+    env.aim = Some(&shown);
+    assert_eq!(first("ls +w", &env), "line 2 B +w");
+}
+
+/// The places of the lines of the todo file given, from 1.
+fn placed(lines: &[u32]) -> Places {
+    let nrs = lines.iter().filter_map(|n| Nr::new(*n));
+    nrs.zip(1..)
+        .map(|(nr, place)| ((Source::Todo, nr), place))
+        .collect()
 }
 
 #[test]
@@ -188,7 +228,7 @@ fn the_human_acts_whoever_the_environment_names() {
     let mut env = ops::Env::new(&fx.found, &fx.config, &fx.clock);
     env.actor =
         Actor::named("agent1").unwrap_or_else(|e| panic!("{}", e.message()));
-    run_inline(&env, None, &words("do id:k3f9"))
+    run_inline(&env, None, &words("do id:k3f9"), &Places::new())
         .unwrap_or_else(|e| panic!("{}", e.message()));
     let data =
         fs::read_to_string(fx.dir.path().join("todo.txt")).unwrap_or_default();

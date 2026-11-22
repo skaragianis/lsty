@@ -13,6 +13,7 @@ use lsty_core::{
 
 use crate::{
     env::Env,
+    inline::Places,
     output::Output,
     paint::Painter,
     parse::{Opt, Opts, Parsed, Scope},
@@ -41,6 +42,9 @@ pub(crate) struct Call<'a> {
     pub ops: ops::Env<'a>,
     /// Colours the human output; off when stdout is not coloured.
     pub paint: Painter,
+    /// The places of the tasks of the list a caller shows, which numbers
+    /// stand for; none for the command line, whose numbers are file lines.
+    pub places: Option<&'a Places>,
 }
 
 impl Call<'_> {

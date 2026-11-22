@@ -109,8 +109,10 @@ fn task_lines<'a>(
     tasks: impl Iterator<Item = &'a Task>,
 ) -> Vec<Vec<u8>> {
     let mut lines = Vec::new();
+    let numbers = call.numbers(snap);
     for task in tasks {
-        lines.push(list_line(&call.paint, snap, task, Hide::default()));
+        let hide = Hide::default();
+        lines.push(list_line(&call.paint, snap, task, hide, numbers.as_ref()));
         for file in linked_files(snap, task, call.home) {
             let mut text = b"  ".to_vec();
             let path = file.path.as_os_str().as_bytes();
