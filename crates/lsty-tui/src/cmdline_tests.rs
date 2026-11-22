@@ -272,17 +272,34 @@ fn nothing_to_undo_closes_the_line_with_a_message() {
 #[test]
 fn a_read_opens_a_popup_that_scrolls_and_closes() {
     let (_dir, mut model) = workdir_model(
-        "A +w\nB +w\nC +w\nD +w\nE +w\nF +w\nG +w\nH +w\n",
+        "A\nB +w\nC +w\nD +w\nE +w\nF +w\nG +w\nH +w\nI +w id:i\n",
         alone(),
     );
     model.update(Msg::Resize(80, 8));
-    line(&mut model, "ls +w");
+    // the list shows the `+w` tasks, one row up from their lines
+    keys(&mut model, "/+w<CR>");
+    line(&mut model, "ls");
     assert!(model.output.is_some());
     assert!(model.line.is_none());
+    let first = |model: &Model, at: usize| {
+        let lines = &model.output.as_ref().map(|o| o.lines.clone());
+        lines
+            .as_ref()
+            .and_then(|l| l.get(at)?.first().map(|s| s.text.to_string()))
+    };
+    // a task the list does not show is named by its line
+    assert_eq!(first(&model, 0).as_deref(), Some("line 1 A"));
+    assert_eq!(first(&model, 1).as_deref(), Some("1 B +w"));
     press(&mut model, "j");
     assert_eq!(model.output.as_ref().map(Output::top), Some(1));
     press(&mut model, "q");
     assert!(model.output.is_none());
+    line(&mut model, "show 2");
+    assert_eq!(first(&model, 0).as_deref(), Some("2 C +w"));
+    press(&mut model, "q");
+    // a number past the last row is no task, as is the line it was before
+    line(&mut model, "do 9");
+    assert_eq!(model.message.text(), Some("no task 9"));
 }
 
 /// The text before the word, the word, and what it may become.

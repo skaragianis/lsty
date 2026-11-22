@@ -12,7 +12,7 @@ mod quote_table;
 mod said;
 
 pub use quote::{quote, shown};
-pub use said::{Msg, Name, Part, Place};
+pub use said::{Msg, Name, Part, Place, unplaced};
 
 #[cfg(test)]
 mod quote_tests;

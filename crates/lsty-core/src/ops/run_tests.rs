@@ -278,7 +278,10 @@ fn an_archived_target_and_a_gone_one() {
         let archived = tx.target(&Target::at(Source::Done, 1).archived())?;
         assert!(matches!(archived, Picked::Task(_)));
         let gone = tx.target(&Target::at(Source::Done, 2))?;
-        assert_eq!(gone, Picked::Gone("done:2 already restored".to_owned()));
+        let Picked::Gone(said) = gone else {
+            panic!("not gone")
+        };
+        assert_eq!(said.cli(), b"done:2 already restored");
         Ok(())
     })
     .unwrap();

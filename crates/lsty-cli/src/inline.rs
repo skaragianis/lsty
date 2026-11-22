@@ -2,10 +2,10 @@
 //! line of the TUI does: the human acts, nothing is printed, and a write
 //! hands back what the operation did.
 
-use std::{io::BufRead, path::Path};
+use std::{collections::HashMap, io::BufRead, path::Path};
 
 use lsty_core::{
-    errs::{Code, Error, Field, Result, quote},
+    errs::{Code, Error, Field, Nr, Result, Source, quote},
     ops::{self, Actor, Outcome},
 };
 
@@ -32,6 +32,10 @@ const REFUSED: [Opt; 11] = [
     Opt::Help,
     Opt::Version,
 ];
+
+/// The place each task a caller shows has in its list, by its line: what
+/// its numbers mean, in place of file lines.
+pub type Places = HashMap<(Source, Nr), usize>;
 
 /// What a command run inline did.
 #[derive(Debug)]
@@ -88,7 +92,8 @@ pub fn inline_options(name: &str) -> Vec<String> {
 
 /// Runs the command given as `words` as the human, with the files, the
 /// configuration, the clock and the way to wait for the lock of `env`.
-/// It prints nothing.
+/// It prints nothing. A bare number it is given is the place of a task in
+/// `places`, and the tasks it shows are numbered by their place.
 ///
 /// # Errors
 ///
@@ -98,6 +103,7 @@ pub fn run_inline(
     env: &ops::Env<'_>,
     home: Option<&Path>,
     words: &[String],
+    places: &Places,
 ) -> Result<Inline> {
     let (parsed, parsing) = parse::parse(words);
     refuse_options(&parsed.opts)?;
@@ -115,6 +121,7 @@ pub fn run_inline(
             ..env.clone()
         },
         paint: Painter::off(),
+        places: Some(places),
     };
     let result = match command.handler {
         Handler::Read(handler) => {

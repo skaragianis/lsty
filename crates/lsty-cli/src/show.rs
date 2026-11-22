@@ -14,7 +14,7 @@ use crate::{
     commands::Call,
     output::{Field, Output},
     parse::{Hide, Opt, needs},
-    read::{list_line, text_lines},
+    read::{Numbers, list_line, text_lines},
     reflist::ref_list,
     task_json::rec_text,
 };
@@ -29,6 +29,7 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
     }
     call.bind(&mut targets)?;
     let snap = call.load()?;
+    let numbers = call.numbers(&snap);
     let mut tasks: Vec<&Task> = Vec::new();
     for target in &targets {
         let task = resolve(&snap, target)?;
@@ -55,9 +56,11 @@ pub(crate) fn show(call: &Call<'_>) -> Result<Output> {
             let mut blocks: Vec<Vec<Vec<u8>>> = tasks
                 .iter()
                 .map(|&task| {
+                    let hide = Hide::default();
+                    let numbers = numbers.as_ref();
                     let head =
-                        list_line(&call.paint, &snap, task, Hide::default());
-                    let facts = facts(call, &snap, task);
+                        list_line(&call.paint, &snap, task, hide, numbers);
+                    let facts = facts(call, &snap, task, numbers);
                     let facts = text_lines(&call.paint, facts.iter());
                     std::iter::once(head).chain(facts).collect()
                 })
@@ -85,7 +88,12 @@ fn labelled(label: &str, value: &[u8]) -> Vec<u8> {
     fact(&[label.as_bytes(), b": ", value])
 }
 
-fn facts(call: &Call<'_>, snap: &Snapshot, task: &Task) -> Vec<Vec<u8>> {
+fn facts(
+    call: &Call<'_>,
+    snap: &Snapshot,
+    task: &Task,
+    numbers: Option<&Numbers>,
+) -> Vec<Vec<u8>> {
     let line = snap.line(task);
     let tags = line.tags();
     let mut facts = vec![
@@ -107,7 +115,7 @@ fn facts(call: &Call<'_>, snap: &Snapshot, task: &Task) -> Vec<Vec<u8>> {
     maybe("rec", rec_text(line, &tags));
     maybe("id", tags.id);
     facts.extend(claim_fact(call, task, tags.owner));
-    facts.extend(relation_facts(snap, task));
+    facts.extend(relation_facts(snap, task, numbers));
     facts.extend(link_facts(call.home, task, snap));
     facts.extend(tag_facts(snap, task));
     facts
@@ -136,13 +144,17 @@ fn claim_fact(
     Some(fact(&[&text, &since]))
 }
 
-fn relation_facts(snap: &Snapshot, task: &Task) -> Vec<Vec<u8>> {
+fn relation_facts(
+    snap: &Snapshot,
+    task: &Task,
+    numbers: Option<&Numbers>,
+) -> Vec<Vec<u8>> {
     let mut facts = Vec::new();
     let blockers: Vec<Vec<u8>> = task
         .blockers()
         .iter()
         .filter_map(|&b| snap.task(b))
-        .map(|b| blocker_text(snap, b))
+        .map(|b| blocker_text(snap, b, numbers))
         .collect();
     if !blockers.is_empty() {
         facts.push(labelled("blocked by", &blockers.join(&b", "[..])));
@@ -153,14 +165,23 @@ fn relation_facts(snap: &Snapshot, task: &Task) -> Vec<Vec<u8>> {
         facts.push(labelled("missing prerequisite", &list));
     }
     if task.cycle() {
-        let text = cycle_text(snap, task);
+        let text = cycle_text(snap, task, numbers);
         facts.push(labelled("dependency cycle", text.as_bytes()));
     }
     facts
 }
 
-fn blocker_text(snap: &Snapshot, blocker: &Task) -> Vec<u8> {
-    let mut text = blocker.handle().into_bytes();
+/// The number of a task: its file line when no list is shown.
+fn number(numbers: Option<&Numbers>, snap: &Snapshot, task: &Task) -> String {
+    numbers.map_or_else(|| task.handle(), |n| n.of(snap, task))
+}
+
+fn blocker_text(
+    snap: &Snapshot,
+    blocker: &Task,
+    numbers: Option<&Numbers>,
+) -> Vec<u8> {
+    let mut text = number(numbers, snap, blocker).into_bytes();
     text.push(b' ');
     text.extend_from_slice(&snap.line(blocker).text());
     if let Some(id) = snap.id_of(blocker) {
@@ -171,15 +192,19 @@ fn blocker_text(snap: &Snapshot, blocker: &Task) -> Vec<u8> {
     text
 }
 
-fn cycle_text(snap: &Snapshot, task: &Task) -> String {
+fn cycle_text(
+    snap: &Snapshot,
+    task: &Task,
+    numbers: Option<&Numbers>,
+) -> String {
     let path: Vec<TaskId> =
         snap.cycle_path(task.task_id()).unwrap_or_default();
     let mut parts: Vec<String> = path
         .iter()
         .filter_map(|&m| snap.task(m))
-        .map(Task::handle)
+        .map(|t| number(numbers, snap, t))
         .collect();
-    parts.push(task.handle());
+    parts.push(number(numbers, snap, task));
     parts.join(" → ")
 }
 

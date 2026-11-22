@@ -228,8 +228,9 @@ impl Model {
     /// alert tone.
     fn run_cli(&mut self, words: &[String]) {
         let home = self.deps.home.clone();
-        let result =
-            self.attempt(|env| run_inline(env, home.as_deref(), words));
+        let places = self.lines();
+        let result = self
+            .attempt(|env| run_inline(env, home.as_deref(), words, &places));
         match result {
             Err(e) => self.fail_line(&e),
             Ok((inline, clock)) => {

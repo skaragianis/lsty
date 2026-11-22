@@ -883,11 +883,10 @@ fn a_message_names_tasks_by_their_place() {
         ),
         // a task no row shows and no id names, by its file line
         (
-            "A +x\nB id:b\nC\n",
+            "A +x id:a\nB dep:a\n",
             "",
-            "/+x<CR>:set auto_archive<CR>:do 3<CR>",
-            "line 3 done: C; archived to done.txt as 2; hidden by current \
-             filters in 2 seconds or at the next key",
+            "/+x<CR>:del 1<CR>",
+            "1 deleted; unblocked line 2",
         ),
         // raised to the top of a priority sort
         (

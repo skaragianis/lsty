@@ -15,6 +15,18 @@ pub enum Place {
     Read(Nr),
 }
 
+/// How a message names a task no row shows: by its `id:`, else by its
+/// line, `line 3` for a todo line and `done:3` for the done file's.
+pub fn unplaced(source: Source, nr: Nr, id: Option<&str>) -> String {
+    id.map_or_else(
+        || match source {
+            Source::Todo => format!("line {nr}"),
+            Source::Done => source.numbered(nr),
+        },
+        |id| format!("id:{id}"),
+    )
+}
+
 /// A task a message names.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Name {

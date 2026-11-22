@@ -118,6 +118,36 @@ impl Target {
         Ok(target)
     }
 
+    /// A bare number read as the place of a row in a list shown: the target
+    /// at the line `line` gives for it, still as the caller wrote it.
+    /// `done:` and `id:` references stay as they are.
+    ///
+    /// # Errors
+    ///
+    /// `no_task` when `line` gives none: no row has that place.
+    pub fn placed(
+        mut self,
+        line: impl FnOnce(u32) -> Option<(Source, Nr)>,
+    ) -> Result<Self> {
+        let Key::Line {
+            source: Source::Todo,
+            nr,
+            ..
+        } = self.key
+        else {
+            return Ok(self);
+        };
+        let Some((source, to)) = u32::try_from(nr).ok().and_then(line) else {
+            return Err(no_task(&self));
+        };
+        self.key = Key::Line {
+            source,
+            nr: i64::from(to.get()),
+            expect: None,
+        };
+        Ok(self)
+    }
+
     /// The target, refusing a task of the done file again.
     #[must_use]
     pub(super) const fn current_only(mut self) -> Self {
