@@ -3,10 +3,11 @@
 //! collected once for each reading of the files, not for each key.
 
 use std::{
-    borrow::Cow, collections::BTreeSet, fs, os::unix::ffi::OsStrExt,
-    path::Path,
+    borrow::Cow, cell::OnceCell, collections::BTreeSet, fs,
+    os::unix::ffi::OsStrExt, path::Path,
 };
 
+use lsty_cli::{Places, place_name};
 use lsty_core::{
     case::lower,
     errs::{self, Nr, Source},
@@ -20,6 +21,7 @@ use crate::{
     model::Model,
     prompt::{KNOWN_KEYS, matching},
     reldate::{Today, date_cell},
+    track::place_of,
 };
 
 /// The fewest characters of a word that complete as a key.
@@ -38,7 +40,7 @@ struct Open {
     given: Option<String>,
     text: String,
     lower: String,
-    label: String,
+    tail: String,
 }
 
 /// What the candidates are made of, for one reading and one day.
@@ -89,27 +91,20 @@ fn open_task(snap: &Snapshot, task: &Task, line: &Line, today: Today) -> Open {
         nr: task.nr(),
         given: snap.id_of(task).map(errs::lossy),
         lower: lower(&text),
-        label: label_of(task, line, &text, today),
+        tail: tail_of(task, line, &text, today),
         text,
     }
 }
 
-/// The label of a task in the popup: number (of a todo-file task), text,
-/// tags, due.
-fn label_of(task: &Task, line: &Line, text: &str, today: Today) -> String {
+/// The label of a task in the popup after its number: text, tags, due.
+fn tail_of(task: &Task, line: &Line, text: &str, today: Today) -> String {
     let tags: Vec<String> = line
         .tokens()
         .filter(|t| matches!(t.kind, Kind::Project | Kind::Context))
         .map(|t| errs::lossy(t.name_text()))
         .collect();
     let due = date_cell(task, line, today).text;
-    // A done-file task has no number in the list.
-    let nr = if task.source() == Source::Todo {
-        task.nr().to_string()
-    } else {
-        String::new()
-    };
-    let parts = [nr.as_str(), text, &tags.join(" "), &due];
+    let parts = [text, &tags.join(" "), &due];
     parts
         .into_iter()
         .filter(|p| !p.is_empty())
@@ -190,6 +185,7 @@ impl Model {
     /// (or an id with no one task) shows itself.
     pub(crate) fn labelled(&self, texts: Vec<String>) -> Vec<Candidate> {
         let today = self.today();
+        let places = OnceCell::new();
         texts
             .into_iter()
             .map(|text| {
@@ -201,7 +197,11 @@ impl Model {
                         |task| {
                             let line = self.snap.line(task);
                             let own = errs::lossy(&line.text());
-                            label_of(task, line, &own, today)
+                            self.labelled_task(
+                                places.get_or_init(|| self.lines()),
+                                task,
+                                tail_of(task, line, &own, today),
+                            )
                         },
                     );
                 Candidate {
@@ -225,6 +225,7 @@ impl Model {
         let folded = !typed.chars().any(is_upper);
         let waits = self.waits_for();
         let me = self.edited_task();
+        let places = self.lines();
         let waiting = me.map_or_default(|me| self.snap.waiting_on(me));
         sources
             .open
@@ -253,11 +254,36 @@ impl Model {
                     |id| Put::Text(format!("dep:{id}")),
                 );
                 Some(Candidate {
-                    label: o.label.clone(),
+                    label: self.snap.task(o.id).map_or_else(
+                        || o.tail.clone(),
+                        |t| self.labelled_task(&places, t, o.tail.clone()),
+                    ),
                     put,
                 })
             })
             .collect()
+    }
+
+    /// `tail` after the name of a todo-file task (a done-file task has no
+    /// number in the list), as a message names it.
+    fn labelled_task(
+        &self,
+        places: &Places,
+        task: &Task,
+        tail: String,
+    ) -> String {
+        if task.source() == Source::Todo {
+            format!(
+                "{}{GAP}{tail}",
+                place_name(
+                    places.get(&place_of(task)).copied(),
+                    &self.snap,
+                    task
+                )
+            )
+        } else {
+            tail
+        }
     }
 
     /// The task of the draft; none for a new task or one that is gone.

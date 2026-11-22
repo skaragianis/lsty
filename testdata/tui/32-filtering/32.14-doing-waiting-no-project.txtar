@@ -28,8 +28,8 @@ x 2026-09-01 Old task +work
 │             ││                                                                          ││ nr          6                       │
 │             ││                                                                          ││ started     2026-09-29 08:00 (1h)   │
 │             ││                                                                          ││ claim       claimed (by you)        │
-│             ││                                                                          ││ blocked by  Write parser (5)        │
-│             ││                                                                          ││                                     │
+│             ││                                                                          ││ blocked by  Write parser            │
+│             ││                                                                          ││             (id:parser)             │
 ├[4]─Contexts─┤│                                                                          ││                                     │
 │ @email   1/1││                                                                          ││                                     │
 │ @phone   1/1││                                                                          ││                                     │
@@ -59,8 +59,8 @@ x 2026-09-01 Old task +work
 │             ││                                                                          ││ nr          6                       │
 │             ││                                                                          ││ started     2026-09-29 08:00 (1h)   │
 │             ││                                                                          ││ claim       claimed (by you)        │
-│             ││                                                                          ││ blocked by  Write parser (5)        │
-│             ││                                                                          ││                                     │
+│             ││                                                                          ││ blocked by  Write parser            │
+│             ││                                                                          ││             (id:parser)             │
 ├[4]─Contexts─┤│                                                                          ││                                     │
 │ @email   1/1││                                                                          ││                                     │
 │ @phone   1/1││                                                                          ││                                     │

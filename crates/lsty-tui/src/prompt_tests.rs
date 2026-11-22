@@ -376,3 +376,15 @@ fn the_command_line_completes_filter_terms_as_the_search_does() {
         assert_eq!(text_of(&model), want, "{typed}");
     }
 }
+
+/// The search popup names tasks by the places of the list it filters now.
+#[test]
+fn the_search_popup_names_places_as_the_list_filters() {
+    let (_dir, mut model) = crate::test_util::workdir_model(
+        "Z\nA dep:p\nP id:p dep:q\nQ id:q dep:p\n",
+        alone(),
+    );
+    keys(&mut model, "/dep:<Tab>");
+    let popup = |m: &Model| screen(m, 80, 12)[10].clone();
+    assert_eq!(popup(&model), "id:p  P  2  Q");
+}

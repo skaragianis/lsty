@@ -401,6 +401,16 @@ fn prerequisites_are_the_open_tasks_with_a_matching_text() {
         let model = typing(dir.path(), typed);
         assert_eq!(labels(&model), want, "{typed:?}");
     }
+    // each task by its place in the list shown, else its line
+    let mut model = model_of(dir.path());
+    keys(&mut model, "/Write<CR>Ga dep:");
+    let want = [
+        "1  Write parser  +spec01",
+        "line 2  Add CLI ls  +spec01",
+        "2  Write docs  +spec01",
+        "line 5  Call client",
+    ];
+    assert_eq!(labels(&model), want);
 }
 
 // 39.28, 39.29: not the task itself, what it waits for, or a cycle.

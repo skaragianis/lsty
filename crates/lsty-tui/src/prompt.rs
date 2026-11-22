@@ -429,6 +429,27 @@ impl Model {
         })
     }
 
+    /// Labels the candidates of the open prompt again, for the rows now
+    /// shown.
+    pub(crate) fn relabel_prompt(&mut self) {
+        let Some(comp) = self.line.as_ref().and_then(|l| l.comp.as_ref())
+        else {
+            return;
+        };
+        let texts = comp
+            .cands
+            .iter()
+            .filter_map(|c| match &c.put {
+                Put::Text(text) => Some(text.clone()),
+                Put::NeedsId(_) => None,
+            })
+            .collect();
+        let cands = self.labelled(texts);
+        if let Some(comp) = self.line.as_mut().and_then(|l| l.comp.as_mut()) {
+            comp.cands = cands;
+        }
+    }
+
     /// What can complete `word` in the prompt of `kind`.
     fn pool(&mut self, kind: Kind, word: &str) -> Cow<'_, [String]> {
         match kind {
