@@ -170,8 +170,12 @@ impl Side {
         let seen = self.seen(key);
         let sticky = self.model.rows.iter().any(|r| r.sticky);
         let before = self.kept();
+        // The strokes before the last wait for it, and, like any key, let go
+        // of the sticky tasks: a message names the rows left after them.
+        let at = last_stroke(key).unwrap_or(0);
+        keys(&mut self.model, &key[..at]);
         let was = shown(&self.model);
-        keys(&mut self.model, key);
+        keys(&mut self.model, &key[at..]);
         screen(&self.model, self.model.width, self.model.height);
         let m = &self.model;
         let name = format!(
@@ -403,6 +407,15 @@ fn first_key(model: &Model, key: &str) -> Option<usize> {
         let head = key.get(..at).and_then(|h| parse_keys(h, None).ok());
         head.is_some_and(|h| all.starts_with(&h))
             && fed(model, &key[..at]).is_some_and(|o| o != Outcome::Pending)
+    })
+}
+
+/// Where the last of the strokes of `key` starts, when it has more.
+fn last_stroke(key: &str) -> Option<usize> {
+    let all = parse_keys(key, None).ok()?;
+    (1..key.len()).rev().find(|&at| {
+        let head = key.get(..at).and_then(|h| parse_keys(h, None).ok());
+        head.is_some_and(|h| h.len() + 1 == all.len() && all.starts_with(&h))
     })
 }
 
