@@ -86,7 +86,7 @@ const CASES: [Case; 15] = [
         lines: &[("A", true)],
         below: Some("2"),
         file: "\nB\nA\n",
-        said: &["pasted 1 task (1 moved)"],
+        said: &["moved 1 task"],
     },
     Case {
         name: "43.13 an identical line in the file makes a copy",
@@ -102,7 +102,7 @@ const CASES: [Case; 15] = [
         lines: &[("A", true), ("A", true)],
         below: Some("2"),
         file: "\nB\nA\n2026-09-29 A\n",
-        said: &["pasted 2 tasks (1 moved)"],
+        said: &["pasted 2 tasks (1 task moved)"],
     },
     Case {
         name: "43.8 the first of two own lines with one id moves",
@@ -110,7 +110,7 @@ const CASES: [Case; 15] = [
         lines: &[("A id:a", true), ("A id:a", true)],
         below: Some("2"),
         file: "\nB\nA id:a\n2026-09-29 A\n",
-        said: &["pasted 2 tasks (1 moved)"],
+        said: &["pasted 2 tasks (1 task moved)"],
     },
     Case {
         name: "43.16 foreign text is a copy",
@@ -283,7 +283,7 @@ fn a_move_gives_its_dependents_their_link_back() {
     let line = own_with("A id:a", vec![relink(2, "B dep:a", "B")]);
     let out = paste_at(&dir, &[line], &Place::After(anchor("3"))).expect("p");
     assert_eq!(dir.todo(), "\nB dep:a\nC\nA id:a\n");
-    assert_eq!(messages(&out), ["pasted 1 task (1 moved)", "relinked 2"]);
+    assert_eq!(messages(&out), ["moved 1 task", "relinked 2"]);
     assert_eq!(out.changed().len(), 1);
 }
 
@@ -293,7 +293,7 @@ fn a_dependent_of_two_moves_is_named_once() {
     let relinks = || vec![relink(3, "C dep:a dep:b", "C")];
     let lines = [own_with("A id:a", relinks()), own_with("B id:b", relinks())];
     let out = paste_at(&dir, &lines, &Place::After(anchor("3"))).expect("p");
-    assert_eq!(messages(&out), ["pasted 2 tasks (2 moved)", "relinked 3"]);
+    assert_eq!(messages(&out), ["moved 2 tasks", "relinked 3"]);
 }
 
 #[test]
@@ -308,7 +308,7 @@ fn a_dependent_that_changed_is_left_alone() {
     assert_eq!(
         messages(&out),
         [
-            "pasted 1 task (1 moved)",
+            "moved 1 task",
             "relinked 3",
             "2 changed since; dep:a not restored"
         ]
@@ -330,7 +330,7 @@ fn a_dependent_that_is_gone_is_reported() {
     assert_eq!(
         messages(&out),
         [
-            "pasted 1 task (1 moved)",
+            "moved 1 task",
             "a dependent of a is gone",
             "a dependent of a is gone",
             "a dependent of a is gone"
@@ -347,10 +347,7 @@ fn a_link_that_would_close_a_cycle_is_not_restored() {
     assert_eq!(dir.todo(), "\nB id:b\nC id:c dep:b\nA id:a dep:c\n");
     assert_eq!(
         messages(&out),
-        [
-            "pasted 1 task (1 moved)",
-            "2: dep:a would close a cycle; not restored"
-        ]
+        ["moved 1 task", "2: dep:a would close a cycle; not restored"]
     );
 }
 
@@ -383,10 +380,7 @@ fn a_dependency_cycle_in_pasted_text_is_warned_about() {
     assert_eq!(dir.todo(), "A id:a dep:b\nB id:b dep:a\n");
     assert_eq!(
         messages(&out),
-        [
-            "pasted 1 task (1 moved)",
-            "2 is now part of a dependency cycle"
-        ]
+        ["moved 1 task", "2 is now part of a dependency cycle"]
     );
     let Some(crate::errs::Part::Name(name)) = out.said()[1].parts().first()
     else {
@@ -441,7 +435,7 @@ fn a_restored_link_counts_when_the_next_one_is_checked() {
     assert_eq!(
         messages(&out),
         [
-            "pasted 2 tasks (2 moved)",
+            "moved 2 tasks",
             "relinked 3",
             "4: dep:b would close a cycle; not restored"
         ]

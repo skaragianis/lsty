@@ -1,7 +1,7 @@
 size 110 7
 start
 keys 2 t
-status 1 stopped; 1 was claimed by agent2; 1 not underway\b
+status 1 stopped; 1 was claimed by agent2; 1 task not underway\b
 file todo.txt stopped
 keys 2 t
 status some are done — nothing changed

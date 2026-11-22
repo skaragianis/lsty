@@ -234,8 +234,11 @@ impl<'a> Pasting<'a> {
 
     fn summary(&self, n: usize) -> String {
         let head = format!("pasted {}", counted(n, "task"));
-        if !self.moved.is_empty() {
-            format!("{head} ({} moved)", self.moved.len())
+        let moved = counted(self.moved.len(), "task");
+        if self.moved.len() == n {
+            format!("moved {moved}")
+        } else if !self.moved.is_empty() {
+            format!("{head} ({moved} moved)")
         } else if self.joined > 0 {
             format!("{head} (joined from {} lines)", self.joined)
         } else {

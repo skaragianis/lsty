@@ -30,7 +30,7 @@ Four
 -- done.txt --
 x 2026-09-01 Old
 -- out1 --
-archived 2 to done.txt
+archived 2 tasks to done.txt
 2026-10-15T09:30:00 2 3
 -- out2 --
 nothing to archive

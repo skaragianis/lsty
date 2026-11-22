@@ -29,7 +29,7 @@ fn nothing_ready(chosen: &Chosen) -> String {
     ]
     .into_iter()
     .filter(|(n, _)| *n > 0)
-    .map(|(n, what)| format!("{n} {what}"))
+    .map(|(n, what)| format!("{} {what}", counted(n, "task")))
     .collect();
     if reasons.is_empty() {
         "nothing ready".to_owned()

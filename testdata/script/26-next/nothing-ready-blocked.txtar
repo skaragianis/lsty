@@ -4,7 +4,7 @@ env TODO_FILE=$WORK/todo.txt
 exec lsty next --filter +a --no-config
 cmp stdout want
 exec lsty next --filter +a --json --no-config
-stdout '"tasks":\[\],"stale":\[\],"later_count":0,"blocked_count":2,"claimed_count":0,"messages":\["nothing ready \(2 blocked\)"\],"resumed":false'
+stdout '"tasks":\[\],"stale":\[\],"later_count":0,"blocked_count":2,"claimed_count":0,"messages":\["nothing ready \(2 tasks blocked\)"\],"resumed":false'
 exec lsty next --filter +elsewhere --no-config
 cmp stdout want-plain
 
@@ -13,6 +13,6 @@ Waits +a dep:b
 Waits too +a dep:b
 Other +b id:b
 -- want --
-nothing ready (2 blocked)
+nothing ready (2 tasks blocked)
 -- want-plain --
 nothing ready

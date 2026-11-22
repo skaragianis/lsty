@@ -1,7 +1,7 @@
 size 100 16
 start
 keys v G x
-status 1 done; 9 already done\b
+status 1 task done; 9 tasks already done\b
 frame selection
 file todo.txt selection-file
 keys u
@@ -10,7 +10,7 @@ keys <C-r>
 status redid: 1 done: Open
 keys u g g
 keys 1 0 x
-status 1 done; 9 already done\b
+status 1 task done; 9 tasks already done\b
 file todo.txt count-file
 -- config.toml --
 show_sidebar = false
@@ -42,7 +42,7 @@ x 2026-09-09 Done nine
 │                                                                                                  │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  1 done; 9 already done  x reopen  o new  a append  dd delete         10|10  9.9.9
+ N  sort(manual)  1 task done; 9 tasks already done  x reopen  o new  a append         10|10  9.9.9
 -- selection-file --
 x 2026-09-29 Open
 x 2026-09-01 Done one

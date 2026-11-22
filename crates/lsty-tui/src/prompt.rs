@@ -347,7 +347,7 @@ impl Model {
             if kept == 0 {
                 changed
             } else {
-                format!("{changed}; {kept} unchanged")
+                format!("{changed}; {} unchanged", ops::counted(kept, "task"))
             }
         } else {
             shown
