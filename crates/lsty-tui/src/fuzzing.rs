@@ -50,7 +50,7 @@ cycle_priority = [\"gp\", \"+\"]\ncycle_priority_back = [\"gP\", \"-\"]\n\
 cycle_priority = [\"gp\", \"+\"]\ncycle_priority_back = [\"gP\", \"-\"]\n";
 
 /// The keys pressed: a key, and what is typed after it.
-const KEYS: [(&str, &str); 42] = [
+const KEYS: [(&str, &str); 38] = [
     ("x", ""),
     ("t", ""),
     ("T", ""),
@@ -89,10 +89,6 @@ const KEYS: [(&str, &str); 42] = [
     ("gd", "2030-01-01<CR>"),
     ("gt", "k:v<CR>"),
     ("a", "Z<CR>"),
-    (":", "do 1<CR>"),
-    (":", "del 2,3<CR>"),
-    (":", "do 7<CR>"),
-    (":", "do 99<CR>"),
 ];
 
 /// The keys pressed on a list whose file changed behind its back.
@@ -100,6 +96,11 @@ const STALE: [&str; 8] = ["x", "t", "T", "<Del>", "-", "+", "<F9>", "."];
 
 /// A step byte at or above this changes the file behind the list's back.
 const REWRITE: u8 = 0xF0;
+
+/// A step byte in this range is a `:` command on one task, its low bits
+/// picking the command (see `colon`). The range is none of the bytes the
+/// seeds hold, so the seeds keep their keys.
+const COLON: std::ops::RangeInclusive<u8> = 0xD1..=0xD6;
 
 /// A list and the folder of its files.
 struct Side {
@@ -241,7 +242,7 @@ impl Side {
         name: &str,
     ) -> Vec<(usize, usize)> {
         if self.moved.is_empty() {
-            let gone = lines_of(deleted(said), was, name);
+            let gone = lines_of(&deleted(said), was, name);
             assert!(
                 seen.is_empty() || gone.iter().all(|line| seen.contains(line)),
                 "named a row the key did not act on: {name}"
@@ -249,30 +250,11 @@ impl Side {
         }
         let now = shown(&self.model);
         ["unblocked ", "relinked "]
-            .map(|word| lines_of(after(said, word), &now, name))
+            .map(|word| lines_of(&after(said, word), &now, name))
             .concat()
     }
 
     /// Whether the list is shown, no field open.
-    fn past_end(
-        &self,
-        place: Option<usize>,
-        rows: usize,
-        before: &[Vec<u8>; 2],
-        trail: &[String],
-    ) {
-        let Some(n) = place.filter(|n| *n > rows) else {
-            return;
-        };
-        let want = format!("no task {n}");
-        assert_eq!(
-            self.model.message.text(),
-            Some(want.as_str()),
-            "{trail:?}"
-        );
-        assert_eq!(&self.files(), before, "{trail:?}");
-    }
-
     fn list(&self) -> bool {
         matches!(self.model.key_mode(), Mode::Normal | Mode::Visual)
     }
@@ -442,31 +424,114 @@ fn shown(model: &Model) -> HashMap<usize, (usize, usize)> {
     .collect()
 }
 
-/// The lines of `rows` that the numbers of `nrs` are the places of; a
-/// number that is no row fails.
+/// The lines of `rows` that the names in a message are the places of; a
+/// place that is no row fails. A task with no row is named by its line
+/// (`line N`, `done:N`), which no row may show: a row is named by its place.
 fn lines_of(
-    nrs: Vec<usize>,
+    names: &[String],
     rows: &HashMap<usize, (usize, usize)>,
     name: &str,
 ) -> Vec<(usize, usize)> {
-    let at = |n| rows.get(&n).unwrap_or_else(|| panic!("no row {n}: {name}"));
-    nrs.into_iter().map(|n| *at(n)).collect()
+    let line = |n: &str| n.parse::<usize>().ok().map(|n| n.saturating_sub(1));
+    let unshown = |file, n: &str| {
+        let at = (file, line(n)?);
+        assert!(!rows.values().any(|r| *r == at), "{n} is a row: {name}");
+        Some(at)
+    };
+    let place = |n: &str| {
+        let at =
+            |n| rows.get(&n).unwrap_or_else(|| panic!("no row {n}: {name}"));
+        n.parse().ok().map(|n| *at(n))
+    };
+    let lines = names.iter().filter_map(|n| match n.strip_prefix("line ") {
+        Some(n) => unshown(0, n),
+        None => match n.strip_prefix("done:") {
+            Some(n) => unshown(1, n),
+            None => place(n),
+        },
+    });
+    lines.collect()
 }
 
-/// The numbers a message names after `word`, up to the next `;`.
-fn after(message: Option<&str>, word: &str) -> Vec<usize> {
+/// The names a message gives after `word`, up to the next `;`.
+fn after(message: Option<&str>, word: &str) -> Vec<String> {
     let said = message.unwrap_or_default().split(word).skip(1);
-    let nrs =
+    let names =
         said.flat_map(|s| s.split(';').next().unwrap_or_default().split(", "));
-    nrs.filter_map(|n| n.trim().parse().ok()).collect()
+    names.map(|n| n.trim().to_owned()).collect()
 }
 
-/// The numbers of the parts of a message that say `N deleted`.
-fn deleted(message: Option<&str>) -> Vec<usize> {
+/// The names of the parts of a message that say `N deleted`.
+fn deleted(message: Option<&str>) -> Vec<String> {
     let parts = message.unwrap_or_default().split(';');
     parts
-        .filter_map(|p| p.trim().strip_suffix(" deleted")?.parse().ok())
+        .filter_map(|p| Some(p.trim().strip_suffix(" deleted")?.to_owned()))
         .collect()
+}
+
+/// A `:` command on one task, the byte after `op` picking the row: `do` or
+/// `del` of a row by its place, by its `id:` or of the place after the last
+/// row, which can be a line of the file. It must write on the row at that
+/// place and no other line, and name that row; past the last row it is no
+/// task and writes nothing.
+fn colon(side: &mut Side, op: u8, arg: u8, trail: &mut Vec<String>) {
+    let how = usize::from(op - COLON.start());
+    trail.push(":".to_owned());
+    side.checked(":", trail);
+    if side
+        .model
+        .line
+        .as_ref()
+        .is_none_or(|l| !l.field.text.is_empty())
+    {
+        return;
+    }
+    // the list as it is when `<CR>` runs the command: `:` lets go of the
+    // sticky tasks
+    let rows = shown(&side.model);
+    let (by_id, past) = (how / 2 == 1, how / 2 == 2);
+    let place = if past {
+        rows.len() + 1
+    } else {
+        1 + usize::from(arg) % rows.len().max(1)
+    };
+    let row = rows.get(&place).copied();
+    let files = side.files();
+    let id = row.and_then(|(file, at)| {
+        let line = files[file].split(|b| *b == b'\n').nth(at)?;
+        let tag =
+            line.split(|b| *b == b' ').find(|w| w.starts_with(b"id:"))?;
+        Some(String::from_utf8_lossy(tag).into_owned())
+    });
+    let target = id.filter(|_| by_id).unwrap_or_else(|| place.to_string());
+    let text = format!("{} {target}", ["do", "del"][how % 2]);
+    trail.push(format!("{text}<CR>"));
+    keys(&mut side.model, &text);
+    side.opened = row.into_iter().collect();
+    side.checked("<CR>", trail);
+    side.opened.clear();
+    let said = side.model.message.text();
+    let Some(row) = row else {
+        let want = format!("no task {place}");
+        assert_eq!(said, Some(want.as_str()), "{trail:?}");
+        return;
+    };
+    // a place is named whatever the outcome; an `id:` may be refused as
+    // ambiguous, so it is named when it wrote
+    if !by_id || side.files() != files {
+        // the row where it is now, else where it was
+        let now = shown(&side.model);
+        let at = now
+            .iter()
+            .find(|(_, r)| **r == row)
+            .map_or(place, |(p, _)| *p);
+        let said = said.unwrap_or_default();
+        let named = [format!("{at} "), format!("task {at} ")];
+        assert!(
+            named.iter().any(|n| said.starts_with(n)),
+            "{said:?} is not row {at}: {trail:?}"
+        );
+    }
 }
 
 /// The words of a line but its `dep:` tags.
@@ -486,7 +551,9 @@ fn but_deps(line: &[u8]) -> Vec<&[u8]> {
 /// picking a line of the file. Each byte after those is a key; one at `0xF0`
 /// and above is, while the list is shown, a rewrite instead, its low bits
 /// picking which (see `rewrite`, `behind`): the next byte picks the
-/// line, the two after it the count and the key pressed then.
+/// line, the two after it the count and the key pressed then. One in
+/// `COLON` is, while the list is shown, a `:` command instead (see `colon`):
+/// the next byte picks its row.
 ///
 /// # Panics
 ///
@@ -515,7 +582,10 @@ pub fn hints_property(data: &[u8]) {
     let mut trail = vec![format!("{todo:?} {setup}")];
     let mut bytes = steps.iter().copied();
     while let Some(op) = bytes.next() {
-        if op >= REWRITE && side.list() {
+        if COLON.contains(&op) && side.list() {
+            let arg = bytes.next().unwrap_or(0);
+            colon(&mut side, op, arg, &mut trail);
+        } else if op >= REWRITE && side.list() {
             let mut next = || usize::from(bytes.next().unwrap_or(0));
             let (arg, count, key) =
                 (next(), ["", "2", "3"][next() % 3], next());
@@ -526,12 +596,6 @@ pub fn hints_property(data: &[u8]) {
             let (key, then) = KEYS[usize::from(op) % KEYS.len()];
             trail.push(format!("{key}{then}"));
             let opens = side.seen(key);
-            let place = then.strip_prefix("do ").and_then(|n| {
-                let n: usize = n.strip_suffix("<CR>")?.parse().ok()?;
-                (key == ":" && side.list()).then_some(n)
-            });
-            let rows = side.model.rows.len();
-            let before = side.files();
             side.checked(key, &trail);
             match then.strip_suffix("<CR>") {
                 Some(text) if !opens.is_empty() && !side.list() => {
@@ -542,7 +606,6 @@ pub fn hints_property(data: &[u8]) {
                 }
                 _ => {
                     keys(&mut side.model, then);
-                    side.past_end(place, rows, &before, &trail);
                 }
             }
         }
