@@ -365,7 +365,7 @@ impl Model {
         let spot = self.edit.as_ref().and_then(|d| d.at);
         let old_rows = std::mem::take(&mut self.rows);
         self.rebuild_rows();
-        self.refresh_popup();
+        self.refresh_popup(&moves);
         self.rebuild_panels();
         let aim = spot.or_else(|| {
             let aim = place.and_then(|at| moves.aim(at));
