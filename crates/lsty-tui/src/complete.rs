@@ -253,7 +253,6 @@ impl Model {
             return;
         };
         self.follow_word(true, true);
-        let line = |id| self.snap.task(id).map(place_of);
         let kept = match &old.put {
             Put::NeedsId(id) => {
                 moves.old.task(*id).and_then(|t| moves.kept(place_of(t)))
@@ -264,7 +263,7 @@ impl Model {
             p.cands.iter().position(|c| match (&c.put, &old.put) {
                 (Put::Text(x), Put::Text(y)) => x == y,
                 (Put::NeedsId(id), Put::NeedsId(_)) => {
-                    kept.is_some() && line(*id) == kept
+                    self.snap.task(*id).map(place_of) == kept
                 }
                 _ => false,
             })
