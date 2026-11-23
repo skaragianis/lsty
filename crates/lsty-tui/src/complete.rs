@@ -3,7 +3,7 @@
 
 use lsty_core::keys::{Action, Fed, Mode, Outcome as Pressed, Stroke};
 
-use crate::{field::is_sep, grants::DEP, model::Model};
+use crate::{candidates::GAP, field::is_sep, grants::DEP, model::Model};
 
 /// How many candidates the popup shows at once.
 pub(crate) const POPUP_ROWS: usize = 8;
@@ -68,7 +68,8 @@ impl Popup {
     }
 }
 
-/// Whether two candidates insert the same text under the same label.
+/// Whether two candidates insert the same text for the same label, not
+/// counting the place that names a task: a reading may number it anew.
 /// The task of a `dep:` candidate is not compared: it belongs to one
 /// reading.
 fn same_choice(a: &Candidate, b: &Candidate) -> bool {
@@ -79,7 +80,12 @@ fn same_choice(a: &Candidate, b: &Candidate) -> bool {
             false
         }
     };
-    put && a.label == b.label
+    put && tail(&a.label) == tail(&b.label)
+}
+
+/// A label without the place that names its task.
+fn tail(label: &str) -> &str {
+    label.split_once(GAP).map_or(label, |(_, tail)| tail)
 }
 
 /// What a draft keeps of the popup.

@@ -548,7 +548,6 @@ impl Model {
                 Change::Lost | Change::Found | Change::Same => {}
             }
         }
-        self.refresh_popup();
     }
 
     /// Puts pasted text into the field.
