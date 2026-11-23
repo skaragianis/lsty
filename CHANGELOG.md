@@ -4,6 +4,31 @@ Changes a lsty user can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.9.0 (2026-11-23)
+
+### Breaking
+
+- **tui:** Number list rows by their place in the list, from 1, in place of their line in the file; `{n}G`, `{n}gg` and `:N` go to place n. A bare number in any other `:` command is a place too, so `:do 3` completes the row numbered 3; todo.sh's line numbers stay for the command line (`lsty do 3`) and in the detail panel, which shows the line as `nr`.
+
+### Added
+
+- **tui:** Show the cursor position on the status line, left of the version: the task's place over the rows in the list (` 3|40 `), and in INSERT the column over the line's length as well (` 3|40│12|58 `).
+- **tui:** Name the id of the task shown in the detail panel title, `[2]─Detail "id:65f9"`.
+
+### Changed
+
+- **tui:** Name tasks by their place in the list in every message, as the numbers on screen show them: `3 moved to 1`, `1 done: A; archived to done.txt`, `undid: 3 moved back from 1`. The detail panel's `blocked by` row, the `:ls` and `:show` popups and the `dep:` completion name places too. A hint's command to copy keeps the todo.sh form.
+- **tui:** Lean the status line: a one-letter mode (` N `, ` V `, ` I `, ` C `), the sort as `sort(manual)`, and no file name. A missing file shows `[New]` in the list title instead.
+- **tui:** Quote the path in the list title, `[1]─"~/todo.txt"`, with no padding spaces, like every other box title.
+- **tui:** Say `task` or `tasks` after every count in a message (`2 tasks done; 1 task already done`), and say `moved 3 tasks` when a paste of cut tasks moved them all.
+- **cli:** Say `task` or `tasks` after the counts of `lsty archive` and `lsty next` too: `archived 2 tasks to done.txt`, `nothing ready (2 tasks blocked, 1 task later)`.
+
+### Fixed
+
+- **tui:** End a list title cut short on a whole filter chip and `…`, never on the gap after one; a click on the `…` acts on that chip.
+- **theme:** Colour a due date as due soon only within `upcoming_days`, as the `Upcoming` filter lists it, also when it is set below 6; dates up to 6 days away no longer always count as soon.
+- **tui:** Name the task in the message of a refused link restore after a paste (`a dependent of a changed since; dep:a not restored`), in place of a number that was no longer right.
+
 ## 0.8.0 (2026-11-19)
 
 ### Breaking
