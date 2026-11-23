@@ -17,8 +17,8 @@ use crate::{
     model::Model,
     msg::{Cmd, Msg},
     test_util::{
-        alone, cursor_text, deps, held_lock, keys, load_of, press, reload,
-        screen, start, started_from, workdir, workdir_model,
+        alone, cursor_text, deps, held_lock, keys, load_of, minute, press,
+        reload, screen, start, started_from, workdir, workdir_model,
     },
 };
 
@@ -54,12 +54,6 @@ fn watched(dir: &std::path::Path, config: Config) -> (Model, Rc<Feed>) {
 /// The change of a file, as the watch tells it.
 fn changed(model: &mut Model) -> Vec<Cmd> {
     model.update(Msg::Notice(Notice::Changed))
-}
-
-/// The clock reaching a minute, with the reading it asks for done.
-fn minute(model: &mut Model) {
-    let msg = load_of(model.update(Msg::Minute)).read();
-    model.update(msg);
 }
 
 fn debounce() -> Vec<Cmd> {

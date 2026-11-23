@@ -9,8 +9,8 @@ use crate::{
     model::Model,
     msg::Msg,
     test_util::{
-        NOW, alone, deps, instant, keys, press, reload, started, todo_of,
-        workdir,
+        NOW, alone, deps, instant, keys, minute, press, reload, started,
+        todo_of, workdir,
     },
 };
 
@@ -763,18 +763,30 @@ fn the_names_follow_the_files() {
 
 #[test]
 fn a_new_day_changes_the_due_dates_of_the_candidates() {
-    let dir = workdir("Hid t:2026-10-01\nPay due:2026-09-30\nB\n");
+    let dir = workdir(
+        "Hid t:2026-10-01\nPay due:2026-09-30\nBill due:2026-09-30\nB\n",
+    );
     let now = Rc::new(Cell::new(instant(NOW)));
     let mut d = deps(dir.path(), Config::default());
     let clock = Rc::clone(&now);
     d.now = Box::new(move || clock.get());
     let mut model = started(d);
     press(&mut model, "Ga dep:");
-    assert_eq!(labels(&model), ["line 1  Hid", "1  Pay  tomorrow"]);
-    keys(&mut model, "<BS>");
+    keys(&mut model, "<Down><Down>");
+    let at = |m: &Model| m.popup().map(|p| p.at);
+    assert_eq!(
+        labels(&model),
+        ["line 1  Hid", "1  Pay  tomorrow", "2  Bill  tomorrow"]
+    );
+    assert_eq!(at(&model), Some(2));
+    // The tick brings the new day: the task stays selected, renumbered.
     now.set(instant("2026-10-01T09:00:00Z"));
-    keys(&mut model, ":");
-    assert_eq!(labels(&model), ["1  Hid", "2  Pay  1d late"]);
+    minute(&mut model);
+    assert_eq!(
+        labels(&model),
+        ["1  Hid", "2  Pay  1d late", "3  Bill  1d late"]
+    );
+    assert_eq!(at(&model), Some(2));
 }
 
 /// A list whose first task offers ten names, the last one wide.
