@@ -67,7 +67,7 @@ impl Model {
             .into_iter()
             .filter_map(|c| match c.put {
                 Put::Text(text) => Some(text),
-                Put::NeedsId(..) => None,
+                Put::NeedsId(_) => None,
             })
             .collect()
     }

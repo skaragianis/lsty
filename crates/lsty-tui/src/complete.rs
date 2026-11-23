@@ -3,7 +3,12 @@
 
 use lsty_core::keys::{Action, Fed, Mode, Outcome as Pressed, Stroke};
 
-use crate::{field::is_sep, grants::DEP, model::Model};
+use crate::{
+    field::is_sep,
+    grants::DEP,
+    model::Model,
+    track::{Moves, place_of},
+};
 
 /// How many candidates the popup shows at once.
 pub(crate) const POPUP_ROWS: usize = 8;
@@ -13,9 +18,8 @@ pub(crate) const POPUP_ROWS: usize = 8;
 pub(crate) enum Put {
     /// This text.
     Text(String),
-    /// `dep:` and the id of the task at this line, which gets one now,
-    /// with the text and tags that name it across readings.
-    NeedsId(lsty_core::list::TaskId, String),
+    /// `dep:` and the id of the task at this line, which gets one now.
+    NeedsId(lsty_core::list::TaskId),
 }
 
 /// A line of the popup and what accepting it does.
@@ -66,17 +70,6 @@ impl Popup {
         let top = top.min(self.at);
         let end = (top + rows).min(self.cands.len());
         (top, self.cands.get(top..end).unwrap_or_default())
-    }
-}
-
-/// Whether two candidates insert the same text for the same task. A
-/// task that waits for an id is known by its text and tags, since its
-/// place and due date change with a reading or a day and its id with it.
-fn same_choice(a: &Candidate, b: &Candidate) -> bool {
-    match (&a.put, &b.put) {
-        (Put::Text(x), Put::Text(y))
-        | (Put::NeedsId(_, x), Put::NeedsId(_, y)) => x == y,
-        _ => false,
     }
 }
 
@@ -252,19 +245,32 @@ impl Model {
 
     /// Makes the candidates again after a new reading of the files, and
     /// keeps the selection on the same candidate when it is still
-    /// listed, else on the first.
-    pub(crate) fn refresh_popup(&mut self) {
+    /// listed, else on the first: a task to wait for is the same when its
+    /// line is, as `moves` follows it.
+    pub(crate) fn refresh_popup(&mut self, moves: &Moves<'_>) {
         let Some(old) = self.popup().and_then(|p| p.cands.get(p.at).cloned())
         else {
             return;
         };
         self.follow_word(true, true);
+        let line = |id| self.snap.task(id).map(place_of);
+        let kept = match &old.put {
+            Put::NeedsId(id) => {
+                moves.old.task(*id).and_then(|t| moves.kept(place_of(t)))
+            }
+            Put::Text(_) => None,
+        };
+        let at = self.popup().and_then(|p| {
+            p.cands.iter().position(|c| match (&c.put, &old.put) {
+                (Put::Text(x), Put::Text(y)) => x == y,
+                (Put::NeedsId(id), Put::NeedsId(_)) => {
+                    kept.is_some() && line(*id) == kept
+                }
+                _ => false,
+            })
+        });
         if let Some(popup) = self.popup_mut() {
-            popup.at = popup
-                .cands
-                .iter()
-                .position(|c| same_choice(c, &old))
-                .unwrap_or(0);
+            popup.at = at.unwrap_or(0);
             popup.top = 0;
             popup.step(0);
         }
@@ -319,7 +325,7 @@ impl Model {
                 }
                 text.clone()
             }
-            Put::NeedsId(task, _) => match self.give_id(*task) {
+            Put::NeedsId(task) => match self.give_id(*task) {
                 Ok(text) => text,
                 Err(e) => {
                     self.fail(&e);

@@ -27,7 +27,7 @@ use crate::{
 /// The fewest characters of a word that complete as a key.
 const MIN_KEY_WORD: usize = 2;
 /// What separates the parts of the label of a task.
-const GAP: &str = "  ";
+pub(crate) const GAP: &str = "  ";
 /// The keys the popup offers besides those of the tag prompt.
 const MORE_KEYS: [&str; 3] = ["started:", "ended:", "owner:"];
 
@@ -40,8 +40,6 @@ struct Open {
     given: Option<String>,
     text: String,
     lower: String,
-    /// The text and tags: what tells the task from another across readings.
-    key: String,
     tail: String,
 }
 
@@ -88,40 +86,30 @@ pub(crate) fn tokens_of(
 
 fn open_task(snap: &Snapshot, task: &Task, line: &Line, today: Today) -> Open {
     let text = errs::lossy(&line.text());
-    let key = key_of(line, &text);
     Open {
         id: task.task_id(),
         nr: task.nr(),
         given: snap.id_of(task).map(errs::lossy),
         lower: lower(&text),
-        tail: tail_of(key.clone(), task, line, today),
-        key,
+        tail: tail_of(task, line, &text, today),
         text,
     }
 }
 
-/// The text and tags of a task, as its label in the popup starts.
-fn key_of(line: &Line, text: &str) -> String {
+/// The label of a task in the popup after its number: text, tags, due.
+fn tail_of(task: &Task, line: &Line, text: &str, today: Today) -> String {
     let tags: Vec<String> = line
         .tokens()
         .filter(|t| matches!(t.kind, Kind::Project | Kind::Context))
         .map(|t| errs::lossy(t.name_text()))
         .collect();
-    [text, &tags.join(" ")]
+    let due = date_cell(task, line, today).text;
+    let parts = [text, &tags.join(" "), &due];
+    parts
         .into_iter()
         .filter(|p| !p.is_empty())
         .collect::<Vec<_>>()
         .join(GAP)
-}
-
-/// The label of a task in the popup after its number: its key and due.
-fn tail_of(key: String, task: &Task, line: &Line, today: Today) -> String {
-    let due = date_cell(task, line, today).text;
-    if due.is_empty() {
-        key
-    } else {
-        format!("{key}{GAP}{due}")
-    }
 }
 
 impl Model {
@@ -212,7 +200,7 @@ impl Model {
                             self.labelled_task(
                                 places.get_or_init(|| self.lines()),
                                 task,
-                                tail_of(key_of(line, &own), task, line, today),
+                                tail_of(task, line, &own, today),
                             )
                         },
                     );
@@ -262,7 +250,7 @@ impl Model {
                     return None;
                 }
                 let put = id.map_or_else(
-                    || Put::NeedsId(o.id, o.key.clone()),
+                    || Put::NeedsId(o.id),
                     |id| Put::Text(format!("dep:{id}")),
                 );
                 Some(Candidate {
