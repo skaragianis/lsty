@@ -726,20 +726,21 @@ fn a_letter_typed_in_front_of_a_word_does_not_open_a_popup() {
 
 #[test]
 fn a_reload_keeps_the_selection_on_the_same_task_to_wait_for() {
-    let dir = workdir("Alpha\nBravo\nCharlie\n");
+    let dir = workdir("Alpha\nBravo due:2026-09-30\nCharlie\n");
     let mut model = typing(dir.path(), " dep:");
     keys(&mut model, "<Down>");
     assert_eq!(selected(&model), Some(1));
     let chosen = |m: &Model| m.popup().map(|p| p.cands[p.at].label.clone());
-    assert_eq!(chosen(&model).as_deref(), Some("2  Bravo"));
-    // A line above renumbers the tasks, and Bravo stays selected.
+    assert_eq!(chosen(&model).as_deref(), Some("2  Bravo  tomorrow"));
+    // A line above renumbers the tasks and the due date moves: Bravo
+    // stays selected.
     fs::write(
         dir.path().join("todo.txt"),
-        "Zero\nAlpha\nBravo\nCharlie\nDelta\n",
+        "Zero\nAlpha\nBravo due:2026-10-05\nCharlie\nDelta\n",
     )
     .unwrap();
     reload(&mut model);
-    assert_eq!(chosen(&model).as_deref(), Some("3  Bravo"));
+    assert_eq!(chosen(&model).as_deref(), Some("3  Bravo  mon"));
 }
 
 #[test]
