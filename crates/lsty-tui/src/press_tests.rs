@@ -902,6 +902,13 @@ fn a_message_names_tasks_by_their_place() {
         ),
         // a dependent that is only its dep: tag ends as no task
         ("A id:a\ndep:a\n", "", "dd", "1 deleted; unblocked 2"),
+        // a repeat that changes nothing lets go of the rows kept in sight
+        (
+            "A +x\nB +x\n",
+            "",
+            "/+x<CR>gT+x<CR>gT+x<CR>",
+            "line 1 has no +x",
+        ),
         // a task no row shows and no id names, by its file line
         (
             "A +x id:a\nB dep:a\n",

@@ -142,6 +142,9 @@ pub(crate) struct Live {
     /// The message of that refusal, to name by places once they are shown,
     /// and what follows it on the status line.
     pub(crate) refused: Option<(errs::Msg, String)>,
+    /// The messages of a write that changed nothing, and what they said: the
+    /// tasks they name keep their places until the rows kept in sight go.
+    pub(crate) no_op: Option<(Vec<errs::Msg>, String)>,
     shown: Shown,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
