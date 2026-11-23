@@ -104,12 +104,14 @@ impl Tx {
         let Some(index) = landed else {
             return changed(Msg::from(format!("a dependent of {text}")));
         };
-        let Some(row) = self.todo.rows().get(index) else {
+        let Some(row) = self
+            .todo
+            .rows()
+            .get(index)
+            .filter(|row| !Line::is_blank_text(&row.orig))
+        else {
             return gone(&text);
         };
-        if Line::is_blank_text(&row.orig) {
-            return gone(&text);
-        }
         let at = LineRef {
             source: Source::Todo,
             index,
