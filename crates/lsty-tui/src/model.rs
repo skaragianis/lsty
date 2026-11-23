@@ -630,6 +630,7 @@ impl Model {
         );
         self.natural = Natural::of(&self.rows);
         self.relabel_prompt();
+        self.refresh_popup();
     }
 
     /// Today and the days that count as soon.

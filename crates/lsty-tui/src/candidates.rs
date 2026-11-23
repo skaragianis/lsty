@@ -27,7 +27,7 @@ use crate::{
 /// The fewest characters of a word that complete as a key.
 const MIN_KEY_WORD: usize = 2;
 /// What separates the parts of the label of a task.
-const GAP: &str = "  ";
+pub(crate) const GAP: &str = "  ";
 /// The keys the popup offers besides those of the tag prompt.
 const MORE_KEYS: [&str; 3] = ["started:", "ended:", "owner:"];
 

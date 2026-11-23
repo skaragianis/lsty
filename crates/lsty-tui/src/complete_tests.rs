@@ -731,14 +731,15 @@ fn a_reload_keeps_the_selection_on_the_same_task_to_wait_for() {
     keys(&mut model, "<Down>");
     assert_eq!(selected(&model), Some(1));
     let chosen = |m: &Model| m.popup().map(|p| p.cands[p.at].label.clone());
-    let label = chosen(&model);
+    assert_eq!(chosen(&model).as_deref(), Some("2  Bravo"));
+    // A line above renumbers the tasks, and Bravo stays selected.
     fs::write(
         dir.path().join("todo.txt"),
-        "Alpha\nBravo\nCharlie\nDelta\n",
+        "Zero\nAlpha\nBravo\nCharlie\nDelta\n",
     )
     .unwrap();
     reload(&mut model);
-    assert_eq!(chosen(&model), label);
+    assert_eq!(chosen(&model).as_deref(), Some("3  Bravo"));
 }
 
 #[test]
@@ -762,18 +763,18 @@ fn the_names_follow_the_files() {
 
 #[test]
 fn a_new_day_changes_the_due_dates_of_the_candidates() {
-    let dir = workdir("Pay due:2026-09-30\nB\n");
+    let dir = workdir("Hid t:2026-10-01\nPay due:2026-09-30\nB\n");
     let now = Rc::new(Cell::new(instant(NOW)));
     let mut d = deps(dir.path(), Config::default());
     let clock = Rc::clone(&now);
     d.now = Box::new(move || clock.get());
     let mut model = started(d);
     press(&mut model, "Ga dep:");
-    assert_eq!(labels(&model), ["1  Pay  tomorrow"]);
+    assert_eq!(labels(&model), ["line 1  Hid", "1  Pay  tomorrow"]);
     keys(&mut model, "<BS>");
     now.set(instant("2026-10-01T09:00:00Z"));
     keys(&mut model, ":");
-    assert_eq!(labels(&model), ["1  Pay  1d late"]);
+    assert_eq!(labels(&model), ["1  Hid", "2  Pay  1d late"]);
 }
 
 /// A list whose first task offers ten names, the last one wide.
