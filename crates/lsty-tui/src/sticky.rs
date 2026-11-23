@@ -238,16 +238,18 @@ impl Model {
     /// started from.
     /// A refilter on its way does this itself, and the rows stay as drawn
     /// until then.
-    pub(crate) fn leave_sticky(&mut self, keep: Option<Place>) {
+    /// Tells whether a row left.
+    pub(crate) fn leave_sticky(&mut self, keep: Option<Place>) -> bool {
         if self.refilter.owed {
-            return;
+            return false;
         }
         let place = self.drawn_cursor();
         let view = self.view_offset();
         let [going_on, visual, press] = self.under_way();
         let keep = [keep, going_on, visual, press];
         let top = self.rows.get(self.top).map(Row::place);
-        if self.sticky.drop_aged(&keep) {
+        let left = self.sticky.drop_aged(&keep);
+        if left {
             self.rebuild_at(place, view);
             // A view with the cursor out of it keeps its top task.
             let kept = top.and_then(|at| self.row_at(at));
@@ -255,5 +257,6 @@ impl Model {
                 self.keep_top(i);
             }
         }
+        left
     }
 }

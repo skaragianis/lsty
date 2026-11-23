@@ -264,6 +264,7 @@ impl Model {
             then(self);
             let said = self.rendered(&msgs, &was);
             self.message.put(join(&said));
+            self.live.no_op = Some((msgs, said.join("; ")));
             return said;
         }
         let touched = touched(&outcome);
@@ -300,6 +301,18 @@ impl Model {
             self.release_sticky();
             let text = self.rendered(&[said], &self.lines());
             self.message.edit(|_| format!("{}{tail}", text[0]));
+        }
+    }
+
+    /// Names the tasks of a message of a write that changed nothing by the
+    /// rows left once the rows kept in sight went, if it still shows.
+    pub(crate) fn rename_no_op(&mut self) {
+        let Some((msgs, said)) = self.live.no_op.take() else {
+            return;
+        };
+        if self.message.text() == Some(said.as_str()) {
+            let said = self.rendered(&msgs, &self.lines());
+            self.message.edit(|_| said.join("; "));
         }
     }
 
