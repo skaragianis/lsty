@@ -3,7 +3,7 @@
 
 use lsty_core::keys::{Action, Fed, Mode, Outcome as Pressed, Stroke};
 
-use crate::{candidates::GAP, field::is_sep, grants::DEP, model::Model};
+use crate::{field::is_sep, grants::DEP, model::Model};
 
 /// How many candidates the popup shows at once.
 pub(crate) const POPUP_ROWS: usize = 8;
@@ -13,8 +13,9 @@ pub(crate) const POPUP_ROWS: usize = 8;
 pub(crate) enum Put {
     /// This text.
     Text(String),
-    /// `dep:` and the id of the task at this line, which gets one now.
-    NeedsId(lsty_core::list::TaskId),
+    /// `dep:` and the id of the task at this line, which gets one now,
+    /// with the text and tags that name it across readings.
+    NeedsId(lsty_core::list::TaskId, String),
 }
 
 /// A line of the popup and what accepting it does.
@@ -68,19 +69,15 @@ impl Popup {
     }
 }
 
-/// Whether two candidates insert the same text for the same task, by
-/// the text of its label: the place that names it and the due date after
-/// it are left out, since a new reading or a new day changes them. The
-/// task of a `dep:` candidate is not compared: it belongs to one reading.
+/// Whether two candidates insert the same text for the same task. A
+/// task that waits for an id is known by its text and tags, since its
+/// place and due date change with a reading or a day and its id with it.
 fn same_choice(a: &Candidate, b: &Candidate) -> bool {
-    let put = match (&a.put, &b.put) {
-        (Put::Text(x), Put::Text(y)) => x == y,
-        (Put::NeedsId(_), Put::NeedsId(_)) => true,
-        (Put::Text(_), Put::NeedsId(_)) | (Put::NeedsId(_), Put::Text(_)) => {
-            false
-        }
-    };
-    put && a.label.split(GAP).nth(1) == b.label.split(GAP).nth(1)
+    match (&a.put, &b.put) {
+        (Put::Text(x), Put::Text(y))
+        | (Put::NeedsId(_, x), Put::NeedsId(_, y)) => x == y,
+        _ => false,
+    }
 }
 
 /// What a draft keeps of the popup.
@@ -322,7 +319,7 @@ impl Model {
                 }
                 text.clone()
             }
-            Put::NeedsId(task) => match self.give_id(*task) {
+            Put::NeedsId(task, _) => match self.give_id(*task) {
                 Ok(text) => text,
                 Err(e) => {
                     self.fail(&e);

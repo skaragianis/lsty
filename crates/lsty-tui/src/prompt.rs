@@ -441,7 +441,7 @@ impl Model {
             .iter()
             .filter_map(|c| match &c.put {
                 Put::Text(text) => Some(text.clone()),
-                Put::NeedsId(_) => None,
+                Put::NeedsId(..) => None,
             })
             .collect();
         let cands = self.labelled(texts);
