@@ -146,7 +146,7 @@ impl Row {
 
     /// Whether the line no longer holds a task: it is removed, or blank.
     pub(super) fn is_gone(&self) -> bool {
-        self.removed || (self.blanked && self.raw.is_empty())
+        self.removed || Line::is_blank_text(&self.raw)
     }
 
     /// The text after the change; a removed line has none.

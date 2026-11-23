@@ -900,6 +900,8 @@ fn a_message_names_tasks_by_their_place() {
             ":set keep_adding<CR>ohidden by current filters in 2 seconds or at the next key<CR>",
             "2 added as id:t001: hidden by current filters in 2 seconds or at the next key",
         ),
+        // a dependent that is only its dep: tag ends as no task
+        ("A id:a\ndep:a\n", "", "dd", "1 deleted; unblocked 2"),
         // a task no row shows and no id names, by its file line
         (
             "A +x id:a\nB dep:a\n",
