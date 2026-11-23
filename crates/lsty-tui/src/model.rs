@@ -315,7 +315,10 @@ impl Model {
         // The rows go with the message that names them, which this input
         // took down or replaced.
         let new = self.message.text().is_none() || self.message.is_new(said);
-        if !self.live.wrote && new && self.release_sticky() {
+        if self.live.wrote || !new {
+            return;
+        }
+        if self.release_sticky() {
             self.rename_no_op();
         }
     }
