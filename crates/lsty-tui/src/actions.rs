@@ -132,10 +132,10 @@ impl Model {
             self.cursor = cursor;
             return false;
         };
-        if let Some(words) = command.words().filter(|_| there > 0) {
-            let lines = said.len() - moves;
-            self.message
-                .say(shortened(&said, lines, &changing, there, words));
+        if let Some((did, already)) = command.words().filter(|_| there > 0) {
+            let head = shortened(&said, said.len() - moves, &changing, did);
+            let already = format!("{} {already}", ops::counted(there, "task"));
+            self.message.say(format!("{head}; {already}"));
         }
         self.scroll();
         true
@@ -420,25 +420,23 @@ impl Model {
     }
 }
 
-/// What `said` becomes when `there` tasks were already as asked: a count of
-/// the `changing` ones where one line says each, then the count of those
-/// there. `words` are how the command says each.
+/// What `said` becomes when some tasks were already as asked, before the
+/// count of those: a count of the `changing` ones where one line says
+/// each. `did` is how the command says each.
 fn shortened(
     said: &[String],
     lines: usize,
     changing: &[&Chosen],
-    there: usize,
-    (did, already): (&str, &str),
+    did: &str,
 ) -> String {
     let change = changing.len();
     // Taking a claim over has one line, which the count would lose.
     let plain = !changing.iter().any(|t| matches!(t.claim, Claim::Agent));
-    let head = if plain && lines == change {
+    if plain && lines == change {
         format!("{} {did}", ops::counted(change, "task"))
     } else {
         said.join("; ")
-    };
-    format!("{head}; {} {already}", ops::counted(there, "task"))
+    }
 }
 
 fn join(said: &[String]) -> Option<String> {
