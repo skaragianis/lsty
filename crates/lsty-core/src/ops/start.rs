@@ -42,7 +42,7 @@ fn start_task(
     stamp: &str,
     opts: StartOpts,
 ) -> Result<()> {
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let task = tx.task(id).ok_or_else(gone)?;
     let line = tx.snapshot().line(task).clone();
     match task.state() {
@@ -51,7 +51,7 @@ fn start_task(
                 tx.snapshot(),
                 task,
                 State::Done,
-                format!("{handle} is done"),
+                name.then(" is done"),
                 format!("use lsty reopen {} first", tx.given(id)),
             ));
         }
@@ -69,7 +69,7 @@ fn start_task(
         "" => String::new(),
         name => format!(" by {name}"),
     };
-    tx.say(format!("{handle} started{by}"));
+    tx.say(name.then(format!(" started{by}")));
     if opts.ignore_blocked {
         say_was_blocked(tx, id);
     }
@@ -85,21 +85,21 @@ fn restart_task(
     stamp: &str,
     opts: StartOpts,
 ) -> Result<()> {
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let task = tx.task(id).ok_or_else(gone)?;
     let snap = tx.snapshot();
     if !held_by_other(snap, &env.actor, task) {
-        tx.say(format!("{handle} is already underway"));
+        tx.say(name.then(" is already underway"));
         return Ok(());
     }
-    check_task_claim(snap, &env.actor, task, &handle, opts.claim)?;
+    check_task_claim(snap, &env.actor, task, &name.typed, opts.claim)?;
     let holder = holder_name(snap, task).to_vec();
     let claimed = with_claim(tx, id, line, &env.actor, stamp)?;
     tx.set(id, claimed.raw(), Path::Action);
     let phrase = claim_phrase(env.actor.is_human(), ClaimMode::Ends);
-    let mut said = [handle.as_bytes(), phrase, &holder].concat();
+    let mut said = name.then(phrase).then(holder);
     if env.actor.is_human() {
-        said.extend_from_slice(b"; now yours");
+        said = said.then("; now yours");
     }
     tx.say(said);
     Ok(())

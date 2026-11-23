@@ -348,7 +348,14 @@ const WRITTEN: &[Aimed] = &[
         "Copy\nB\n",
         "Copy\n2026-09-29 Copy id:t001\nB\n",
     ),
-    ("A\n  \nB\n", ":del 2<CR>", "N\nA\n  \nB\n", "N\nA\n\nB\n"),
+    ("A\n  \nB\n", ":del 2<CR>", "N\nA\n  \nB\n", "N\nA\n  \n\n"),
+    // the second row of a filtered list, a place that is not its line
+    (
+        "A\nB +x\nC +x\n",
+        "/+x<CR>:del 2<CR>",
+        "N\nA\nB +x\nC +x\n",
+        "N\nA\nB +x\n\n",
+    ),
     (
         DONE_B,
         "2x",

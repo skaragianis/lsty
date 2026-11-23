@@ -401,6 +401,16 @@ fn prerequisites_are_the_open_tasks_with_a_matching_text() {
         let model = typing(dir.path(), typed);
         assert_eq!(labels(&model), want, "{typed:?}");
     }
+    // each task by its place in the list shown, else its line
+    let mut model = model_of(dir.path());
+    keys(&mut model, "/Write<CR>Ga dep:");
+    let want = [
+        "1  Write parser  +spec01",
+        "line 2  Add CLI ls  +spec01",
+        "2  Write docs  +spec01",
+        "line 5  Call client",
+    ];
+    assert_eq!(labels(&model), want);
 }
 
 // 39.28, 39.29: not the task itself, what it waits for, or a cycle.
@@ -716,19 +726,31 @@ fn a_letter_typed_in_front_of_a_word_does_not_open_a_popup() {
 
 #[test]
 fn a_reload_keeps_the_selection_on_the_same_task_to_wait_for() {
-    let dir = workdir("Alpha\nBravo\nCharlie\n");
+    let rest = "Alpha\nBravo due:2026-09-30\nTwin +a\nTwin +b\n\
+        Pay due:2026-10-01\nPay due:2026-10-05\nSame\nSame\nCharlie\n";
+    let dir = workdir(rest);
     let mut model = typing(dir.path(), " dep:");
     keys(&mut model, "<Down>");
     assert_eq!(selected(&model), Some(1));
     let chosen = |m: &Model| m.popup().map(|p| p.cands[p.at].label.clone());
-    let label = chosen(&model);
-    fs::write(
-        dir.path().join("todo.txt"),
-        "Alpha\nBravo\nCharlie\nDelta\n",
-    )
-    .unwrap();
-    reload(&mut model);
-    assert_eq!(chosen(&model), label);
+    assert_eq!(chosen(&model).as_deref(), Some("2  Bravo  tomorrow"));
+    // A line above renumbers the tasks: the selected one stays, and so
+    // does the second of each pair of twins that differ by a tag, by the
+    // due date or by nothing, since the line is what is followed.
+    let mut above = String::new();
+    for (down, label) in [
+        ("", "3  Bravo  tomorrow"),
+        ("<Down><Down>", "6  Twin  +b"),
+        ("<Down><Down>", "9  Pay  mon"),
+        ("<Down><Down>", "12  Same"),
+    ] {
+        above.push_str("Top\n");
+        fs::write(dir.path().join("todo.txt"), format!("{above}{rest}"))
+            .unwrap();
+        keys(&mut model, down);
+        reload(&mut model);
+        assert_eq!(chosen(&model).as_deref(), Some(label));
+    }
 }
 
 #[test]

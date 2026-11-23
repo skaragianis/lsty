@@ -14,7 +14,7 @@ use super::{
     tx::{Picked, Tx, archived_error},
 };
 use crate::{
-    errs::{Code, Error, Result, Source},
+    errs::{Code, Error, Name, Result, Source},
     lineid::follow,
     list::{Snapshot, TaskId},
     todotxt::{Line, trim},
@@ -25,7 +25,8 @@ use crate::{
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct EditPlan {
     given: String,
-    handle: String,
+    /// The task as read when it was picked.
+    name: Name,
     index: usize,
     raw: Vec<u8>,
     before: Vec<Vec<u8>>,
@@ -40,7 +41,7 @@ impl EditPlan {
 
     /// How messages name the task.
     pub fn handle(&self) -> &str {
-        &self.handle
+        &self.name.typed
     }
 }
 
@@ -73,7 +74,10 @@ pub fn prepare_edit(
     let given = target.given().map_or_else(|| handle.clone(), str::to_owned);
     Ok(EditPlan {
         given,
-        handle,
+        name: Name {
+            place: None,
+            ..snap.name(task, handle)
+        },
         index: task.nr().index(),
         raw: snap.line(task).raw().to_vec(),
         before,
@@ -137,10 +141,8 @@ fn followed(tx: &mut Tx, plan: &EditPlan) -> Result<TaskId> {
 }
 
 fn conflict(plan: &EditPlan) -> Error {
-    Error::new(
-        Code::EditConflict,
-        format!("{} changed while it was being edited", plan.handle),
-    )
+    let said = plan.name.clone().then(" changed while it was being edited");
+    Error::named(Code::EditConflict, said)
 }
 
 fn edit_task(
@@ -151,12 +153,12 @@ fn edit_task(
 ) -> Result<()> {
     let old = tx.line_of(id)?;
     let unchanged = raw == old.raw();
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     if unchanged {
-        tx.say(format!("{handle} unchanged"));
+        tx.say(name.then(" unchanged"));
         return Ok(());
     }
     let raw = tx.set_edited_on(&env.actor, id, raw, Path::Typed)?;
-    tx.say([handle.as_bytes(), b" ", &raw].concat());
+    tx.say(name.then(" ").then(raw));
     Ok(())
 }

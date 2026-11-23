@@ -283,7 +283,7 @@ fn many_tasks_are_counted_when_their_messages_do_not_fit_the_status_line() {
     assert_eq!(said(42, "Vjgt+x<CR>").as_deref(), Some(message));
     assert_eq!(said(41, "Vjgt+x<CR>").as_deref(), Some("2 tasks changed"));
     let some = said(41, "gt+x<CR>Vjgt+x<CR>");
-    assert_eq!(some.as_deref(), Some("1 task changed; 1 unchanged"));
+    assert_eq!(some.as_deref(), Some("1 task changed; 1 task unchanged"));
     // Changing none, they say why, whatever the room, and so does `.`.
     let none = "1 already has +x; 2 already has +x";
     assert_eq!(said(41, "Vjgt+x<CR>Vjgt+x<CR>").as_deref(), Some(none));
@@ -375,4 +375,16 @@ fn the_command_line_completes_filter_terms_as_the_search_does() {
         keys(&mut model, typed);
         assert_eq!(text_of(&model), want, "{typed}");
     }
+}
+
+/// The search popup names tasks by the places of the list it filters now.
+#[test]
+fn the_search_popup_names_places_as_the_list_filters() {
+    let (_dir, mut model) = crate::test_util::workdir_model(
+        "Z\nA dep:p\nP id:p dep:q\nQ id:q dep:p\n",
+        alone(),
+    );
+    keys(&mut model, "/dep:<Tab>");
+    let popup = |m: &Model| screen(m, 80, 12)[10].clone();
+    assert_eq!(popup(&model), "id:p  P  2  Q");
 }

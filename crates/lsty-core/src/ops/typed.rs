@@ -68,25 +68,28 @@ fn stage_typed(
 ) -> Result<()> {
     let task = tx.task(id).ok_or_else(gone)?;
     let old = tx.snapshot().line(task);
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     if !Line::parse(draft).has_text() {
         return Err(empty_task(tx.snapshot(), task));
     }
     let typed = trim_end(draft);
-    let (text, mut warns) = soft_tags(typed, old, env.clock.today());
+    let (text, warns) = soft_tags(typed, old, env.clock.today());
     let text = tx.without_claim(&env.actor, id, old, text)?;
     if !Line::parse(&text).has_text() {
         return Err(empty_task(tx.snapshot(), task));
     }
-    warns.extend(repeated_keys(&handle, old, &text));
+    let repeats = repeated_keys(old, &text);
     if text == old.raw() {
-        tx.say(format!("{handle} unchanged"));
+        tx.say(name.then(" unchanged"));
         return Ok(());
     }
     tx.set(id, &text, Path::Typed);
-    tx.say([handle.as_bytes(), b" ", &text].concat());
+    tx.say(name.clone().then(" ").then(text));
     for warning in warns {
         tx.say(warning);
+    }
+    for tail in repeats {
+        tx.say(name.clone().then(tail));
     }
     Ok(())
 }
@@ -96,7 +99,7 @@ fn empty_task(snap: &Snapshot, task: &Task) -> Error {
         snap,
         task,
         task.state(),
-        "empty task".to_owned(),
+        "empty task".into(),
         "use dd to delete".to_owned(),
     )
 }
@@ -178,8 +181,8 @@ fn count_key(line: &Line, key: &[u8]) -> usize {
 }
 
 /// A warning for each single-valued key that `typed` has more often
-/// than `old`, and more than once.
-fn repeated_keys(handle: &str, old: &Line, typed: &[u8]) -> Warnings {
+/// than `old`, and more than once, each after the name of the task.
+fn repeated_keys(old: &Line, typed: &[u8]) -> Warnings {
     let typed = Line::parse(typed);
     SETTABLE_KEYS
         .iter()
@@ -190,13 +193,8 @@ fn repeated_keys(handle: &str, old: &Line, typed: &[u8]) -> Warnings {
             }
             let first = typed.tokens().find(|t| t.is_tag(key))?;
             Some(
-                [
-                    handle.as_bytes(),
-                    b" already has ",
-                    first.text,
-                    b"; the first one counts",
-                ]
-                .concat(),
+                [b" already has ", first.text, b"; the first one counts"]
+                    .concat(),
             )
         })
         .collect()

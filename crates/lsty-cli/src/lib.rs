@@ -44,9 +44,10 @@ mod wait;
 pub use dispatch::run;
 pub use env::{Env, TuiArgs};
 pub use inline::{
-    Inline, inline_command, inline_commands, inline_names, inline_options,
-    run_inline,
+    Inline, Places, inline_command, inline_commands, inline_names,
+    inline_options, run_inline,
 };
+pub use read::place_name;
 
 #[cfg(test)]
 mod colour_tests;

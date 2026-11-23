@@ -2,6 +2,7 @@
 
 use std::borrow::Cow;
 
+use lsty_cli::place_name;
 use lsty_core::{
     dates::Date,
     errs::{Source, lossy},
@@ -18,6 +19,7 @@ use crate::{
     model::Model,
     open::exists_mark,
     text::{ELLIPSIS, RULE, Span, cut, framed, pad, put, width, width_of},
+    track::place_of,
     wrap::wrap_words,
 };
 
@@ -361,8 +363,9 @@ impl Model {
                 .filter(|t| t.kind == Kind::Word)
                 .map(|t| Span::new(lossy(t.text), Some(parts.slot(&t))))
                 .collect();
+            let place = self.row_at(place_of(other)).map(|i| self.place(i));
             words.push(Span::new(
-                format!("({})", other.nr()),
+                format!("({})", place_name(place, &self.snap, other)),
                 Some(Slot::Text),
             ));
             out.push(Field::words("blocked by", words));

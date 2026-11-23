@@ -29,7 +29,7 @@ x 2026-09-01 Old
 │  3   D                                                                                           │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  archived 2 to done.txt; removed 1 blank line; hidden by current filters in 2 secon
+ N  sort(manual)  archived 2 tasks to done.txt; removed 1 blank line; hidden by current filters in 2
 -- a-todo --
 B
 D
@@ -45,7 +45,7 @@ x 2026-09-28 C
 │  3   D                                                                                           │
 │                                                                                                  │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  undid: archived 2 to done.txt  x reopen  o new  a append  dd delete    1|4  9.9.9
+ N  sort(manual)  undid: archived 2 tasks to done.txt  x reopen  o new  a append         1|4  9.9.9
 -- b-todo --
 x 2026-09-28 A
 B

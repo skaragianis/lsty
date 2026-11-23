@@ -6,10 +6,10 @@ use std::sync::Arc;
 
 use super::{
     staged::{LineRef, Path},
-    tx::Tx,
+    tx::{Tx, gone},
 };
 use crate::{
-    errs::{Result, Source, lossy, lossy_path},
+    errs::{Name, Nr, Result, Source, lossy, lossy_path},
     fsio,
     list::{Task, TaskId},
 };
@@ -95,11 +95,14 @@ impl Tx {
         Ok((line, over.is_some()))
     }
 
-    /// The line number a staged line has in the file as it will be
-    /// written.
-    pub(super) fn written_nr(&self, line: LineRef) -> usize {
-        self.file(line.source)
-            .position(line.index)
-            .map_or(0, |at| at + 1)
+    /// A staged line as a message names it: by the line it has in the
+    /// file as it will be written.
+    pub(super) fn written_name(&self, line: LineRef) -> Result<Name> {
+        let at = self.file(line.source).position(line.index);
+        let nr = at.and_then(Nr::from_index).ok_or_else(gone)?;
+        let row = self.file(line.source).rows().get(line.index);
+        let id = row.and_then(|r| self.row_id(r)).map(|id| lossy(&id));
+        let name = Name::new(line.source.numbered(nr), id, line.source, None);
+        Ok(name.written(nr, (line.source, line.index)))
     }
 }

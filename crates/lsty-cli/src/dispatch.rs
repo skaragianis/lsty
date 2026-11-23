@@ -191,6 +191,7 @@ impl<'a> Session<'a> {
             home: self.env.home.as_deref(),
             parsed: &self.parsed,
             ops,
+            places: None,
         };
         handler(&call, &self.env)
     }

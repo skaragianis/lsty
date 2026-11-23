@@ -94,8 +94,8 @@ where
     };
     if let Err(e) = planned(env, &mut tx, rules, plan) {
         // Only a reading made here is worth showing: it says what is there.
-        let slot = env.read_back.filter(|_| held.is_none());
-        if let Some(slot) = slot.filter(|_| e.code() == Code::ExpectMismatch) {
+        // The names in the error are lines of it.
+        if let Some(slot) = env.read_back.filter(|_| held.is_none()) {
             slot.set(Some(tx.snap));
         }
         return Err(e);

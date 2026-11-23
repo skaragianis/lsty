@@ -3,7 +3,12 @@
 
 use lsty_core::keys::{Action, Fed, Mode, Outcome as Pressed, Stroke};
 
-use crate::{field::is_sep, grants::DEP, model::Model};
+use crate::{
+    field::is_sep,
+    grants::DEP,
+    model::Model,
+    track::{Moves, place_of},
+};
 
 /// How many candidates the popup shows at once.
 pub(crate) const POPUP_ROWS: usize = 8;
@@ -66,20 +71,6 @@ impl Popup {
         let end = (top + rows).min(self.cands.len());
         (top, self.cands.get(top..end).unwrap_or_default())
     }
-}
-
-/// Whether two candidates insert the same text under the same label.
-/// The task of a `dep:` candidate is not compared: it belongs to one
-/// reading.
-fn same_choice(a: &Candidate, b: &Candidate) -> bool {
-    let put = match (&a.put, &b.put) {
-        (Put::Text(x), Put::Text(y)) => x == y,
-        (Put::NeedsId(_), Put::NeedsId(_)) => true,
-        (Put::Text(_), Put::NeedsId(_)) | (Put::NeedsId(_), Put::Text(_)) => {
-            false
-        }
-    };
-    put && a.label == b.label
 }
 
 /// What a draft keeps of the popup.
@@ -254,19 +245,31 @@ impl Model {
 
     /// Makes the candidates again after a new reading of the files, and
     /// keeps the selection on the same candidate when it is still
-    /// listed, else on the first.
-    pub(crate) fn refresh_popup(&mut self) {
+    /// listed, else on the first: a task to wait for is the same when its
+    /// line is, as `moves` follows it.
+    pub(crate) fn refresh_popup(&mut self, moves: &Moves<'_>) {
         let Some(old) = self.popup().and_then(|p| p.cands.get(p.at).cloned())
         else {
             return;
         };
         self.follow_word(true, true);
+        let kept = match &old.put {
+            Put::NeedsId(id) => {
+                moves.old.task(*id).and_then(|t| moves.kept(place_of(t)))
+            }
+            Put::Text(_) => None,
+        };
+        let at = self.popup().and_then(|p| {
+            p.cands.iter().position(|c| match (&c.put, &old.put) {
+                (Put::Text(x), Put::Text(y)) => x == y,
+                (Put::NeedsId(id), Put::NeedsId(_)) => {
+                    self.snap.task(*id).map(place_of) == kept
+                }
+                _ => false,
+            })
+        });
         if let Some(popup) = self.popup_mut() {
-            popup.at = popup
-                .cands
-                .iter()
-                .position(|c| same_choice(c, &old))
-                .unwrap_or(0);
+            popup.at = at.unwrap_or(0);
             popup.top = 0;
             popup.step(0);
         }

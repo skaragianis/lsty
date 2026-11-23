@@ -7,7 +7,7 @@ use super::{
     tx::Tx,
 };
 use crate::{
-    errs::{Nr, Source, lossy},
+    errs::{Msg, Name, Nr, Source, lossy},
     todotxt::{Line, share},
 };
 
@@ -53,10 +53,7 @@ pub(super) fn relink(tx: &mut Tx, moved: &[Moved<'_>]) {
         }
     }
     if !nrs.is_empty() {
-        tx.say(format!(
-            "relinked {}",
-            nrs.iter().map(Nr::to_string).collect::<Vec<_>>().join(", ")
-        ));
+        tx.say(Msg::from("relinked ").and_list(nrs));
     }
     for warning in warns {
         tx.say(warning);
@@ -92,41 +89,48 @@ impl Tx {
         graph: &mut Option<Graph>,
         id: &[u8],
         relink: &Relink,
-    ) -> Result<Nr, Vec<u8>> {
+    ) -> Result<Name, Msg> {
         let text = lossy(id);
         let Some(nr) = relink.nr else {
             return gone(&text);
         };
-        let changed = |nr: Nr| {
-            let why = format!("{nr} changed since; dep:{text} not restored");
-            Err(why.into_bytes())
+        let changed = |name: Msg| {
+            Err(name.then(format!(" changed since; dep:{text} not restored")))
         };
         let landed = self.landing.as_ref().map_or_else(
             || Some(nr.index()),
             |landing| landing.line(Source::Todo, nr.index()),
         );
         let Some(index) = landed else {
-            return changed(nr);
+            return changed(Msg::from(format!("a dependent of {text}")));
         };
-        let Some(row) = self.todo.rows().get(index) else {
+        let Some(row) = self
+            .todo
+            .rows()
+            .get(index)
+            .filter(|row| !Line::is_blank_text(&row.orig))
+        else {
             return gone(&text);
         };
-        if Line::is_blank_text(&row.orig) {
+        let at = LineRef {
+            source: Source::Todo,
+            index,
+        };
+        let Ok(name) = self.written_name(at) else {
             return gone(&text);
-        }
-        let nr = Nr::from_index(index).unwrap_or(nr);
+        };
+        let dependent = id_text(&relink.before);
         if *row.raw == *relink.before {
-            return Ok(nr);
+            return Ok(name);
         }
         if relink.lost || *row.orig != *relink.after {
-            return changed(nr);
+            return changed(name.into());
         }
-        let dependent = id_text(&relink.before);
         let graph = graph.get_or_insert_with(|| graph_of(self));
         if closes_cycle(graph, id, &dependent) {
             let why =
-                format!("{nr}: dep:{text} would close a cycle; not restored");
-            return Err(why.into_bytes());
+                format!(": dep:{text} would close a cycle; not restored");
+            return Err(name.then(why));
         }
         if !dependent.is_empty() {
             graph.entry(dependent).or_default().push(id.to_vec());
@@ -135,17 +139,13 @@ impl Tx {
             row.raw = share(&relink.before);
             row.path = row.path.max(Path::Action);
         }
-        let at = LineRef {
-            source: Source::Todo,
-            index,
-        };
         self.side.push(at);
-        Ok(nr)
+        Ok(name)
     }
 }
 
-fn gone(id: &str) -> Result<Nr, Vec<u8>> {
-    Err(format!("a dependent of {id} is gone").into_bytes())
+fn gone(id: &str) -> Result<Name, Msg> {
+    Err(format!("a dependent of {id} is gone").into())
 }
 
 /// Whether `id` already waits for `dependent`, through any number of

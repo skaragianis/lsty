@@ -164,7 +164,9 @@ const READS: &[Case] = &[
                Claimed started:2026-09-29T0800Z owner:agent9\n\
                Human started:2026-09-29T0800Z\n\
                Blocker id:b dep:c\nOther id:c dep:b\n",
-        messages: &["nothing ready (3 blocked, 1 later, 2 claimed)"],
+        messages: &[
+            "nothing ready (3 tasks blocked, 1 task later, 2 tasks claimed)",
+        ],
         stale: &[],
         later: 1,
         blocked: 3,
@@ -185,7 +187,7 @@ const READS: &[Case] = &[
         name: "blocked and later counts in both",
         todo: "Both +x dep:b t:2026-10-05\nOther +y id:b\n",
         filter: "+x",
-        messages: &["nothing ready (1 blocked, 1 later)"],
+        messages: &["nothing ready (1 task blocked, 1 task later)"],
         stale: &[],
         later: 1,
         blocked: 1,
@@ -196,7 +198,7 @@ const READS: &[Case] = &[
         todo: "Waits dep:b started:2026-09-29T0800Z owner:agent9\n\
                Other id:b\n",
         filter: "Waits",
-        messages: &["nothing ready (1 claimed)"],
+        messages: &["nothing ready (1 task claimed)"],
         stale: &[],
         later: 0,
         blocked: 0,
@@ -207,7 +209,7 @@ const READS: &[Case] = &[
         name: "later tasks only",
         todo: "A +x t:2026-10-05\nB +x t:2026-10-06\n",
         filter: "+x",
-        messages: &["nothing ready (2 later)"],
+        messages: &["nothing ready (2 tasks later)"],
         stale: &[],
         later: 2,
         blocked: 0,
@@ -225,7 +227,7 @@ const READS: &[Case] = &[
     Case {
         name: "a claimed later task is counted once, as claimed",
         todo: "A t:2026-10-05 started:2026-09-29T0800Z owner:agent9\n",
-        messages: &["nothing ready (1 claimed)"],
+        messages: &["nothing ready (1 task claimed)"],
         stale: &[],
         later: 0,
         blocked: 0,
@@ -235,7 +237,7 @@ const READS: &[Case] = &[
     Case {
         name: "claimed by another worker, fresh",
         todo: "A +x started:2026-09-29T0800Z owner:agent9\n",
-        messages: &["nothing ready (1 claimed)"],
+        messages: &["nothing ready (1 task claimed)"],
         stale: &[],
         later: 0,
         blocked: 0,
@@ -324,7 +326,7 @@ fn next_reads_the_first_ready_task() {
             .and_then(|id| got.snapshot.task(id))
             .map(|i| i.nr().get());
         assert_eq!(nr, case.nr, "{}", case.name);
-        assert_eq!(got.messages, said(case.messages), "{}", case.name);
+        assert_eq!(got.messages(), said(case.messages), "{}", case.name);
         let stale: Vec<u32> =
             got.seen.stale.iter().map(|r| r.nr.get()).collect();
         assert_eq!(stale, case.stale, "{}", case.name);
@@ -344,7 +346,7 @@ fn next_ignores_the_done_file() {
     let env = dir.env();
     let got = next_read(&env, &by_priority()).expect("next");
     assert_eq!(got.task, None);
-    assert_eq!(got.messages, said(&["nothing ready"]));
+    assert_eq!(got.messages(), said(&["nothing ready"]));
 }
 
 #[test]
@@ -443,7 +445,7 @@ fn start_says_how_many_are_blocked() {
     assert_eq!(got.seen.blocked, 1);
     assert_eq!(
         got.outcome.messages(),
-        said(&["nothing ready (1 blocked, 1 claimed)"])
+        said(&["nothing ready (1 task blocked, 1 task claimed)"])
     );
     assert_eq!(got.seen.claimed, 1);
     assert_eq!(dir.todo(), todo);

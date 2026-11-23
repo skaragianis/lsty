@@ -9,7 +9,7 @@ use super::{
     tx::Tx,
 };
 use crate::{
-    errs::{Nr, Source},
+    errs::{Msg, Name, Nr, Source},
     query::contains,
     todotxt::{Line, TokenView},
 };
@@ -20,7 +20,7 @@ const DEP: &[u8] = b"dep:";
 impl Tx {
     /// Says a message about an id the operation may remove. When the
     /// cascade unblocks dependents, the message tells which.
-    pub(super) fn say_lost(&mut self, id: &[u8], message: impl Into<Vec<u8>>) {
+    pub(super) fn say_lost(&mut self, id: &[u8], message: impl Into<Msg>) {
         self.lost.push((self.messages.len(), id.to_vec()));
         self.say(message);
     }
@@ -54,7 +54,7 @@ impl Tx {
         if lost.is_empty() {
             return;
         }
-        let mut freed: HashMap<Vec<u8>, Vec<String>> = HashMap::new();
+        let mut freed: HashMap<Vec<u8>, Vec<Name>> = HashMap::new();
         for index in self.todo.order().to_vec() {
             let Some(cut) = self.unlink(index, &lost) else {
                 continue;
@@ -64,17 +64,18 @@ impl Tx {
                 index,
             };
             let nr = self.row_nr(at).map_or(0, Nr::get);
+            let name = self.row_name(at).typed(nr.to_string());
             for id in cut {
-                freed.entry(id).or_default().push(nr.to_string());
+                freed.entry(id).or_default().push(name.clone());
             }
         }
         for (at, id) in std::mem::take(&mut self.lost) {
-            let Some(nrs) = freed.get(&id) else {
+            let Some(names) = freed.remove(&id) else {
                 continue;
             };
             if let Some(message) = self.messages.get_mut(at) {
-                message.extend_from_slice(b"; unblocked ");
-                message.extend_from_slice(nrs.join(", ").as_bytes());
+                let said = std::mem::take(message);
+                *message = said.then("; unblocked ").and_list(names);
             }
         }
     }

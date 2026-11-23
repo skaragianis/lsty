@@ -7,14 +7,14 @@ use super::{
     counted,
     env::{Actor, Env},
     ids::Taken,
-    lifecycle::with_claim,
+    lifecycle::{and_blockers, with_claim},
     result::Outcome,
     run::run,
     staged::Path,
     tx::{Tx, gone},
 };
 use crate::{
-    errs::{Ref, Result, Source},
+    errs::{Msg, Name, Ref, Result, Source},
     list::{Snapshot, SortField, State, Task, TaskId},
     query::{Context, Query},
 };
@@ -29,7 +29,7 @@ fn nothing_ready(chosen: &Chosen) -> String {
     ]
     .into_iter()
     .filter(|(n, _)| *n > 0)
-    .map(|(n, what)| format!("{n} {what}"))
+    .map(|(n, what)| format!("{} {what}", counted(n, "task")))
     .collect();
     if reasons.is_empty() {
         "nothing ready".to_owned()
@@ -76,7 +76,14 @@ pub struct Reading {
     /// What was seen on the way.
     pub seen: Survey,
     /// What to tell the caller.
-    pub messages: Vec<Vec<u8>>,
+    pub said: Vec<Msg>,
+}
+
+impl Reading {
+    /// What to tell the caller, as the command line prints it.
+    pub fn messages(&self) -> Vec<Vec<u8>> {
+        self.said.iter().map(Msg::cli).collect()
+    }
 }
 
 /// What `next` with a claim did.
@@ -105,29 +112,22 @@ struct Chosen {
 pub fn next_read(env: &Env<'_>, params: &NextParams) -> Result<Reading> {
     let snapshot = env.load()?;
     let chosen = choose(&snapshot, env, params);
-    let mut messages = Vec::new();
+    let mut said = Vec::new();
     let task = chosen.task.and_then(|id| snapshot.task(id));
     match task {
-        Some(task) => messages.extend(self_notes(
-            &snapshot,
-            task,
-            &chosen,
-            &handle_of(&snapshot, task),
-        )),
-        None => messages.push(nothing_ready(&chosen).into_bytes()),
+        Some(task) => {
+            let name = snapshot.name(task, handle_of(&snapshot, task));
+            said.extend(self_notes(&snapshot, task, &chosen, &name));
+        }
+        None => said.push(nothing_ready(&chosen).into()),
     }
-    messages.extend(stale_note(chosen.seen.stale.len()));
-    messages.extend(filter_notes(&params.filter));
-    messages.extend(
-        snapshot
-            .warnings_for(task)
-            .into_iter()
-            .map(String::into_bytes),
-    );
+    said.extend(stale_note(chosen.seen.stale.len()));
+    said.extend(filter_notes(&params.filter));
+    said.extend(snapshot.warnings_for(task).into_iter().map(Msg::from));
     Ok(Reading {
         task: task.map(Task::task_id),
         seen: chosen.seen,
-        messages,
+        said,
         snapshot,
     })
 }
@@ -166,8 +166,8 @@ fn plan(tx: &mut Tx, env: &Env<'_>, chosen: &Chosen) -> Result<()> {
     Ok(())
 }
 
-fn filter_notes(filter: &Query) -> impl Iterator<Item = Vec<u8>> {
-    filter.warnings().iter().map(|w| w.clone().into_bytes())
+fn filter_notes(filter: &Query) -> impl Iterator<Item = Msg> {
+    filter.warnings().iter().cloned().map(Msg::from)
 }
 
 fn claim(
@@ -180,7 +180,6 @@ fn claim(
     let snap = tx.snapshot();
     let mut line = snap.line(task).clone();
     let text = line.text();
-    let nr = task.nr();
     let fresh = if snap.id_of(task).is_some() {
         None
     } else {
@@ -189,19 +188,17 @@ fn claim(
     let handle = fresh
         .as_ref()
         .map_or_else(|| handle_of(snap, task), ToString::to_string);
-    let notes = self_notes(snap, task, chosen, &handle);
+    let name = snap.name(task, task.nr().to_string());
+    let notes = self_notes(snap, task, chosen, &name.clone().typed(&handle));
     if let Some(fresh) = fresh {
         line = tx.append_tok(id, &line, format!("id:{fresh}").as_bytes())?;
-        tx.say(format!("{nr} is id:{fresh}"));
+        let id = Some(fresh.to_string());
+        tx.say(Name { id, ..name.clone() }.then(format!(" is id:{fresh}")));
     }
     if !chosen.seen.resumed {
         line = with_claim(tx, id, &line, &env.actor, &env.clock.stamp())?;
-        let said = [
-            format!("{handle} started by {}: ", env.actor.name()).as_bytes(),
-            &text,
-        ]
-        .concat();
-        tx.say(said);
+        let said = format!(" started by {}: ", env.actor.name());
+        tx.say(name.typed(handle).then(said).then(text));
     }
     tx.set(id, line.raw(), Path::Action);
     for note in notes {
@@ -222,56 +219,34 @@ fn self_notes(
     snap: &Snapshot,
     task: &Task,
     chosen: &Chosen,
-    handle: &str,
-) -> Vec<Vec<u8>> {
+    name: &Name,
+) -> Vec<Msg> {
     if !chosen.seen.resumed {
         return Vec::new();
     }
-    let text = snap.line(task).text();
-    let mut notes =
-        vec![[format!("{handle} resumed: ").as_bytes(), &text].concat()];
+    let said = |rest: &str| name.clone().then(rest);
+    let mut notes = vec![said(" resumed: ").then(snap.line(task).text())];
     if task.blocked() {
-        notes.push(blocked_note(snap, task, handle));
+        notes.push(blocked_note(snap, task, said(" is blocked by ")));
     }
     if task.later() {
         let until = snap.tags(task).threshold.unwrap_or_default();
-        notes.push(format!("{handle} starts on {until}").into_bytes());
+        notes.push(said(&format!(" starts on {until}")));
     }
     if chosen.mismatch {
-        notes.push(
-            format!("{handle} no longer matches the filter").into_bytes(),
-        );
+        notes.push(said(" no longer matches the filter"));
     }
     notes
 }
 
-fn blocked_note(snap: &Snapshot, task: &Task, handle: &str) -> Vec<u8> {
-    let parts: Vec<Vec<u8>> = task
-        .blockers()
-        .iter()
-        .filter_map(|b| snap.task(*b))
-        .map(|b| {
-            [
-                b.nr().to_string().as_bytes(),
-                b" (",
-                &snap.line(b).text(),
-                b")",
-            ]
-            .concat()
-        })
-        .collect();
-    [
-        format!("{handle} is blocked by ").as_bytes(),
-        &parts.join(&b", "[..]),
-        b"; work on the blocker or stop the claim",
-    ]
-    .concat()
+fn blocked_note(snap: &Snapshot, task: &Task, said: Msg) -> Msg {
+    and_blockers(snap, task, said)
+        .then("; work on the blocker or stop the claim")
 }
 
-fn stale_note(count: usize) -> Option<Vec<u8>> {
-    (count > 0).then(|| {
-        format!("{} skipped", counted(count, "stale claim")).into_bytes()
-    })
+fn stale_note(count: usize) -> Option<Msg> {
+    (count > 0)
+        .then(|| format!("{} skipped", counted(count, "stale claim")).into())
 }
 
 /// What a walk over the todo file collects.

@@ -83,12 +83,12 @@ fn type_into(
     typed: &[u8],
 ) -> Result<()> {
     let old = tx.line_of(id)?.clone();
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let raw =
         tx.set_edited_on(&env.actor, id, build(&old, typed), Path::Typed)?;
-    tx.say([handle.as_bytes(), b" ", &raw].concat());
-    for warning in repeat_warnings(&handle, &old, typed) {
-        tx.say(warning);
+    tx.say(name.clone().then(" ").then(raw));
+    for tail in repeat_warnings(&old, typed) {
+        tx.say(name.clone().then(tail));
     }
     Ok(())
 }
@@ -153,14 +153,14 @@ fn replace_task(
     text: &str,
 ) -> Result<()> {
     let old = tx.line_of(id)?.clone();
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let raw = replacement(tx, id, &old, text)?;
     if raw == old.raw() {
-        tx.say(format!("{handle} unchanged"));
+        tx.say(name.then(" unchanged"));
         return Ok(());
     }
     let raw = tx.set_edited_on(&env.actor, id, raw, Path::Typed)?;
-    tx.say([handle.as_bytes(), b" ", &raw].concat());
+    tx.say(name.then(" ").then(raw));
     Ok(())
 }
 
@@ -271,14 +271,14 @@ fn delete_term(
     term: &str,
 ) -> Result<()> {
     let line = tx.line_of(id)?.clone();
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let desc = line.description();
     let head = line.raw().len() - desc.len();
     // white space at the start of the description stays, so the word
     // after it cannot become a priority or a date
     let lead = desc.get(..trim_range(desc).start).unwrap_or_default();
     let Some(kept) = without_term(desc, lead.len(), term.as_bytes()) else {
-        tx.say(format!("{handle} has no {}", quote(term)));
+        tx.say(name.then(format!(" has no {}", quote(term))));
         return Ok(());
     };
     let raw =
@@ -287,7 +287,7 @@ fn delete_term(
         return Err(tx.stamp_word_refusal(id));
     }
     let raw = tx.set_edited(&env.actor, id, raw)?;
-    tx.say([handle.as_bytes(), b" ", &raw].concat());
+    tx.say(name.then(" ").then(raw));
     Ok(())
 }
 

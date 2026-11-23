@@ -121,7 +121,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         done: Some("x 2026-09-01 Z\n"),
         want_todo: "A\nD\n",
         want_done: Some("x 2026-09-01 Z\nx 2026-09-28 B\nx 2026-09-27 C\n"),
-        msgs: &["archived 2 to done.txt", "removed 1 blank line"],
+        msgs: &["archived 2 tasks to done.txt", "removed 1 blank line"],
         renumbered: true,
         ..BASE
     },
@@ -160,7 +160,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         done: Some("x 2026-09-01 Z"),
         want_todo: "A\n",
         want_done: Some("x 2026-09-01 Z\nx 2026-09-28 B\n"),
-        msgs: &["archived 1 to done.txt"],
+        msgs: &["archived 1 task to done.txt"],
         ..BASE
     },
     Case {
@@ -180,7 +180,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         todo: "x 2026-09-28 B\n",
         want_todo: "",
         want_done: Some("x 2026-09-28 B\n"),
-        msgs: &["archived 1 to done.txt"],
+        msgs: &["archived 1 task to done.txt"],
         ..BASE
     },
     Case {
@@ -190,7 +190,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         want_todo: "",
         want_done: Some("x 2026-09-28 B id:k\nx 2026-09-01 Z\n"),
         msgs: &[
-            "archived 1 to done.txt",
+            "archived 1 task to done.txt",
             "finished an interrupted move of id:k",
         ],
         ..BASE
@@ -200,7 +200,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         todo: "A id:a\nx 2026-09-28 B dep:a\n",
         want_todo: "A id:a\n",
         want_done: Some("x 2026-09-28 B dep:a\n"),
-        msgs: &["archived 1 to done.txt"],
+        msgs: &["archived 1 task to done.txt"],
         ..BASE
     },
     Case {
@@ -208,7 +208,7 @@ const ARCHIVE_ROWS: &[Case] = &[
         todo: "x 2026-09-28 A id:a\nB dep:a\n",
         want_todo: "B dep:a\n",
         want_done: Some("x 2026-09-28 A id:a\n"),
-        msgs: &["archived 1 to done.txt"],
+        msgs: &["archived 1 task to done.txt"],
         renumbered: true,
         ..BASE
     },
@@ -766,7 +766,7 @@ const CRASH_ROWS: &[CrashRow] = &[
             Some("x 2026-09-28 B id:k\nx 2026-09-27 C\nx 2026-09-27 C\n"),
         ),
         msgs: &[
-            "archived 2 to done.txt",
+            "archived 2 tasks to done.txt",
             "finished an interrupted move of id:k",
         ],
         ..CRASH_BASE

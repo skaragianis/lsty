@@ -136,14 +136,21 @@ struct Shown {
 pub(crate) struct Live {
     watcher: Option<Box<dyn Watcher>>,
     phase: Phase,
-    /// The lists the core read when it refused a write on lines that
-    /// changed, and the clock it read them by, shown once the input is
-    /// over.
+    /// The lists the core read when it refused a write, and the clock it
+    /// read them by, shown once the input is over.
     pub(crate) read: Cell<Option<(Snapshot, Clock)>>,
+    /// The message of that refusal, to name by places once they are shown,
+    /// and what follows it on the status line.
+    pub(crate) refused: Option<(errs::Msg, String)>,
+    /// The messages of a write that changed nothing, and what they said: the
+    /// tasks they name keep their places until the rows kept in sight go.
+    pub(crate) no_op: Option<(Vec<errs::Msg>, String)>,
     shown: Shown,
     /// Counts what changes the state shown. A reading that started under
     /// an older number is out of date and dropped.
     serial: u64,
+    /// Whether the input being handled wrote the files.
+    pub(crate) wrote: bool,
 }
 
 /// Reads both files under shared locks. A folder that is missing has
@@ -298,14 +305,15 @@ impl Model {
         }
     }
 
-    /// Shows the lists the core read when it refused a write on lines that
-    /// changed, as a reading of the watch would be, before the next input
-    /// reads the list.
+    /// Shows the lists the core read when it refused a write, as a reading of
+    /// the watch would be, before the next input reads the list; then names
+    /// the tasks of the refusal by their places in it.
     pub(crate) fn show_read(&mut self) {
         if let Some((snap, clock)) = self.live.read.take() {
             self.unseen = true;
             self.accept(snap, clock);
         }
+        self.name_refusal();
     }
 
     /// Starts a reload now, or after the one under way. The minute does
@@ -339,6 +347,7 @@ impl Model {
         let gone = was || self.live.shown.deleted;
         self.live.shown.deleted = gone && !self.file_exists();
         self.live.serial += 1;
+        self.live.wrote |= wrote.is_some();
         self.clock = clock;
         self.hist.follow(&moves.remap);
         self.remap_clip(&moves);
@@ -356,6 +365,7 @@ impl Model {
         let spot = self.edit.as_ref().and_then(|d| d.at);
         let old_rows = std::mem::take(&mut self.rows);
         self.rebuild_rows();
+        self.refresh_popup(&moves);
         self.rebuild_panels();
         let aim = spot.or_else(|| {
             let aim = place.and_then(|at| moves.aim(at));

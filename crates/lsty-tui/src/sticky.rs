@@ -15,6 +15,7 @@ use crate::{
     line::{Line, LineKind},
     messages,
     model::Model,
+    motion::View,
     rows::Row,
     track::{Place, Remap, Touched, place_of},
 };
@@ -171,7 +172,11 @@ impl Model {
         if self.visual.is_none()
             && touched.iter().any(|t| stuck.contains(&t.now))
         {
-            self.note(messages::STICKY);
+            self.note(if self.new_field() {
+                messages::STICKY_IN_FIELD
+            } else {
+                messages::STICKY
+            });
         }
     }
 
@@ -233,16 +238,25 @@ impl Model {
     /// started from.
     /// A refilter on its way does this itself, and the rows stay as drawn
     /// until then.
-    pub(crate) fn leave_sticky(&mut self, keep: Option<Place>) {
+    /// Tells whether a row left.
+    pub(crate) fn leave_sticky(&mut self, keep: Option<Place>) -> bool {
         if self.refilter.owed {
-            return;
+            return false;
         }
         let place = self.drawn_cursor();
         let view = self.view_offset();
         let [going_on, visual, press] = self.under_way();
         let keep = [keep, going_on, visual, press];
-        if self.sticky.drop_aged(&keep) {
+        let top = self.rows.get(self.top).map(Row::place);
+        let left = self.sticky.drop_aged(&keep);
+        if left {
             self.rebuild_at(place, view);
+            // A view with the cursor out of it keeps its top task.
+            let kept = top.and_then(|at| self.row_at(at));
+            if let (View::Top(_), Some(i)) = (view, kept) {
+                self.keep_top(i);
+            }
         }
+        left
     }
 }

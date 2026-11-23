@@ -2,7 +2,7 @@
 //! the files sometimes changed behind its back, against what the hint of
 //! each key said the key would do.
 
-use std::{cmp::Ordering, fs, path::Path};
+use std::{cmp::Ordering, collections::HashMap, fs, path::Path};
 
 use lsty_core::{
     config::Config,
@@ -15,11 +15,13 @@ use crate::{
     hints::dim,
     history::Again,
     insert::Draft,
-    messages::Tone,
+    messages::{STICKY, Tone},
     model::Model,
     msg::Msg,
     press::{Answer, repeats_over, writes_line},
+    rows::Row,
     test_util::{alone, deps, files, keys, reload, screen, started, workdir},
+    track::Place,
 };
 
 /// The lines of a todo file; one may come more than once, as twins.
@@ -97,6 +99,16 @@ const STALE: [&str; 8] = ["x", "t", "T", "<Del>", "-", "+", "<F9>", "."];
 /// A step byte at or above this changes the file behind the list's back.
 const REWRITE: u8 = 0xF0;
 
+/// A step byte in this range is a `:` command on one task, its low bits
+/// picking the command (see `colon`). The range is none of the bytes the
+/// seeds hold, so the seeds keep their keys.
+const COLON: std::ops::RangeInclusive<u8> = 0xD1..=0xD6;
+
+/// A step byte in this range is a rewrite as one at `REWRITE` is, but the
+/// key pressed after it is an undo, or with bit 3 a redo, and no byte
+/// follows but the line. The range is none of the bytes the seeds hold.
+const AFTER: std::ops::RangeInclusive<u8> = 0xA0..=0xAF;
+
 /// A list and the folder of its files.
 struct Side {
     dir: TempDir,
@@ -158,7 +170,12 @@ impl Side {
         let seen = self.seen(key);
         let sticky = self.model.rows.iter().any(|r| r.sticky);
         let before = self.kept();
-        keys(&mut self.model, key);
+        // The strokes before the last wait for it, and, like any key, let go
+        // of the sticky tasks: a message names the rows left after them.
+        let at = last_stroke(key).unwrap_or(0);
+        keys(&mut self.model, &key[..at]);
+        let was = shown(&self.model);
+        keys(&mut self.model, &key[at..]);
         screen(&self.model, self.model.width, self.model.height);
         let m = &self.model;
         let name = format!(
@@ -166,9 +183,18 @@ impl Side {
             m.message.text()
         );
         let wrote = self.files();
-        let named = named(m.message.text());
+        let said = m.message.text();
+        let way = aim.filter(|_| history);
+        let press = Press {
+            said,
+            was: &was,
+            seen: &seen,
+            way,
+            name: &name,
+        };
+        let written = self.named(&press, &before.0);
         assert!(
-            history || kept_lines(&before.0, &wrote, &seen, &named, !moves),
+            history || kept_lines(&before.0, &wrote, &seen, &written, !moves),
             "wrote on lines not seen: {name}"
         );
         match asked {
@@ -223,6 +249,88 @@ impl Side {
         .collect()
     }
 
+    /// The lines a message names after the write (a dependent unblocked or
+    /// relinked, by its place now); a delete names a row of the list as it
+    /// was before the key, one the key acted on, when no one changed the file
+    /// behind the list. Every task it names by its place is checked by
+    /// `history_named`, an undo or redo by what it repeats.
+    fn named(&self, press: &Press<'_>, before: &Files) -> Vec<(usize, usize)> {
+        let (said, name) = (press.said.unwrap_or_default(), press.name);
+        let body = press.way.and_then(|_| {
+            let (head, body) = said.split_once(": ")?;
+            ["undid", "redid"].contains(&head).then_some(body)
+        });
+        self.history_named(press, before, body.unwrap_or(said));
+        if body.is_some() {
+            return Vec::new();
+        }
+        let now = shown(&self.model);
+        let gone = if self.moved.is_empty() {
+            lines_of(&deleted(Some(said)), press.was, name)
+        } else {
+            Vec::new()
+        };
+        let seen = press.seen;
+        assert!(
+            seen.is_empty() || gone.iter().all(|line| seen.contains(line)),
+            "named a row the key did not act on: {name}"
+        );
+        ["unblocked ", "relinked "]
+            .map(|word| lines_of(&after(Some(said), word), &now, name))
+            .concat()
+    }
+
+    /// Every task a message names by its place (see `named_places`) is a
+    /// row, of the list shown now or of the one before the key, and, unless
+    /// its clause says the task was already as asked or left alone (`changed
+    /// since`), or a key that is no undo or redo wrote nothing, a line the
+    /// write changed on disk. In such a clause of an ordinary press, other
+    /// than `changed since`, the task is a row the key acted on. Not for a
+    /// press of a file that changed behind the list, but the tasks it
+    /// unblocked or relinked, which are rows of the list it left: a place of
+    /// the list the key read cannot be rebuilt.
+    fn history_named(&self, press: &Press<'_>, before: &Files, body: &str) {
+        let stale = !self.moved.is_empty();
+        let (now, after) = (shown(&self.model), self.files());
+        let idle = press.way.is_none() && *before == after;
+        let deleted = deleted(Some(body));
+        for (n, said, listed) in named_places(body) {
+            let gone = deleted.contains(&n.to_string());
+            if stale && !listed {
+                continue;
+            }
+            let lists = if stale {
+                vec![&now]
+            } else {
+                vec![&now, press.was]
+            };
+            let rows: Vec<_> =
+                lists.iter().filter_map(|r| r.get(&n)).collect();
+            assert!(!rows.is_empty(), "no row {n}: {}", press.name);
+            assert!(
+                said != Said::Changed
+                    || stale
+                    || idle
+                    || rows
+                        .iter()
+                        .any(|at| touched(before, &after, **at, gone)),
+                "{n} unchanged: {}",
+                press.name
+            );
+            let asked = said == Said::Already || (idle && said != Said::Left);
+            let acted = |at| press.seen.contains(at);
+            assert!(
+                !asked
+                    || listed
+                    || press.way.is_some()
+                    || press.seen.is_empty()
+                    || press.was.get(&n).is_some_and(acted),
+                "{n} not acted on: {}",
+                press.name
+            );
+        }
+    }
+
     /// Whether the list is shown, no field open.
     fn list(&self) -> bool {
         matches!(self.model.key_mode(), Mode::Normal | Mode::Visual)
@@ -238,7 +346,8 @@ impl Side {
             m.snap.serial(),
             (m.hist.undo.len(), m.hist.redo.len()),
             m.hist.stopped.is_some(),
-            m.selected_rows(),
+            m.selected_rows()
+                .map(|(a, b)| m.rows[a..=b].iter().map(Row::place).collect()),
             m.again.clone(),
             m.key_mode(),
         )
@@ -248,12 +357,27 @@ impl Side {
 /// The action a key runs and what its hint says, when it runs one.
 type Hint = Option<(Action, Answer)>;
 
+/// The bytes of the todo file and the done file.
+type Files = [Vec<u8>; 2];
+
+/// A press and what it said.
+struct Press<'a> {
+    said: Option<&'a str>,
+    /// The places of the rows before the key.
+    was: &'a HashMap<usize, (usize, usize)>,
+    /// The lines the key acts on.
+    seen: &'a [(usize, usize)],
+    /// Undo or redo, when the key is one.
+    way: Option<Action>,
+    name: &'a str,
+}
+
 type Kept = (
-    [Vec<u8>; 2],
+    Files,
     u32,
     (usize, usize),
     bool,
-    Option<(usize, usize)>,
+    Option<Vec<Place>>,
     Option<Again>,
     Mode,
 );
@@ -283,6 +407,15 @@ fn first_key(model: &Model, key: &str) -> Option<usize> {
         let head = key.get(..at).and_then(|h| parse_keys(h, None).ok());
         head.is_some_and(|h| all.starts_with(&h))
             && fed(model, &key[..at]).is_some_and(|o| o != Outcome::Pending)
+    })
+}
+
+/// Where the last of the strokes of `key` starts, when it has more.
+fn last_stroke(key: &str) -> Option<usize> {
+    let all = parse_keys(key, None).ok()?;
+    (1..key.len()).rev().find(|&at| {
+        let head = key.get(..at).and_then(|h| parse_keys(h, None).ok());
+        head.is_some_and(|h| h.len() + 1 == all.len() && all.starts_with(&h))
     })
 }
 
@@ -352,13 +485,14 @@ fn behind(
 /// Whether a press kept every line of `before` but the `seen` ones (a file
 /// and a line each): all still there, in their order, and, `in_place`
 /// when it moves no line and keeps their number, each where it was. Lines
-/// it adds may go anywhere. A `named` line, a dependent the press says it
-/// unblocked or relinked, may change in its `dep:` but nowhere else.
+/// it adds may go anywhere. A `written` line, a dependent the press says it
+/// unblocked or relinked (by its line after the write), may change in its
+/// `dep:` but nowhere else.
 fn kept_lines(
     before: &[Vec<u8>; 2],
     after: &[Vec<u8>; 2],
     seen: &[(usize, usize)],
-    named: &[(usize, usize)],
+    written: &[(usize, usize)],
     in_place: bool,
 ) -> bool {
     (0..2).all(|file| {
@@ -368,31 +502,215 @@ fn kept_lines(
             .iter()
             .enumerate()
             .filter(|(i, _)| !seen.contains(&(file, *i)));
-        let same = |i: usize, line: &[u8], now: &[u8]| {
+        let same = |line: &[u8], (j, now): (usize, &[u8])| {
             now == line
-                || named.contains(&(file, i))
+                || written.contains(&(file, j))
                     && but_deps(now) == but_deps(line)
         };
         if in_place && was.len() == now.len() {
-            others.all(|(i, line)| same(i, line, now[i]))
+            others.all(|(i, line)| same(line, (i, now[i])))
         } else {
-            let mut rest = now.iter();
-            others.all(|(i, line)| rest.any(|l| same(i, line, l)))
+            let mut rest = now.iter().map(|l| &l[..]).enumerate();
+            others.all(|(_, line)| rest.any(|l| same(line, l)))
         }
     })
 }
 
-/// The todo lines a message names as dependents it unblocked or relinked,
-/// by their number before the press.
-fn named(message: Option<&str>) -> Vec<(usize, usize)> {
-    let message = message.unwrap_or_default();
-    let said = ["unblocked ", "relinked "]
-        .into_iter()
-        .flat_map(|word| message.split(word).skip(1));
-    let nrs =
+/// The file and line of each row shown, by its place.
+fn shown(model: &Model) -> HashMap<usize, (usize, usize)> {
+    let rows = model.rows.iter().enumerate();
+    rows.map(|(i, r)| {
+        let file = usize::from(r.source == Source::Done);
+        (model.place(i), (file, r.nr.index()))
+    })
+    .collect()
+}
+
+/// The lines of `rows` that the names in a message are the places of; a
+/// place that is no row fails. A task with no row is named by its line
+/// (`line N`, `done:N`), which no row may show: a row is named by its place.
+fn lines_of(
+    names: &[String],
+    rows: &HashMap<usize, (usize, usize)>,
+    name: &str,
+) -> Vec<(usize, usize)> {
+    let line = |n: &str| n.parse::<usize>().ok().map(|n| n.saturating_sub(1));
+    let unshown = |file, n: &str| {
+        let at = (file, line(n)?);
+        assert!(!rows.values().any(|r| *r == at), "{n} is a row: {name}");
+        Some(at)
+    };
+    let place = |n: &str| {
+        let at =
+            |n| rows.get(&n).unwrap_or_else(|| panic!("no row {n}: {name}"));
+        n.parse().ok().map(|n| *at(n))
+    };
+    let lines = names.iter().filter_map(|n| match n.strip_prefix("line ") {
+        Some(n) => unshown(0, n),
+        None => match n.strip_prefix("done:") {
+            Some(n) => unshown(1, n),
+            None => place(n),
+        },
+    });
+    lines.collect()
+}
+
+/// The names a message gives after `word`, up to the next `;`.
+fn after(message: Option<&str>, word: &str) -> Vec<String> {
+    let said = message.unwrap_or_default().split(word).skip(1);
+    let names =
         said.flat_map(|s| s.split(';').next().unwrap_or_default().split(", "));
-    let at = |n: &str| n.trim().parse::<usize>().ok()?.checked_sub(1);
-    nrs.filter_map(at).map(|i| (0, i)).collect()
+    names.map(|n| n.trim().to_owned()).collect()
+}
+
+/// What a clause says of a task it names: changed, already as asked, or
+/// left alone by a paste (`changed since`).
+#[derive(Clone, Copy, PartialEq)]
+enum Said {
+    Changed,
+    Already,
+    Left,
+}
+
+/// The tasks the clauses of `body` name by their place: the first number of
+/// a clause (`N`, `task N`; not a line, `line N`, or a count, `N task` or
+/// `N tasks`), the tasks after `unblocked ` and `relinked ` (`listed`), and
+/// the row after ` moved to `, ` moved back from ` and ` reopened as `. Each
+/// with what its clause says of the task, and whether it is listed.
+fn named_places(body: &str) -> Vec<(usize, Said, bool)> {
+    let body = body.split(STICKY).next().unwrap_or(body);
+    let first = |c: &str| {
+        let words: Vec<_> = c.trim().split([' ', ',']).collect();
+        let skip = usize::from(words[0] == "task");
+        let next = words.get(skip + 1);
+        let counted = next.is_some_and(|n| ["task", "tasks"].contains(n));
+        words[skip].parse().ok().filter(|_| !counted)
+    };
+    let clause = |c: &str| {
+        let said = if c.contains(" already ") {
+            Said::Already
+        } else if c.contains(" changed since") {
+            Said::Left
+        } else {
+            Said::Changed
+        };
+        let at = |words: &[&str], listed| {
+            let names: Vec<_> =
+                words.iter().flat_map(|w| after(Some(c), w)).collect();
+            let numbers: Vec<usize> =
+                names.iter().filter_map(|n| n.parse().ok()).collect();
+            let mut once = numbers.clone();
+            once.sort_unstable();
+            once.dedup();
+            assert_eq!(once.len(), numbers.len(), "{c:?} names a task twice");
+            numbers
+                .into_iter()
+                .map(|n| (n, said, listed))
+                .collect::<Vec<_>>()
+        };
+        let mut named = at(&["unblocked ", "relinked "], true);
+        let rows = [" moved to ", " moved back from ", " reopened as "];
+        named.extend(at(&rows, false));
+        named.extend(first(c).map(|n| (n, said, false)));
+        named
+    };
+    body.split(';').flat_map(clause).collect()
+}
+
+/// Whether the line `at` (a file and a line) is not as it was, or a twin of
+/// the line may be the one changed, or, of a deleted task (`gone`), the one
+/// deleted from among twins before the write.
+fn touched(
+    before: &Files,
+    after: &Files,
+    (file, at): (usize, usize),
+    gone: bool,
+) -> bool {
+    let line = |text: &Files| {
+        text[file]
+            .split(|b| *b == b'\n')
+            .nth(at)
+            .map(<[u8]>::to_vec)
+    };
+    let (was, now) = (line(before), line(after));
+    let twins = |text: &Files, line: &Option<Vec<u8>>| {
+        let same = |l: &&[u8]| Some(l.to_vec()) == *line;
+        text[file].split(|b| *b == b'\n').filter(same).count() > 1
+    };
+    was != now || twins(after, &now) || gone && twins(before, &was)
+}
+
+/// The names of the parts of a message that say `N deleted`.
+fn deleted(message: Option<&str>) -> Vec<String> {
+    let parts = message.unwrap_or_default().split(';');
+    parts
+        .filter_map(|p| Some(p.trim().strip_suffix(" deleted")?.to_owned()))
+        .collect()
+}
+
+/// A `:` command on one task, the byte after `op` picking the row: `do` or
+/// `del` of a row by its place, by its `id:` or of the place after the last
+/// row, which can be a line of the file. It must write on the row at that
+/// place and no other line, and name that row; past the last row it is no
+/// task and writes nothing.
+fn colon(side: &mut Side, op: u8, arg: u8, trail: &mut Vec<String>) {
+    let how = usize::from(op - COLON.start());
+    trail.push(":".to_owned());
+    side.checked(":", trail);
+    if side
+        .model
+        .line
+        .as_ref()
+        .is_none_or(|l| !l.field.text.is_empty())
+    {
+        return;
+    }
+    // the list as it is when `<CR>` runs the command: `:` lets go of the
+    // sticky tasks
+    let rows = shown(&side.model);
+    let (by_id, past) = (how / 2 == 1, how / 2 == 2);
+    let place = if past {
+        rows.len() + 1
+    } else {
+        1 + usize::from(arg) % rows.len().max(1)
+    };
+    let row = rows.get(&place).copied();
+    let files = side.files();
+    let id = row.and_then(|(file, at)| {
+        let line = files[file].split(|b| *b == b'\n').nth(at)?;
+        let tag =
+            line.split(|b| *b == b' ').find(|w| w.starts_with(b"id:"))?;
+        Some(String::from_utf8_lossy(tag).into_owned())
+    });
+    let target = id.filter(|_| by_id).unwrap_or_else(|| place.to_string());
+    let text = format!("{} {target}", ["do", "del"][how % 2]);
+    trail.push(format!("{text}<CR>"));
+    keys(&mut side.model, &text);
+    side.opened = row.into_iter().collect();
+    side.checked("<CR>", trail);
+    side.opened.clear();
+    let said = side.model.message.text();
+    let Some(row) = row else {
+        let want = format!("no task {place}");
+        assert_eq!(said, Some(want.as_str()), "{trail:?}");
+        return;
+    };
+    // a place is named whatever the outcome; an `id:` may be refused as
+    // ambiguous, so it is named when it wrote
+    if !by_id || side.files() != files {
+        // the row where it is now, else where it was
+        let now = shown(&side.model);
+        let at = now
+            .iter()
+            .find(|(_, r)| **r == row)
+            .map_or(place, |(p, _)| *p);
+        let said = said.unwrap_or_default();
+        let named = [format!("{at} "), format!("task {at} ")];
+        assert!(
+            named.iter().any(|n| said.starts_with(n)),
+            "{said:?} is not row {at}: {trail:?}"
+        );
+    }
 }
 
 /// The words of a line but its `dep:` tags.
@@ -412,7 +730,10 @@ fn but_deps(line: &[u8]) -> Vec<&[u8]> {
 /// picking a line of the file. Each byte after those is a key; one at `0xF0`
 /// and above is, while the list is shown, a rewrite instead, its low bits
 /// picking which (see `rewrite`, `behind`): the next byte picks the
-/// line, the two after it the count and the key pressed then.
+/// line, the two after it the count and the key pressed then. One in
+/// `AFTER` is the same with an undo or a redo pressed then, and one byte
+/// after it. One in `COLON` is, while the list is shown, a `:` command
+/// instead (see `colon`): the next byte picks its row.
 ///
 /// # Panics
 ///
@@ -441,11 +762,17 @@ pub fn hints_property(data: &[u8]) {
     let mut trail = vec![format!("{todo:?} {setup}")];
     let mut bytes = steps.iter().copied();
     while let Some(op) = bytes.next() {
-        if op >= REWRITE && side.list() {
+        if COLON.contains(&op) && side.list() {
+            let arg = bytes.next().unwrap_or(0);
+            colon(&mut side, op, arg, &mut trail);
+        } else if (op >= REWRITE || AFTER.contains(&op)) && side.list() {
             let mut next = || usize::from(bytes.next().unwrap_or(0));
-            let (arg, count, key) =
-                (next(), ["", "2", "3"][next() % 3], next());
-            let key = STALE[key % STALE.len()];
+            let arg = next();
+            let (count, key) = if op >= REWRITE {
+                (["", "2", "3"][next() % 3], STALE[next() % STALE.len()])
+            } else {
+                ("", ["u", "<C-r>"][usize::from(op & 8 != 0)])
+            };
             trail.push(format!("rewrite {op} {arg} {count}{key}"));
             behind(&mut side, (op, arg, count, key), &trail);
         } else {

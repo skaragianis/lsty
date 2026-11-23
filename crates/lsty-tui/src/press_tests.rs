@@ -227,7 +227,7 @@ impl Pressed<'_> {
     /// What a write said of the tasks it passed over, and `u` takes it back.
     fn written(&mut self, command: Command, there: usize) {
         if let Some((_, already)) = command.words().filter(|_| there > 0) {
-            let tail = format!("; {there} {already}");
+            let tail = format!("; {} {already}", ops::counted(there, "task"));
             let said = self.model.message.text().unwrap_or_default();
             assert!(said.ends_with(&tail), "{}: {said}", self.name);
             assert!(!said.contains(" is "), "{}: {said}", self.name);
@@ -803,6 +803,7 @@ fn a_refused_key_says_what_it_always_said() {
     const NO_ID: &str = "Old is archived and has no id — x reopens it first";
     const SOME: &str = "some are archived — nothing changed";
     const THREE: &str = "A\nB\nC\n";
+    const BLOCKED: &str = "task 2 is blocked by 1 (A)";
     const SORTED: &str = "sorted by priority — press s for manual order";
     let rows = [
         ("", OLD, "", "a", ONE, true),
@@ -829,6 +830,8 @@ fn a_refused_key_says_what_it_always_said() {
         (TODO, "", "", "p", "nothing to paste", false),
         (TODO, "", "", "gx", "no link on this task", false),
         (TODO, OLD, "gtk:v<CR>j", ".", ONE, true),
+        // a blank line first, with a block between the tasks
+        ("\nA id:a\nB dep:a\nC\n", "", "jv", "x", BLOCKED, true),
     ];
     for (todo, done, first, key, said, alert) in rows {
         let name = format!("{key} on {todo:?} {done:?} after {first}");
@@ -840,6 +843,154 @@ fn a_refused_key_says_what_it_always_said() {
         assert_eq!(model.message.text(), Some(said), "{name}");
         assert_eq!(model.message.tone == Tone::Alert, alert, "{name}");
         assert_eq!(files(dir.path()), before, "{name}");
+    }
+}
+
+/// A message names each task by its place in the list: after the write for a
+/// task still shown, before it for one the write removed, in the list the
+/// core read when that is not the one drawn. A hint keeps the file line.
+#[test]
+#[expect(clippy::too_many_lines, reason = "a table")]
+fn a_message_names_tasks_by_their_place() {
+    let rows = [
+        // a key that writes keeps the rows an earlier key kept in sight
+        (
+            "A\nB\nC\n",
+            "",
+            ":set hidden_tasks=done<CR>xJu",
+            "undid: 2 moved back from 3",
+        ),
+        (
+            "A\nB\nC\n",
+            "",
+            ":set hidden_tasks=done<CR>x<Del>u",
+            "undid: 2 deleted",
+        ),
+        (
+            "A\nB id:b\nC dep:b\n",
+            "",
+            ":set hidden_tasks=done<CR>x<Del>",
+            "2 deleted; unblocked 2",
+        ),
+        // archived to a row other than the one it left
+        (
+            "A\nB\nC\n",
+            "",
+            ":set auto_archive<CR>x",
+            "1 done: A; archived to done.txt as 3",
+        ),
+        // a refused new task has no line yet, which no row shows
+        (
+            "\n\nA id:a dep:x\nB\n",
+            "",
+            "GoX id:x dep:a<CR>",
+            "3 → 1 → 3 would be a dependency cycle",
+        ),
+        // a second id on a new task, named by the field
+        (
+            "\n\nA\nB\n",
+            "",
+            "ggOX id:a id:b<CR>",
+            "1 already has id:a — a task has one id",
+        ),
+        // a task whose text holds the sticky notice is not rewritten
+        (
+            "A\n",
+            "",
+            ":set keep_adding<CR>ohidden by current filters in 2 seconds or at the next key<CR>",
+            "2 added as id:t001: hidden by current filters in 2 seconds or at the next key",
+        ),
+        // a dependent that is only its dep: tag ends as no task
+        ("A id:a\ndep:a\n", "", "dd", "1 deleted; unblocked 2"),
+        // a repeat that changes nothing lets go of the rows kept in sight
+        (
+            "A +x\nB +x\n",
+            "",
+            "/+x<CR>gT+x<CR>gT+x<CR>",
+            "line 1 has no +x",
+        ),
+        // a task no row shows and no id names, by its file line
+        (
+            "A +x id:a\nB dep:a\n",
+            "",
+            "/+x<CR>:del 1<CR>",
+            "1 deleted; unblocked line 2",
+        ),
+        // raised to the top of a priority sort
+        (
+            "(D) A\n(D) B\n(D) C\n",
+            "",
+            "sjjgp",
+            "1 re-prioritized from (D) to (C)",
+        ),
+        // a new task refused for a taken id, below the field that is open
+        (
+            "Buy\nCall id:c1\n",
+            "",
+            "jOX id:c1<CR>",
+            "id:c1 is taken by 3",
+        ),
+        // a delete in the list read, which an outside edit moved down
+        ("A\nB\nC\n", "X\nA\nB\nC\n", "jdd", "3 deleted"),
+        (
+            "A id:a\nB dep:a\n",
+            "X\nA id:a\nB dep:a\n",
+            "dd",
+            "2 deleted; unblocked 2",
+        ),
+        // put back, and done again, by the places in the sorted list
+        (
+            "(D) A\n(D) B\n(D) C\n",
+            "",
+            "sjjgpu",
+            "undid: 3 re-prioritized from (D) to (C)",
+        ),
+        (
+            "(D) A\n(D) B\n(D) C\n",
+            "",
+            "sjjgpu<C-r>",
+            "redid: 1 re-prioritized from (D) to (C)",
+        ),
+        // after `|` an outside edit moves the lines down: the keys before
+        // it wrote, the keys after it are an undo and a redo
+        ("A\nB\nC\n", "X\nA\n\nC\n", "jdd|u", "undid: 3 deleted"),
+        (
+            "A\nB\nC\n",
+            "X\nA\nB\nC\n",
+            "jdd|u<C-r>",
+            "redid: 3 deleted",
+        ),
+        (
+            "A\nB\nC\n",
+            "X\nB\nA\nC\n",
+            "J|u",
+            "undid: 2 moved back from 3",
+        ),
+        (
+            "A\nB\nC\n",
+            "X\nB\nA\nC\n",
+            "J|u<C-r>",
+            "redid: 2 moved to 3",
+        ),
+        // the tasks it unblocked, in the list it left
+        (
+            "A id:a\nB dep:a\nC dep:a\n",
+            "X\n\nB\nC\n",
+            "dd|u",
+            "undid: 2 deleted; unblocked 3, 4",
+        ),
+    ];
+    for (todo, outside, key, said) in rows {
+        let name = format!("{key} on {todo:?}");
+        let (dir, mut model, _opened) = watched((todo, ""), &Board::default());
+        let (first, rest) = key.split_once('|').unwrap_or(("", key));
+        keys(&mut model, first);
+        if !outside.is_empty() {
+            fs::write(dir.path().join("todo.txt"), outside)
+                .unwrap_or_else(|e| panic!("{e}"));
+        }
+        keys(&mut model, rest);
+        assert_eq!(model.message.text(), Some(said), "{name}");
     }
 }
 
@@ -1092,7 +1243,7 @@ fn a_doing_task_that_is_blocked() {
         ("jx", "task 2 is blocked by 1", false),
         ("jT", "2 won't do: Stuck", true),
         ("jt", "2 stopped", true),
-        ("j2t", "1 started; 1 already underway", true),
+        ("j2t", "1 task started; 1 task already underway", true),
     ];
     let dir = workdir(format!("Blocker id:blk\n{STUCK}\n"));
     let mut model = started(deps(dir.path(), config()));

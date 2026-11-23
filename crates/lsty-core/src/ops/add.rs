@@ -15,12 +15,12 @@ use super::{
     rules::{blocked_error, check_rec, expand_first},
     run::run,
     seen::Seen,
-    staged::Path,
+    staged::{LineRef, Path},
     tokens::{ENDED_HINT, is_claim_tag},
     tx::{Tx, gone},
 };
 use crate::{
-    errs::{Code, Error, Field, Result, Source, lossy},
+    errs::{Code, Error, Field, Msg, Result, Source, lossy},
     list::{Snapshot, Task},
     todotxt::{Id, Line, Parts, Priority, build},
 };
@@ -404,30 +404,35 @@ fn announce(tx: &mut Tx, env: &Env<'_>, placed: &[Placed]) -> Result<()> {
         {
             return Err(blocked_start(&after, task));
         }
-        tx.say(message(one.how, &after, task));
+        tx.say(message(one.how, &after, (task, one.line)));
     }
     Ok(())
 }
 
-fn message(how: How, after: &Snapshot, task: &Task) -> Vec<u8> {
+fn message(how: How, after: &Snapshot, (task, at): (&Task, LineRef)) -> Msg {
     let nr = task.nr();
-    let text = after.line(task).text();
+    let name = after
+        .name(task, nr.to_string())
+        .written(nr, (at.source, at.index));
     let id = after.id_of(task);
     let head = match (how, id) {
-        (How::Added, None) => format!("{nr} added"),
-        (How::Added, Some(_)) => format!("{nr} added as id:"),
-        (How::Found, None) => format!("{nr} already there"),
-        (How::Found, Some(_)) => format!("{nr} already there as id:"),
-        (How::Named, _) => format!("{nr} already there, now id:"),
+        (How::Added, None) => " added",
+        (How::Added, Some(_)) => " added as id:",
+        (How::Found, None) => " already there",
+        (How::Found, Some(_)) => " already there as id:",
+        (How::Named, _) => " already there, now id:",
     };
-    [head.as_bytes(), id.unwrap_or_default(), b": ", &text].concat()
+    name.then(head)
+        .then(id.unwrap_or_default())
+        .then(": ")
+        .then(after.line(task).text())
 }
 
 fn blocked_start(after: &Snapshot, task: &Task) -> Error {
     blocked_error(
         after,
         task,
-        "a new task can't start while it waits for another",
+        "a new task can't start while it waits for another".into(),
         "write it without started:",
     )
 }

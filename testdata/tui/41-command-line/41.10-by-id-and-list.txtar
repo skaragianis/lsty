@@ -28,7 +28,7 @@ E
 │  3   D                                                                                           │
 │  4   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  b done: B  x done  t start  T wont  o new  a append  dd delete         1|5  9.9.9
+ N  sort(manual)  2 done: B  x done  t start  T wont  o new  a append  dd delete         1|5  9.9.9
 -- id-file --
 A
 x 2026-09-29 B id:b

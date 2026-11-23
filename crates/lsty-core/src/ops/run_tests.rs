@@ -69,6 +69,54 @@ fn renumbered_after_an_insert() {
     }
 }
 
+#[test]
+fn a_message_names_tasks_by_the_list_each_line_belongs_to() {
+    let dir = folder("a id:k1\nb\nc\n", Some("x d\n"));
+    let out = run(&dir.env(), "do", true, |tx| {
+        let (a, b, c) = (
+            id(tx, Source::Todo, 1),
+            id(tx, Source::Todo, 2),
+            id(tx, Source::Todo, 3),
+        );
+        let (kept, gone) = (tx.name(a), tx.name(b));
+        let new = tx.insert(Source::Todo, 0, *b"new id:zz", Path::Action);
+        let refused = tx.row_name(new);
+        assert_eq!((refused.place, refused.id.as_deref()), (None, Some("zz")));
+        super::id::put_id(tx, c, "q9")?;
+        tx.send_to(Source::Done, b, *b"x 2026-09-29 b")?;
+        tx.say(kept.then(" kept"));
+        tx.say(gone.then(" archived"));
+        let err = tx.target(&Target::at(Source::Done, 1)).unwrap_err();
+        let at = err.said().expect("names the task").parts();
+        let (errs::Part::Name(n), Some("done:1 is archived; use restore")) =
+            (&at[0], err.hint())
+        else {
+            panic!("{err:?}");
+        };
+        assert_eq!(
+            n.place,
+            Some(errs::Place::Read(Nr::new(1).unwrap())),
+            "{n:?}"
+        );
+        assert_eq!((n.source, n.id.as_deref()), (Source::Done, None));
+        Ok(())
+    })
+    .unwrap();
+    let place = |m: usize| match &out.said()[m].parts()[0] {
+        errs::Part::Name(n) => (n.place, n.id.clone()),
+        errs::Part::Text(_) => panic!("no name"),
+    };
+    let nr = |n| Nr::new(n).unwrap();
+    let w = |n| Some(errs::Place::Written(nr(n)));
+    assert_eq!(place(0), (w(4), Some("q9".to_owned())));
+    assert_eq!(place(1), (w(2), Some("k1".to_owned())));
+    assert_eq!(place(2), (Some(errs::Place::Read(nr(2))), None));
+    assert_eq!(
+        out.messages(),
+        said(&["3 is id:q9", "1 kept", "2 archived"])
+    );
+}
+
 /// The outcome keeps the lines as read and as left.
 fn assert_outcome_lines(out: &Outcome) {
     assert_eq!(out.before().len(), 1);
@@ -230,7 +278,10 @@ fn an_archived_target_and_a_gone_one() {
         let archived = tx.target(&Target::at(Source::Done, 1).archived())?;
         assert!(matches!(archived, Picked::Task(_)));
         let gone = tx.target(&Target::at(Source::Done, 2))?;
-        assert_eq!(gone, Picked::Gone("done:2 already restored".to_owned()));
+        let Picked::Gone(said) = gone else {
+            panic!("not gone")
+        };
+        assert_eq!(said.cli(), b"done:2 already restored");
         Ok(())
     })
     .unwrap();
@@ -296,7 +347,8 @@ fn messages_come_before_warnings() {
     .unwrap();
     assert_eq!(out.messages().len(), 2, "{:?}", out.messages());
     assert_eq!(out.messages()[0], b"hello");
-    let warning = String::from_utf8_lossy(&out.messages()[1]);
+    let messages = out.messages();
+    let warning = String::from_utf8_lossy(&messages[1]);
     assert!(warning.contains("k1"), "{warning}");
 }
 

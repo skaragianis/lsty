@@ -160,9 +160,8 @@ impl Tx {
             return;
         };
         let holder = holder_name(&self.snap, task).to_vec();
-        let handle = self.handle(id);
         let phrase = claim_phrase(actor.is_human(), mode);
-        self.say([handle.as_bytes(), phrase, &holder].concat());
+        self.say(self.name(id).then(phrase).then(holder));
     }
 }
 
@@ -182,13 +181,14 @@ fn claimed_error(snap: &Snapshot, task: &Task, handle: &str) -> Error {
         [] => (HUMAN_NAME, Field::Null),
         name => (name, Field::Str(lossy(name))),
     };
-    let mut message = format!("{handle} is claimed by {}", lossy(holder));
+    let mut message = format!(" is claimed by {}", lossy(holder));
     let mut started = Field::Null;
     if let Some(at) = task.started() {
         write!(message, " since {}", at.strftime("%Y-%m-%dT%H:%MZ")).ok();
         started = Field::Str(at.to_string());
     }
-    Error::new(Code::Claimed, message)
+    let said = snap.name(task, handle.to_owned()).then(message);
+    Error::named(Code::Claimed, said)
         .with_hint(CLAIMED_HINT)
         .with_field("owner", owner)
         .with_field("started", started)

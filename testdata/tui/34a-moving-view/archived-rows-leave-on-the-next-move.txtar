@@ -22,7 +22,7 @@ E
 │  4   D                                                                                           │
 │  1   E                                                                                           │
 └──────────────────────────────────────────────────────────────────────────────────────────────────┘
- N  sort(manual)  1 done: A; archived to done.txt as done:1; 2 done: B; archived to done.txt as done
+ N  sort(manual)  1 done: A; archived to done.txt; 2 done: B; archived to done.txt; 3 done: C; archi
 -- after --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
 │  1   D                                                                                           │

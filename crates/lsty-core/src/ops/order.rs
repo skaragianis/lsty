@@ -14,7 +14,7 @@ use super::{
     tx::{Tx, gone},
 };
 use crate::{
-    errs::{Code, Error, Field, Nr, Result, Source},
+    errs::{Code, Error, Field, MOVED_TO, Nr, Result, Source},
     list::{Task, TaskId},
     todotxt::Line,
 };
@@ -97,10 +97,10 @@ fn shift(
         if block.tasks.is_empty() {
             return Ok(());
         }
-        match tx.find(&block, way, n) {
-            Some(at) => tx.regroup(env, &block, at),
-            None => tx.say_each(&block, &format!("is already {}", way.edge())),
+        if let Some(at) = tx.find(&block, way, n) {
+            return tx.regroup(env, &block, at);
         }
+        tx.say_each(&block, &format!("is already {}", way.edge()));
         Ok(())
     })
 }
@@ -128,8 +128,7 @@ pub fn reorder(
             return Ok(());
         }
         let at = tx.place_at(&block, place)?;
-        tx.regroup(env, &block, at);
-        Ok(())
+        tx.regroup(env, &block, at)
     })
 }
 
@@ -194,8 +193,7 @@ impl Tx {
 
     fn say_each(&mut self, block: &Block, what: &str) {
         for &id in &block.tasks {
-            let handle = self.handle(id);
-            self.say(format!("{handle} {what}"));
+            self.say(self.name(id).then(format!(" {what}")));
         }
     }
 
@@ -211,11 +209,8 @@ impl Tx {
         };
         let id = self.anchor(anchor)?;
         if block.tasks.contains(&id) {
-            let handle = self.handle(id);
-            return Err(Error::new(
-                Code::Usage,
-                format!("{handle} is both a target and the anchor"),
-            ));
+            let said = self.name(id).then(" is both a target and the anchor");
+            return Err(Error::named(Code::Usage, said));
         }
         let task = self.task(id).ok_or_else(gone)?;
         let line = task.nr().index();
@@ -226,7 +221,12 @@ impl Tx {
     }
 
     /// Puts the block at `at` in `rest`.
-    fn regroup(&mut self, env: &Env<'_>, block: &Block, at: usize) {
+    fn regroup(
+        &mut self,
+        env: &Env<'_>,
+        block: &Block,
+        at: usize,
+    ) -> Result<()> {
         let at = at.min(block.rest.len());
         let (head, tail) = block.rest.split_at(at);
         let seq: Vec<usize> = [head, &block.lines, tail].concat();
@@ -235,16 +235,16 @@ impl Tx {
         let now = seq.iter().map(|&l| lines[l].raw());
         if now.eq(lines.iter().map(Line::raw)) {
             self.say_each(block, "is already there");
-            return;
+            return Ok(());
         }
         let prev = head.last();
         self.relocate(&block.tasks, prev.map_or(0, |p| p + 1));
-        for (i, &id) in block.tasks.iter().enumerate() {
-            let new_nr = at + i + 1;
-            let handle = self.handle(id);
-            self.say(format!("{handle} moved to {new_nr}"));
+        for &id in &block.tasks {
+            let to = self.written_name(self.line_ref(id)?)?;
+            self.say(self.name(id).read().then(MOVED_TO).and(to));
             self.note_claim(&env.actor, id, ClaimMode::Edit);
         }
+        Ok(())
     }
 
     /// The tasks whose line is equal to an earlier one.

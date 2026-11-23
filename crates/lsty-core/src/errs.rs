@@ -9,8 +9,11 @@ use std::{
 pub mod fuzzing;
 mod quote;
 mod quote_table;
+mod said;
 
 pub use quote::{quote, shown};
+pub(crate) use said::MOVED_TO;
+pub use said::{Msg, Name, Part, Place, unplaced};
 
 #[cfg(test)]
 mod quote_tests;
@@ -287,6 +290,8 @@ enum About {
 struct Inner {
     code: Code,
     message: String,
+    /// The message as data, when it names tasks.
+    said: Option<Msg>,
     hint: Option<String>,
     multiline: bool,
     about: Option<About>,
@@ -329,12 +334,25 @@ impl Error {
         Self(Box::new(Inner {
             code,
             message: message.into(),
+            said: None,
             hint: None,
             multiline: false,
             about: None,
             fields: BTreeMap::new(),
             source: None,
         }))
+    }
+
+    /// An error whose message names tasks.
+    pub fn named(code: Code, said: Msg) -> Self {
+        let mut err = Self::new(code, lossy(&said.cli()));
+        err.0.said = Some(said);
+        err
+    }
+
+    /// The message as data, when it names tasks.
+    pub fn said(&self) -> Option<&Msg> {
+        self.0.said.as_ref()
     }
 
     /// Sets the hint printed after the message. An empty hint is no hint.

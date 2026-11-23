@@ -228,14 +228,17 @@ impl Model {
     /// alert tone.
     fn run_cli(&mut self, words: &[String]) {
         let home = self.deps.home.clone();
-        let result =
-            self.attempt(|env| run_inline(env, home.as_deref(), words));
+        let places = self.lines();
+        let result = self
+            .attempt(|env| run_inline(env, home.as_deref(), words, &places));
         match result {
             Err(e) => self.fail_line(&e),
             Ok((inline, clock)) => {
                 let none = matches!(&inline, Inline::Wrote(o) if o.no_op());
                 match inline {
-                    Inline::Wrote(outcome) => self.adopt(*outcome, clock),
+                    Inline::Wrote(outcome) => {
+                        self.adopt(*outcome, clock);
+                    }
                     Inline::Read(lines) => {
                         self.open_output(&words.join(" "), &lines);
                     }

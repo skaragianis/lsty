@@ -5,12 +5,14 @@ use std::collections::HashMap;
 
 use super::{
     env::Actor,
-    refs::{Target, invalid_id},
+    refs::invalid_id,
     staged::{LineRef, Row},
     tx::Tx,
 };
 use crate::{
-    errs::{Code, Error, Field, Nr, Ref, Result, Source, lossy},
+    errs::{
+        Code, Error, Field, Msg, Name, Nr, Place, Ref, Result, Source, lossy,
+    },
     list::{State, Task, TaskId},
     todotxt::{Id, Line, Tags},
 };
@@ -79,7 +81,7 @@ impl Tx {
 
     /// The id a row carries. A row as read uses the id the snapshot
     /// found; only a changed row is parsed again.
-    fn row_id(&self, row: &Row) -> Option<Vec<u8>> {
+    pub(super) fn row_id(&self, row: &Row) -> Option<Vec<u8>> {
         if row.raw == row.orig
             && let Some(id) = row.task
         {
@@ -115,12 +117,10 @@ impl Tx {
             return Ok(());
         };
         let text = lossy(id);
-        let handle = self.row_handle(holder);
-        let err = Error::new(
-            Code::IdTaken,
-            format!("id:{text} is taken by {handle}"),
-        )
-        .with_field("taken", Field::Str(text));
+        let said = Msg::from(format!("id:{text} is taken by "))
+            .and(self.row_name(holder));
+        let err = Error::named(Code::IdTaken, said)
+            .with_field("taken", Field::Str(text));
         let err = self
             .row_ref(holder, Some(id))
             .into_iter()
@@ -151,13 +151,12 @@ impl Tx {
         let state = task
             .and_then(|i| self.snap.task(i))
             .map_or(State::Todo, Task::state);
-        let id = lossy(id);
-        Error::new(
-            Code::WrongState,
-            format!("{} already has id:{id}", self.row_handle(at)),
-        )
-        .with_hint(hint)
-        .with_field("state", Field::Str(state.as_str().to_owned()))
+        let said = self
+            .row_name(at)
+            .then(format!(" already has id:{}", lossy(id)));
+        Error::named(Code::WrongState, said)
+            .with_hint(hint)
+            .with_field("state", Field::Str(state.as_str().to_owned()))
     }
 
     fn with_row_task(
@@ -188,13 +187,20 @@ impl Tx {
         })
     }
 
-    pub(super) fn row_handle(&self, at: LineRef) -> String {
+    /// The line of `at` as a message names it. A line that was read is
+    /// named by the line it was read at; one that was added has no line
+    /// in the list read, and the command line names it by its place.
+    pub(super) fn row_name(&self, at: LineRef) -> Name {
         let row = self.file(at.source).rows().get(at.index);
-        if let Some(handle) = row.and_then(|r| r.handle.clone()) {
-            return handle;
-        }
-        let nr = self.row_nr(at).map_or(0, |nr| i64::from(nr.get()));
-        Target::at(at.source, nr).handle()
+        let typed = row
+            .and_then(|r| r.handle.clone())
+            .or_else(|| Some(at.source.numbered(self.row_nr(at)?)));
+        let id = row.and_then(|r| self.row_id(r)).map(|id| lossy(&id));
+        let place = row.and_then(|r| r.nr).map(Place::Read);
+        let mut name =
+            Name::new(typed.unwrap_or_default(), id, at.source, place);
+        name.row = Some((at.source, at.index));
+        name
     }
 
     /// Whether a line of either file that will be written carries `id`.

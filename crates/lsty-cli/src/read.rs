@@ -6,7 +6,7 @@ use std::{
 };
 
 use lsty_core::{
-    errs::{Result, Source},
+    errs::{Result, Source, lossy, unplaced},
     list::{Snapshot, SortField, Task},
     query::{Category, Context, Query},
     theme::Slot,
@@ -15,11 +15,65 @@ use lsty_core::{
 
 use crate::{
     commands::Call,
+    inline::Places,
     output::{Field, Json, Output},
     paint::Painter,
     parse::{Hide, Opt},
     task_json::TaskJson,
 };
+
+/// How a read numbers its tasks for a caller that shows a list: by their
+/// place in it, else by `id:`, else by line. A reading that is not the one
+/// the list was built from has no place to give. It owns a copy of the
+/// places: a read streams its lines after the call that made them is gone.
+#[derive(Clone)]
+pub(crate) struct Numbers {
+    places: Places,
+    same: bool,
+}
+
+impl Numbers {
+    /// The number of `task`.
+    pub(crate) fn of(&self, snap: &Snapshot, task: &Task) -> String {
+        let place = self.places.get(&(task.source(), task.nr()));
+        place_name(place.copied().filter(|_| self.same), snap, task)
+    }
+}
+
+/// How a list names `task`: by its `place` in it, else by `id:`, else by
+/// line.
+pub fn place_name(
+    place: Option<usize>,
+    snap: &Snapshot,
+    task: &Task,
+) -> String {
+    place.map_or_else(
+        || {
+            let id = snap.id_of(task).map(lossy);
+            unplaced(task.source(), task.nr(), id.as_deref())
+        },
+        |place| place.to_string(),
+    )
+}
+
+impl Call<'_> {
+    /// The numbering of what `snap` shows, when the caller shows a list.
+    pub(crate) fn numbers(&self, snap: &Snapshot) -> Option<Numbers> {
+        let same = |aim: &Snapshot| {
+            [Source::Todo, Source::Done].into_iter().all(|source| {
+                let (a, b) = (aim.file(source), snap.file(source));
+                a.lines
+                    .iter()
+                    .map(Line::raw)
+                    .eq(b.lines.iter().map(Line::raw))
+            })
+        };
+        Some(Numbers {
+            places: self.places?.clone(),
+            same: self.ops.aim.is_none_or(same),
+        })
+    }
+}
 
 /// The letters of a priority list such as `A-CF`.
 pub(crate) struct Priorities(Vec<(u8, u8)>);
@@ -162,6 +216,7 @@ fn list_tasks(
     let home = call.home.map(Path::to_path_buf);
     let paint = call.paint.clone();
     let hide = call.parsed.hide;
+    let numbers = call.numbers(&snap);
     let footer = format!("-- {} of {} shown", sel.shown.len(), sel.total);
     let fields = if json {
         vec![Field::streamed("tasks"), Field::strs("messages", &messages)]
@@ -180,8 +235,10 @@ fn list_tasks(
                 };
                 json.write_array(&mut w, tasks)?;
             } else {
-                let body = tasks
-                    .map(|task| shown_line(&paint, &snap, task, raw, hide));
+                let how = (!raw).then_some(hide);
+                let body = tasks.map(|t| {
+                    shown_line(&paint, &snap, t, how, numbers.as_ref())
+                });
                 let tail = (!raw)
                     .then(|| paint.paint(Slot::Muted, footer.as_bytes()));
                 let notes =
@@ -197,19 +254,18 @@ fn list_tasks(
     })
 }
 
-/// The line of a task in a list: as it is stored with `raw`, else made
+/// The line of a task in a list: as it is stored with no `hide`, else made
 /// by [`list_line`].
 fn shown_line(
     paint: &Painter,
     snap: &Snapshot,
     task: &Task,
-    raw: bool,
-    hide: Hide,
+    hide: Option<Hide>,
+    numbers: Option<&Numbers>,
 ) -> Vec<u8> {
-    if raw {
-        snap.line(task).raw().to_vec()
-    } else {
-        list_line(paint, snap, task, hide)
+    match hide {
+        None => snap.line(task).raw().to_vec(),
+        Some(hide) => list_line(paint, snap, task, hide, numbers),
     }
 }
 
@@ -220,7 +276,33 @@ pub(crate) fn list_line(
     snap: &Snapshot,
     task: &Task,
     hide: Hide,
+    numbers: Option<&Numbers>,
 ) -> Vec<u8> {
+    let raw = snap.line(task);
+    let mut line = Vec::with_capacity(raw.raw().len() + 64);
+    let label = numbers.map(|n| n.of(snap, task));
+    if let Some(label) = label {
+        paint.paint_into(&mut line, Slot::Muted, label.as_bytes());
+    } else {
+        let (number, at) = padded(snap, task);
+        paint.paint_into(&mut line, Slot::Muted, &number[at..]);
+    }
+    if hide == Hide::default() {
+        line.push(b' ');
+        paint.task(&mut line, raw, task);
+    } else {
+        let rest = hidden(raw.raw(), hide);
+        if let Some((&gap, text)) = rest.split_first() {
+            line.push(gap);
+            paint.task(&mut line, &Line::parse(text), task);
+        }
+    }
+    line
+}
+
+/// The file line of a task, padded with zeros to the width of the file's
+/// last line, in the tail of an array from the index given.
+fn padded(snap: &Snapshot, task: &Task) -> ([u8; 32], usize) {
     let lines = snap.file(task.source()).lines.len();
     let width = lines.checked_ilog10().map_or(1, |log| log as usize + 1);
     // By hand on the stack: a list prints thousands of these, and the
@@ -238,20 +320,7 @@ pub(crate) fn list_line(
     let prefix = task.source().prefix().as_bytes();
     at -= prefix.len();
     number[at..at + prefix.len()].copy_from_slice(prefix);
-    let raw = snap.line(task);
-    let mut line = Vec::with_capacity(raw.raw().len() + 64);
-    paint.paint_into(&mut line, Slot::Muted, &number[at..]);
-    if hide == Hide::default() {
-        line.push(b' ');
-        paint.task(&mut line, raw, task);
-    } else {
-        let rest = hidden(raw.raw(), hide);
-        if let Some((&gap, text)) = rest.split_first() {
-            line.push(gap);
-            paint.task(&mut line, &Line::parse(text), task);
-        }
-    }
-    line
+    (number, at)
 }
 
 /// A byte `[[:graph:]]` matches: anything but controls and blanks.

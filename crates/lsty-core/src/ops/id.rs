@@ -69,8 +69,7 @@ fn give_id(
     if let Some(have) = tx.id_bytes(task) {
         keep_id(tx, task, &have, chosen)?;
         let have = lossy(&have);
-        let handle = tx.handle(task);
-        tx.say(format!("{handle} is id:{have} (unchanged)"));
+        tx.say(tx.name(task).then(format!(" is id:{have} (unchanged)")));
         return Ok(());
     }
     let id = chosen_or_drawn(tx, env, chosen, taken)?;
@@ -97,8 +96,7 @@ pub(super) fn put_id(tx: &mut Tx, task: TaskId, id: &str) -> Result<()> {
     let line = tx.current(task).ok_or_else(gone)?;
     let line = tx.append_tok(task, &line, format!("id:{id}").as_bytes())?;
     tx.set(task, line.raw(), Path::Action);
-    let handle = tx.handle(task);
-    tx.say(format!("{handle} is id:{id}"));
+    tx.say(tx.name(task).then(format!(" is id:{id}")));
     Ok(())
 }
 
@@ -115,7 +113,8 @@ pub(super) fn keep_id(
             tx.snapshot(),
             found,
             found.state(),
-            format!("{} already has id:{}", tx.handle(task), lossy(have)),
+            tx.name(task)
+                .then(format!(" already has id:{}", lossy(have))),
             "an id is never changed".to_owned(),
         )),
         _ => Ok(()),

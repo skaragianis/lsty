@@ -9,8 +9,8 @@ use super::{
     tx::Tx,
 };
 use crate::{
-    errs::{Code, Error, Field, Ref, Result, Source},
-    list::{Snapshot, TaskId},
+    errs::{Code, Error, Field, Msg, Name, Ref, Result, Source, lossy},
+    list::{Snapshot, Task, TaskId},
     todotxt::Line,
 };
 
@@ -38,10 +38,10 @@ impl Tx {
                 continue;
             };
             if rules != Rules::WarnCycles {
-                return Err(cycle_error(&after, &path));
+                return Err(self.cycle_error(&after, &path));
             }
-            let handle = self.row_handle(row.at);
-            self.say(format!("{handle} is now part of a dependency cycle"));
+            let name = self.row_name(row.at);
+            self.say(name.then(" is now part of a dependency cycle"));
         }
         Ok(())
     }
@@ -58,6 +58,36 @@ impl Tx {
             })
             .filter(|row| !row.added.is_empty())
             .collect()
+    }
+
+    /// The refusal, with the numbers the lines will have; each task is
+    /// named by its row, which is in the list read unless the write added
+    /// it.
+    fn cycle_error(&self, after: &Snapshot, path: &[TaskId]) -> Error {
+        let tasks: Vec<&Task> =
+            path.iter().filter_map(|id| after.task(*id)).collect();
+        let name = |task: &Task| {
+            let (source, typed) = (task.source(), task.nr().to_string());
+            let row = self.file(source).order().get(task.nr().index());
+            if let Some(&index) = row {
+                return self.row_name(LineRef { source, index }).typed(typed);
+            }
+            Name::new(typed, after.id_of(task).map(lossy), source, None)
+        };
+        let mut said = Msg::default();
+        for (i, task) in tasks.iter().enumerate() {
+            said = if i == 0 { said } else { said.then(" → ") };
+            said = said.and(name(task));
+        }
+        let refs: Vec<Ref> = tasks.iter().map(|t| after.ref_of(t)).collect();
+        let mut err = Error::named(
+            Code::Cycle,
+            said.then(" would be a dependency cycle"),
+        );
+        if let Some(first) = refs.first() {
+            err = err.with_task(first.clone());
+        }
+        err.with_field("path", Field::Refs(refs))
     }
 
     /// The loop through the row's task that one of its new `dep:`
@@ -95,22 +125,4 @@ fn new_deps(row: &Row) -> Vec<Vec<u8>> {
         .filter(|id| !have.contains(id))
         .map(<[u8]>::to_vec)
         .collect()
-}
-
-/// The refusal, with the numbers the lines will have.
-fn cycle_error(after: &Snapshot, path: &[TaskId]) -> Error {
-    let refs: Vec<Ref> = path
-        .iter()
-        .filter_map(|id| after.task(*id))
-        .map(|task| after.ref_of(task))
-        .collect();
-    let steps: Vec<String> = refs.iter().map(|r| r.nr.to_string()).collect();
-    let mut err = Error::new(
-        Code::Cycle,
-        format!("{} would be a dependency cycle", steps.join(" → ")),
-    );
-    if let Some(first) = refs.first() {
-        err = err.with_task(first.clone());
-    }
-    err.with_field("path", Field::Refs(refs))
 }

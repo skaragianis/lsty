@@ -18,7 +18,7 @@ use super::{
     tx::{Tx, gone},
 };
 use crate::{
-    errs::{Result, Source},
+    errs::{Msg, Name, Result, Source},
     list::TaskId,
     todotxt::{Line, Parts, build},
 };
@@ -61,7 +61,7 @@ pub fn finish(
                 (&mut pending, &mut taken),
             )
         });
-        say_nexts(tx, pending);
+        say_nexts(tx, pending)?;
         done
     })
 }
@@ -73,14 +73,13 @@ fn finish_task(
     (opts, archive): (DoOpts, bool),
     (pending, taken): (&mut Vec<Pending>, &mut Taken),
 ) -> Result<()> {
-    let handle = tx.handle(id);
+    let name = tx.name(id);
     let task = tx.task(id).ok_or_else(gone)?;
     let source = task.source();
     let line = tx.snapshot().line(task).clone();
     // The mark, not the state: an open line of the done file is completed.
     if line.is_done() {
-        let message = already_done(tx, id, source, &line, opts.wontdo);
-        tx.say(message);
+        tx.say(already_done(tx, (id, name), source, &line, opts.wontdo));
         return Ok(());
     }
     if !opts.wontdo {
@@ -90,12 +89,12 @@ fn finish_task(
         }
     }
     let done = completion(tx, env, id, &line, opts.wontdo)?;
-    let said: &[u8] = if opts.wontdo {
-        b" won't do: "
+    let said = if opts.wontdo {
+        " won't do: "
     } else {
-        b" done: "
+        " done: "
     };
-    tx.say([handle.as_bytes(), said, &line.text()].concat());
+    tx.say(name.then(said).then(line.text()));
     if archive && source == Source::Todo {
         archive_done(tx, id, done.shared())?;
     } else {
@@ -112,21 +111,20 @@ fn finish_task(
 /// the way to change the decision, as the task was given.
 fn already_done(
     tx: &Tx,
-    id: TaskId,
+    (id, name): (TaskId, Name),
     source: Source,
     line: &Line,
     wontdo: bool,
-) -> String {
-    let handle = tx.handle(id);
+) -> Msg {
     if !wontdo {
-        return format!("{handle} is already done");
+        return name.then(" is already done");
     }
     if line.has_wontdo() {
-        return format!("{handle} is already won't do");
+        return name.then(" is already won't do");
     }
     let route = source.pick("reopen", "restore");
     let given = tx.given(id);
-    format!("{handle} is already done; use lsty {route} {given} first")
+    name.then(format!(" is already done; use lsty {route} {given} first"))
 }
 
 /// Whether a target is an open line of the done file that spawns. The
@@ -152,11 +150,13 @@ fn spawns_from_done(tx: &Tx, targets: &[Target], wontdo: bool) -> bool {
 fn archive_done(tx: &mut Tx, id: TaskId, done: Arc<[u8]>) -> Result<()> {
     tx.dest = Some(Source::Done);
     let (line, over) = tx.send_to(Source::Done, id, done)?;
-    let (name, nr) = (tx.file_name(Source::Done), tx.written_nr(line));
-    tx.say(format!(
-        "archived to {name} as {}",
-        Source::Done.numbered(nr)
-    ));
+    let file = tx.file_name(Source::Done);
+    let at = tx.written_name(line)?.moved_from(&tx.name(id));
+    tx.say(
+        Msg::from(format!("archived to {file}"))
+            .then(" as ")
+            .and(at),
+    );
     if over && let Some(key) = tx.id_bytes(id) {
         tx.say_interrupted(&key);
     }

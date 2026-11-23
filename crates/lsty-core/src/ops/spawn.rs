@@ -13,7 +13,7 @@ use super::{
 };
 use crate::{
     dates::Date,
-    errs::{Code, Error, Field, Result, Source},
+    errs::{Code, Error, Field, Msg, Result, Source},
     list::TaskId,
     todotxt::{Line, Parts, Rec, RecUnit, TokenView, build, is_wontdo},
 };
@@ -68,16 +68,13 @@ pub(super) fn spawn_next(
     let line = tx.snapshot().line(task);
     let Some(rec) = line.tags().rec else {
         if first_of_key(line, b"rec").is_some() {
-            let handle = tx.handle(id);
-            tx.say(format!(
-                "{handle} has a bad rec: value; no next occurrence"
-            ));
+            let said = " has a bad rec: value; no next occurrence";
+            tx.say(tx.name(id).then(said));
         }
         return Ok(());
     };
     if done.has_wontdo() {
-        let handle = tx.handle(id);
-        tx.say(format!("{handle} has rec:; the series ended"));
+        tx.say(tx.name(id).then(" has rec:; the series ended"));
         return Ok(());
     }
     let (source, after) = (task.source(), task.nr().index() + 1);
@@ -97,35 +94,31 @@ pub(super) fn spawn_next(
         line: at,
         next,
     });
-    tx.say(Vec::new());
+    tx.say(Msg::default());
     Ok(())
 }
 
 /// Writes the messages of the spawns, now that their line numbers are
 /// final.
-pub(super) fn say_nexts(tx: &mut Tx, pending: Vec<Pending>) {
+pub(super) fn say_nexts(tx: &mut Tx, pending: Vec<Pending>) -> Result<()> {
     for Pending { at, line, next } in pending {
-        let nr = tx.written_nr(line);
         let tags = next.tags();
+        let name = tx.written_name(line)?;
         let note = match (tags.due, tags.threshold) {
             (Some(due), _) => format!("due {due}"),
             (None, threshold) => {
                 format!("from {}", threshold.unwrap_or_default())
             }
         };
-        let message = [
-            nr.to_string().as_bytes(),
-            b" next: ",
-            &next.text(),
-            b" (",
-            note.as_bytes(),
-            b")",
-        ]
-        .concat();
+        let message = name
+            .then(" next: ")
+            .then(next.text())
+            .then(format!(" ({note})"));
         if let Some(slot) = tx.messages.get_mut(at) {
             *slot = message;
         }
     }
+    Ok(())
 }
 
 /// `line` with `due:` and `t:` moved on by `rec`. The base is today, or

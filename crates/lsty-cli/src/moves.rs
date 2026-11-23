@@ -56,7 +56,7 @@ pub(crate) fn reorder(call: &Call<'_>) -> Result<Written> {
             return Err(usage("agents place tasks by anchor")
                 .with_hint("use --after id:\u{2026}"));
         }
-        (None, None, Some(n)) => Ok(Placement::Position(n)),
+        (None, None, Some(n)) => Ok(Placement::Position(call.position(n))),
         (None, None, None) => return Err(needs()),
         _ => return Err(usage("give a position or an anchor, not both")),
     };

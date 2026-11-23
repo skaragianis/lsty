@@ -5,11 +5,11 @@ env LSTY_OWNER=agent1
 exec lsty next --filter +a --no-config
 cmp stdout want
 exec lsty next --filter +a --json --no-config
-stdout '"later_count":1,"blocked_count":1,"claimed_count":1,"messages":\["nothing ready \(1 blocked, 1 later, 1 claimed\)"\]'
+stdout '"later_count":1,"blocked_count":1,"claimed_count":1,"messages":\["nothing ready \(1 task blocked, 1 task later, 1 task claimed\)"\]'
 exec lsty next --start --filter +a --no-config
 cmp stdout want
 exec lsty next --start --filter +a --json --no-config
-stdout '"later_count":1,"blocked_count":1,"claimed_count":1,"resumed":false,"messages":\["nothing ready \(1 blocked, 1 later, 1 claimed\)"\]'
+stdout '"later_count":1,"blocked_count":1,"claimed_count":1,"resumed":false,"messages":\["nothing ready \(1 task blocked, 1 task later, 1 task claimed\)"\]'
 cmp todo.txt want-todo
 
 -- todo.txt --
@@ -23,4 +23,4 @@ Later +a t:2099-10-05
 Busy +a started:2026-09-29T0900Z owner:agent9
 Other +b id:b
 -- want --
-nothing ready (1 blocked, 1 later, 1 claimed)
+nothing ready (1 task blocked, 1 task later, 1 task claimed)

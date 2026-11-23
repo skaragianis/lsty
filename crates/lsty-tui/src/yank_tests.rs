@@ -158,44 +158,44 @@ const OUTSIDE_EDITS: &[OutsideEdit] = &[
         "X\nY\n\nB\nC\n",
         true,
         "X\nY\n\nB dep:a\nC\nA id:a\n",
-        "relinked 4",
+        "relinked 3",
     ),
     (
         "X\nY\n\nB\nC\n",
         false,
         "X\nY\n\nB dep:a\nC\nA id:a\n",
-        "relinked 4",
+        "relinked 3",
     ),
     (
         "\nC\nB\n",
         true,
         "\nC\nB\nA id:a\n",
-        "3 changed since; dep:a not restored",
+        "2 changed since; dep:a not restored",
     ),
     (
         "\nC\nB\n",
         false,
         "\nC\nA id:a\nB\n",
-        "2 changed since; dep:a not restored",
+        "a dependent of a changed since; dep:a not restored",
     ),
     (
         "\nB\nB\nC\n",
         true,
         "\nB\nB\nC\nA id:a\n",
-        "2 changed since; dep:a not restored",
+        "1 changed since; dep:a not restored",
     ),
     (
         "\nB\nB\nC\n",
         false,
         "\nB\nB\nC\nA id:a\n",
-        "2 changed since; dep:a not restored",
+        "a dependent of a changed since; dep:a not restored",
     ),
     ("\nC\n", true, "\nC\nA id:a\n", "a dependent of a is gone"),
     (
         "\nC\n",
         false,
         "\nC\nA id:a\n",
-        "2 changed since; dep:a not restored",
+        "a dependent of a changed since; dep:a not restored",
     ),
 ];
 
@@ -216,7 +216,7 @@ fn a_kept_dependent_through_an_outside_change() {
         }
         keys(&mut model, "Gp");
         assert_eq!(todo_of(dir.path()), *want, "{name}");
-        let message = format!("pasted 1 task (1 moved); {said}");
+        let message = format!("moved 1 task; {said}");
         assert_eq!(model.message.text(), Some(message.as_str()), "{name}");
     }
 }
@@ -247,15 +247,20 @@ fn the_kept_links_are_used_by_one_paste() {
     let copied = "\nB dep:a\nC\n2026-09-29 A id:a\n2026-09-29 A id:t001\n";
     for (typed, file, said) in [
         ("jjpp", copied, "pasted 1 task"),
-        ("Gpup", linked, "pasted 1 task (1 moved); relinked 2"),
-        ("Gpupup", linked, "pasted 1 task (1 moved); relinked 2"),
-        ("Gpupu<C-r>", linked, "redid: pasted 1 task (1 moved)"),
+        (
+            "P",
+            "\n2026-09-29 A id:a\nB dep:a\nC\n",
+            "moved 1 task; relinked 2",
+        ),
+        ("Gpup", linked, "moved 1 task; relinked 1"),
+        ("Gpupup", linked, "moved 1 task; relinked 1"),
+        ("Gpupu<C-r>", linked, "redid: moved 1 task"),
         ("Gpu<C-r>p", copied, "pasted 1 task"),
         // an add of the cut's text is not its paste coming back
         (
             "Go2026-09-29 A id:a<CR><Esc>uGp",
             linked,
-            "pasted 1 task (1 moved); relinked 2",
+            "moved 1 task; relinked 1",
         ),
     ] {
         let dir = workdir("2026-09-29 A id:a\nB dep:a\nC\n");
@@ -285,11 +290,7 @@ fn a_second_paste_does_not_link_the_dependents_again() {
         reload(&mut model);
         keys(&mut model, "Gp");
         assert_eq!(todo_of(dir.path()), "\nB\nC\nA id:a\n", "{first}");
-        assert_eq!(
-            model.message.text(),
-            Some("pasted 1 task (1 moved)"),
-            "{first}"
-        );
+        assert_eq!(model.message.text(), Some("moved 1 task"), "{first}");
     }
 }
 
