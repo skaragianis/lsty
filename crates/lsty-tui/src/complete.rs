@@ -68,10 +68,10 @@ impl Popup {
     }
 }
 
-/// Whether two candidates insert the same text for the same label, not
-/// counting the place that names a task: a reading may number it anew.
-/// The task of a `dep:` candidate is not compared: it belongs to one
-/// reading.
+/// Whether two candidates insert the same text for the same task, by
+/// the text of its label: the place that names it and the due date after
+/// it are left out, since a new reading or a new day changes them. The
+/// task of a `dep:` candidate is not compared: it belongs to one reading.
 fn same_choice(a: &Candidate, b: &Candidate) -> bool {
     let put = match (&a.put, &b.put) {
         (Put::Text(x), Put::Text(y)) => x == y,
@@ -80,12 +80,7 @@ fn same_choice(a: &Candidate, b: &Candidate) -> bool {
             false
         }
     };
-    put && tail(&a.label) == tail(&b.label)
-}
-
-/// A label without the place that names its task.
-fn tail(label: &str) -> &str {
-    label.split_once(GAP).map_or(label, |(_, tail)| tail)
+    put && a.label.split(GAP).nth(1) == b.label.split(GAP).nth(1)
 }
 
 /// What a draft keeps of the popup.

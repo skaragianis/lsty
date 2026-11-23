@@ -403,6 +403,12 @@ pub(crate) fn reload(model: &mut Model) -> Vec<Cmd> {
     model.update(msg)
 }
 
+/// The clock reaching a minute, with the reading it asks for done.
+pub(crate) fn minute(model: &mut Model) {
+    let msg = load_of(model.update(Msg::Minute)).read();
+    model.update(msg);
+}
+
 /// The line of the task under the cursor.
 pub(crate) fn cursor_text(model: &Model) -> String {
     model.cursor_task().map_or_default(|i| {
