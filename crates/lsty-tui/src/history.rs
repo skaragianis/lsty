@@ -421,7 +421,6 @@ fn turn(
             let at =
                 |(source, p)| (source, turned(source, p, held).unwrap_or(p));
             name.place = name.place.map(|p| at((name.source, p)).1);
-            name.from = name.from.map(at);
         }
     }
 }
