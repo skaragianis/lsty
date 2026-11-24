@@ -13,6 +13,7 @@ use lsty_core::{
 use crate::{
     connective::{self, Term},
     motion::Step,
+    rows::Shows,
     text::{RULE, Span, fit, pad, scrolled, width, width_of, window},
 };
 
@@ -282,17 +283,20 @@ impl<'a> Tree<'a> {
     }
 }
 
-/// The counts of `snap`, made once for each reading.
+/// The counts of `snap`, made once for each reading and each setting of the
+/// hiding switches.
 fn counted<'a>(
-    counted: &'a mut Option<(u32, Counts)>,
+    counted: &'a mut Option<(u32, Shows, Counts)>,
     snap: &Snapshot,
+    shows: Shows,
     kind: todotxt::Kind,
 ) -> &'a Counts {
     let serial = snap.serial();
-    counted.take_if(|c| c.0 != serial);
+    counted.take_if(|c| (c.0, c.1) != (serial, shows));
+    let open = |task: &_| shows.holds(task, &[]);
     &counted
-        .get_or_insert_with(|| (serial, snap.rolled_counts(kind)))
-        .1
+        .get_or_insert_with(|| (serial, shows, snap.rolled_counts(kind, open)))
+        .2
 }
 
 /// One of the three lists of the sidebar.
@@ -303,7 +307,7 @@ pub(crate) struct Panel {
     nodes: Counts,
     /// The counts the tasks give, with the serial of the reading they
     /// were made on.
-    counted: Option<(u32, Counts)>,
+    counted: Option<(u32, Shows, Counts)>,
     folded: BTreeSet<Vec<u8>>,
     /// The projects and contexts that filter the list, in the order they
     /// were chosen.
@@ -343,8 +347,13 @@ impl Panel {
     /// and lays it out again. The counts are made once for each reading.
     /// The active ones stay listed, with those above them, when no
     /// task has them.
-    pub(crate) fn set_nodes(&mut self, snap: &Snapshot, kind: todotxt::Kind) {
-        let mut nodes = counted(&mut self.counted, snap, kind).clone();
+    pub(crate) fn set_nodes(
+        &mut self,
+        snap: &Snapshot,
+        shows: Shows,
+        kind: todotxt::Kind,
+    ) {
+        let mut nodes = counted(&mut self.counted, snap, shows, kind).clone();
         for name in self.active.iter().flat_map(|a| name_levels(&a.name)) {
             nodes.entry(name.to_vec()).or_default();
         }
@@ -361,9 +370,10 @@ impl Panel {
     pub(crate) fn drop_unnamed(
         &mut self,
         snap: &Snapshot,
+        shows: Shows,
         kind: todotxt::Kind,
     ) -> bool {
-        let counts = counted(&mut self.counted, snap, kind);
+        let counts = counted(&mut self.counted, snap, shows, kind);
         let before = self.active.len();
         self.active
             .retain(|a| counts.contains_key(a.name.as_slice()));

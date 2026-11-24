@@ -155,8 +155,8 @@ impl Model {
         let before: Vec<_> = (self.panels.iter_mut().zip(rows))
             .map(|(p, rows)| (p.seen(rows), std::mem::take(&mut p.entries)))
             .collect();
-        self.panels[PROJECTS].set_nodes(&self.snap, Kind::Project);
-        self.panels[CONTEXTS].set_nodes(&self.snap, Kind::Context);
+        self.panels[PROJECTS].set_nodes(&self.snap, self.shows, Kind::Project);
+        self.panels[CONTEXTS].set_nodes(&self.snap, self.shows, Kind::Context);
         let entries = self.filter_entries();
         self.panels[FILTERS].set_entries(entries);
         let rows = self.panel_rows();
@@ -174,10 +174,16 @@ impl Model {
         if own && !self.sticky.is_empty() {
             return false;
         }
-        let projects =
-            self.panels[PROJECTS].drop_unnamed(&self.snap, Kind::Project);
-        let contexts =
-            self.panels[CONTEXTS].drop_unnamed(&self.snap, Kind::Context);
+        let projects = self.panels[PROJECTS].drop_unnamed(
+            &self.snap,
+            self.shows,
+            Kind::Project,
+        );
+        let contexts = self.panels[CONTEXTS].drop_unnamed(
+            &self.snap,
+            self.shows,
+            Kind::Context,
+        );
         projects | contexts
     }
 

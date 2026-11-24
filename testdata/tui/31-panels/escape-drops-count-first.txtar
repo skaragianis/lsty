@@ -12,7 +12,7 @@ x 2026-09-28 Fix bug +work
 Write parser +spec01 id:parser
 -- count-dropped --
 ┌[3]─Projects─┐┌[1]─"~/todo.txt"───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   (A) Call client +work @phone                                 today           │
+│ +home    0/1││  1   (A) Call client +work @phone                                 today           │
 │ +spec01  1/1││  1   (B) Send Invoice +work.acme @email                           2d late         │
 │ ▾+work   2/3││  2 ✓     Fix bug +work                                            1d ago          │
 ├[4]─Contexts─┤└───────────────────────────────────────────────────────────────────────────────────┘
@@ -25,7 +25,7 @@ Write parser +spec01 id:parser
  N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                           9.9.9
 -- in-list --
 ┌[3]─Projects─┐┌[1]─"~/todo.txt"───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   (A) Call client +work @phone                                 today           │
+│ +home    0/1││  1   (A) Call client +work @phone                                 today           │
 │ +spec01  1/1││  1   (B) Send Invoice +work.acme @email                           2d late         │
 │ ▾+work   2/3││  2 ✓     Fix bug +work                                            1d ago          │
 ├[4]─Contexts─┤└───────────────────────────────────────────────────────────────────────────────────┘

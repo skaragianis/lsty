@@ -13,7 +13,7 @@ x 2026-09-28 Fix bug +work
 Write parser +spec01 id:parser
 -- in-panel --
 ┌[3]─Projects─┐┌[1]─@phone─────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   (A) Call client +work @phone                                           today │
+│ +home    0/1││  1   (A) Call client +work @phone                                           today │
 │ +spec01  1/1││                                                                                   │
 │ ▾+work   2/3││                                                                                   │
 ├[4]─Contexts─┤└───────────────────────────────────────────────────────────────────────────────────┘
@@ -26,7 +26,7 @@ Write parser +spec01 id:parser
  N  sort(manual)  x filter  <CR> list  <Tab> next  h fold  l unfold                           9.9.9
 -- in-list --
 ┌[3]─Projects─┐┌[1]─@phone─────────────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   (A) Call client +work @phone                                           today │
+│ +home    0/1││  1   (A) Call client +work @phone                                           today │
 │ +spec01  1/1││                                                                                   │
 │ ▾+work   2/3││                                                                                   │
 ├[4]─Contexts─┤└───────────────────────────────────────────────────────────────────────────────────┘
