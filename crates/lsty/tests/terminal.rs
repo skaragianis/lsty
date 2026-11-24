@@ -24,10 +24,16 @@ use rustix::{
     termios::{Winsize, tcsetwinsize},
 };
 
+#[path = "terminal/soak.rs"]
+mod soak;
+
 type Check = Result<(), Failed>;
 
 const ENTER: &str = "\x1b[?1049h";
 const LEAVE: &str = "\x1b[?1049l";
+/// The size of the terminal.
+const ROWS: usize = 24;
+const COLS: usize = 80;
 const LIMIT: Duration = Duration::from_secs(5);
 /// How long one read of the terminal waits.
 const SLICE: Timespec = Timespec {
@@ -43,6 +49,8 @@ const LIST: &str = "(A) Call client +work\nBuy milk +home\n";
 /// What the program wrote to its terminal.
 struct Screen {
     seen: Vec<u8>,
+    /// The text on the screen, for the tests that read it as rows.
+    grid: Grid,
     master: File,
 }
 
@@ -106,7 +114,86 @@ impl Screen {
             return false;
         };
         self.seen.extend_from_slice(&buf[..n]);
+        self.grid.feed(&buf[..n]);
         true
+    }
+}
+
+/// Where an escape sequence of the terminal stands.
+enum Mode {
+    Text,
+    Esc,
+    /// The parameters read of a control sequence.
+    Csi(String),
+}
+
+/// The text on the screen of a terminal, as far as the list draws it: text
+/// put where the cursor is, which `CSI row ; column H` moves; any other
+/// control sequence is skipped. A string sequence (`OSC`) is not: its body
+/// is put as text, and the soak sends none.
+struct Grid {
+    cells: Vec<Vec<char>>,
+    at: (usize, usize),
+    mode: Mode,
+    /// The start of a character not whole yet.
+    held: Vec<u8>,
+}
+
+impl Grid {
+    fn new() -> Self {
+        Self {
+            cells: vec![vec![' '; COLS]; ROWS],
+            at: (0, 0),
+            mode: Mode::Text,
+            held: Vec::new(),
+        }
+    }
+
+    /// Takes in what the program wrote; a byte that is no text becomes
+    /// U+FFFD. A character cut off at the end of a read is held for the
+    /// next one, unless an invalid byte comes before it in the same read:
+    /// the program draws no invalid byte, so that is not handled.
+    fn feed(&mut self, bytes: &[u8]) {
+        self.held.extend_from_slice(bytes);
+        let cut = match std::str::from_utf8(&self.held) {
+            Err(e) if e.error_len().is_none() => e.valid_up_to(),
+            _ => self.held.len(),
+        };
+        let tail = self.held.split_off(cut);
+        let text = String::from_utf8_lossy(&self.held).into_owned();
+        self.held = tail;
+        text.chars().for_each(|c| self.take(c));
+    }
+
+    fn take(&mut self, c: char) {
+        match std::mem::replace(&mut self.mode, Mode::Text) {
+            Mode::Esc if c == '[' => self.mode = Mode::Csi(String::new()),
+            Mode::Csi(mut params) if !('@'..='~').contains(&c) => {
+                params.push(c);
+                self.mode = Mode::Csi(params);
+            }
+            Mode::Csi(params) if c == 'H' => {
+                let mut n = params
+                    .split(';')
+                    .map(|p| p.parse::<usize>().map_or(0, |n| n.max(1) - 1));
+                let (row, col) =
+                    (n.next().unwrap_or(0), n.next().unwrap_or(0));
+                self.at = (row.min(ROWS - 1), col.min(COLS - 1));
+            }
+            Mode::Text if c == '\x1b' => self.mode = Mode::Esc,
+            Mode::Text if !c.is_control() => {
+                let (row, col) = self.at;
+                if col < COLS {
+                    self.cells[row][col] = c;
+                }
+                self.at.1 = col + 1;
+            }
+            Mode::Esc | Mode::Csi(_) | Mode::Text => {}
+        }
+    }
+
+    fn rows(&self) -> Vec<String> {
+        self.cells.iter().map(|r| r.iter().collect()).collect()
     }
 }
 
@@ -140,8 +227,8 @@ impl Work {
 fn open_pty() -> Result<(File, OwnedFd), Failed> {
     let (master, tty) = lsty_scripttest::open_pty()?;
     let size = Winsize {
-        ws_row: 24,
-        ws_col: 80,
+        ws_row: u16::try_from(ROWS)?,
+        ws_col: u16::try_from(COLS)?,
         ws_xpixel: 0,
         ws_ypixel: 0,
     };
@@ -165,9 +252,18 @@ fn start_with(
     let child = spawn(root, vars, args, tty)?;
     let screen = Screen {
         seen: Vec::new(),
+        grid: Grid::new(),
         master,
     };
     Ok((child, screen))
+}
+
+/// `lsty` run in `root` with a clean environment.
+fn command(root: &Path) -> Command {
+    let mut cmd =
+        lsty_scripttest::list_command(env!("CARGO_BIN_EXE_lsty"), root);
+    cmd.current_dir(root);
+    cmd
 }
 
 /// Starts `lsty` in `root` with `tty` for its three streams.
@@ -177,21 +273,14 @@ fn spawn(
     args: &[&str],
     tty: OwnedFd,
 ) -> Result<Child, Failed> {
-    let mut cmd = Command::new(env!("CARGO_BIN_EXE_lsty"));
+    let mut cmd = command(root);
     cmd.args(args)
-        .env_clear()
-        .env("HOME", root)
-        .env("TZ", "UTC")
-        .env("TODOTXT_GLOBAL_CFG_FILE", root.join("none"))
         .env("TERM", "xterm-256color")
-        .env("LSTY_NOW", "2026-09-29T0900Z")
-        .env("TODO_FILE", root.join("todo.txt"))
         .envs(vars.iter().copied())
-        .current_dir(root)
         .stdin(tty.try_clone()?)
         .stdout(tty.try_clone()?)
         .stderr(tty);
-    let child = lsty_scripttest::with_coverage(&mut cmd).spawn()?;
+    let child = cmd.spawn()?;
     // The terminal closes once the child's copies are the only ones.
     drop(cmd);
     Ok(child)
@@ -619,6 +708,7 @@ fn main() -> std::process::ExitCode {
             "another writer is shown without a key",
             another_writer_is_shown_without_a_key,
         ),
+        Trial::test("the list keeps up with other writers", soak::keeps_up),
         Trial::test(
             "a stop signal ends a busy reload",
             stop_during_a_busy_reload,
