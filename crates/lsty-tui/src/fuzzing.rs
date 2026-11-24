@@ -318,6 +318,14 @@ impl Side {
     fn history_named(&self, press: &Press<'_>, before: &Files, body: &str) {
         let (now, after) = (shown(&self.model), self.files());
         let idle = press.way.is_none() && *before == after;
+        assert!(
+            *before != after
+                || moves(body).is_empty()
+                    && !MOVES.iter().any(|m| body.contains(m)),
+            "moved, but wrote nothing: {}",
+            press.name
+        );
+        self.claims_held(press, (before, &after), &now, body);
         let read = self.model.snap.todo().to_bytes() == after[0];
         let undo = press.way == Some(Action::Undo);
         // `named` checks the line of a task that moved from a row to
@@ -374,6 +382,57 @@ impl Side {
                 "{n} not acted on: {}",
                 press.name
             );
+        }
+    }
+
+    /// A note of a claim says the line of its task holds `owner:X`: at the
+    /// row now, in the files after the write or, for an ended claim or a
+    /// field edit (which may rewrite the owner it noted), before it; an ended
+    /// claim also at the row before the key (followed). A task no row shows is
+    /// named by its line (`line N`). The task is one the key acted on.
+    fn claims_held(
+        &self,
+        press: &Press<'_>,
+        (before, after): (&Files, &Files),
+        now: &HashMap<usize, (usize, usize)>,
+        body: &str,
+    ) {
+        for c in body.split("; ") {
+            let Some((n, holder)) =
+                CLAIMS.iter().find_map(|w| c.split_once(w))
+            else {
+                continue;
+            };
+            let kept = c.contains(CLAIMS[0]);
+            // A field edit may change the owner it noted the claim of.
+            let early = !kept || !self.opened.is_empty();
+            let owner = format!("owner:{holder}");
+            let has = |files: &Files, (f, at): (usize, usize)| {
+                let mut lines = files[f].split(|b| *b == b'\n');
+                let line = lines.nth(at).unwrap_or_default();
+                String::from_utf8_lossy(line)
+                    .split_whitespace()
+                    .any(|w| w == owner)
+            };
+            let n = n.trim();
+            let (at, row) = (line_of(n, now), n.parse().ok());
+            let here = at
+                .is_some_and(|at| has(after, at) || early && has(before, at));
+            let was = row.and_then(|n| press.was.get(&n));
+            let earlier = !kept
+                && was.is_some_and(|&at| {
+                    let to = self.follow(at);
+                    to.is_empty() || to.iter().any(|&l| has(before, l))
+                });
+            let ok = here || earlier;
+            assert!(ok, "{c} not held: {}", press.name);
+            // The task is one the key acted on: its line now, its row before
+            // the key, or the row it moved to.
+            let acted = press.seen.is_empty()
+                || at.is_some_and(|at| press.seen.contains(&at))
+                || was.is_some_and(|&at| self.acted(press.seen, at, false))
+                || moves(body).iter().any(|m| Some(m.1) == row);
+            assert!(acted, "{c} not acted on: {}", press.name);
         }
     }
 
@@ -585,6 +644,23 @@ fn shown(model: &Model) -> HashMap<usize, (usize, usize)> {
     .collect()
 }
 
+/// The line a name in a message stands for: the line of the row it is the
+/// place of in `rows`, or the one a task no row shows is named by (`line N`,
+/// `done:N`); none for a place that is no row.
+fn line_of(
+    name: &str,
+    rows: &HashMap<usize, (usize, usize)>,
+) -> Option<(usize, usize)> {
+    let line = |n: &str| n.parse::<usize>().ok().map(|n| n.saturating_sub(1));
+    match name.strip_prefix("line ") {
+        Some(n) => Some((0, line(n)?)),
+        None => match name.strip_prefix("done:") {
+            Some(n) => Some((1, line(n)?)),
+            None => rows.get(&name.parse().ok()?).copied(),
+        },
+    }
+}
+
 /// The lines of `rows` that the names in a message are the places of; a
 /// place that is no row fails. A task with no row is named by its line
 /// (`line N`, `done:N`), which no row may show: a row is named by its place.
@@ -593,23 +669,20 @@ fn lines_of(
     rows: &HashMap<usize, (usize, usize)>,
     name: &str,
 ) -> Vec<(usize, usize)> {
-    let line = |n: &str| n.parse::<usize>().ok().map(|n| n.saturating_sub(1));
-    let unshown = |file, n: &str| {
-        let at = (file, line(n)?);
-        assert!(!rows.values().any(|r| *r == at), "{n} is a row: {name}");
-        Some(at)
-    };
-    let place = |n: &str| {
-        let at =
-            |n| rows.get(&n).unwrap_or_else(|| panic!("no row {n}: {name}"));
-        n.parse().ok().map(|n| *at(n))
-    };
-    let lines = names.iter().filter_map(|n| match n.strip_prefix("line ") {
-        Some(n) => unshown(0, n),
-        None => match n.strip_prefix("done:") {
-            Some(n) => unshown(1, n),
-            None => place(n),
-        },
+    let place = |n: &str| n.parse::<usize>().is_ok();
+    let lines = names.iter().filter_map(|n| {
+        let at = line_of(n, rows);
+        match at {
+            None => assert!(!place(n), "no row {n}: {name}"),
+            Some(at) if !place(n) => {
+                assert!(
+                    !rows.values().any(|r| *r == at),
+                    "{n} is a row: {name}"
+                );
+            }
+            Some(_) => {}
+        }
+        at
     });
     lines.collect()
 }
@@ -624,7 +697,15 @@ fn after(message: Option<&str>, word: &str) -> Vec<String> {
 
 /// The words of the clauses that name a row before and a row after the
 /// write: a task moved to a row, moved back from one, or reopened as one.
-const MOVES: [&str; 3] = [" moved to ", " moved back from ", " reopened as "];
+const MOVES: [&str; 3] = [MOVED_TO, MOVED_BACK, REOPENED_AS];
+
+const MOVED_TO: &str = " moved to ";
+const MOVED_BACK: &str = " moved back from ";
+const REOPENED_AS: &str = " reopened as ";
+
+/// The words of a note of a claim: kept, ended or taken over.
+const CLAIMS: [&str; 3] =
+    [" is claimed by ", " was claimed by ", " taken over from "];
 
 /// What a clause says of a task it names: changed, already as asked, or
 /// left alone by a paste (`changed since`).
@@ -666,6 +747,10 @@ fn named_places(body: &str, undo: bool) -> Vec<(usize, Said, At)> {
         words[skip].parse().ok().filter(|_| !counted)
     };
     let clause = |c: &str| {
+        // `claims_held` checks a note of a claim.
+        if CLAIMS.iter().any(|w| c.contains(w)) {
+            return Vec::new();
+        }
         let said = if c.contains(" already ") {
             Said::Already
         } else if c.contains(" changed since") {
@@ -673,7 +758,7 @@ fn named_places(body: &str, undo: bool) -> Vec<(usize, Said, At)> {
         } else {
             Said::Changed
         };
-        let turned = [MOVES[0], MOVES[2]].iter().any(|w| c.contains(w))
+        let turned = [MOVED_TO, REOPENED_AS].iter().any(|w| c.contains(w))
             || [" deleted", " moved", " moved back"]
                 .iter()
                 .any(|w| c.ends_with(w));
@@ -697,8 +782,8 @@ fn named_places(body: &str, undo: bool) -> Vec<(usize, Said, At)> {
                 .collect::<Vec<_>>()
         };
         let mut named = at(&["unblocked ", "relinked "], At::After);
-        named.extend(at(&[MOVES[2]], side(At::After)));
-        named.extend(at(&MOVES[..2], At::Placed));
+        named.extend(at(&[REOPENED_AS], side(At::After)));
+        named.extend(at(&[MOVED_TO, MOVED_BACK], At::Placed));
         let own = if turned { At::Before } else { At::After };
         named.extend(first(c).map(|n| (n, said, side(own))));
         named
