@@ -33,7 +33,6 @@ pub(crate) struct Sticky {
 }
 
 impl Sticky {
-    #[cfg(test)]
     pub(crate) fn is_empty(&self) -> bool {
         self.held.is_empty()
     }
@@ -237,7 +236,8 @@ impl Model {
     /// that row keeps it for as long as it lasts, and a selection the row it
     /// started from.
     /// A refilter on its way does this itself, and the rows stay as drawn
-    /// until then.
+    /// until then. Wherever the rows are listed again, the selected names
+    /// that no task has go.
     /// Tells whether a row left.
     pub(crate) fn leave_sticky(&mut self, keep: Option<Place>) -> bool {
         if self.refilter.owed {

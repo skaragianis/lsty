@@ -472,20 +472,23 @@ fn the_cursor_stays_on_its_task_or_moves_to_the_next_row() {
 }
 
 #[test]
-fn an_active_name_that_leaves_the_file_stays_listed_with_no_tasks() {
-    let (dir, mut model) = workdir_model("a +w\nb +x.y\n", plain());
-    model.panels[PROJECTS].active = vec![Term::and(*b"x.y")];
-    std::fs::write(dir.path().join("todo.txt"), "a +w\n")
-        .unwrap_or_else(|e| panic!("{e}"));
-    reload(&mut model);
-    let lines = screen(&model, 80, 24);
-    assert!(lines.iter().any(|l| l.contains("│=  .y")), "{lines:?}");
-    let text = lines.join("\n");
-    assert!(text.contains("+x"), "{text}");
-    assert!(text.contains("0/0"), "{text}");
-    model.panels[PROJECTS].active.clear();
-    model.rebuild();
-    assert!(!screen(&model, 80, 24).join("\n").contains("0/0"));
+fn an_active_name_that_leaves_the_file_leaves_the_panel_with_its_filter() {
+    for (panel, name, drawn, before, after) in [
+        (PROJECTS, "x.y", "+x", "a +w\nb +x.y\n", "a +w\nb\n"),
+        (CONTEXTS, "bug", "@bug", "a @w\nb @bug\n", "a @w\nb\n"),
+    ] {
+        let (dir, mut model) = workdir_model(before, plain());
+        model.panels[panel].active = vec![Term::and(name.as_bytes())];
+        model.rebuild();
+        assert_eq!(model.rows.len(), 1);
+        std::fs::write(dir.path().join("todo.txt"), after)
+            .unwrap_or_else(|e| panic!("{e}"));
+        reload(&mut model);
+        assert_eq!(active(&model, panel), None);
+        assert_eq!(model.rows.len(), 2);
+        let text = screen(&model, 80, 24).join("\n");
+        assert!(!text.contains(drawn) && !text.contains("0/0"), "{text}");
+    }
 }
 
 #[test]

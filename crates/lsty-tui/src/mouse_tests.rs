@@ -21,8 +21,8 @@ use crate::{
     segments::line_field,
     terminal::mouse_of,
     test_util::{
-        NOW, SAMPLE, alone, cursor_text, deps, expiry, instant, keys, press,
-        reload, started, todo_of, workdir, workdir_model,
+        NOW, SAMPLE, alone, click, cursor_text, deps, expiry, instant, keys,
+        press, reload, started, todo_of, workdir, workdir_model,
     },
 };
 
@@ -211,17 +211,6 @@ fn timed(dir: &Path) -> (Model, Rc<Cell<Timestamp>>) {
     let read = Rc::clone(&clock);
     d.now = Box::new(move || read.get());
     (started(d), clock)
-}
-
-fn click(model: &mut Model, x: u16, y: u16) {
-    for gesture in [Gesture::Down(Button::Left), Gesture::Up] {
-        let shift = false;
-        model.update(Msg::Mouse(Mouse {
-            gesture,
-            at: Position::new(x, y),
-            shift,
-        }));
-    }
 }
 
 fn after(clock: &Cell<Timestamp>, millis: i64) {
