@@ -137,10 +137,10 @@ fn the_marker_tells_a_human_claim_from_an_agent_claim() {
         (" ", None),
         ("▷", Some(Slot::Doing)),
         ("▶", Some(Slot::Doing)),
-        ("✓", Some(Slot::Done)),
+        ("✓", Some(Slot::Text)),
         (" ", None),
         ("⧗", Some(Slot::Blocked)),
-        ("✗", Some(Slot::Done)),
+        ("✗", Some(Slot::Text)),
         (" ", None),
     ]
     .map(|(text, slot)| (text.to_owned(), slot));
@@ -175,11 +175,11 @@ fn an_id_shows_in_the_column_in_the_slot_of_its_row() {
     let todo = "A id:a1\nB id:b2 dep:a1\nx 2026-09-29 C id:c3\nD dep:a1\n";
     let (width, rows) = id_column(todo, true);
     assert_eq!(width, 2);
-    let (id, done) = (Some(Slot::Id), Some(Slot::Done));
+    let id = Some(Slot::Id);
     let want = [
         ("a1", id, "A"),
         ("b2", id, "B dep:a1"),
-        ("c3", done, "C"),
+        ("c3", id, "C"),
         ("", None, "D dep:a1"),
     ]
     .map(|(id, slot, text)| (id.to_owned(), slot, text.to_owned()));

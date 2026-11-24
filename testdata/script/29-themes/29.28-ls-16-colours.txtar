@@ -4,13 +4,18 @@ env COLORTERM=
 mkdir home/.config/lsty
 cp config.toml home/.config/lsty/config.toml
 mkdir .git
-exec lsty ls --color=always
+exec lsty lsa --color=always
 cmp stdout want
 
 -- config.toml --
 theme = "tokyo-night-storm"
 -- todo.txt --
 (A) Call +work @phone
+x 2026-09-28 Fix bug +work due:2026-09-20
+-- done.txt --
+x 2026-09-01 Old task +work
 -- want --
 [2m1[m [1;91m(A)[m Call [35m+work[m [36m@phone[m
-[2m-- 1 of 1 shown[m
+[2m2[m [2;9mx 2026-09-28 Fix bug[m [2;35;9m+work[m [2;9mdue:2026-09-20[m
+[2mdone:1[m [2;9mx 2026-09-01 Old task +work[m
+[2m-- 3 of 3 shown[m

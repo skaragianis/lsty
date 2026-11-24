@@ -69,9 +69,12 @@ fn the_cursor_row_and_a_selected_row_are_drawn_in_every_profile() {
 
 /// On screen at 16 colours: the row under the cursor is bold, a selected
 /// one underlined, the others neither, and no row or line has a background.
+/// A done row off the cursor keeps the colour of its parts and is struck and
+/// faint from its marker to the last cell of its text, not in the line
+/// number or the margin after the text.
 #[test]
 fn the_rows_at_16_colours_are_marked_without_a_background() {
-    let dir = workdir("A\nB\nC\n");
+    let dir = workdir("A\nB\nC +p\nx 2026-09-29 D +p\n");
     let mut with = deps(dir.path(), alone());
     with.profile = Profile::Ansi;
     let mut model = started(with);
@@ -91,6 +94,22 @@ fn the_rows_at_16_colours_are_marked_without_a_background() {
     assert!(row(&model, 1).contains(Modifier::UNDERLINED));
     assert!(row(&model, 2).contains(Modifier::UNDERLINED));
     assert_eq!(row(&model, 3), Modifier::empty());
+    let mut buf = Buffer::empty(area);
+    model.draw(&mut buf);
+    let at = |x: u16, y: u16| (buf[(x, y)].fg, buf[(x, y)].modifier);
+    assert_eq!(at(9, 4).0, at(9, 3).0, "the project keeps its colour");
+    assert!(at(7, 4).1.contains(Modifier::DIM));
+    for (x, struck) in [
+        (5, true),
+        (7, true),
+        (9, true),
+        (37, true),
+        (3, false),
+        (38, false),
+    ] {
+        let out = at(x, 4).1.contains(Modifier::CROSSED_OUT);
+        assert_eq!(out, struck, "column {x}");
+    }
 }
 
 /// With a `background` theme, no cell of the screen shows the terminal's
