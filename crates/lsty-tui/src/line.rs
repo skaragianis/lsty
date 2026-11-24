@@ -15,6 +15,8 @@ pub(crate) struct Line {
     pub(crate) comp: Option<Completion>,
     /// Whether `<Tab>` has nothing to complete, for its hint.
     pub(crate) no_candidates: bool,
+    /// The text, cursor and reading `no_candidates` was worked out for.
+    pub(crate) noted: Option<(String, usize, u32)>,
     pub(crate) kind: LineKind,
 }
 
@@ -37,6 +39,7 @@ impl Line {
             field: Field::new(text),
             comp: None,
             no_candidates: false,
+            noted: None,
             kind,
         }
     }
