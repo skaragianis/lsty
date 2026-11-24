@@ -114,8 +114,9 @@ struct Side {
     dir: TempDir,
     model: Model,
     /// Where each line of the file another writer changed went, while the
-    /// list has not read it: none when it changed, went or got a twin.
-    moved: Vec<Vec<usize>>,
+    /// list has not read it: none when it changed, went or got a twin. None
+    /// once it has read it, which an empty file shows as no lines too.
+    moved: Option<Vec<Vec<usize>>>,
     /// While its `<CR>` is checked, the lines the key that opened a field
     /// was to write on.
     opened: Vec<(usize, usize)>,
@@ -130,7 +131,7 @@ impl Side {
         }
         let mut model = started(deps(dir.path(), config.clone()));
         model.update(Msg::Resize(width, 24));
-        let (moved, opened) = (Vec::new(), Vec::new());
+        let (moved, opened) = (None, Vec::new());
         Self {
             dir,
             model,
@@ -240,11 +241,13 @@ impl Side {
         let rows = m.rows_of(count).iter().map(|r| (r.source, r.nr.index()));
         rows.flat_map(|(source, at)| match source {
             Source::Done => vec![(1, at)],
-            Source::Todo if !self.moved.is_empty() => {
-                let to = self.moved.get(at).cloned().unwrap_or_default();
-                to.into_iter().map(|at| (0, at)).collect()
-            }
-            Source::Todo => vec![(0, at)],
+            Source::Todo => match &self.moved {
+                Some(moved) => {
+                    let to = moved.get(at).cloned().unwrap_or_default();
+                    to.into_iter().map(|at| (0, at)).collect()
+                }
+                None => vec![(0, at)],
+            },
         })
         .collect()
     }
@@ -265,7 +268,7 @@ impl Side {
             return Vec::new();
         }
         let now = shown(&self.model);
-        let gone = if self.moved.is_empty() {
+        let gone = if self.moved.is_none() {
             lines_of(&deleted(Some(said)), press.was, name)
         } else {
             Vec::new()
@@ -290,7 +293,7 @@ impl Side {
     /// unblocked or relinked, which are rows of the list it left: a place of
     /// the list the key read cannot be rebuilt.
     fn history_named(&self, press: &Press<'_>, before: &Files, body: &str) {
-        let stale = !self.moved.is_empty();
+        let stale = self.moved.is_some();
         let (now, after) = (shown(&self.model), self.files());
         let idle = press.way.is_none() && *before == after;
         for (n, said, listed) in named_places(body) {
@@ -473,12 +476,12 @@ fn behind(
     keys(&mut side.model, count);
     let moved = rewrite(side.dir.path(), op, arg);
     if op & 4 == 0 {
-        side.moved = moved;
+        side.moved = Some(moved);
     } else {
         reload(&mut side.model);
     }
     side.checked(key, trail);
-    side.moved.clear();
+    side.moved = None;
     reload(&mut side.model);
 }
 
