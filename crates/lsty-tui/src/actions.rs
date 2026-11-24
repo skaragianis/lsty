@@ -9,7 +9,10 @@ use lsty_core::{
     errs::{self, Code, Msg, Nr, Part, Source},
     keys::Action,
     list::{Claim, Snapshot, State, TaskId},
-    ops::{self, ClaimOpts, DoOpts, Env, Outcome, PriPair, StartOpts, Target},
+    ops::{
+        self, ClaimOpts, DoOpts, Env, Landing, Outcome, PriPair, StartOpts,
+        Target,
+    },
     todotxt::Priority,
 };
 
@@ -253,12 +256,7 @@ impl Model {
         clock: Clock,
         then: impl FnOnce(&mut Self),
     ) -> Vec<String> {
-        // A key the list showed would change nothing read no files.
-        if outcome.read().serial() != self.snap.serial() {
-            self.accept(outcome.read().clone(), clock.clone());
-        }
-        // The rows a removed task had are those of the list read.
-        let was = self.lines();
+        let was = self.accept_read(outcome.read(), &clock);
         let msgs = outcome.said().to_vec();
         if outcome.no_op() {
             then(self);
@@ -294,6 +292,28 @@ impl Model {
         said
     }
 
+    /// Shows `read`, the list an operation read under the lock, when it is
+    /// not the one shown. Gives the rows its lines had on the screen at the
+    /// press, which a message names a task's earlier row by; a line the
+    /// screen did not show has the row it has in `read`.
+    pub(crate) fn accept_read(
+        &mut self,
+        read: &Snapshot,
+        clock: &Clock,
+    ) -> Places {
+        if read.serial() == self.snap.serial() {
+            return self.lines();
+        }
+        let (shown, landing) = (self.lines(), Landing::of(&self.snap, read));
+        self.accept(read.clone(), clock.clone());
+        let mut was = self.lines();
+        for ((source, nr), row) in shown {
+            let to = landing.line(source, nr.index()).and_then(Nr::from_index);
+            was.extend(to.map(|to| ((source, to), row)));
+        }
+        was
+    }
+
     /// Names the tasks of the message of a refusal by their places in the
     /// list shown, which is the one the core read.
     pub(crate) fn name_refusal(&mut self) {
@@ -325,8 +345,8 @@ impl Model {
 
     /// `msgs` with each task named by its place in the list shown, or in
     /// `was` when the write removed it; a task with no row by its `id:`,
-    /// else its line. The clause that says where an archived task went is
-    /// left out when it shows at the row it had.
+    /// else its line. The clause that says where a task went (archived or
+    /// moved) is left out when it shows at the row it had.
     pub(crate) fn rendered(&self, msgs: &[Msg], was: &Places) -> Vec<String> {
         let now = self.lines();
         let row = |source, place| match place? {
@@ -342,12 +362,12 @@ impl Model {
         let text = |msg: &Msg| errs::lossy(&msg.render(name));
         msgs.iter()
             .map(|msg| match moved(msg) {
-                Some(((source, place), to))
+                Some(((source, place), to, said))
                     if row(source, Some(place)).is_some()
                         && row(source, Some(place))
                             == row(to.source, to.place) =>
                 {
-                    text(&msg.without_last(2))
+                    text(&msg.without_last(2).then(said))
                 }
                 _ => text(msg),
             })
@@ -456,15 +476,25 @@ fn join(said: &[String]) -> Option<String> {
     Some(said.join("; ")).filter(|m| !m.is_empty())
 }
 
-/// Where a task went, and the name that says it: the task before the write,
-/// and where it is after.
-type Moved<'a> = ((Source, errs::Place), &'a errs::Name);
+/// Where a task went, the name that says it, and what a message says of
+/// the task when it went nowhere: the task before the write, where it is
+/// after.
+type Moved<'a> = ((Source, errs::Place), &'a errs::Name, &'static str);
 
-/// What a message that says where a task went names.
+/// What a message that says where a task went names: an archived task, or a
+/// move, an undone or redone one too.
 fn moved(msg: &Msg) -> Option<Moved<'_>> {
-    match msg.parts().last()? {
-        Part::Name(to) => Some((to.from?, to)),
-        Part::Text(_) => None,
+    match msg.parts() {
+        [.., Part::Name(from), Part::Text(text), Part::Name(to)] => {
+            let said = match text.as_slice() {
+                errs::MOVED_TO => " moved",
+                errs::MOVED_BACK => " moved back",
+                _ => return Some((to.from?, to, "")),
+            };
+            Some(((from.source, from.place?), to, said))
+        }
+        [.., Part::Name(to)] => Some((to.from?, to, "")),
+        _ => None,
     }
 }
 

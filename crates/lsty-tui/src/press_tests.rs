@@ -930,14 +930,17 @@ fn a_message_names_tasks_by_their_place() {
             "jOX id:c1<CR>",
             "id:c1 is taken by 3",
         ),
-        // a delete in the list read, which an outside edit moved down
-        ("A\nB\nC\n", "X\nA\nB\nC\n", "jdd", "3 deleted"),
+        // a delete of a row of the list shown, which an outside edit not read
+        // yet moved down, by the row it had on screen
+        ("A\nB\nC\n", "X\nA\nB\nC\n", "jdd", "2 deleted"),
         (
             "A id:a\nB dep:a\n",
             "X\nA id:a\nB dep:a\n",
             "dd",
-            "2 deleted; unblocked 2",
+            "1 deleted; unblocked 2",
         ),
+        // a move the same way, to the row it has after
+        ("A\nB\nC\n", "X\nA\nB\nC\n", "jJ", "2 moved to 4"),
         // put back, and done again, by the places in the sorted list
         (
             "(D) A\n(D) B\n(D) C\n",
@@ -960,12 +963,7 @@ fn a_message_names_tasks_by_their_place() {
             "jdd|u<C-r>",
             "redid: 3 deleted",
         ),
-        (
-            "A\nB\nC\n",
-            "X\nB\nA\nC\n",
-            "J|u",
-            "undid: 2 moved back from 3",
-        ),
+        ("A\nB\nC\n", "X\nB\nA\nC\n", "J|u", "undid: 2 moved back"),
         (
             "A\nB\nC\n",
             "X\nB\nA\nC\n",
