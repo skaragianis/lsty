@@ -228,6 +228,20 @@ fn shown_dim(model: &Model, width: u16) -> String {
     text.split_whitespace().collect::<Vec<_>>().join(" ")
 }
 
+#[test]
+fn the_tab_hint_reads_the_folder_when_the_word_changes_not_on_a_message() {
+    let dir = workdir("Buy milk\n");
+    let mut model = started(deps(dir.path(), alone()));
+    press(&mut model, ":add file:no");
+    assert_eq!(shown_dim(&model, 200), "<Tab> next");
+    fs::write(dir.path().join("notes.md"), "").unwrap();
+    model.update(Msg::Refilter(0));
+    keys(&mut model, "<Right>");
+    assert_eq!(shown_dim(&model, 200), "<Tab> next");
+    keys(&mut model, "<BS>o");
+    assert_eq!(shown_dim(&model, 200), "");
+}
+
 /// At 16 colours a lit hint and a dim one differ by attribute alone, in the
 /// terminal's own text colour, whatever the theme: on a done task `x` is
 /// lit, `u` dim.

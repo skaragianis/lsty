@@ -383,10 +383,17 @@ impl Model {
     /// With candidates open the key moves through them, whatever a new start
     /// would find.
     pub(crate) fn note_candidates(&mut self) {
-        let idle = self.line.as_ref().is_some_and(|l| l.comp.is_none());
-        let none = idle && self.start_completion().is_none();
+        let Some(line) = &self.line else { return };
+        let key = line.comp.is_none().then(|| {
+            (line.field.text(), line.field.cursor, self.snap.serial())
+        });
+        if line.noted == key {
+            return;
+        }
+        let none = key.is_some() && self.start_completion().is_none();
         if let Some(line) = &mut self.line {
             line.no_candidates = none;
+            line.noted = key;
         }
     }
 
