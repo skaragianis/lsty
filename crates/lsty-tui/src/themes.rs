@@ -4,9 +4,9 @@
 //! the built-in themes look the same, and the popup's title says so.
 
 use std::{
-    ffi::{OsStr, OsString},
+    ffi::OsStr,
     fs::{self, File},
-    io::{self, Read, Write},
+    io::{self, Read},
     os::fd::{AsFd, OwnedFd},
     path::Path,
 };
@@ -14,16 +14,13 @@ use std::{
 use lsty_core::{
     case::lower,
     errs::lossy_path,
-    fsio::{Hooks as _, OsHooks},
+    fsio::{self, OsHooks},
     keys::{Action, Fed, Mode, Outcome},
     theme::{self, Profile, Slot, Theme},
 };
 use ratatui::{buffer::Buffer, layout::Rect};
 use rustix::{
-    fs::{
-        AtFlags, CWD, FileType, Mode as Perm, OFlags, fchmod, fstat, openat,
-        renameat, unlinkat,
-    },
+    fs::{CWD, FileType, Mode as Perm, OFlags, fstat, openat},
     io::Errno,
 };
 use toml::de::{DeTable, DeValue};
@@ -36,7 +33,7 @@ use crate::{
     model::Model,
     motion::Step,
     output::prompt_cursor,
-    store::{quoted, reason, save},
+    store::{quoted, reason, save, saved_err},
     styles::Styles,
     text::{Span, fit, pad, titled_spans, width_of, window},
 };
@@ -528,38 +525,8 @@ fn write_project_theme(path: &Path, name: &str) -> Result<(), String> {
         mode = Some(Perm::from_bits_truncate(stat.st_mode & 0o777));
     }
     let next = themed(data, path, name)?;
-    replace_in(&lsty, file, next.as_bytes(), mode)
-        .map_err(|e| reason(path, &e))
-}
-
-/// Replaces `file` of the folder `lsty` with `data` through a synced temp
-/// file of the folder, a rename and a sync of the folder.
-fn replace_in(
-    lsty: &OwnedFd,
-    file: &OsStr,
-    data: &[u8],
-    mode: Option<Perm>,
-) -> io::Result<()> {
-    let mut temp = OsString::from(".");
-    temp.push(file);
-    temp.push(format!(".lsty-{}.tmp", std::process::id()));
-    // a temp file left by a crash of this process id
-    unlinkat(lsty, &temp, AtFlags::empty()).unwrap_or_default();
-    let flags =
-        OFlags::WRONLY | OFlags::CREATE | OFlags::EXCL | OFlags::CLOEXEC;
-    let open = mode.unwrap_or(Perm::from_raw_mode(0o666));
-    let mut fresh = File::from(openat(lsty, &temp, flags, open)?);
-    // the umask may have narrowed the mode of the old file
-    let done = mode
-        .map_or(Ok(()), |m| Ok(fchmod(&fresh, m)?))
-        .and_then(|()| fresh.write_all(data))
-        .and_then(|()| fresh.sync_all())
-        .and_then(|()| Ok(renameat(lsty, &temp, lsty, file)?))
-        .and_then(|()| OsHooks.sync_dir(&File::from(lsty.try_clone()?)));
-    if done.is_err() {
-        unlinkat(lsty, &temp, AtFlags::empty()).unwrap_or_default();
-    }
-    done
+    fsio::write_in((lsty.as_fd(), path, mode), next.as_bytes(), &OsHooks)
+        .map_err(|e| saved_err(path, &e))
 }
 
 /// Why the theme of a config file could not be set.

@@ -1,25 +1,33 @@
 use std::{
-    ffi::OsString,
-    fs::{self, File, OpenOptions},
+    ffi::{OsStr, OsString},
+    fs::{self, File},
     io::{self, Write},
-    os::unix::{
-        ffi::OsStrExt,
-        fs::{OpenOptionsExt, PermissionsExt},
+    os::{
+        fd::{AsFd, BorrowedFd, OwnedFd},
+        unix::ffi::OsStrExt,
     },
     path::{Path, PathBuf},
 };
 
-use rustix::io::Errno;
+use rustix::{
+    fs::{
+        AtFlags, CWD, FileType, Mode, OFlags, fchmod, openat, renameat,
+        statat, unlinkat,
+    },
+    io::Errno,
+};
 
 use super::{Hooks, base_name, folder_of, read::MAX_LEN};
 use crate::{errs, errs::io_at};
 
 /// The mode of a new file before the umask.
-const NEW_FILE_MODE: u32 = 0o666;
+const NEW_FILE_MODE: Mode = Mode::from_bits_truncate(0o666);
 
 /// Replaces `path` with `data` through a synced temp file in the same
-/// folder, a rename and a folder sync. `path` is a resolved path. A failure
-/// before the rename removes the temp file and leaves the target as it was.
+/// folder, a rename and a folder sync. `path` is a resolved path: its
+/// folder is opened once, and every later step names a file of that
+/// folder, never a path. A failure before the rename removes the temp file
+/// and leaves the target as it was.
 pub fn write<H: Hooks + ?Sized>(
     path: &Path,
     data: &[u8],
@@ -35,19 +43,91 @@ fn write_within<H: Hooks + ?Sized>(
     hooks: &H,
     max: u64,
 ) -> errs::Result<()> {
+    let folder = open_folder(path)?;
+    let at = on_disk(folder.as_fd(), path)?;
+    write_in_within(at, data, hooks, max)
+}
+
+/// The file `path` in the open folder `dir`, with the mode it has now.
+fn on_disk<'a>(
+    dir: BorrowedFd<'a>,
+    path: &'a Path,
+) -> errs::Result<Target<'a>> {
+    Ok((dir, path, target_mode(dir, base_name(path), path)?))
+}
+
+/// Writes each of `files` (a resolved path and its data) in order, as
+/// `write` does, but opens each folder once and writes every file of it
+/// through that handle, so a folder renamed between two writes cannot
+/// take the later one.
+pub(crate) fn write_all<H: Hooks + ?Sized>(
+    files: &[(&Path, &[u8])],
+    hooks: &H,
+) -> errs::Result<()> {
+    let mut open: Vec<(&Path, OwnedFd)> = Vec::new();
+    let mut slots = Vec::new();
+    for &(path, _) in files {
+        let dir = folder_of(path);
+        let slot = if let Some(at) = open.iter().position(|(d, _)| *d == dir) {
+            at
+        } else {
+            open.push((dir, open_folder(path)?));
+            open.len() - 1
+        };
+        slots.push(slot);
+    }
+    for (&(path, data), slot) in files.iter().zip(slots) {
+        let at = on_disk(open[slot].1.as_fd(), path)?;
+        write_in(at, data, hooks)?;
+    }
+    Ok(())
+}
+
+fn open_folder(path: &Path) -> errs::Result<OwnedFd> {
+    let dir = folder_of(path);
+    let flags = OFlags::RDONLY | OFlags::DIRECTORY | OFlags::CLOEXEC;
+    openat(CWD, dir, flags, Mode::empty())
+        .map_err(|e| io_at("write", path, "open", dir, e.into()))
+}
+
+/// A file to write: the open folder it is in, the path that stands for it
+/// in hooks and errors, and its permission bits, none when it is new.
+pub type Target<'a> = (BorrowedFd<'a>, &'a Path, Option<Mode>);
+
+/// `write` for `target`, with the mode its caller read it with. Nothing
+/// here follows a path, so a link put at its name since is replaced, not
+/// written through.
+pub fn write_in<H: Hooks + ?Sized>(
+    target: Target<'_>,
+    data: &[u8],
+    hooks: &H,
+) -> errs::Result<()> {
+    write_in_within(target, data, hooks, MAX_LEN)
+}
+
+fn write_in_within<H: Hooks + ?Sized>(
+    target: Target<'_>,
+    data: &[u8],
+    hooks: &H,
+    max: u64,
+) -> errs::Result<()> {
+    let (dir, shown, _) = target;
+    let name = base_name(shown);
     if data.len() as u64 > max {
         let err = io::ErrorKind::FileTooLarge.into();
-        return Err(io_at("write", path, "write", path, err));
+        return Err(io_at("write", shown, "write", shown, err));
     }
-    let temp = write_temp(path, data, hooks)?;
-    hooks.before_rename(path)?;
-    if let Err(e) = fs::rename(&temp, path) {
-        remove_quietly(&temp);
-        return Err(errs::io_rename(&temp, path, rename_cause(e)));
+    write_temp(target, data, hooks)?;
+    hooks.before_rename(shown)?;
+    let temp = temp_name(name);
+    if let Err(e) = renameat(dir, &temp, dir, name) {
+        remove_quietly(dir, &temp);
+        let cause = rename_cause(e.into());
+        return Err(errs::io_rename(&temp_path(shown), shown, cause));
     }
-    hooks.after_rename(path)?;
-    sync_folder(path, hooks)?;
-    hooks.after_dir_sync(path)?;
+    hooks.after_rename(shown)?;
+    sync_folder(dir, shown, hooks)?;
+    hooks.after_dir_sync(shown)?;
     Ok(())
 }
 
@@ -60,51 +140,55 @@ fn rename_cause(err: io::Error) -> io::Error {
     err
 }
 
-fn sync_folder<H: Hooks + ?Sized>(path: &Path, hooks: &H) -> errs::Result<()> {
-    let dir = folder_of(path);
-    let folder =
-        File::open(dir).map_err(|e| io_at("sync", dir, "open", dir, e))?;
-    hooks
-        .sync_dir(&folder)
-        .map_err(|e| io_at("sync", dir, "sync", dir, e))
+fn sync_folder<H: Hooks + ?Sized>(
+    dir: BorrowedFd<'_>,
+    shown: &Path,
+    hooks: &H,
+) -> errs::Result<()> {
+    let at = folder_of(shown);
+    let fail = |op| move |e| io_at("sync", at, op, at, e);
+    let folder = dir.try_clone_to_owned().map_err(fail("open"))?;
+    hooks.sync_dir(&File::from(folder)).map_err(fail("sync"))
 }
 
-/// `.<file>.lsty-<pid>.tmp` in the folder of `path`.
+/// `.<file>.lsty-<pid>.tmp`.
+fn temp_name(name: &OsStr) -> OsString {
+    let mut temp = OsString::from(".");
+    temp.push(name);
+    temp.push(format!(".lsty-{}.tmp", std::process::id()));
+    temp
+}
+
+/// The temp file of `path`, in its folder.
 fn temp_path(path: &Path) -> PathBuf {
-    let mut name = OsString::from(".");
-    name.push(base_name(path));
-    name.push(format!(".lsty-{}.tmp", std::process::id()));
-    path.with_file_name(name)
+    path.with_file_name(temp_name(base_name(path)))
 }
 
-fn remove_quietly(path: &Path) {
+fn remove_quietly(dir: BorrowedFd<'_>, temp: &OsStr) {
     // The temp file may already be gone; nothing more can be done.
-    drop(fs::remove_file(path));
+    unlinkat(dir, temp, AtFlags::empty()).unwrap_or_default();
 }
 
 fn write_temp<H: Hooks + ?Sized>(
-    path: &Path,
-    data: &[u8],
-    hooks: &H,
-) -> errs::Result<PathBuf> {
-    let temp = temp_path(path);
-    match fill_temp(path, &temp, data, hooks) {
-        Ok(()) => Ok(temp),
-        Err(e) => {
-            remove_quietly(&temp);
-            Err(e)
-        }
-    }
-}
-
-fn fill_temp<H: Hooks + ?Sized>(
-    path: &Path,
-    temp: &Path,
+    target: Target<'_>,
     data: &[u8],
     hooks: &H,
 ) -> errs::Result<()> {
-    let at = |op: &'static str| move |e| io_at("write", path, op, temp, e);
-    let mut file = create_temp(path, temp)?;
+    let (dir, shown, _) = target;
+    fill_temp(target, data, hooks).inspect_err(|_| {
+        remove_quietly(dir, &temp_name(base_name(shown)));
+    })
+}
+
+fn fill_temp<H: Hooks + ?Sized>(
+    target: Target<'_>,
+    data: &[u8],
+    hooks: &H,
+) -> errs::Result<()> {
+    let shown = target.1;
+    let temp = temp_path(shown);
+    let at = |op: &'static str| |e| io_at("write", shown, op, &temp, e);
+    let mut file = create_temp(target)?;
     file.write_all(data).map_err(at("write"))?;
     hooks.sync_file(&file).map_err(at("sync"))?;
     // The file is closed by dropping it. std cannot report a failed close,
@@ -112,33 +196,44 @@ fn fill_temp<H: Hooks + ?Sized>(
     Ok(())
 }
 
-fn create_temp(path: &Path, temp: &Path) -> errs::Result<File> {
-    match fs::remove_file(temp) {
-        Err(e) if e.kind() != io::ErrorKind::NotFound => {
-            return Err(io_at("write", path, "remove", temp, e));
-        }
+fn create_temp(target: Target<'_>) -> errs::Result<File> {
+    let (dir, shown, mode) = target;
+    let name = base_name(shown);
+    let (temp, at) = (temp_name(name), temp_path(shown));
+    let fail = |op, e: Errno| io_at("write", shown, op, &at, e.into());
+    match unlinkat(dir, &temp, AtFlags::empty()) {
+        Err(e) if e != Errno::NOENT => return Err(fail("remove", e)),
         _ => {}
     }
-    let mode = target_mode(path)?;
-    let file = OpenOptions::new()
-        .write(true)
-        .create_new(true)
-        .mode(mode.unwrap_or(NEW_FILE_MODE))
-        .open(temp)
-        .map_err(|e| io_at("write", path, "open", temp, e))?;
+    let flags = OFlags::WRONLY
+        | OFlags::CREATE
+        | OFlags::EXCL
+        | OFlags::NOFOLLOW
+        | OFlags::CLOEXEC;
+    let open = mode.unwrap_or(NEW_FILE_MODE);
+    let file = File::from(
+        openat(dir, &temp, flags, open).map_err(|e| fail("open", e))?,
+    );
     if let Some(mode) = mode {
-        file.set_permissions(fs::Permissions::from_mode(mode))
-            .map_err(|e| io_at("write", path, "chmod", temp, e))?;
+        fchmod(&file, mode).map_err(|e| fail("chmod", e))?;
     }
     Ok(file)
 }
 
-/// The permission bits of `path`, or `None` when it does not exist.
-fn target_mode(path: &Path) -> errs::Result<Option<u32>> {
-    match fs::metadata(path) {
-        Ok(meta) => Ok(Some(meta.permissions().mode() & 0o777)),
-        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(None),
-        Err(e) => Err(io_at("write", path, "stat", path, e)),
+/// The permission bits of the file `name`, or `None` when there is none
+/// or it is not a regular file (a link there is replaced, so its own
+/// mode does not count).
+fn target_mode(
+    dir: BorrowedFd<'_>,
+    name: &OsStr,
+    shown: &Path,
+) -> errs::Result<Option<Mode>> {
+    match statat(dir, name, AtFlags::SYMLINK_NOFOLLOW) {
+        Ok(st) => Ok(FileType::from_raw_mode(st.st_mode)
+            .is_file()
+            .then(|| Mode::from_bits_truncate(st.st_mode & 0o777))),
+        Err(Errno::NOENT) => Ok(None),
+        Err(e) => Err(io_at("write", shown, "stat", shown, e.into())),
     }
 }
 

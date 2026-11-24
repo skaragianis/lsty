@@ -1,8 +1,11 @@
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     fs::{self, File},
     io,
-    os::unix::fs::{OpenOptionsExt, symlink},
+    os::{
+        fd::AsFd,
+        unix::fs::{OpenOptionsExt, symlink},
+    },
     path::{Path, PathBuf},
 };
 
@@ -13,7 +16,7 @@ use crate::{
         Crash, Hooks, OsHooks, clean_orphans, crash, folder_of, is_crash,
         read, resolve,
         test_util::{chmod, dir, mode, put, temps, text},
-        write,
+        write, write_all, write_in,
     },
 };
 
@@ -140,6 +143,12 @@ fn an_existing_file_keeps_its_mode() {
         write(&path, b"new", &OsHooks).unwrap();
         assert_eq!(mode(&path), m);
         assert_eq!(text(&path), "new");
+        // The mode a caller read goes on when the file is gone by the write.
+        let read = Some(rustix::fs::stat(&path).unwrap().st_mode.into());
+        fs::remove_file(&path).unwrap();
+        let folder = File::open(&d).unwrap();
+        write_in((folder.as_fd(), &path, read), b"again", &OsHooks).unwrap();
+        assert_eq!(mode(&path), m);
     }
 }
 
@@ -239,6 +248,10 @@ fn a_write_through_a_symlink() {
     let seen = spy.seen_temps.borrow();
     assert_eq!(seen.len(), 1);
     assert_eq!(seen[0].parent(), Some(d.join("real").as_path()));
+    // a folder that is a link, as a linked settings folder is
+    symlink("real", d.join("conf")).unwrap();
+    write(&d.join("conf/list.txt"), b"again", &OsHooks).unwrap();
+    assert_eq!(text(&d.join("real/list.txt")), "again");
 }
 
 #[test]
@@ -252,15 +265,43 @@ fn a_write_to_a_dangling_link_creates_the_target() {
     assert_eq!(text(&d.join("made.txt")), "data");
 }
 
+/// Moves the folder of the target away and puts a link to `other` in its
+/// place, just before the first rename.
+struct Swap(PathBuf, Cell<bool>);
+
+impl Hooks for Swap {
+    fn before_rename(&self, target: &Path) -> io::Result<()> {
+        if self.1.replace(true) {
+            return Ok(());
+        }
+        let folder = folder_of(target);
+        fs::rename(folder, folder.with_extension("real"))?;
+        symlink(&self.0, folder)
+    }
+}
+
 #[test]
-fn a_target_that_cannot_be_examined_is_an_error_and_leaves_no_temp() {
+fn a_folder_swapped_for_a_link_before_the_rename_is_not_followed() {
     let (_tmp, d) = dir();
-    symlink("b", d.join("a")).unwrap();
-    symlink("a", d.join("b")).unwrap();
-    let err = write(&d.join("a"), b"data", &OsHooks).unwrap_err();
-    assert_eq!(err.code(), Code::Io);
-    assert!(err.message().contains("stat"), "{}", err.message());
-    assert!(!temp_path(&d.join("a")).exists());
+    let (sub, other) = (d.join("sub"), d.join("other"));
+    fs::create_dir(&sub).unwrap();
+    fs::create_dir(&other).unwrap();
+    put(&sub.join("todo.txt"), "old", 0o644);
+    put(&other.join("todo.txt"), "keep", 0o644);
+    put(&other.join("done.txt"), "keep", 0o644);
+    let swap = Swap(other.clone(), Cell::new(false));
+    // The second file of the folder goes through the folder opened for the
+    // first, not through the link now at its path.
+    let files: [(&Path, &[u8]); 2] = [
+        (&sub.join("todo.txt"), b"new"),
+        (&sub.join("done.txt"), b"more"),
+    ];
+    write_all(&files, &swap).unwrap();
+    assert_eq!(text(&other.join("todo.txt")), "keep");
+    assert_eq!(text(&other.join("done.txt")), "keep");
+    assert_eq!(text(&d.join("sub.real/todo.txt")), "new");
+    assert_eq!(text(&d.join("sub.real/done.txt")), "more");
+    assert_eq!(temps(&other), Vec::<String>::new());
 }
 
 #[test]
@@ -389,15 +430,15 @@ fn clean_orphans_in_a_missing_folder_is_an_io_error() {
 }
 
 #[test]
-fn a_write_through_a_regular_file_names_the_temp_step() {
+fn a_write_inside_a_regular_file_names_the_folder_step() {
     let (_tmp, d) = dir();
     put(&d.join("f"), "", 0o644);
     let path = d.join("f/x");
     let err = write(&path, b"x", &OsHooks).unwrap_err();
     let want = format!(
-        "write {}: remove {}: not a directory",
+        "write {}: open {}: not a directory",
         path.display(),
-        temp_path(&path).display()
+        d.join("f").display()
     );
     assert_eq!(err.message(), want);
 }

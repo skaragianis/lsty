@@ -141,14 +141,14 @@ pub(crate) fn save(path: &Path, data: &[u8]) -> Result<(), String> {
     if let Some(dir) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
         make_folders(dir).map_err(|(at, e)| reason(&at, &e))?;
     }
-    fsio::write(path, data, &OsHooks).map_err(|e| {
-        let cause = std::error::Error::source(&e)
-            .and_then(|s| s.downcast_ref::<io::Error>());
-        cause.map_or_else(
-            || e.message().to_owned(),
-            |cause| reason(path, cause),
-        )
-    })
+    fsio::write(path, data, &OsHooks).map_err(|e| saved_err(path, &e))
+}
+
+/// A failed write of `path`, worded as `path: cause`.
+pub(crate) fn saved_err(path: &Path, e: &lsty_core::errs::Error) -> String {
+    let cause = std::error::Error::source(e)
+        .and_then(|s| s.downcast_ref::<io::Error>());
+    cause.map_or_else(|| e.message().to_owned(), |c| reason(path, c))
 }
 
 /// How many symlinks [`linked`] follows before it gives up.
