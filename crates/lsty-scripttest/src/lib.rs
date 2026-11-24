@@ -18,6 +18,7 @@ mod script;
 pub mod txtar;
 
 use std::{
+    ffi::OsStr,
     fs, io,
     path::{Path, PathBuf},
     process::{Command, ExitCode},
@@ -271,6 +272,21 @@ pub fn with_coverage(cmd: &mut Command) -> &mut Command {
     if let Some(file) = std::env::var_os("LLVM_PROFILE_FILE") {
         cmd.env("LLVM_PROFILE_FILE", file);
     }
+    cmd
+}
+
+/// `program` with nothing from the host in its environment but the
+/// coverage profile, running on the files in `root`: its `todo.txt`, its
+/// home and an empty global config, and the fixed clock.
+pub fn list_command(program: impl AsRef<OsStr>, root: &Path) -> Command {
+    let mut cmd = Command::new(program);
+    cmd.env_clear()
+        .env("HOME", root)
+        .env("TZ", "UTC")
+        .env("TODOTXT_GLOBAL_CFG_FILE", root.join("none"))
+        .env("LSTY_NOW", "2026-09-29T0900Z")
+        .env("TODO_FILE", root.join("todo.txt"));
+    with_coverage(&mut cmd);
     cmd
 }
 

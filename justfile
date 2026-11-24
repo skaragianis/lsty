@@ -115,6 +115,16 @@ stress minutes="10":
     echo "logs in $dir" >&2
     exit 1
 
+# Run one TUI against lsty processes that change its file, for MINUTES; a failure prints its seed (LSTY_SOAK_SEED=<seed> repeats the choices)
+soak minutes="10":
+    #!/usr/bin/env sh
+    set -eu
+    case {{quote(minutes)}} in
+        ''|*[!0-9]*|0?*) echo "minutes must be a whole number" >&2; exit 1 ;;
+    esac
+    LSTY_SOAK_SECONDS=$(( {{minutes}} * 60 )) \
+        cargo test -p lsty --test terminal --locked -- "keeps up"
+
 # Build the release executable
 build:
     cargo build --release --locked -p lsty

@@ -63,18 +63,14 @@ impl Work {
     }
 
     fn command(&self, owner: &str, args: &[&str]) -> Command {
-        let mut cmd = Command::new(env!("CARGO_BIN_EXE_lsty"));
-        cmd.args(args)
-            .env_clear()
-            .env("HOME", &self.root)
-            .env("TZ", "UTC")
-            .env("TODOTXT_GLOBAL_CFG_FILE", self.root.join("none"))
-            .env("LSTY_NOW", "2026-09-29T0900Z")
-            .env("TODO_FILE", self.root.join("todo.txt"));
+        let mut cmd = lsty_scripttest::list_command(
+            env!("CARGO_BIN_EXE_lsty"),
+            &self.root,
+        );
+        cmd.args(args);
         if !owner.is_empty() {
             cmd.env("LSTY_OWNER", owner);
         }
-        lsty_scripttest::with_coverage(&mut cmd);
         cmd
     }
 }
