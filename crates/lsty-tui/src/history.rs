@@ -239,8 +239,7 @@ impl Model {
         let Some(record) = outcome.take_undo() else {
             return;
         };
-        self.accept(outcome.read().clone(), clock.clone());
-        let was = self.lines();
+        let was = self.accept_read(outcome.read(), &clock);
         let touched = moves_of(&record, &step.pairs);
         let mut msg = step.msg;
         turn(

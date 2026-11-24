@@ -238,18 +238,24 @@ impl Side {
         let again = m.again.as_ref().filter(|_| action == Action::Repeat);
         let typed = m.typed_count();
         let count = again.map_or(typed, |a| repeats_over(a, typed));
-        let rows = m.rows_of(count).iter().map(|r| (r.source, r.nr.index()));
-        rows.flat_map(|(source, at)| match source {
-            Source::Done => vec![(1, at)],
-            Source::Todo => match &self.moved {
-                Some(moved) => {
-                    let to = moved.get(at).cloned().unwrap_or_default();
-                    to.into_iter().map(|at| (0, at)).collect()
-                }
-                None => vec![(0, at)],
-            },
+        let rows = m.rows_of(count).iter();
+        rows.flat_map(|r| {
+            self.follow((usize::from(r.source == Source::Done), r.nr.index()))
         })
         .collect()
+    }
+
+    /// Where the line `at` (a file and a line) of the files the list shows
+    /// stands on disk: where another writer moved it, none when it changed,
+    /// went or got a twin, while the list has not read the change.
+    fn follow(&self, at: (usize, usize)) -> Vec<(usize, usize)> {
+        match (&self.moved, at) {
+            (Some(moved), (0, line)) => {
+                let to = moved.get(line).into_iter().flatten();
+                to.map(|to| (0, *to)).collect()
+            }
+            _ => vec![at],
+        }
     }
 
     /// The lines a message names after the write (a dependent unblocked or
@@ -264,18 +270,34 @@ impl Side {
             ["undid", "redid"].contains(&head).then_some(body)
         });
         self.history_named(press, before, body.unwrap_or(said));
+        let now = shown(&self.model);
+        // A moved task is the same line at the row it moved to.
+        let wrote = self.files();
+        let line = |files: &Files, (file, at): (usize, usize)| {
+            let mut lines = files[file].split(|b| *b == b'\n');
+            lines.nth(at).map(<[u8]>::to_vec)
+        };
+        for (from, to) in moves(said) {
+            let from = lines_of(&[from.to_string()], press.was, name);
+            let to = lines_of(&[to.to_string()], &now, name)[0];
+            let moved = from.iter().flat_map(|at| self.follow(*at));
+            let moved: Vec<_> = moved.map(|at| line(before, at)).collect();
+            assert!(
+                moved.is_empty() || moved.contains(&line(&wrote, to)),
+                "moved to a row of another line: {name}"
+            );
+        }
         if body.is_some() {
             return Vec::new();
         }
-        let now = shown(&self.model);
-        let gone = if self.moved.is_none() {
-            lines_of(&deleted(Some(said)), press.was, name)
-        } else {
-            Vec::new()
-        };
-        let seen = press.seen;
+        let mut earlier = deleted(Some(said));
+        let places = named_places(said, false);
+        let from = places.iter().filter(|p| p.2 == At::Before);
+        earlier.extend(from.map(|p| p.0.to_string()));
+        let gone = lines_of(&earlier, press.was, name);
         assert!(
-            seen.is_empty() || gone.iter().all(|line| seen.contains(line)),
+            press.seen.is_empty()
+                || gone.iter().all(|&at| self.acted(press.seen, at, false)),
             "named a row the key did not act on: {name}"
         );
         ["unblocked ", "relinked "]
@@ -288,50 +310,84 @@ impl Side {
     /// its clause says the task was already as asked or left alone (`changed
     /// since`), or a key that is no undo or redo wrote nothing, a line the
     /// write changed on disk. In such a clause of an ordinary press, other
-    /// than `changed since`, the task is a row the key acted on. Not for a
-    /// press of a file that changed behind the list, but the tasks it
-    /// unblocked or relinked, which are rows of the list it left: a place of
-    /// the list the key read cannot be rebuilt.
+    /// than `changed since`, the task is a row the key acted on, of the list
+    /// before the key or, for a refusal, of the list it read and shows now.
+    /// For a press of a file that changed behind the list, the tasks it
+    /// unblocked or relinked are rows of the list it left, and the row a
+    /// task moved or was reopened from is one of the list before the key.
     fn history_named(&self, press: &Press<'_>, before: &Files, body: &str) {
-        let stale = self.moved.is_some();
         let (now, after) = (shown(&self.model), self.files());
         let idle = press.way.is_none() && *before == after;
-        for (n, said, listed) in named_places(body) {
-            if stale && !listed {
-                continue;
-            }
-            let lists = if stale {
-                vec![&now]
-            } else {
-                vec![&now, press.was]
+        let read = self.model.snap.todo().to_bytes() == after[0];
+        let undo = press.way == Some(Action::Undo);
+        // `named` checks the line of a task that moved from a row to
+        // another; one that stayed on its row changed like any other.
+        let moved: Vec<usize> = moves(body)
+            .iter()
+            .filter(|m| m.0 != m.1)
+            .flat_map(|m| [m.0, m.1])
+            .collect();
+        for (n, said, at) in named_places(body, undo) {
+            let lists = match at {
+                At::Before => vec![press.was],
+                At::After => vec![&now],
+                At::Placed => vec![&now, press.was],
             };
             let rows: Vec<_> =
                 lists.iter().filter_map(|r| r.get(&n)).collect();
             assert!(!rows.is_empty(), "no row {n}: {}", press.name);
+            // A row of the list before is a line another writer may have
+            // moved; one it changed cannot be followed.
+            let changed = |row| {
+                let lines = match at {
+                    At::Before => self.follow(row),
+                    At::After | At::Placed => vec![row],
+                };
+                lines.is_empty()
+                    || lines.iter().any(|l| touched(before, &after, *l))
+            };
             assert!(
                 said != Said::Changed
-                    || stale
+                    || moved.contains(&n)
                     || idle
-                    || rows.iter().any(|at| touched(before, &after, **at)),
+                    || rows.iter().any(|row| changed(**row)),
                 "{n} unchanged: {}",
                 press.name
             );
             let asked = said == Said::Already || (idle && said != Said::Left);
-            let acted = |rows: &HashMap<usize, (usize, usize)>| {
-                rows.get(&n).is_some_and(|at| press.seen.contains(at))
-            };
             // A key that wrote nothing names its rows by the list shown
-            // now; any other, by the list the key read.
+            // now; any other, by the list the key read. Another writer may
+            // have moved the lines of a list not read since (one it
+            // changed cannot be followed).
+            let (list, read) = if idle {
+                (&now, read)
+            } else {
+                (press.was, false)
+            };
             assert!(
                 !asked
-                    || listed
                     || press.way.is_some()
                     || press.seen.is_empty()
-                    || if idle { acted(&now) } else { acted(press.was) },
+                    || list.get(&n).is_some_and(|at| {
+                        self.acted(press.seen, *at, read)
+                    }),
                 "{n} not acted on: {}",
                 press.name
             );
         }
+    }
+
+    /// Whether the line `at` of a list, as it stood before another writer
+    /// moved lines unless `read`, is one of `seen`; one it changed cannot be
+    /// followed.
+    fn acted(
+        &self,
+        seen: &[(usize, usize)],
+        at: (usize, usize),
+        read: bool,
+    ) -> bool {
+        let to = if read { vec![at] } else { self.follow(at) };
+        to.is_empty() || to.iter().any(|l| seen.contains(l))
     }
 
     /// Whether the list is shown, no field open.
@@ -566,6 +622,10 @@ fn after(message: Option<&str>, word: &str) -> Vec<String> {
     names.map(|n| n.trim().to_owned()).collect()
 }
 
+/// The words of the clauses that name a row before and a row after the
+/// write: a task moved to a row, moved back from one, or reopened as one.
+const MOVES: [&str; 3] = [" moved to ", " moved back from ", " reopened as "];
+
 /// What a clause says of a task it names: changed, already as asked, or
 /// left alone by a paste (`changed since`).
 #[derive(Clone, Copy, PartialEq)]
@@ -575,12 +635,28 @@ enum Said {
     Left,
 }
 
+/// Which list the row a message names is of.
+#[derive(Clone, Copy, PartialEq)]
+enum At {
+    /// The list shown at the press: the row of a task deleted, or the one a
+    /// task moved or was reopened from.
+    Before,
+    /// The list left by the write: a task unblocked or relinked, the row
+    /// it was reopened as, and any other task named.
+    After,
+    /// Either list: the row a task moved to, or back from, where a line
+    /// moved past can leave the same bytes; `moves` checks its line.
+    Placed,
+}
+
 /// The tasks the clauses of `body` name by their place: the first number of
 /// a clause (`N`, `task N`; not a line, `line N`, or a count, `N task` or
-/// `N tasks`), the tasks after `unblocked ` and `relinked ` (`listed`), and
-/// the row after ` moved to `, ` moved back from ` and ` reopened as `. Each
-/// with what its clause says of the task, and whether it is listed.
-fn named_places(body: &str) -> Vec<(usize, Said, bool)> {
+/// `N tasks`), the tasks after `unblocked `, `relinked `, ` moved to ` and
+/// ` reopened as ` and ` moved back from `. Each with what its clause says
+/// of the task, and the list its row is of: as a press that writes names
+/// them, but an `undo` turns the rows of a delete, a move and a reopening
+/// round, the list before for the list after.
+fn named_places(body: &str, undo: bool) -> Vec<(usize, Said, At)> {
     let body = body.split(STICKY).next().unwrap_or(body);
     let first = |c: &str| {
         let words: Vec<_> = c.trim().split([' ', ',']).collect();
@@ -597,7 +673,16 @@ fn named_places(body: &str) -> Vec<(usize, Said, bool)> {
         } else {
             Said::Changed
         };
-        let at = |words: &[&str], listed| {
+        let turned = [MOVES[0], MOVES[2]].iter().any(|w| c.contains(w))
+            || [" deleted", " moved", " moved back"]
+                .iter()
+                .any(|w| c.ends_with(w));
+        let side = |at: At| match at {
+            At::Before if undo => At::After,
+            At::After if undo && turned => At::Before,
+            At::Before | At::After | At::Placed => at,
+        };
+        let at = |words: &[&str], list: At| {
             let names: Vec<_> =
                 words.iter().flat_map(|w| after(Some(c), w)).collect();
             let numbers: Vec<usize> =
@@ -608,27 +693,49 @@ fn named_places(body: &str) -> Vec<(usize, Said, bool)> {
             assert_eq!(once.len(), numbers.len(), "{c:?} names a task twice");
             numbers
                 .into_iter()
-                .map(|n| (n, said, listed))
+                .map(|n| (n, said, list))
                 .collect::<Vec<_>>()
         };
-        let mut named = at(&["unblocked ", "relinked "], true);
-        let rows = [" moved to ", " moved back from ", " reopened as "];
-        named.extend(at(&rows, false));
-        named.extend(first(c).map(|n| (n, said, false)));
+        let mut named = at(&["unblocked ", "relinked "], At::After);
+        named.extend(at(&[MOVES[2]], side(At::After)));
+        named.extend(at(&MOVES[..2], At::Placed));
+        let own = if turned { At::Before } else { At::After };
+        named.extend(first(c).map(|n| (n, said, side(own))));
         named
     };
     body.split(';').flat_map(clause).collect()
 }
 
-/// Whether the line `at` (a file and a line) is not as it was.
+/// Whether the line `at` (a file and a line) is not as it was: another text
+/// there, or a twin of it added or taken out elsewhere.
 fn touched(before: &Files, after: &Files, (file, at): (usize, usize)) -> bool {
     let line = |text: &Files| {
-        text[file]
-            .split(|b| *b == b'\n')
-            .nth(at)
-            .map(<[u8]>::to_vec)
+        let lines = || text[file].split(|b| *b == b'\n');
+        let this = lines().nth(at);
+        let twins = lines().filter(|l| Some(l) == this.as_ref()).count();
+        (this.map(<[u8]>::to_vec), twins)
     };
     line(before) != line(after)
+}
+
+/// The rows each task of a message says it moved from and to: `2 moved to 4`,
+/// `4 moved back from 2` (to 4); `2 moved` and `2 moved back` leave it on its
+/// row.
+fn moves(message: &str) -> Vec<(usize, usize)> {
+    let parts = message.split(STICKY).next().unwrap_or(message).split(';');
+    let said = |part: &str| {
+        let (n, rest) = part.trim().split_once(" moved")?;
+        let n = n.split_whitespace().last()?.parse().ok()?;
+        let row = |t: &str| t.split_whitespace().next()?.parse().ok();
+        match rest {
+            "" | " back" => Some((n, n)),
+            _ => match rest.strip_prefix(" to ") {
+                Some(to) => Some((n, row(to)?)),
+                None => Some((row(rest.strip_prefix(" back from ")?)?, n)),
+            },
+        }
+    };
+    parts.filter_map(said).collect()
 }
 
 /// The names of the parts of a message that say `N deleted`.

@@ -115,9 +115,13 @@ pub enum Part {
     Name(Name),
 }
 
-/// What a message that says where a task moved says between its names.
-pub(crate) const MOVED_TO: &[u8] = b" moved to ";
-const MOVED_BACK: &[u8] = b" moved back from ";
+/// What a message that says where a task moved says between the name of the
+/// row it left and that of the row it went to.
+pub const MOVED_TO: &[u8] = b" moved to ";
+/// What a message that says where an undone move went says between its
+/// names: the row the task is at, then the row it left. A redone move says
+/// `MOVED_TO` again.
+pub const MOVED_BACK: &[u8] = b" moved back from ";
 
 /// A message: a template of text and the tasks it names, in order.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]

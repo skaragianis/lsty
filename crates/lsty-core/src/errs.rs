@@ -12,8 +12,7 @@ mod quote_table;
 mod said;
 
 pub use quote::{quote, shown};
-pub(crate) use said::MOVED_TO;
-pub use said::{Msg, Name, Part, Place, unplaced};
+pub use said::{MOVED_BACK, MOVED_TO, Msg, Name, Part, Place, unplaced};
 
 #[cfg(test)]
 mod quote_tests;
