@@ -70,6 +70,6 @@ due_overdue    = { fg = "red", bold = true }
 due_today      = { fg = "brown", bold = true }
 due_soon       = "cyan"
 code           = "black"
-done           = { fg = "darkgray", strike = true }
+done           = { fg = "darkgray", strike = true, faint = true }
 doing          = "green"
 warning        = { fg = "brown", bold = true }

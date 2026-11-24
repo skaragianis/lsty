@@ -63,6 +63,8 @@ pub(crate) struct Row {
     pub(crate) source: Source,
     /// The slot that styles the whole row, when there is one.
     pub(crate) base: Option<Slot>,
+    /// The task is done: the attributes of `done` go over every part.
+    pub(crate) done: bool,
     /// What the colour of the task's words depends on.
     pub(crate) parts: Parts,
     pub(crate) marker: Span<'static>,
@@ -245,6 +247,7 @@ impl Row {
             nr: task.nr(),
             source: task.source(),
             base,
+            done: state_slot(task) == Slot::Done,
             parts: Parts::of(task, Some(ctx.today)),
             marker: marker(snap, task, base),
             priority: priority_span(task, line, base),
@@ -265,6 +268,7 @@ impl Row {
         let row = Self::new(snap, task, ctx);
         Self {
             base,
+            done: false,
             marker: marker(snap, task, base),
             priority: priority_span(task, snap.line(task), base),
             date: Cell {
@@ -284,7 +288,7 @@ impl Row {
 
 pub(crate) fn base_slot(task: &Task) -> Option<Slot> {
     Some(state_slot(task))
-        .filter(|slot| [Slot::Muted, Slot::Done, Slot::Blocked].contains(slot))
+        .filter(|slot| [Slot::Muted, Slot::Blocked].contains(slot))
 }
 
 pub(crate) fn marker(
@@ -292,10 +296,11 @@ pub(crate) fn marker(
     task: &Task,
     base: Option<Slot>,
 ) -> Span<'static> {
+    let plain = whole(base).or(Some(Slot::Text));
     if snap.is_wontdo(task) {
-        Span::new(MARKER_WONTDO, base)
+        Span::new(MARKER_WONTDO, plain)
     } else if task.state() == State::Done {
-        Span::new(MARKER_DONE, base)
+        Span::new(MARKER_DONE, plain)
     } else if task.blocked() {
         Span::new(MARKER_BLOCKED, Some(Slot::Blocked))
     } else if task.state() == State::Doing {
@@ -325,13 +330,13 @@ fn priority_span(
 }
 
 /// The slot that styles the whole row: a blocked row only styles its
-/// plain words.
+/// plain words, and a done row none.
 pub(crate) fn whole(base: Option<Slot>) -> Option<Slot> {
     base.filter(|&slot| slot != Slot::Blocked)
 }
 
-/// The slot of a word of a row: the rule's, unless the row is done or
-/// muted whole; the plain words of a blocked row are `blocked`.
+/// The slot of a word of a row: the rule's, unless the row is muted
+/// whole; the plain words of a blocked row are `blocked`.
 pub(crate) fn token_slot(
     tok: &TokenView<'_>,
     base: Option<Slot>,

@@ -61,7 +61,7 @@ slots! {
     DueSoon => "due_soon";
     /// Text between backticks
     Code => "code";
-    /// A completed task
+    /// Completion time; its attributes go over a done task
     Done => "done";
     /// The started: and owner: tags and the doing marker
     Doing => "doing";

@@ -8,7 +8,7 @@ use lsty_core::{
     query::Category,
     theme::Slot,
 };
-use ratatui::{buffer::Buffer, layout::Rect};
+use ratatui::{buffer::Buffer, layout::Rect, style::Style};
 
 use crate::{
     columns::{Layout, MIN_GUTTER},
@@ -73,7 +73,7 @@ impl Model {
         );
         if width < MIN_WIDTH || height < MIN_HEIGHT {
             let text = prefix(TOO_SMALL, usize::from(width));
-            buf.set_string(0, 0, text, ratatui::style::Style::default());
+            buf.set_string(0, 0, text, Style::default());
             return;
         }
         let dims = Size {
@@ -188,7 +188,11 @@ impl Model {
             } else if current {
                 buf.set_style(area, self.styles.fill(Slot::Cursorline));
             }
-            put(buf, (x + 1, y), inner, &spans, self.styles.row(current));
+            let styles = self.styles.row(current);
+            put(buf, (x + 1, y), inner, &spans, styles);
+            if row.done {
+                strike(buf, (x, y), (inner, layout), styles);
+            }
         }
     }
 
@@ -463,4 +467,19 @@ pub(crate) fn clear(buf: &mut Buffer, area: Rect, styles: &Styles) {
             }
         }
     }
+}
+
+/// Lays the attributes of `done` over a done row at `at`, from its marker
+/// to the last cell of its spans.
+fn strike(
+    buf: &mut Buffer,
+    (x, y): (u16, u16),
+    (inner, layout): (usize, Layout),
+    styles: &Styles,
+) {
+    let skip = layout.before_marker();
+    let width = cells(inner.saturating_sub(skip + 1));
+    let area = Rect::new(x + 1 + cells(skip), y, width, 1);
+    let done = styles.get(Some(Slot::Done)).add_modifier;
+    buf.set_style(area, Style::default().add_modifier(done));
 }

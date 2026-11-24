@@ -95,14 +95,16 @@ impl Layout {
         layout
     }
 
+    /// The cells before the marker: the margin and the line number.
+    pub(crate) fn before_marker(&self) -> usize {
+        1 + if self.gutter > 0 { self.gutter + 1 } else { 0 }
+    }
+
     /// The cells before the text.
     pub(crate) fn lead(&self) -> usize {
-        let mut lead = 1 + 1;
+        let mut lead = self.before_marker() + 1;
         if self.priority > 0 {
             lead += self.priority + 1;
-        }
-        if self.gutter > 0 {
-            lead += self.gutter + 1;
         }
         lead
     }
