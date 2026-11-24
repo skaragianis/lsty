@@ -314,13 +314,17 @@ impl Side {
                 press.name
             );
             let asked = said == Said::Already || (idle && said != Said::Left);
-            let acted = |at| press.seen.contains(at);
+            let acted = |rows: &HashMap<usize, (usize, usize)>| {
+                rows.get(&n).is_some_and(|at| press.seen.contains(at))
+            };
+            // A key that wrote nothing names its rows by the list shown
+            // now; any other, by the list the key read.
             assert!(
                 !asked
                     || listed
                     || press.way.is_some()
                     || press.seen.is_empty()
-                    || press.was.get(&n).is_some_and(acted),
+                    || if idle { acted(&now) } else { acted(press.was) },
                 "{n} not acted on: {}",
                 press.name
             );
