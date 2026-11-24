@@ -315,14 +315,18 @@ impl Model {
     }
 
     /// Takes what a prompt's action or a move did: one that changed nothing
-    /// says why in the alert tone. Once it wrote, the number of its tasks
-    /// it left as they were.
+    /// says why in the alert tone, with what to do about it when it was typed
+    /// wrong. Once it wrote, the number of its tasks it left as they were.
     pub(crate) fn took(
         &mut self,
         result: errs::Result<(Outcome, Clock)>,
     ) -> Option<usize> {
         let kept = match &result {
             Ok((outcome, _)) if !outcome.no_op() => Some(unchanged(outcome)),
+            Err(e) if matches!(e.code(), Code::Usage | Code::InvalidValue) => {
+                self.fail_hinted(e);
+                return None;
+            }
             Ok(_) | Err(_) => None,
         };
         if self.settle(result).is_some() && kept.is_none() {

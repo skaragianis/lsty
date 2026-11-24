@@ -4,20 +4,33 @@ keys g t
 type work
 keys <CR>
 frame a-frame
+keys <Esc> g t
+type pri:A
+keys <CR>
+frame b-frame
 file todo.txt a-file
 -- config.toml --
 show_sidebar = false
 show_detail = false
 -- todo.txt --
-Call
+x 2026-09-28 Call
 -- a-frame --
 ┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
-│  1   Call                                                                                        │
+│  1 ✓ Call                                                                                 1d ago │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
 │                                                                                                  │
-"work" is not a tag
+"work" is not a tag — use +name, @name or key:value
  C  tag: work  <CR> add  <Tab> next  <Esc> cancel
+-- b-frame --
+┌[1]─"~/todo.txt"──────────────────────────────────────────────────────────────────────────────────┐
+│  1 ✓ Call                                                                                 1d ago │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+│                                                                                                  │
+1 is done; reopen it first
+ C  tag: pri:A  <CR> add  <Tab> next  <Esc> cancel
 -- a-file --
-Call
+x 2026-09-28 Call
