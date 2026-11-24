@@ -872,6 +872,14 @@ fn a_message_names_tasks_by_their_place() {
             ":set hidden_tasks=done<CR>x<Del>",
             "2 deleted; unblocked 2",
         ),
+        // a move names the task by the row it left, and a note of its claim
+        // by the row it is on
+        (
+            "A\nB\nC started:2026-09-29T0800Z owner:agent2\n",
+            "",
+            "GK",
+            "3 moved to 2; 2 is claimed by agent2",
+        ),
         // archived to a row other than the one it left
         (
             "A\nB\nC\n",

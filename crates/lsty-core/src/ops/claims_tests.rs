@@ -662,6 +662,19 @@ const HUMAN_ROWS: &[Case] = &[
         )],
     },
     Case {
+        name: "18.25 human tags an agent's task that has the tag",
+        todo: "A started:2026-09-29T0800Z owner:agent1 +x\n",
+        steps: &[step(
+            "",
+            "1",
+            Op::Tag("+x"),
+            Want::NoOp(
+                "A started:2026-09-29T0800Z owner:agent1 +x\n",
+                &["1 already has +x", "1 is claimed by agent1"],
+            ),
+        )],
+    },
+    Case {
         name: "18.25 human edits an owned task not underway",
         todo: "A owner:agent1\n",
         steps: &[step(
