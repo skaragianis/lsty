@@ -16,7 +16,7 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- sticky --
 ┌[3]─Projects─┐┌[1]─"~/todo.txt"───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1 ✓     Call client +work @phone                            filtered             │
+│ +home    0/1││  1 ✓     Call client +work @phone                            filtered             │
 │ +spec01  2/2││  2   (B) Send Invoice +work.acme @email                      2d late              │
 │ ▾+work   1/4││  1       Write parser +spec01                                          parser     │
 ├[4]─Contexts─┤└───────────────────────────────────────────────────────────────────────────────────┘
@@ -29,7 +29,7 @@ x 2026-09-01 Old task +work
  N  sort(manual)  ▶ 1 in doing  1 done: Call client; hidden by current filters in 2 seconds or at th
 -- left --
 ┌[3]─Projects─┐┌[1]─"~/todo.txt"───────────────────────────────────────────────────────────────────┐
-│ +home    1/1││  1   (B) Send Invoice +work.acme @email                       2d late             │
+│ +home    0/1││  1   (B) Send Invoice +work.acme @email                       2d late             │
 │ +spec01  2/2││  1       Write parser +spec01                                          parser     │
 │ ▾+work   1/4││  2 ⧗     Add CLI ls +spec01 dep:parser                                         1h │
 ├[4]─Contexts─┤└───────────────────────────────────────────────────────────────────────────────────┘

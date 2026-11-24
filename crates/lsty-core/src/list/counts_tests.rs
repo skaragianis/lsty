@@ -33,7 +33,9 @@ fn count(open: usize, total: usize) -> Count {
 }
 
 fn of(snap: &Snapshot, kind: Kind, name: &str) -> Option<Count> {
-    snap.rolled_counts(kind).get(name.as_bytes()).copied()
+    snap.rolled_counts(kind, |_| true)
+        .get(name.as_bytes())
+        .copied()
 }
 
 fn fixture() -> Snapshot {
@@ -41,7 +43,7 @@ fn fixture() -> Snapshot {
 }
 
 fn names(snap: &Snapshot, kind: Kind) -> BTreeMap<String, Count> {
-    snap.rolled_counts(kind)
+    snap.rolled_counts(kind, |_| true)
         .into_iter()
         .map(|(name, c)| (String::from_utf8_lossy(&name).into_owned(), c))
         .collect()
@@ -129,12 +131,15 @@ fn a_task_under_two_levels_counts_once_in_the_parent() {
     assert_eq!(of(&snap, Kind::Project, "work"), Some(count(1, 1)));
     let snap = snapshot(&["Twice +work +work +work/q3"], &[]);
     assert_eq!(of(&snap, Kind::Project, "work"), Some(count(1, 1)));
+    // A task that is not shown is not open, and is still in the total.
+    let counts = snap.rolled_counts(Kind::Project, |_| false);
+    assert_eq!(counts[b"work".as_slice()], count(0, 1));
 }
 
 #[test]
 fn a_parent_nobody_carries_is_listed_with_its_subtree() {
     let snap = snapshot(&["One +a.b.c"], &[]);
-    let counts = snap.rolled_counts(Kind::Project);
+    let counts = snap.rolled_counts(Kind::Project, |_| true);
     let names: Vec<_> = counts.keys().map(Vec::as_slice).collect();
     assert_eq!(names, [b"a".as_slice(), b"a.b", b"a.b.c"]);
     assert!(counts.values().all(|c| *c == count(1, 1)));

@@ -1,16 +1,16 @@
 use std::collections::BTreeMap;
 
-use super::snapshot::Snapshot;
+use super::snapshot::{Snapshot, Task};
 use crate::{
     errs::Source,
     todotxt::{Kind, name_levels},
 };
 
-/// How many tasks carry a name: the open ones of the todo file, and all
-/// of them in both files.
+/// How many tasks carry a name: the open ones of the todo file that the
+/// caller's predicate lets in, and all of them in both files.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct Count {
-    /// The open tasks of the todo file.
+    /// The open tasks of the todo file that the predicate lets in.
     pub open: usize,
     /// The tasks of the todo file and of the done file.
     pub total: usize,
@@ -27,8 +27,13 @@ impl Snapshot {
     /// Counts each name of `kind` and every level above it over the tasks
     /// at or below that level, each task once. Only names at or above a
     /// name that a task of the todo file carries are listed; the done
-    /// file adds to their totals.
-    pub fn rolled_counts(&self, kind: Kind) -> BTreeMap<Vec<u8>, Count> {
+    /// file adds to their totals. `counts` says which open tasks of the
+    /// todo file count as open.
+    pub fn rolled_counts(
+        &self,
+        kind: Kind,
+        counts: impl Fn(&Task) -> bool,
+    ) -> BTreeMap<Vec<u8>, Count> {
         let mut tallies: BTreeMap<&[u8], Tally> = BTreeMap::new();
         let mut keys: Vec<&[u8]> = Vec::new();
         for task in self.tasks() {
@@ -38,10 +43,11 @@ impl Snapshot {
             keys.sort_unstable();
             keys.dedup();
             let in_todo = task.source() == Source::Todo;
+            let open = in_todo && task.is_open() && counts(task);
             for key in &keys {
                 let t = tallies.entry(key).or_default();
                 t.count.total += 1;
-                t.count.open += usize::from(in_todo && task.is_open());
+                t.count.open += usize::from(open);
                 t.listed |= in_todo;
             }
         }

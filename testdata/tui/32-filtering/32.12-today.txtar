@@ -15,7 +15,7 @@ Plan offsite due:2026-10-03
 x 2026-09-01 Old task +work
 -- today --
 ┌[3]─Projects─┐┌[1]─Today─────────────────────────────────────────────────────────────────┐┌[2]─Detail───────────────────────────┐
-│ +home    1/1││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
+│ +home    0/1││  1   (A) Call client +work @phone                                  today ││ Call client +work @phone            │
 │ +spec01  2/2││                                                                          ││ due:2026-09-29                      │
 │ ▾+work   2/4││                                                                          ││ ─────────────────────────────────── │
 │   .acme  1/1││                                                                          ││ state     todo                      │

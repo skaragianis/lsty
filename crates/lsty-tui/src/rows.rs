@@ -122,7 +122,7 @@ impl Inline {
     clippy::struct_excessive_bools,
     reason = "one switch for each kind of task that can be hidden"
 )]
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, PartialEq)]
 pub(crate) struct Shows {
     later: bool,
     blocked: bool,
