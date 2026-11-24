@@ -1,5 +1,7 @@
 //! The steps of an operation: lock, read, plan, check, write, report.
 
+use std::path::Path;
+
 use super::{
     env::Env, landing::Landing, result::Outcome, staged::SealedFile, tx::Tx,
 };
@@ -155,7 +157,7 @@ fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
 }
 
 /// The file, and whether it exists; a missing file is an empty one.
-fn read_file(path: &std::path::Path) -> Result<(File, bool)> {
+fn read_file(path: &Path) -> Result<(File, bool)> {
     Ok(match fsio::read(path)? {
         Some(data) => (File::parse(&data), true),
         None => (File::default(), false),
@@ -222,13 +224,13 @@ impl Sealed {
         if order.len() == 2 && Some(Source::Done) == self.tx.dest {
             order.reverse();
         }
-        for &source in &order {
-            let data = &self.file(source).bytes;
-            fsio::write(env.found.path(source), data, env.hooks)?;
-        }
-        if let Some((path, data)) = &self.tx.log {
-            fsio::write(path, data, env.hooks)?;
-        }
+        let log = self.tx.log.iter();
+        let files: Vec<(&Path, &[u8])> = order
+            .iter()
+            .map(|&s| (env.found.path(s), self.file(s).bytes.as_slice()))
+            .chain(log.map(|(p, d)| (p.as_path(), d.as_slice())))
+            .collect();
+        fsio::write_all(&files, env.hooks)?;
         Ok(order)
     }
 }

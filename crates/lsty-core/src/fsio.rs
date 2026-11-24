@@ -27,8 +27,8 @@ pub(crate) use names::{base_name, folder_of};
 pub use read::read;
 pub(crate) use read::read_in;
 pub(crate) use resolve::resolve;
-pub(crate) use write::clean_orphans;
-pub use write::write;
+pub use write::{Target, write, write_in};
+pub(crate) use write::{clean_orphans, write_all};
 
 pub(crate) use crate::todotxt::clean;
 
