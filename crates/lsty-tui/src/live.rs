@@ -359,6 +359,7 @@ impl Model {
         if let Some(w) = wrote {
             self.stick(&moves.remap, w.touched);
         }
+        self.drop_unnamed(wrote.is_some());
         // An open field aims at its place. That is in the coordinates of
         // the reading before a write, which is right because the line the
         // write adds takes that index.

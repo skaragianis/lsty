@@ -911,9 +911,9 @@ fn a_message_names_tasks_by_their_place() {
         ),
         // a task no row shows and no id names, by its file line
         (
-            "A +x id:a\nB dep:a\n",
+            "A id:a\nB dep:a\n",
             "",
-            "/+x<CR>:del 1<CR>",
+            "/A<CR>:del 1<CR>",
             "1 deleted; unblocked line 2",
         ),
         // raised to the top of a priority sort

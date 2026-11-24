@@ -620,7 +620,10 @@ impl Model {
         self.settle_cursor(place);
     }
 
+    /// Lists the rows again. The selected projects and contexts that no
+    /// task has now go, with their filters, unless a row is held.
     pub(crate) fn rebuild_rows(&mut self) {
+        let dropped = self.drop_unnamed(true);
         self.cut = (0, 0);
         self.refilter.owed = false;
         let ctx = self.context();
@@ -633,6 +636,9 @@ impl Model {
         );
         self.natural = Natural::of(&self.rows);
         self.relabel_prompt();
+        if dropped {
+            self.rebuild_panels();
+        }
     }
 
     /// Today and the days that count as soon.

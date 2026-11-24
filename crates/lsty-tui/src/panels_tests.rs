@@ -1,4 +1,4 @@
-use std::fs;
+use std::{fs, path::Path};
 
 use lsty_core::{
     config::{
@@ -18,12 +18,13 @@ use tempfile::TempDir;
 
 use crate::{
     focus::Focus,
+    hit::Kind,
     layout::Size,
     model::Model,
     msg::{Gesture, Mouse, Msg},
-    sidebar::panel_heights,
+    sidebar::{CONTEXTS, panel_heights},
     test_util::{
-        cursor_text, deps, expiry, keys, plain, press, reload, screen,
+        click, cursor_text, deps, expiry, keys, plain, press, reload, screen,
         started, todo_of, workdir, workdir_model,
     },
 };
@@ -823,20 +824,65 @@ fn a_rewrite_that_drops_the_last_use_drops_the_name() {
     assert!(shown(&m, 0).is_empty() && shown(&m, 1).is_empty());
 }
 
-// A chosen name stays with its count until it is unchosen; the filter is
-// never dropped behind the user's back.
+/// Clicks the show switch whose row of the screen holds `word`.
+fn click_switch(m: &mut Model, word: &str) {
+    let lines = screen(m, 130, 30);
+    let y = (0..30)
+        .find(|&y| {
+            m.hit(Position::new(3, y)).kind == Kind::Toggle
+                && lines[usize::from(y)].contains(word)
+        })
+        .unwrap_or_else(|| panic!("no {word} switch"));
+    click(m, 3, y);
+}
+
+/// A key that took the name off its last task, then the sticky row going
+/// by what `then` does.
+fn edited_name_goes(then: fn(&mut Model, &Path)) {
+    let (dir, mut m) = model(plain(), (130, 30), "A @bug\nB\n");
+    keys(&mut m, "<C-w>4x<C-w>1A<C-w><CR>");
+    assert!(!m.sticky.is_empty());
+    assert_eq!(m.panels[CONTEXTS].active.len(), 1);
+    then(&mut m, dir.path());
+    assert_eq!(m.panels[CONTEXTS].active.len(), 0);
+    assert_eq!(shown(&m, 1), Vec::<String>::new());
+    assert_eq!(m.rows.len(), 2);
+}
+
+// A chosen name goes, with its filter, when no task has it any more: at
+// once when the key left no sticky row, else when its rows go.
 #[test]
-fn a_chosen_name_stays_until_it_is_unchosen() {
-    let todo = "A +solo\nB keep +x\n";
+fn a_chosen_name_goes_when_no_task_has_it() {
+    let todo = "A +solo\nB keep +x\nC +x\n";
     let (_dir, mut m) = model(plain(), (130, 30), todo);
     keys(&mut m, "<C-w>3x<C-w>1dd");
-    assert_eq!(shown(&m, 0), ["=+solo 0/0", "+x 1/1"]);
-    assert_eq!(m.panels[0].active.len(), 1);
-    keys(&mut m, "<C-w>3x");
-    assert_eq!(shown(&m, 0), ["-+solo 0/0", "+x 1/1"]);
-    keys(&mut m, "x");
-    assert_eq!(shown(&m, 0), ["+x 1/1"]);
+    assert_eq!(shown(&m, 0), ["+x 2/2"]);
     assert_eq!(m.panels[0].active.len(), 0);
+    assert_eq!(m.rows.len(), 2);
+    // The next key; an outside change, which does not wait for the sticky
+    // rows; a click on a switch, which owes a refilter, then the timer or
+    // a key that lists the rows again.
+    for then in [
+        (|m, _| {
+            keys(m, "<Esc>");
+        }) as fn(&mut Model, &Path),
+        |m, dir| {
+            fs::write(dir.join("todo.txt"), "A\nC\n")
+                .unwrap_or_else(|e| panic!("{e}"));
+            reload(m);
+            assert!(!m.sticky.is_empty());
+        },
+        |m, _| {
+            click_switch(m, "Later");
+            m.flush_refilter();
+        },
+        |m, _| {
+            click_switch(m, "Later");
+            keys(m, "s");
+        },
+    ] {
+        edited_name_goes(then);
+    }
 }
 
 // The panel cursor lands on the row that takes the place of its row,

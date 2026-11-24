@@ -23,7 +23,10 @@ use lsty_core::{
     theme::{self, Profile, Theme},
     todotxt::File,
 };
-use ratatui::{buffer::Buffer, layout::Rect};
+use ratatui::{
+    buffer::Buffer,
+    layout::{Position, Rect},
+};
 use tempfile::TempDir;
 
 use crate::{
@@ -31,10 +34,22 @@ use crate::{
     hints::dim,
     live::Load,
     model::Model,
-    msg::{Cmd, Msg},
+    msg::{Button, Cmd, Gesture, Mouse, Msg},
     press::Answer,
     track::Place,
 };
+
+/// Presses and releases the left button at cell `x`, `y`.
+pub(crate) fn click(model: &mut Model, x: u16, y: u16) {
+    for gesture in [Gesture::Down(Button::Left), Gesture::Up] {
+        let shift = false;
+        model.update(Msg::Mouse(Mouse {
+            gesture,
+            at: Position::new(x, y),
+            shift,
+        }));
+    }
+}
 
 /// Draws the ids `t001`, `t002` and so on.
 #[derive(Default)]

@@ -167,6 +167,20 @@ impl Model {
         }
     }
 
+    /// Lets go of the selected projects and contexts that no task has
+    /// now, and their filters; whether there were any. After the person's
+    /// own key (`own`) it waits while a row is held.
+    pub(crate) fn drop_unnamed(&mut self, own: bool) -> bool {
+        if own && !self.sticky.is_empty() {
+            return false;
+        }
+        let projects =
+            self.panels[PROJECTS].drop_unnamed(&self.snap, Kind::Project);
+        let contexts =
+            self.panels[CONTEXTS].drop_unnamed(&self.snap, Kind::Context);
+        projects | contexts
+    }
+
     fn filter_entries(&self) -> Vec<Entry> {
         let mut entries = Vec::new();
         for (what, label) in TOGGLES {

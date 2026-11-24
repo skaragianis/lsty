@@ -282,6 +282,19 @@ impl<'a> Tree<'a> {
     }
 }
 
+/// The counts of `snap`, made once for each reading.
+fn counted<'a>(
+    counted: &'a mut Option<(u32, Counts)>,
+    snap: &Snapshot,
+    kind: todotxt::Kind,
+) -> &'a Counts {
+    let serial = snap.serial();
+    counted.take_if(|c| c.0 != serial);
+    &counted
+        .get_or_insert_with(|| (serial, snap.rolled_counts(kind)))
+        .1
+}
+
 /// One of the three lists of the sidebar.
 #[derive(Debug)]
 pub(crate) struct Panel {
@@ -331,12 +344,7 @@ impl Panel {
     /// The active ones stay listed, with those above them, when no
     /// task has them.
     pub(crate) fn set_nodes(&mut self, snap: &Snapshot, kind: todotxt::Kind) {
-        let serial = snap.serial();
-        self.counted.take_if(|c| c.0 != serial);
-        let (_, counts) = self
-            .counted
-            .get_or_insert_with(|| (serial, snap.rolled_counts(kind)));
-        let mut nodes = counts.clone();
+        let mut nodes = counted(&mut self.counted, snap, kind).clone();
         for name in self.active.iter().flat_map(|a| name_levels(&a.name)) {
             nodes.entry(name.to_vec()).or_default();
         }
@@ -346,6 +354,20 @@ impl Panel {
             Tree::new(self.sigil, &self.active, &self.nodes, &none).entries();
         self.natural = natural_of(&open);
         self.refill();
+    }
+
+    /// Takes off the active entries that no task names now, so that the
+    /// filter goes with them; whether there were any.
+    pub(crate) fn drop_unnamed(
+        &mut self,
+        snap: &Snapshot,
+        kind: todotxt::Kind,
+    ) -> bool {
+        let counts = counted(&mut self.counted, snap, kind);
+        let before = self.active.len();
+        self.active
+            .retain(|a| counts.contains_key(a.name.as_slice()));
+        self.active.len() != before
     }
 
     /// Whether the project or context `name` has an entry in the tree.
