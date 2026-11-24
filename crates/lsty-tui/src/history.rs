@@ -388,9 +388,13 @@ fn turn(
     let remap = Remap::new(read, left, Some(undone), &[]);
     let maps = [Source::Todo, Source::Done].map(|source| {
         let file = rec.files.iter().find(|f| f.source == source);
-        file.map_or_else(Lines::default, |f| Lines {
-            post: follow(f.post(), read.file(source)),
-            pre: follow(f.pre(), left.file(source)),
+        file.map_or_else(Lines::default, |f| {
+            let post = follow(f.post(), read.file(source));
+            let pre = follow(f.pre(), left.file(source));
+            let put = undone.files.iter().find(|f| f.source == source);
+            let mut lines = Lines { post, pre };
+            through(&mut lines, (f, put), (source, &remap));
+            lines
         })
     });
     let to = |lines: &[Option<usize>], nr: Nr| {
@@ -418,6 +422,45 @@ fn turn(
                 |(source, p)| (source, turned(source, p, held).unwrap_or(p));
             name.place = name.place.map(|p| at((name.source, p)).1);
             name.from = name.from.map(at);
+        }
+    }
+}
+
+/// Refines where each line the record `rec` read is in the list its undo
+/// `put` left (`lines.pre`, found by text): a line the operation kept or
+/// changed goes where `remap` takes the line it wrote; one it took out, to
+/// the line the undo put back for it, the nth put back for the nth taken
+/// out of the same text, so a twin another writer added is never taken for
+/// it.
+fn through(
+    lines: &mut Lines,
+    (rec, put): (&FileRecord, Option<&FileRecord>),
+    (source, remap): (Source, &Remap),
+) {
+    let mut back = put
+        .into_iter()
+        .flat_map(|p| &p.changes)
+        .filter(|c| c.before.is_empty() && !c.after.is_empty())
+        .filter_map(|c| Some((&c.after, c.nr_after?.index())))
+        .collect::<Vec<_>>();
+    let taken = |c: &&ops::Change| {
+        matches!(c.kind, ops::ChangeKind::Removed | ops::ChangeKind::Blanked)
+    };
+    let mut out = rec.changes.iter().filter(taken).collect::<Vec<_>>();
+    out.sort_by_key(|c| c.nr_before);
+    for (i, to) in rec.pre_to_post().into_iter().enumerate() {
+        let was = to.and_then(|p| lines.post.get(p).copied().flatten());
+        let Some(was) = was.and_then(Nr::from_index) else {
+            continue;
+        };
+        if let Some((_, now)) = remap.track((source, was)) {
+            lines.pre[i] = Some(now.index());
+        }
+    }
+    for change in out {
+        let at = back.iter().position(|(text, _)| **text == change.before);
+        if let (Some(i), Some(nr)) = (at, change.nr_before) {
+            lines.pre[nr.index()] = Some(back.remove(i).1);
         }
     }
 }
