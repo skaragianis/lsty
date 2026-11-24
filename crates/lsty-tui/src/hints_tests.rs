@@ -304,6 +304,9 @@ fn hinted(
 
 const OLD: &str = "x 2026-09-01 Old\n";
 const STUCK: &str = "Blocker id:b\nStuck dep:b\n";
+/// The task that waits is within a count of two from the first; what it
+/// waits for is not.
+const STUCK_LATER: &str = "Plain\nStuck dep:b\nBlocker id:b\n";
 const STUCK_DOING: &str =
     "Blocker id:b\nStuck dep:b started:2026-09-29T0800Z\n";
 const SKIP: &str = "x 2026-09-01 Skip wontdo:true\n";
@@ -344,7 +347,7 @@ fn the_default_hints_are_dim_when_their_key_would_change_nothing() {
         ("won't do", SKIP, "", "", "u undo"),
         ("archived", "", OLD, "", "a append dd delete u undo"),
         ("visual todo", "A\nB\n", "", "vj", ""),
-        ("visual blocked", STUCK, "", "vj", "x done t start"),
+        ("visual blocked", STUCK, "", "vj", "t start"),
         (
             "visual todo and done",
             "A\nx 2026-09-01 B\n",
@@ -798,7 +801,7 @@ fn a_count_adds_no_hint_to_an_empty_row() {
 /// otherwise take off the line, and says nothing untrue meanwhile.
 #[test]
 fn cancel_gives_way_to_the_next_hint() {
-    let (_dir, model) = hinted((STUCK, ""), None, "", "2");
+    let (_dir, model) = hinted((STUCK_LATER, ""), None, "", "2");
     assert_eq!(shown_dim(&model, 40), "x done");
     assert_eq!(shown_dim(&model, 53), "x done t start");
     assert!(!says_at(&model, 53, "<Esc>"));
@@ -878,8 +881,7 @@ fn a_count_is_cut_with_the_mode() {
 /// open one, and back with `<Esc>`.
 #[test]
 fn the_hints_follow_a_count() {
-    let (_dir, mut model) =
-        hinted(("Blocker id:b\nStuck dep:b\n", ""), None, "", "");
+    let (_dir, mut model) = hinted((STUCK_LATER, ""), None, "", "");
     assert!(!shown_dim(&model, 200).contains("x done"));
     keys(&mut model, "2");
     assert!(shown_dim(&model, 200).contains("x done"));

@@ -1,6 +1,6 @@
 //! `do` and `wontdo`: complete tasks.
 
-use std::sync::Arc;
+use std::{collections::HashSet, sync::Arc};
 
 use super::{
     claim::{ClaimMode, Guard},
@@ -19,7 +19,7 @@ use super::{
 };
 use crate::{
     errs::{Msg, Name, Result, Source},
-    list::TaskId,
+    list::{Task, TaskId},
     todotxt::{Line, Parts, build},
 };
 
@@ -52,12 +52,13 @@ pub fn finish(
         };
         let mut pending = Vec::new();
         let mut taken = Taken::new(tx.edited_ids());
+        let call = named_tasks(tx, &targets);
         let done = tx.each_guarded(&targets, guard, |tx, id| {
             finish_task(
                 tx,
                 env,
                 id,
-                (opts, archive),
+                (opts, archive, &call),
                 (&mut pending, &mut taken),
             )
         });
@@ -70,7 +71,7 @@ fn finish_task(
     tx: &mut Tx,
     env: &Env<'_>,
     id: TaskId,
-    (opts, archive): (DoOpts, bool),
+    (opts, archive, call): (DoOpts, bool, &HashSet<TaskId>),
     (pending, taken): (&mut Vec<Pending>, &mut Taken),
 ) -> Result<()> {
     let name = tx.name(id);
@@ -82,12 +83,7 @@ fn finish_task(
         tx.say(already_done(tx, (id, name), source, &line, opts.wontdo));
         return Ok(());
     }
-    if !opts.wontdo {
-        refuse_unstarted(tx, &env.actor, id, task)?;
-        if !opts.ignore_blocked {
-            refuse_blocked(tx, id, task)?;
-        }
-    }
+    refuse_unready(tx, &env.actor, (id, task), (opts, call))?;
     let done = completion(tx, env, id, &line, opts.wontdo)?;
     let said = if opts.wontdo {
         " won't do: "
@@ -105,6 +101,38 @@ fn finish_task(
         say_was_blocked(tx, id);
     }
     Ok(())
+}
+
+/// Refuses a task that is not started by this actor, or that waits for a
+/// task the call does not name, unless `ignore_blocked`. `wontdo` refuses
+/// neither.
+fn refuse_unready(
+    tx: &Tx,
+    actor: &Actor,
+    (id, task): (TaskId, &Task),
+    (opts, call): (DoOpts, &HashSet<TaskId>),
+) -> Result<()> {
+    if opts.wontdo {
+        return Ok(());
+    }
+    refuse_unstarted(tx, actor, id, task)?;
+    // A prerequisite of the call is done by the time its turn comes.
+    let waits =
+        task.cycle() || task.blockers().iter().any(|b| !call.contains(b));
+    if waits && !opts.ignore_blocked {
+        refuse_blocked(tx, id, task)?;
+    }
+    Ok(())
+}
+
+/// The tasks the targets name: a prerequisite among them is done by the
+/// time the task waiting for it is, so it does not block.
+fn named_tasks(tx: &Tx, targets: &[Target]) -> HashSet<TaskId> {
+    let found = |t: &Target| {
+        let task = find(tx.snapshot(), &tx.landed(t).ok()?).ok()??;
+        Some(task.task_id())
+    };
+    targets.iter().filter_map(found).collect()
 }
 
 /// What a command says about a task that is already done. `wontdo` names

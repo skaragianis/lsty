@@ -4,12 +4,45 @@ cp todo.txt before
 exit 3 lsty do id:k3f9 --json --no-config
 cmpjson stdout want
 cmp todo.txt before
+# tasks that wait on one another are done together, given in any order;
+# one that waits on a task left open outside the call refuses it all
+exit 3 lsty do id:cc id:cb --human --no-config
+cmp todo.txt before
+exec lsty do id:cc id:cb id:ca --human --no-config
+cmp stdout out
+cmp todo.txt after
+cp todo.txt before
+exit 3 lsty do id:la id:lb --human --no-config
+cmp stderr cycle
+cmp todo.txt before
 
 -- todo.txt --
 (A) Write parser +spec01 id:parser
 (A) Add CLI ls +spec02 id:k3f9 dep:parser started:2026-09-29T0900Z owner:agent1
 Call client +work id:c1
 Pay rent rec:1m due:2026-09-30 id:r1
+Chain a id:ca
+Chain b id:cb dep:ca
+Chain c id:cc dep:cb
+Loop a id:la dep:lb
+Loop b id:lb dep:la
+-- out --
+cc done: Chain c
+cb done: Chain b
+ca done: Chain a
+-- after --
+(A) Write parser +spec01 id:parser
+(A) Add CLI ls +spec02 id:k3f9 dep:parser started:2026-09-29T0900Z owner:agent1
+Call client +work id:c1
+Pay rent rec:1m due:2026-09-30 id:r1
+x 2026-09-29 Chain a id:ca
+x 2026-09-29 Chain b id:cb dep:ca
+x 2026-09-29 Chain c id:cc dep:cb
+Loop a id:la dep:lb
+Loop b id:lb dep:la
+-- cycle --
+lsty: task la is blocked by 9 (Loop b) (dependency cycle)
+hint: finish what it waits for first, or use --ignore-blocked
 -- want --
 {"version": 3, "file": "$WORK/todo.txt", "done_file": "$WORK/done.txt", "today": "2026-09-29",
  "error": {"code": "blocked", "exit": 3, "message": "task k3f9 is blocked by 1 (Write parser)", "hint": "finish what it waits for first, or use --ignore-blocked", "blockers": [{"nr": 1, "source": "todo", "id": "parser"}]}}

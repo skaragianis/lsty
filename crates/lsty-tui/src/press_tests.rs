@@ -1023,7 +1023,7 @@ fn the_rule() {
         ToggleStart as Toggle, Wontdo, Yank,
     };
     const STEP: Command = Command::Step { forward: true };
-    let rows: [Rule; 40] = [
+    let rows: [Rule; 41] = [
         (X, &[1], Answer::Resolved(Command::Do)),
         (X, &[1, 7], Answer::Resolved(Command::Do)),
         (X, &[1, 3], Answer::Resolved(Command::Do)),
@@ -1033,6 +1033,7 @@ fn the_rule() {
         (X, &[3, 9], Answer::Resolved(Command::Do)),
         (X, &[7, 9], Answer::Refused(Refusal::Closed)),
         (X, &[2], Answer::CoreRefuses(Command::Do)),
+        (X, &[0, 2], Answer::Resolved(Command::Do)),
         (X, &[1, 2, 7], Answer::CoreRefuses(Command::Do)),
         (Toggle, &[1], Answer::Resolved(Command::Start)),
         (Toggle, &[1, 3], Answer::Resolved(Command::Start)),
@@ -1129,15 +1130,22 @@ fn a_command_refused_on_one_task_writes_none() {
     assert_eq!(files(dir.path()), before);
 }
 
-/// A blocker in the same press does not free the task waiting for it: the
-/// commands read the list as it was.
+/// A blocker in the same press is done first by `x`, which frees the task
+/// waiting for it; `t` reads the list as it was, so it still refuses.
 #[test]
-fn a_blocker_in_the_press_still_blocks() {
-    let (dir, mut model) = list(&[0, 2]);
-    let before = files(dir.path());
-    press(&mut model, "2x");
-    assert_eq!(model.message.tone, Tone::Alert);
-    assert_eq!(files(dir.path()), before);
+fn a_blocker_in_the_press_is_done_first_by_x_only() {
+    for (key, done, tone) in [("2x", 2, Tone::Notice), ("2t", 0, Tone::Alert)]
+    {
+        let (dir, mut model) = list(&[0, 2]);
+        let before = files(dir.path());
+        press(&mut model, key);
+        assert_eq!(model.message.tone, tone, "{key}");
+        assert_eq!(files(dir.path()) != before, done > 0, "{key}");
+        let text = files(dir.path()).concat();
+        let closed =
+            text.split(|b| *b == b'\n').filter(|l| l.starts_with(b"x "));
+        assert_eq!(closed.count(), done, "{key}");
+    }
 }
 
 /// A completion that passes a task over and fails keeps the cursor.

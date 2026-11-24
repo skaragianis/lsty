@@ -3,6 +3,8 @@
 //! do in some state, asked by the key itself and by its hint. The core keeps
 //! its own checks, for the CLI and for files changed on disk.
 
+use std::collections::HashSet;
+
 use lsty_core::{
     errs::Source,
     keys::{Action, Category, Matcher, Mode},
@@ -114,7 +116,10 @@ pub(crate) struct Summary {
     doing: usize,
     done: usize,
     blocked_todo: usize,
-    blocked_doing: usize,
+    /// Open tasks that wait on a task outside the rows, or in a cycle: the
+    /// ones `lsty do` refuses, which completes a prerequisite in the rows
+    /// first.
+    waiting: usize,
 }
 
 impl Summary {
@@ -125,8 +130,12 @@ impl Summary {
             lo,
             ..Self::default()
         };
+        let chosen: HashSet<_> = rows.iter().map(|row| row.id).collect();
         for task in rows.iter().filter_map(|row| snap.task(row.id)) {
             s.total += 1;
+            let waits = task.cycle()
+                || task.blockers().iter().any(|b| !chosen.contains(b));
+            s.waiting += usize::from(waits);
             let blocked = usize::from(task.blocked());
             match task.state() {
                 _ if task.source() == Source::Done => s.archived += 1,
@@ -134,10 +143,7 @@ impl Summary {
                     s.todo += 1;
                     s.blocked_todo += blocked;
                 }
-                State::Doing => {
-                    s.doing += 1;
-                    s.blocked_doing += blocked;
-                }
+                State::Doing => s.doing += 1,
                 State::Done => s.done += 1,
             }
         }
@@ -238,7 +244,7 @@ pub(crate) const fn writes_line(action: Action) -> bool {
 const fn complete(s: &Summary) -> Answer {
     if s.todo + s.doing == 0 {
         Answer::Resolved(Command::Reopen)
-    } else if s.blocked_todo + s.blocked_doing > 0 {
+    } else if s.waiting > 0 {
         Answer::CoreRefuses(Command::Do)
     } else {
         Answer::Resolved(Command::Do)
