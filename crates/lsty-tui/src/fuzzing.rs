@@ -385,11 +385,12 @@ impl Side {
         }
     }
 
-    /// A note of a claim says the line of its task holds `owner:X`: at the
-    /// row now, in the files after the write or, for an ended claim or a
-    /// field edit (which may rewrite the owner it noted), before it; an ended
-    /// claim also at the row before the key (followed). A task no row shows is
-    /// named by its line (`line N`). The task is one the key acted on.
+    /// A note of a claim says the line of its task holds `owner:X`. The
+    /// product names a task the write deleted by its row before the key (the
+    /// line it stood on, followed), any other by its row now: in the files
+    /// after the write or, for an ended claim or a field edit (which may
+    /// rewrite the owner it noted), before it. A task no row shows is named
+    /// by its line (`line N`). The task is one the key acted on.
     fn claims_held(
         &self,
         press: &Press<'_>,
@@ -416,20 +417,25 @@ impl Side {
             };
             let n = n.trim();
             let (at, row) = (line_of(n, now), n.parse().ok());
-            let here = at
-                .is_some_and(|at| has(after, at) || early && has(before, at));
             let was = row.and_then(|n| press.was.get(&n));
-            let earlier = !kept
-                && was.is_some_and(|&at| {
-                    let to = self.follow(at);
-                    to.is_empty() || to.iter().any(|&l| has(before, l))
-                });
-            let ok = here || earlier;
+            // The product names a task the write deleted by its row before
+            // the key, any other by its row now.
+            let gone = press.way.is_none()
+                && deleted(Some(body)).iter().any(|d| d == n);
+            let held = |at| {
+                let to = self.follow(at);
+                to.is_empty() || to.iter().any(|&l| has(before, l))
+            };
+            let ok = if gone {
+                was.is_some_and(|&at| held(at))
+            } else {
+                at.is_some_and(|at| has(after, at) || early && has(before, at))
+            };
             assert!(ok, "{c} not held: {}", press.name);
             // The task is one the key acted on: its line now, its row before
             // the key, or the row it moved to.
             let acted = press.seen.is_empty()
-                || at.is_some_and(|at| press.seen.contains(&at))
+                || !gone && at.is_some_and(|at| press.seen.contains(&at))
                 || was.is_some_and(|&at| self.acted(press.seen, at, false))
                 || moves(body).iter().any(|m| Some(m.1) == row);
             assert!(acted, "{c} not acted on: {}", press.name);
