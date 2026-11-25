@@ -4,6 +4,26 @@ Changes a lsty user can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.10.0 (2026-11-25)
+
+### Changed
+
+- **tui:** Show a done task in its own colours, struck through, in place of one colour; archived tasks look as before.
+- **tui:** Count in the first number of a Projects or Contexts row only the open rows selecting it would show with the current hiding: a project whose only task waits for a date reads `0/1`.
+- **core:** The `lsty-core` library's file API changed (`fsio::read` returns the file's mode with its contents and `fsio::write` takes it; `rolled_counts` takes a filter), hence 0.10.
+
+### Fixed
+
+- **core:** Complete tasks that wait on one another in one `do` or `x`: a prerequisite done in the same call counts as met.
+- **tui:** Show the same hint when a tag or date prompt is refused as the `:` line does (`"work" is not a tag — use +name, @name or key:value`).
+- **tui:** Drop a selected project or context once an outside edit leaves no task with it, so the list neither keeps its old rows nor empties to "nothing matches".
+- **tui:** Name the right row in an `undid:` or `redid:` message when another program wrote an identical line, and in the message of a press made on rows another program has since moved.
+- **core:** Never follow a link swapped in while a list is saved, and keep each file's permissions even if it is replaced between read and write.
+
+### Faster
+
+- **tui:** Stop rereading the themes folder or a `file:` folder on every key while the `:` line is open.
+
 ## 0.9.0 (2026-11-23)
 
 ### Breaking
