@@ -4,7 +4,7 @@ use lsty_core::{
     keys::{Action, Mode, about},
     theme::Slot,
 };
-use ratatui::layout::{Position, Rect};
+use ratatui::layout::Rect;
 
 use crate::{
     Deps,
@@ -12,11 +12,11 @@ use crate::{
     focus::Focus,
     help::Help,
     model::Model,
-    msg::{Button, Cmd, Gesture, Mouse, Msg},
+    msg::{Cmd, Msg},
     rows::MARKER_DOING,
     test_util::{
-        Board, alone, deps, expiry, keys, press, screen, started, workdir,
-        workdir_model,
+        Board, alone, click, deps, expiry, keys, press, screen, started,
+        workdir, workdir_model,
     },
 };
 
@@ -89,15 +89,7 @@ fn the_mouse_is_ignored_while_the_picker_is_open() {
     press(&mut model, "gx");
     assert!(model.opening.is_some());
     for y in [1, 2, 10] {
-        for gesture in [Gesture::Down(Button::Left), Gesture::Up] {
-            let shift = false;
-            let cmds = model.update(Msg::Mouse(Mouse {
-                gesture,
-                at: Position::new(10, y),
-                shift,
-            }));
-            assert_eq!(cmds, Vec::new());
-        }
+        assert_eq!(click(&mut model, 10, y), Vec::new());
     }
     assert!(model.opening.is_some());
     assert_eq!(model.cursor, 0);
