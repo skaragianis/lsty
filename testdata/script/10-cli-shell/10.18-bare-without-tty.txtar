@@ -3,7 +3,7 @@ exit 2 lsty
 cmp stderr want
 
 -- want --
-lsty ("lusty"): a todo list you and your agents share.
+lsty ("listy"): a todo list you and your agents share.
 
 usage: lsty [FILE]                 open the list in the TUI
        lsty COMMAND [ARGS…]        run a command

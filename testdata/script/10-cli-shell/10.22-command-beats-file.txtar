@@ -1,6 +1,6 @@
 cp help todo.txt
 exec lsty help --no-config
-stdout '^lsty \("lusty"\)'
+stdout '^lsty \("listy"\)'
 ! stderr .
 
 -- help --
