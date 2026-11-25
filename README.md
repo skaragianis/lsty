@@ -33,8 +33,8 @@ for safe concurrent use by humans, scripts, and LLM agents.
 
 ## Features
 
-- Concurrent access by lsty processes, with locking, atomic writes, and file
-  watching
+- Safe concurrent access by lsty processes, with locking, atomic writes, and
+  file watching
 - Watch agents work lists in "real-time"
 - Configurable key bindings and themes. Normal, insert, visual and command-line
   modes. `u` for undo and `<C-r>` for redo
