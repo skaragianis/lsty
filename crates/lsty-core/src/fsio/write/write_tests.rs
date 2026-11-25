@@ -355,6 +355,7 @@ fn a_failed_sync_leaves_the_target_unchanged() {
         assert_eq!(temps(&d), Vec::<String>::new());
         let got = read(&path).unwrap();
         assert_eq!(got.0, old.unwrap_or_default().as_bytes());
+        assert_eq!(path.exists(), old.is_some(), "{old:?}");
     }
 }
 
