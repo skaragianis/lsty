@@ -5,8 +5,8 @@
 
 use std::{
     ffi::OsStr,
-    fs::{self, File},
-    io::{self, Read},
+    fs::File,
+    io::Read,
     os::fd::{AsFd, OwnedFd},
     path::Path,
 };
@@ -451,12 +451,8 @@ impl Model {
 /// Sets the theme in the config file at `path`, which is made when it
 /// is missing; a link at the file is followed.
 fn write_theme(path: &Path, name: &str) -> Result<(), String> {
-    let data = match fs::read(path) {
-        Ok(data) => data,
-        Err(e) if e.kind() == io::ErrorKind::NotFound => Vec::new(),
-        Err(e) => return Err(reason(path, &e)),
-    };
-    save(path, themed(data, path, name)?.as_bytes())
+    let (data, mode) = fsio::read(path).map_err(|e| saved_err(path, &e))?;
+    save(path, mode, themed(data, path, name)?.as_bytes())
 }
 
 /// The text of the config file at `path`, which holds `data`, with its

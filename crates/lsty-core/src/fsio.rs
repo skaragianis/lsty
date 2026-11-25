@@ -24,10 +24,10 @@ mod write;
 
 pub use hooks::{Hooks, OsHooks};
 pub(crate) use names::{base_name, folder_of};
-pub use read::read;
 pub(crate) use read::read_in;
+pub use read::{Fetched, read};
 pub(crate) use resolve::resolve;
-pub use write::{Target, write, write_in};
+pub use write::{Kept, Target, write, write_in};
 pub(crate) use write::{clean_orphans, write_all};
 
 pub(crate) use crate::todotxt::clean;

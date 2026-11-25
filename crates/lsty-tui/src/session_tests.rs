@@ -33,6 +33,10 @@ fn text_of(model: &Model) -> String {
     model.line.as_ref().map_or_default(|l| l.field.text())
 }
 
+fn mode_of(path: &Path) -> u32 {
+    fs::metadata(path).unwrap().permissions().mode() & 0o777
+}
+
 fn history_file(dir: &Path) -> String {
     fs::read_to_string(state_of(dir).join("history.toml")).unwrap_or_default()
 }
@@ -79,8 +83,17 @@ fn a_history_read_is_normalised_when_it_is_written_again() {
         format!("command = {}\nsearch = []\n", quote_all(&old)),
     )
     .unwrap_or_default();
+    let path = state_of(dir.path()).join("history.toml");
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o640)).unwrap();
     let mut model = model_in(dir.path(), alone());
     run_line(&mut model, "sort manual");
+    assert_eq!(mode_of(&path), 0o640);
+    // A chmod while the screen is open stays, also one that shuts the
+    // file to its owner.
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o200)).unwrap();
+    run_line(&mut model, "sort manual");
+    assert_eq!(mode_of(&path), 0o200);
+    fs::set_permissions(&path, fs::Permissions::from_mode(0o600)).unwrap();
     let text = history_file(dir.path());
     assert_eq!(text.matches("\"l").count(), 199);
     assert!(text.contains("\"l100\", \"sort manual\"]"));
@@ -236,8 +249,10 @@ fn a_name_that_is_gone_is_dropped_from_the_folds_when_written() {
         key.display().to_string()
     );
     fs::write(&folds, text).unwrap_or_default();
+    fs::set_permissions(&folds, fs::Permissions::from_mode(0o640)).unwrap();
     let mut model = model_in(dir.path(), Config::default());
     fold_work(&mut model);
+    assert_eq!(mode_of(&folds), 0o640);
     let after = fs::read_to_string(&folds).unwrap_or_default();
     assert!(!after.contains("gone"), "{after}");
     assert!(after.contains("\"home\", \"work\""), "{after}");
@@ -365,7 +380,7 @@ fn a_folder_failure_names_the_folder_that_failed() {
     assert_eq!(store.save_history(&Saved::default()), Err(want));
     // A name too long for the system fails the same way.
     let long = dir.path().join("x".repeat(300));
-    let err = save(&long.join("f.toml"), b"").unwrap_err();
+    let err = save(&long.join("f.toml"), None, b"").unwrap_err();
     assert!(err.starts_with(&format!("{}: ", long.display())), "{err}");
 }
 
@@ -397,7 +412,7 @@ fn a_linked_file_is_written_through_its_links() {
     std::os::unix::fs::symlink(&real, &mid).unwrap_or_else(|e| panic!("{e}"));
     std::os::unix::fs::symlink("mid.toml", &link)
         .unwrap_or_else(|e| panic!("{e}"));
-    assert_eq!(save(&link, b"x\n"), Ok(()));
+    assert_eq!(save(&link, None, b"x\n"), Ok(()));
     assert!(fs::symlink_metadata(&link).is_ok_and(|m| m.is_symlink()));
     assert!(fs::symlink_metadata(&mid).is_ok_and(|m| m.is_symlink()));
     assert_eq!(fs::read(&real).ok(), Some(b"x\n".to_vec()));
@@ -415,14 +430,14 @@ fn a_chain_of_links_past_the_limit_is_refused_and_left_alone() {
             .unwrap_or_else(|e| panic!("{e}"));
     }
     // 41 links to a missing file: one past the limit.
-    let err = save(&name(40), b"x\n").unwrap_err();
+    let err = save(&name(40), None, b"x\n").unwrap_err();
     assert!(err.contains("too many levels"), "{err}");
     assert!(!real.exists());
     for i in 0..=40 {
         assert!(fs::symlink_metadata(name(i)).is_ok_and(|m| m.is_symlink()));
     }
     // 40 links reach the target.
-    assert_eq!(save(&name(39), b"x\n"), Ok(()));
+    assert_eq!(save(&name(39), None, b"x\n"), Ok(()));
     assert_eq!(fs::read(&real).ok(), Some(b"x\n".to_vec()));
     assert!(fs::symlink_metadata(name(39)).is_ok_and(|m| m.is_symlink()));
 }

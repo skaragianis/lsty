@@ -15,7 +15,10 @@ use lsty_core::{
     errs::{io_text, lossy_path},
     fsio::{self, OsHooks},
 };
-use rustix::io::Errno;
+use rustix::{
+    fs::{Mode as Perm, stat},
+    io::Errno,
+};
 use toml::de::{DeTable, DeValue};
 
 const HISTORY_FILE: &str = "history.toml";
@@ -43,6 +46,9 @@ impl Folds {
     }
 }
 
+/// The folded names of each todo file.
+type FoldsOf = BTreeMap<String, Folds>;
+
 /// A folder of state files. Without a folder nothing is remembered.
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Store {
@@ -59,6 +65,7 @@ impl Store {
     /// naming the file when it cannot be read or does not parse.
     pub(crate) fn history(&self) -> Result<Saved, String> {
         self.read(HISTORY_FILE, parse_history)
+            .map(|(saved, _)| saved)
     }
 
     /// Writes both histories.
@@ -68,17 +75,18 @@ impl Store {
             array(&saved.command),
             array(&saved.search)
         );
-        self.write(HISTORY_FILE, text.as_bytes())
+        let mode = self.mode_of(HISTORY_FILE);
+        self.write(HISTORY_FILE, mode, text.as_bytes())
     }
 
-    fn all_folds(&self) -> Result<BTreeMap<String, Folds>, String> {
+    fn all_folds(&self) -> Result<(FoldsOf, Option<Perm>), String> {
         self.read(FOLDS_FILE, parse_folds)
     }
 
     /// The folded names saved for the todo file `todo`; none when the
     /// file cannot be read.
     pub(crate) fn folds(&self, todo: &str) -> Folds {
-        let mut all = self.all_folds().unwrap_or_default();
+        let (mut all, _) = self.all_folds().unwrap_or_default();
         all.remove(todo).unwrap_or_default()
     }
 
@@ -90,58 +98,72 @@ impl Store {
         todo: &str,
         folds: Folds,
     ) -> Result<(), String> {
-        let mut all = self.all_folds()?;
+        let (mut all, mode) = self.all_folds()?;
         if folds.is_empty() {
             all.remove(todo);
         } else {
             all.insert(todo.to_owned(), folds);
         }
-        self.write(FOLDS_FILE, folds_text(&all).as_bytes())
+        self.write(FOLDS_FILE, mode, folds_text(&all).as_bytes())
     }
 
-    /// The file `name` read by `parse`; the default when there is no
-    /// folder or no file.
+    /// The file `name` read by `parse`, with the mode it has; the default
+    /// when there is no folder or no file.
     fn read<T: Default>(
         &self,
         name: &str,
         parse: fn(&DeTable<'_>) -> Option<T>,
-    ) -> Result<T, String> {
+    ) -> Result<(T, Option<Perm>), String> {
         let Some(dir) = &self.dir else {
-            return Ok(T::default());
+            return Ok((T::default(), None));
         };
         let path = dir.join(name);
-        let data = match fs::read(&path) {
-            Ok(data) => data,
-            Err(e) if e.kind() == io::ErrorKind::NotFound => Vec::new(),
-            Err(e) => return Err(reason(&path, &e)),
-        };
+        let (data, mode) =
+            fsio::read(&path).map_err(|e| saved_err(&path, &e))?;
         let shown = lossy_path(&path);
         let text = String::from_utf8(data)
             .map_err(|_| format!("{shown}: not UTF-8"))?;
         let table = DeTable::parse(&text)
             .map_err(|_| format!("{shown}: not valid TOML"))?;
-        parse(table.get_ref())
-            .ok_or_else(|| format!("{shown}: an entry has the wrong type"))
+        let parsed = parse(table.get_ref())
+            .ok_or_else(|| format!("{shown}: an entry has the wrong type"))?;
+        Ok((parsed, mode))
     }
 
-    fn write(&self, name: &str, data: &[u8]) -> Result<(), String> {
+    /// The mode the file `name` has now, also when it cannot be read; none
+    /// when it is missing, and the save says why if the folder is no good.
+    fn mode_of(&self, name: &str) -> Option<Perm> {
+        let st = stat(self.dir.as_ref()?.join(name)).ok()?;
+        Some(Perm::from_bits_truncate(st.st_mode & 0o777))
+    }
+
+    fn write(
+        &self,
+        name: &str,
+        mode: Option<Perm>,
+        data: &[u8],
+    ) -> Result<(), String> {
         let Some(dir) = &self.dir else {
             return Ok(());
         };
-        save(&dir.join(name), data)
+        save(&dir.join(name), mode, data)
     }
 }
 
 /// Writes `data` to `path` through a temporary file, after making the
 /// folders above it that are missing. A failure names where it
 /// happened.
-pub(crate) fn save(path: &Path, data: &[u8]) -> Result<(), String> {
+pub(crate) fn save(
+    path: &Path,
+    mode: Option<Perm>,
+    data: &[u8],
+) -> Result<(), String> {
     let target = linked(path).map_err(|e| reason(path, &e))?;
     let path = target.as_path();
     if let Some(dir) = path.parent().filter(|p| !p.as_os_str().is_empty()) {
         make_folders(dir).map_err(|(at, e)| reason(&at, &e))?;
     }
-    fsio::write(path, data, &OsHooks).map_err(|e| saved_err(path, &e))
+    fsio::write((path, mode), data, &OsHooks).map_err(|e| saved_err(path, &e))
 }
 
 /// A failed write of `path`, worded as `path: cause`.

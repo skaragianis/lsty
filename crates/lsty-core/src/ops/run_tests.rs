@@ -323,6 +323,36 @@ fn the_destination_is_written_first() {
 }
 
 #[test]
+fn a_save_keeps_the_mode_the_file_was_read_with() {
+    use std::os::unix::fs::PermissionsExt;
+    let dir = folder("a\n", Some("b\n"));
+    let env = dir.env();
+    for (path, mode) in [(&env.found.todo, 0o600), (&env.found.done, 0o640)] {
+        fs::set_permissions(path, fs::Permissions::from_mode(mode)).unwrap();
+    }
+    run(&env, "move", true, |tx| {
+        let (a, b) = (id(tx, Source::Todo, 1), id(tx, Source::Done, 1));
+        tx.dest = Some(Source::Done);
+        tx.set(a, "A", Path::Action);
+        tx.set(b, "B", Path::Action);
+        Ok(())
+    })
+    .unwrap();
+    // The report log is saved with its mode too.
+    let log = crate::discover::report_file(env.found).unwrap();
+    fs::write(&log, "old\n").unwrap();
+    fs::set_permissions(&log, fs::Permissions::from_mode(0o600)).unwrap();
+    super::report::report(&env).unwrap();
+    for (path, mode) in [(&env.found.todo, 0o600), (&env.found.done, 0o640)]
+        .into_iter()
+        .chain([(&log, 0o600)])
+    {
+        let got = fs::metadata(path).unwrap().permissions().mode() & 0o777;
+        assert_eq!(got, mode, "{}", path.display());
+    }
+}
+
+#[test]
 fn same_text_stages_nothing() {
     let dir = folder("a\n", None);
     let out = run(&dir.env(), "x", false, |tx| {

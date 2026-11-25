@@ -2,6 +2,8 @@
 
 use std::path::Path;
 
+use rustix::fs::Mode as Perm;
+
 use super::{
     env::Env, landing::Landing, result::Outcome, staged::SealedFile, tx::Tx,
 };
@@ -136,11 +138,12 @@ where
 
 /// Reads both files again and builds the snapshot the plan sees.
 fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
-    let (todo, todo_exists) = read_file(&env.found.todo)?;
+    let (todo, todo_perm) = read_file(&env.found.todo)?;
+    let todo_exists = todo_perm.is_some();
     if !todo_exists && !env.create {
         return Err(env.found.no_file());
     }
-    let (done, _) = read_file(&env.found.done)?;
+    let (done, done_perm) = read_file(&env.found.done)?;
     clean(env, done_mode)?;
     let mut found = env.found.clone();
     // The caller may show this reading: it says what is there now.
@@ -153,15 +156,15 @@ fn open(env: &Env<'_>, done_mode: Mode) -> Result<Tx> {
     let landing = env.aim.map(|from| Landing::of(from, &snap));
     let mut tx = Tx::new(snap, !todo_exists);
     tx.landing = landing;
+    tx.modes = (todo_perm, done_perm);
     Ok(tx)
 }
 
-/// The file, and whether it exists; a missing file is an empty one.
-fn read_file(path: &Path) -> Result<(File, bool)> {
-    Ok(match fsio::read(path)? {
-        Some(data) => (File::parse(&data), true),
-        None => (File::default(), false),
-    })
+/// The file, and its permission bits when it exists; a missing file is an
+/// empty one.
+fn read_file(path: &Path) -> Result<(File, Option<Perm>)> {
+    let (data, mode) = fsio::read(path)?;
+    Ok((File::parse(&data), mode))
 }
 
 /// Removes the temp files of the files this operation may write.
@@ -224,11 +227,15 @@ impl Sealed {
         if order.len() == 2 && Some(Source::Done) == self.tx.dest {
             order.reverse();
         }
+        let (todo, done) = self.tx.modes;
         let log = self.tx.log.iter();
-        let files: Vec<(&Path, &[u8])> = order
+        let files: Vec<_> = order
             .iter()
-            .map(|&s| (env.found.path(s), self.file(s).bytes.as_slice()))
-            .chain(log.map(|(p, d)| (p.as_path(), d.as_slice())))
+            .map(|&s| {
+                let at = (env.found.path(s), s.pick(todo, done));
+                (at, self.file(s).bytes.as_slice())
+            })
+            .chain(log.map(|(p, d, m)| ((p.as_path(), *m), d.as_slice())))
             .collect();
         fsio::write_all(&files, env.hooks)?;
         Ok(order)

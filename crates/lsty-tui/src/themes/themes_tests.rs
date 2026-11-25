@@ -95,6 +95,7 @@ fn a_linked_config_is_written_through_the_link() {
         .unwrap_or_else(|e| panic!("{e}"));
     fs::write(&real, "show_sidebar = false\n")
         .unwrap_or_else(|e| panic!("{e}"));
+    fs::set_permissions(&real, fs::Permissions::from_mode(0o640)).unwrap();
     std::os::unix::fs::symlink(&real, &link).unwrap_or_else(|e| panic!("{e}"));
     let mut model = started(Deps {
         config_file: Some(link.clone()),
@@ -108,6 +109,8 @@ fn a_linked_config_is_written_through_the_link() {
         fs::read_to_string(&real).ok(),
         Some(format!("theme = \"{name}\"\nshow_sidebar = false\n"))
     );
+    let mode = fs::metadata(&real).unwrap().permissions().mode() & 0o777;
+    assert_eq!(mode, 0o640);
 }
 
 /// A project's config is written where its folder is the project's, also

@@ -2,6 +2,8 @@
 
 use std::{collections::HashSet, path::PathBuf, sync::Arc};
 
+use rustix::fs::Mode as Perm;
+
 use super::{
     env::Env,
     landing::Landing,
@@ -14,6 +16,9 @@ use crate::{
     list::{Snapshot, State, Task, TaskId},
     todotxt::{Line, share},
 };
+
+/// A file written whole: its path, bytes and the mode it was read with.
+pub(super) type LogFile = (PathBuf, Vec<u8>, Option<Perm>);
 
 /// What a target names once it is found.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -52,7 +57,10 @@ pub(super) struct Tx {
     /// Lines of the other file that a moved line has taken the place of.
     pub(super) paired: HashSet<TaskId>,
     /// A file written after the two lists, whole: its path and bytes.
-    pub(super) log: Option<(PathBuf, Vec<u8>)>,
+    pub(super) log: Option<LogFile>,
+    /// The permission bits each file had when it was read, none when it was
+    /// not there: the todo file's and the done file's.
+    pub(super) modes: (Option<Perm>, Option<Perm>),
     /// The list as the staged bytes would leave it, once built. Only
     /// [`Tx::snapshot_after`] sets it, with the states it was built from.
     after: Option<Rebuilt>,
@@ -114,6 +122,7 @@ impl Tx {
             lost: Vec::new(),
             paired: HashSet::new(),
             log: None,
+            modes: (None, None),
             after: None,
         }
     }

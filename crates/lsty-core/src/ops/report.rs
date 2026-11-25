@@ -23,7 +23,7 @@ pub fn report(env: &Env<'_>) -> Result<Outcome> {
         let counts =
             format!("{} {}", tasks(tx, Source::Todo), tasks(tx, Source::Done));
         let path = report_file(env.found)?;
-        let mut log = fsio::read(&path)?.unwrap_or_default();
+        let (mut log, mode) = fsio::read(&path)?;
         let last = last_line(&log);
         if last.split_once(' ').is_some_and(|(_, seen)| seen == counts) {
             let line = last.to_owned();
@@ -37,7 +37,7 @@ pub fn report(env: &Env<'_>) -> Result<Outcome> {
         log.extend_from_slice(line.as_bytes());
         log.push(b'\n');
         tx.say(line);
-        tx.log = Some((path, log));
+        tx.log = Some((path, log, mode));
         Ok(())
     })
 }

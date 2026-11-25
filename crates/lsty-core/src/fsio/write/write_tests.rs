@@ -9,14 +9,14 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use super::{temp_path, write_within};
+use super::{temp_path, write, write_within};
 use crate::{
-    errs::{Code, Error},
+    errs::{self, Code, Error},
     fsio::{
         Crash, Hooks, OsHooks, clean_orphans, crash, folder_of, is_crash,
         read, resolve,
         test_util::{chmod, dir, mode, put, temps, text},
-        write, write_all, write_in,
+        write_all, write_in,
     },
 };
 
@@ -103,8 +103,8 @@ fn write_then_read() {
     for data in ["a\r\nb\n", "", "\u{feff}no newline"] {
         let (_tmp, d) = dir();
         let path = d.join("todo.txt");
-        write(&path, data.as_bytes(), &OsHooks).unwrap();
-        assert_eq!(read(&path).unwrap().unwrap(), data.as_bytes());
+        write((&path, None), data.as_bytes(), &OsHooks).unwrap();
+        assert_eq!(read(&path).unwrap().0, data.as_bytes());
     }
 }
 
@@ -112,10 +112,11 @@ fn write_then_read() {
 fn a_write_over_the_limit_is_refused_and_leaves_nothing() {
     let (_tmp, d) = dir();
     let path = d.join("todo.txt");
-    write_within(&path, b"0123456789", &OsHooks, 10).unwrap();
-    assert_eq!(read(&path).unwrap().unwrap(), b"0123456789");
+    write_within((&path, None), b"0123456789", &OsHooks, 10).unwrap();
+    assert_eq!(read(&path).unwrap().0, b"0123456789");
     let other = d.join("other.txt");
-    let err = write_within(&other, b"0123456789a", &OsHooks, 10).unwrap_err();
+    let err = write_within((&other, None), b"0123456789a", &OsHooks, 10)
+        .unwrap_err();
     assert_eq!(err.code(), Code::Io);
     let want =
         format!("write {0}: write {0}: file too large", other.display());
@@ -129,7 +130,7 @@ fn a_new_file_gets_the_default_mode() {
     // 04.5
     let (_tmp, d) = dir();
     let want = new_file_mode(&d);
-    write(&d.join("todo.txt"), b"x", &OsHooks).unwrap();
+    write((&d.join("todo.txt"), None), b"x", &OsHooks).unwrap();
     assert_eq!(mode(&d.join("todo.txt")), want);
 }
 
@@ -140,11 +141,11 @@ fn an_existing_file_keeps_its_mode() {
         let (_tmp, d) = dir();
         let path = d.join("todo.txt");
         put(&path, "old", m);
-        write(&path, b"new", &OsHooks).unwrap();
+        let read = read(&path).unwrap().1;
+        write((&path, read), b"new", &OsHooks).unwrap();
         assert_eq!(mode(&path), m);
         assert_eq!(text(&path), "new");
         // The mode a caller read goes on when the file is gone by the write.
-        let read = Some(rustix::fs::stat(&path).unwrap().st_mode.into());
         fs::remove_file(&path).unwrap();
         let folder = File::open(&d).unwrap();
         write_in((folder.as_fd(), &path, read), b"again", &OsHooks).unwrap();
@@ -156,7 +157,7 @@ fn an_existing_file_keeps_its_mode() {
 fn no_temp_file_is_left() {
     // 04.8
     let (_tmp, d) = dir();
-    write(&d.join("todo.txt"), b"x", &OsHooks).unwrap();
+    write((&d.join("todo.txt"), None), b"x", &OsHooks).unwrap();
     assert_eq!(temps(&d), Vec::<String>::new());
 }
 
@@ -166,7 +167,8 @@ fn a_crash_before_the_rename_keeps_the_old_content() {
     let (_tmp, d) = dir();
     let path = d.join("todo.txt");
     put(&path, "old", 0o644);
-    let err = write(&path, b"new", &crash_at("before rename")).unwrap_err();
+    let err =
+        write((&path, None), b"new", &crash_at("before rename")).unwrap_err();
     assert!(is_crash(&err), "{err}");
     assert_eq!(text(&path), "old");
 }
@@ -177,7 +179,8 @@ fn a_crash_after_the_rename_keeps_the_new_content() {
     let (_tmp, d) = dir();
     let path = d.join("todo.txt");
     put(&path, "old", 0o644);
-    let err = write(&path, b"new", &crash_at("after rename")).unwrap_err();
+    let err =
+        write((&path, None), b"new", &crash_at("after rename")).unwrap_err();
     assert!(is_crash(&err), "{err}");
     assert_eq!(text(&path), "new");
 }
@@ -186,7 +189,8 @@ fn a_crash_after_the_rename_keeps_the_new_content() {
 fn a_crash_after_the_folder_sync_is_reported() {
     let (_tmp, d) = dir();
     let path = d.join("todo.txt");
-    let err = write(&path, b"x", &crash_at("after folder sync")).unwrap_err();
+    let err = write((&path, None), b"x", &crash_at("after folder sync"))
+        .unwrap_err();
     assert!(is_crash(&err));
     assert_eq!(text(&path), "x");
 }
@@ -196,7 +200,7 @@ fn the_order_of_the_steps() {
     // 04.11
     let (_tmp, d) = dir();
     let spy = Spy::default();
-    write(&d.join("todo.txt"), b"x", &spy).unwrap();
+    write((&d.join("todo.txt"), None), b"x", &spy).unwrap();
     assert_eq!(
         *spy.calls.borrow(),
         [
@@ -217,7 +221,7 @@ fn a_folder_without_write_permission() {
     put(&path, "old", 0o644);
     chmod(&d, 0o500);
     let root = ignores_permissions(&d);
-    let result = write(&path, b"new", &OsHooks);
+    let result = write((&path, None), b"new", &OsHooks);
     chmod(&d, 0o700);
     if root {
         return;
@@ -242,7 +246,7 @@ fn a_write_through_a_symlink() {
     symlink("real/list.txt", d.join("link")).unwrap();
     let target = resolve(&d.join("link")).unwrap();
     let spy = Spy::default();
-    write(&target, b"new", &spy).unwrap();
+    write((&target, None), b"new", &spy).unwrap();
     assert!(fs::symlink_metadata(d.join("link")).unwrap().is_symlink());
     assert_eq!(text(&d.join("real/list.txt")), "new");
     let seen = spy.seen_temps.borrow();
@@ -250,7 +254,7 @@ fn a_write_through_a_symlink() {
     assert_eq!(seen[0].parent(), Some(d.join("real").as_path()));
     // a folder that is a link, as a linked settings folder is
     symlink("real", d.join("conf")).unwrap();
-    write(&d.join("conf/list.txt"), b"again", &OsHooks).unwrap();
+    write((&d.join("conf/list.txt"), None), b"again", &OsHooks).unwrap();
     assert_eq!(text(&d.join("real/list.txt")), "again");
 }
 
@@ -260,7 +264,7 @@ fn a_write_to_a_dangling_link_creates_the_target() {
     let (_tmp, d) = dir();
     symlink("made.txt", d.join("link")).unwrap();
     let target = resolve(&d.join("link")).unwrap();
-    write(&target, b"data", &OsHooks).unwrap();
+    write((&target, None), b"data", &OsHooks).unwrap();
     assert!(fs::symlink_metadata(d.join("link")).unwrap().is_symlink());
     assert_eq!(text(&d.join("made.txt")), "data");
 }
@@ -292,9 +296,9 @@ fn a_folder_swapped_for_a_link_before_the_rename_is_not_followed() {
     let swap = Swap(other.clone(), Cell::new(false));
     // The second file of the folder goes through the folder opened for the
     // first, not through the link now at its path.
-    let files: [(&Path, &[u8]); 2] = [
-        (&sub.join("todo.txt"), b"new"),
-        (&sub.join("done.txt"), b"more"),
+    let files: [(super::Kept<'_>, &[u8]); 2] = [
+        ((&sub.join("todo.txt"), None), b"new"),
+        ((&sub.join("done.txt"), None), b"more"),
     ];
     write_all(&files, &swap).unwrap();
     assert_eq!(text(&other.join("todo.txt")), "keep");
@@ -310,7 +314,7 @@ fn a_hard_link_keeps_the_old_content() {
     let (_tmp, d) = dir();
     put(&d.join("todo.txt"), "old", 0o644);
     fs::hard_link(d.join("todo.txt"), d.join("other.txt")).unwrap();
-    write(&d.join("todo.txt"), b"new", &OsHooks).unwrap();
+    write((&d.join("todo.txt"), None), b"new", &OsHooks).unwrap();
     assert_eq!(text(&d.join("other.txt")), "old");
     assert_eq!(text(&d.join("todo.txt")), "new");
 }
@@ -323,8 +327,8 @@ fn hundred_sequential_writes() {
     let mut content = String::new();
     for i in 0..100 {
         content = format!("{content}line {i}\n");
-        write(&path, content.as_bytes(), &OsHooks).unwrap();
-        assert_eq!(read(&path).unwrap().unwrap(), content.as_bytes(), "{i}");
+        write((&path, None), content.as_bytes(), &OsHooks).unwrap();
+        assert_eq!(read(&path).unwrap().0, content.as_bytes(), "{i}");
     }
 }
 
@@ -340,7 +344,7 @@ fn a_failed_sync_leaves_the_target_unchanged() {
             fail_sync_file: true,
             ..Spy::default()
         };
-        let err = write(&path, b"new", &spy).unwrap_err();
+        let err = write((&path, None), b"new", &spy).unwrap_err();
         assert_eq!(err.code(), Code::Io);
         let want = format!(
             "write {}: sync {}: sync failed",
@@ -350,7 +354,7 @@ fn a_failed_sync_leaves_the_target_unchanged() {
         assert_eq!(err.message(), want);
         assert_eq!(temps(&d), Vec::<String>::new());
         let got = read(&path).unwrap();
-        assert_eq!(got.as_deref(), old.map(str::as_bytes));
+        assert_eq!(got.0, old.unwrap_or_default().as_bytes());
     }
 }
 
@@ -360,7 +364,7 @@ fn a_stale_temp_file_is_replaced() {
     let path = d.join("todo.txt");
     put(&path, "old", 0o644);
     put(&temp_path(&path), "stale", 0o600);
-    write(&path, b"new", &OsHooks).unwrap();
+    write((&path, None), b"new", &OsHooks).unwrap();
     assert_eq!(text(&path), "new");
     assert_eq!(temps(&d), Vec::<String>::new());
 }
@@ -434,7 +438,7 @@ fn a_write_inside_a_regular_file_names_the_folder_step() {
     let (_tmp, d) = dir();
     put(&d.join("f"), "", 0o644);
     let path = d.join("f/x");
-    let err = write(&path, b"x", &OsHooks).unwrap_err();
+    let err = write((&path, None), b"x", &OsHooks).unwrap_err();
     let want = format!(
         "write {}: open {}: not a directory",
         path.display(),
@@ -448,7 +452,7 @@ fn a_write_over_a_folder_names_both_paths_of_the_rename() {
     let (_tmp, d) = dir();
     let path = d.join("sub");
     fs::create_dir(&path).unwrap();
-    let err = write(&path, b"x", &OsHooks).unwrap_err();
+    let err = write((&path, None), b"x", &OsHooks).unwrap_err();
     let temp = temp_path(&path);
     let want = format!(
         "rename {0}: rename {0} {1}: file exists",
@@ -488,8 +492,7 @@ fn a_bare_file_name_lives_in_the_current_folder() {
 #[test]
 fn a_crash_is_told_from_other_errors_and_worded() {
     assert_eq!(Crash.to_string(), "fsio: simulated crash");
-    let plain =
-        crate::errs::io("write", Path::new("/x"), io::Error::other("no"));
+    let plain = errs::io("write", Path::new("/x"), io::Error::other("no"));
     assert!(!is_crash(&plain));
     assert!(!is_crash(&Error::new(Code::Io, "x")));
 }

@@ -16,14 +16,14 @@ fn read_keeps_every_byte() {
     let (_tmp, d) = dir();
     let path = d.join("todo.txt");
     fs::write(&path, RAW).unwrap();
-    assert_eq!(read(&path).unwrap().as_deref(), Some(RAW));
+    assert_eq!(read(&path).unwrap().0, RAW);
 }
 
 #[test]
 fn read_of_a_missing_file() {
     // 04.2
     let (_tmp, d) = dir();
-    assert_eq!(read(&d.join("none.txt")).unwrap(), None);
+    assert_eq!(read(&d.join("none.txt")).unwrap(), (vec![], None));
 }
 
 #[test]
@@ -54,7 +54,7 @@ fn a_file_over_the_limit_is_refused_by_its_size_or_by_its_bytes() {
     let path = d.join("todo.txt");
     fs::write(&path, "0123456789").unwrap();
     let kept = read_within(&path, 10).unwrap();
-    assert_eq!(kept.as_deref(), Some(&b"0123456789"[..]));
+    assert_eq!(kept.0, b"0123456789");
     fs::write(&path, "0123456789a").unwrap();
     // The second has no size to refuse it by.
     for file in [path.as_path(), std::path::Path::new("/dev/zero")] {
