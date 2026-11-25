@@ -419,8 +419,10 @@ impl Side {
             let (at, row) = (line_of(n, now), n.parse().ok());
             let was = row.and_then(|n| press.was.get(&n));
             // The product names a task the write deleted by its row before
-            // the key, any other by its row now.
+            // the key, any other by its row now (one no row shows, by its
+            // line).
             let gone = press.way.is_none()
+                && row.is_some()
                 && deleted(Some(body)).iter().any(|d| d == n);
             let held = |at| {
                 let to = self.follow(at);
