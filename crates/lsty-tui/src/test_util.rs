@@ -39,16 +39,19 @@ use crate::{
     track::Place,
 };
 
-/// Presses and releases the left button at cell `x`, `y`.
-pub(crate) fn click(model: &mut Model, x: u16, y: u16) {
+/// Presses and releases the left button at cell `x`, `y`; the commands of
+/// both gestures.
+pub(crate) fn click(model: &mut Model, x: u16, y: u16) -> Vec<Cmd> {
+    let mut cmds = Vec::new();
     for gesture in [Gesture::Down(Button::Left), Gesture::Up] {
         let shift = false;
-        model.update(Msg::Mouse(Mouse {
+        cmds.extend(model.update(Msg::Mouse(Mouse {
             gesture,
             at: Position::new(x, y),
             shift,
-        }));
+        })));
     }
+    cmds
 }
 
 /// Draws the ids `t001`, `t002` and so on.

@@ -6,15 +6,13 @@ use std::{
 };
 
 use lsty_core::{config::Config, errs::lossy_path, list::SortField};
-use ratatui::layout::Position;
 
 use crate::{
     model::Model,
-    msg::{Button, Gesture, Mouse, Msg},
     session::keep,
     store::{Folds, Saved, Store, save},
     test_util::{
-        alone, deps, keys, press, screen, start, started, started_from,
+        alone, click, deps, keys, press, screen, start, started, started_from,
         state_of, workdir,
     },
 };
@@ -383,16 +381,7 @@ fn a_fold_by_the_mouse_is_kept_like_one_by_key() {
     let Some((x, y)) = at else {
         panic!("no node to fold in {screen:?}");
     };
-    for gesture in [Gesture::Down(Button::Left), Gesture::Up] {
-        model.update(Msg::Mouse(Mouse {
-            gesture,
-            at: Position::new(
-                crate::layout::cells(x),
-                crate::layout::cells(y),
-            ),
-            shift: false,
-        }));
-    }
+    click(&mut model, crate::layout::cells(x), crate::layout::cells(y));
     let folds = state_of(dir.path()).join("folds.toml");
     let text = fs::read_to_string(folds).unwrap_or_default();
     assert!(text.contains("\"work\""), "{text}");

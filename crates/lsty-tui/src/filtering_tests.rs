@@ -13,10 +13,10 @@ use crate::{
     filters::catalog,
     hit::Kind,
     model::Model,
-    msg::{Button, Gesture, Mouse, Msg},
+    msg::Msg,
     sidebar::{CONTEXTS, FILTERS, PROJECTS},
     test_util::{
-        NOW, alone, cursor_text, deps, instant, keys, plain, press,
+        NOW, alone, click, cursor_text, deps, instant, keys, plain, press,
         refiltering, reload, screen, settled, started, todo_of, workdir,
         workdir_model,
     },
@@ -788,15 +788,7 @@ fn across_a_refilter(to: &str, gap: &str, then: &str) -> (TempDir, Model) {
         .filter(|&at| model.hit(at).kind == Kind::Entry)
         .nth(1)
         .unwrap_or_default();
-    let mut click = |gesture| {
-        model.update(Msg::Mouse(Mouse {
-            gesture,
-            at,
-            shift: false,
-        }))
-    };
-    click(Gesture::Down(Button::Left));
-    let timer = refiltering(&click(Gesture::Up));
+    let timer = refiltering(&click(&mut model, at.x, at.y));
     some(&mut model, gap);
     model.update(timer.unwrap_or_else(|| panic!("no timer")));
     some(&mut model, then);
