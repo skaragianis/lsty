@@ -29,6 +29,5 @@ pub fn load(
 }
 
 fn read_file(path: &std::path::Path) -> errs::Result<File> {
-    let data = fsio::read(path)?;
-    Ok(data.map_or_else(File::default, |data| File::parse(&data)))
+    Ok(File::parse(&fsio::read(path)?.0))
 }

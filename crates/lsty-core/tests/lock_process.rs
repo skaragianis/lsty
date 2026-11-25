@@ -168,9 +168,10 @@ fn say(text: &str) -> io::Result<()> {
 }
 
 fn bump(path: &Path) -> errs::Result<()> {
-    let data = fsio::read(path)?.unwrap_or_default();
+    let (data, mode) = fsio::read(path)?;
     let n: u64 = String::from_utf8_lossy(&data).trim().parse().unwrap_or(0);
-    fsio::write(path, format!("{}\n", n + 1).as_bytes(), &fsio::OsHooks)
+    let next = format!("{}\n", n + 1);
+    fsio::write((path, mode), next.as_bytes(), &fsio::OsHooks)
 }
 
 // The test side.

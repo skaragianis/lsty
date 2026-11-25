@@ -10,10 +10,7 @@ use std::{
 };
 
 use rustix::{
-    fs::{
-        AtFlags, CWD, FileType, Mode, OFlags, fchmod, openat, renameat,
-        statat, unlinkat,
-    },
+    fs::{AtFlags, CWD, Mode, OFlags, fchmod, openat, renameat, unlinkat},
     io::Errno,
 };
 
@@ -23,50 +20,47 @@ use crate::{errs, errs::io_at};
 /// The mode of a new file before the umask.
 const NEW_FILE_MODE: Mode = Mode::from_bits_truncate(0o666);
 
+/// A resolved path and the mode it was read with; none when it was not
+/// there.
+pub type Kept<'a> = (&'a Path, Option<Mode>);
+
 /// Replaces `path` with `data` through a synced temp file in the same
 /// folder, a rename and a folder sync. `path` is a resolved path: its
 /// folder is opened once, and every later step names a file of that
-/// folder, never a path. A failure before the rename removes the temp file
-/// and leaves the target as it was.
+/// folder, never a path. The file keeps `mode`, the permission bits it was
+/// read with; none when it was not there, and the file is made with the
+/// default. A failure before the rename removes the temp file and leaves
+/// the target as it was.
 pub fn write<H: Hooks + ?Sized>(
-    path: &Path,
+    file: Kept<'_>,
     data: &[u8],
     hooks: &H,
 ) -> errs::Result<()> {
-    write_within(path, data, hooks, MAX_LEN)
+    write_within(file, data, hooks, MAX_LEN)
 }
 
 /// `write`, refusing data over `max` bytes.
 fn write_within<H: Hooks + ?Sized>(
-    path: &Path,
+    (path, mode): Kept<'_>,
     data: &[u8],
     hooks: &H,
     max: u64,
 ) -> errs::Result<()> {
     let folder = open_folder(path)?;
-    let at = on_disk(folder.as_fd(), path)?;
-    write_in_within(at, data, hooks, max)
+    write_in_within((folder.as_fd(), path, mode), data, hooks, max)
 }
 
-/// The file `path` in the open folder `dir`, with the mode it has now.
-fn on_disk<'a>(
-    dir: BorrowedFd<'a>,
-    path: &'a Path,
-) -> errs::Result<Target<'a>> {
-    Ok((dir, path, target_mode(dir, base_name(path), path)?))
-}
-
-/// Writes each of `files` (a resolved path and its data) in order, as
-/// `write` does, but opens each folder once and writes every file of it
-/// through that handle, so a folder renamed between two writes cannot
-/// take the later one.
+/// Writes each of `files` (a resolved path with the mode it was read with,
+/// and its data) in order, as `write` does, but opens each folder once and
+/// writes every file of it through that handle, so a folder renamed
+/// between two writes cannot take the later one.
 pub(crate) fn write_all<H: Hooks + ?Sized>(
-    files: &[(&Path, &[u8])],
+    files: &[(Kept<'_>, &[u8])],
     hooks: &H,
 ) -> errs::Result<()> {
     let mut open: Vec<(&Path, OwnedFd)> = Vec::new();
     let mut slots = Vec::new();
-    for &(path, _) in files {
+    for &((path, _), _) in files {
         let dir = folder_of(path);
         let slot = if let Some(at) = open.iter().position(|(d, _)| *d == dir) {
             at
@@ -76,9 +70,8 @@ pub(crate) fn write_all<H: Hooks + ?Sized>(
         };
         slots.push(slot);
     }
-    for (&(path, data), slot) in files.iter().zip(slots) {
-        let at = on_disk(open[slot].1.as_fd(), path)?;
-        write_in(at, data, hooks)?;
+    for (&((path, mode), data), slot) in files.iter().zip(slots) {
+        write_in((open[slot].1.as_fd(), path, mode), data, hooks)?;
     }
     Ok(())
 }
@@ -218,23 +211,6 @@ fn create_temp(target: Target<'_>) -> errs::Result<File> {
         fchmod(&file, mode).map_err(|e| fail("chmod", e))?;
     }
     Ok(file)
-}
-
-/// The permission bits of the file `name`, or `None` when there is none
-/// or it is not a regular file (a link there is replaced, so its own
-/// mode does not count).
-fn target_mode(
-    dir: BorrowedFd<'_>,
-    name: &OsStr,
-    shown: &Path,
-) -> errs::Result<Option<Mode>> {
-    match statat(dir, name, AtFlags::SYMLINK_NOFOLLOW) {
-        Ok(st) => Ok(FileType::from_raw_mode(st.st_mode)
-            .is_file()
-            .then(|| Mode::from_bits_truncate(st.st_mode & 0o777))),
-        Err(Errno::NOENT) => Ok(None),
-        Err(e) => Err(io_at("write", shown, "stat", shown, e.into())),
-    }
 }
 
 /// Removes the temp files of `path` left by a crash. The caller holds the
