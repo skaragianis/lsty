@@ -34,7 +34,7 @@ use crate::{
 
 /// The text of `lsty -h` and of bare `lsty` without a terminal.
 pub(crate) const USAGE_TEXT: &str = "\
-lsty (\"lusty\"): a todo list you and your agents share.
+lsty (\"listy\"): a todo list you and your agents share.
 
 usage: lsty [FILE]                 open the list in the TUI
        lsty COMMAND [ARGS…]        run a command
