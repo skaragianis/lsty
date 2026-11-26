@@ -18,40 +18,47 @@ Terminal lists for Humans and Agents.
 
 ![lsty navigating, adding, filtering, and completing tasks while an agent works](https://raw.githubusercontent.com/skaragianis/lsty/main/assets/demo.gif)
 
-lsty is a Vim-inspired [todo.txt](http://todotxt.org/) TUI and a
+lsty is a Vim-inspired [todo.txt](http://todotxt.org/) TUI and
 [todo.sh](https://github.com/todotxt/todo.txt-cli)-inspired CLI, with extensions
 for safe concurrent use by humans, scripts, and LLM agents.
 
+## Why lsty
+
+- Plain text you can read, diff, and commit. Other todo.txt apps open the same
+  file format
+- Multiple lsty processes can write the same list at once without risk of
+  losing changes
+- Agents and humans share one queue. Agents claim tasks and ask the human with
+  `@human` tasks, while you watch and steer from the TUI
+- One binary, nothing running in the background
+
 ## Problems solved
 
-- Personal todo list with recurring tasks
+- Personal todo list and per-project todo lists
 - Human in the loop, with agents posting decisions for approval
 - Agentic loop memory that a human can keep an eye on
-- Software factory single source of truth with file and web links
+- Software factory single source of truth, with file and web links
 - Ordered work queue for parallel agents and agent types
 - Tracking agent cycle time for your definition of done
 
 ## Features
 
-- Safe concurrent access by lsty processes, with locking, atomic writes, and
-  file watching
-- Watch agents work lists in "real-time"
-- Configurable key bindings and themes. Normal, insert, visual and command-line
-  modes. `u` for undo and `<C-r>` for redo
-- Priorities, projects, contexts, dependencies, dates, and links
+- Safe concurrent lsty access, with locking, atomic writes, and file watching
+- Watch agents work in "real-time"
+- Configurable key bindings, themes, and starting filter
+- Priorities, projects, contexts, dependencies, recurrence, dates, and links
 - Extensive filtering with and (a space), or (`|`) and not (`-`)
-- Auto-completion of commands, filters, projects and contexts
+- Auto-completion of commands, filters, projects, and contexts
 - Nesting of projects and contexts with `.` or `/`
 - A CLI for listing, adding, editing, waiting on, and completing tasks
 - JSON output for scripts and agents. Retry-safe commands
-- Task ownership and claiming for coordinating work
-- Clipboard support (OSC 52 for SSH) and optional mouse support
-- No databases or daemons, just text files
+- Task claiming (start and stop) for coordinating work. Stale indicator
+- Clipboard support (OSC 52 for SSH), and optional mouse support
 
 ## Installation
 
 lsty supports Linux and macOS. Windows users might consider WSL. The TUI
-requires an interactive terminal. Most CLI commands can be used without one.
+requires an interactive terminal. Most CLI commands work without one.
 
 ### Homebrew
 
@@ -105,9 +112,21 @@ lsty includes instructions for agents. Add this to your `AGENTS.md`:
 Tasks are managed by lsty. Run `lsty help --agent` and follow it.
 ```
 
-Then watch it work from the TUI.
+Then watch it work from the TUI. A typical agent interaction:
 
-### Humans
+```sh
+export LSTY_OWNER=agent-3f2a                 # one name per agent run
+lsty next --start --json --filter -@human    # claim the next ready task
+lsty add --blocks id:w9tc '@human Pick the licence +lsty'  # ask the human
+lsty do id:r7kx --json                       # finish the claimed task
+```
+
+The ids are examples; `next` and `add` print the real ones. `--blocks` makes
+`id:w9tc` wait for the new `@human` task, and `--filter -@human` keeps agents
+off that task, so the work waits until you have answered. A retry of `next`
+resumes the same claim.
+
+### Humans 😉
 
 ```sh
 lsty # launches the TUI
@@ -115,21 +134,24 @@ lsty # launches the TUI
 
 Default keys in normal mode:
 
-| Key                            | Action                      |
-| ------------------------------ | --------------------------- |
-| `k` / `j`, or `Up` / `Down`    | Move up / down              |
-| `h` / `l`, or `Left` / `Right` | Lower / raise the priority  |
-| `gg` / `G`                     | Go to the first / last task |
-| `O`                            | Add a task above the cursor |
-| `x`                            | Complete or reopen          |
-| `t`                            | Start or stop the task      |
-| `T`                            | Mark won't do               |
-| `dd` or `Del`                  | Delete the task             |
-| `gx`                           | Open the task's links       |
-| `PageDown` / `PageUp`          | Move down / up a page       |
-| `?`                            | Show keys and commands      |
-| `:archive`                     | Move done tasks to done.txt |
-| `q`                            | Quit                        |
+| Key                                 | Action                      |
+| ----------------------------------- | --------------------------- |
+| `k` / `j`, or `Up` / `Down`         | Go up / down                |
+| `K` / `J`, or `Alt-Up` / `Alt-Down` | Move task up / down         |
+| `h` / `l`, or `Left` / `Right`      | Lower / raise the priority  |
+| `gg` / `G`                          | Go to the first / last task |
+| `O`                                 | Add a task above the cursor |
+| `o`                                 | Add a task below the cursor |
+| `x` or `Space`                      | Complete or reopen          |
+| `u` / `Ctrl-r`                      | Undo / redo                 |
+| `t`                                 | Start or stop the task      |
+| `T`                                 | Mark won't do               |
+| `dd` or `Del`                       | Delete the task             |
+| `gx`                                | Open the task's links       |
+| `PageDown` / `PageUp`               | Move down / up a page       |
+| `?`                                 | Show keys and commands      |
+| `:archive`                          | Move done tasks to done.txt |
+| `q`                                 | Quit                        |
 
 Press `?` for every key binding and `:` command. `:help TEXT` opens it filtered.
 
@@ -160,6 +182,22 @@ mode.
 
 ## Files and configuration
 
+### The file
+
+Plain todo.txt. lsty's extensions are ordinary `key:value` tags, so other
+todo.txt apps can read the same file:
+
+```text
+(A) 2026-10-07 Publish the release +lsty @agent dep:r7kx id:w9tc
+(B) 2026-10-07 Check the install steps +lsty @agent id:r7kx started:2026-10-07T0912Z owner:agent-3f2a
+2026-10-07 Water the plants +personal @home due:2026-10-09 rec:1w id:p2mt
+```
+
+`id:` names a task and `dep:` makes it wait for another. `started:` and
+`owner:` are a claim; `ended:` is added when the task is done, and `stop`
+removes the claim. `t:` hides a task until a date, `rec:` repeats it when
+completed, and `wontdo:true` marks one you won't do.
+
 ### Choosing a todo file
 
 Use `lsty PATH` for the TUI or `--file PATH` for CLI commands. Otherwise lsty
@@ -181,9 +219,9 @@ through `TODO_FILE` or `TODO_DIR`.
 
 ### Filters
 
-`--filter`, the terms of `lsty ls`, saved `[filters]` (listed in the TUI's
-Filters panel) and the TUI's `/` search all use one language. Terms are
-separated by spaces and all must match.
+There is one filter language. `--filter`, the terms of `lsty ls`, saved
+`[filters]` (listed in the TUI's Filters panel) and the TUI's `/` search all
+use it. Terms are separated by spaces and all must match.
 
 | Term                                  | Matches                                             |
 | ------------------------------------- | --------------------------------------------------- |
@@ -200,7 +238,7 @@ The date fields are `due`, `t` (threshold), `started`, `ended`, `created` and
 `completed`; a date is `today`, a weekday such as `fri`, `+3d`, `-7d` or
 `2026-10-01`. The states are `open`, `done`, `wontdo`, `doing`, `blocked`,
 `later`, `overdue`, `archived`, `dangling` and `stale`. `lsty help` describes
-the language too.
+the language.
 
 The Filters panel lists the built-in filters Today, Overdue, Upcoming, Doing,
 Waiting, No project and Won't do, then your custom ones.
@@ -240,16 +278,16 @@ auto_archive = false
 
 **Files and writing.**
 
-| Option              | Default | Accepts                               | Effect                                             |
-| ------------------- | ------- | ------------------------------------- | -------------------------------------------------- |
-| `default_file`      | unset   | a path; `~/` allowed                  | The todo file when none is found any other way     |
-| `auto_archive`      | `false` | `true`, `false`                       | Move completed tasks to the done file              |
-| `include_creation`  | `true`  | `true`, `false`                       | Write a creation date on new tasks                 |
-| `keep_priority`     | `true`  | `true`, `false`                       | Keep a task's priority when it is completed        |
-| `default_priority`  | unset   | one letter `A`-`Z`                    | The priority of new tasks                          |
-| `priority_range`    | `"D"`   | one letter `A`-`Z`                    | Where `gp` starts and `gP` stops                   |
-| `lock_timeout`      | `"2s"`  | a duration: `500ms`, `2s`, `4h`, `2d` | How long to wait for another writer's lock         |
-| `claim_stale_after` | `"4h"`  | a duration                            | When an untouched claim counts as stale            |
+| Option              | Default | Accepts                               | Effect                                         |
+| ------------------- | ------- | ------------------------------------- | ---------------------------------------------- |
+| `default_file`      | unset   | a path; `~/` allowed                  | The todo file when none is found any other way |
+| `auto_archive`      | `false` | `true`, `false`                       | Move completed tasks to the done file          |
+| `include_creation`  | `true`  | `true`, `false`                       | Write a creation date on new tasks             |
+| `keep_priority`     | `true`  | `true`, `false`                       | Keep a task's priority when it is completed    |
+| `default_priority`  | unset   | one letter `A`-`Z`                    | The priority of new tasks                      |
+| `priority_range`    | `"D"`   | one letter `A`-`Z`                    | Where `gp` starts and `gP` stops               |
+| `lock_timeout`      | `"2s"`  | a duration: `500ms`, `2s`, `4h`, `2d` | How long to wait for another writer's lock     |
+| `claim_stale_after` | `"4h"`  | a duration                            | When an untouched claim counts as stale        |
 
 **TUI.**
 
@@ -308,7 +346,7 @@ those tools might conflict. Locking is not a cross-machine solution.
 
 The CLI is inspired by todo.sh but may not always be a drop-in replacement. lsty
 has been benchmarked against todo.sh for performance and compatibility, but lsty
-intentionally diverges around some todo.sh quirks.
+intentionally diverges around todo.sh quirks.
 
 ```sh
 lsty help          # command overview, options, and environment variables
@@ -333,21 +371,39 @@ just install # build and install lsty
 just --list  # every recipe
 ```
 
+## Usage tips
+
+- Name projects after the current theme or batch of todos
+- Align contexts with Conventional Commit names eg. `@fix` and `@feat`
+- Assign a context for each type of user ie. `@human` and `@agent`
+- `lsty next --start` works based on priority then `sort(manual)` order
+- `AGENTS.md` can say to start todos by project, context or priority, one per
+  agent
+- Tell agents to include links to any related web pages or files; click to open
+- Tell agents to post `@human` todos if making a forking decision
+- Use the todo `id:` when typing to an LLM about a specific todo
+- Tell agents to groom your written todos by `id:`
+- Watch in the TUI for any stale tasks
+
 ## Background
 
 I wondered what it would be like to have agents populating and pulling from a
-shared project todo list, where they can leave follow-ups for the human or next
-agents. So it began as a ~2,500 line specification that was decomposed into 44
-implementation specs. A software factory built it in Go and then that was used
-as the reference implementation for the final Rust version. It was then
-benchmarked against todo.sh. I've found it very useful (and entertaining) to
-have a live "surface" to keep an eye on spec implementation progress. Frontier
-LLMs have no issue using it without specific skills.
+shared project todo list, where they can leave follow-ups for a human or next
+agents. todo.sh is not safe for concurrent use and doesn't have a TUI; it is
+beyond its original design brief.
+
+lsty was built with the assistance of LLMs, and is used daily to help
+build a SaaS product. It's been tested and benchmarked against todo.sh. It's
+been fuzzed, stress tested, and regularly mutation tested.
+
+I've found it very useful (and entertaining) to have a live "surface" to keep
+an eye on agents, and a terminal UI for personal items. And LLMs have no
+trouble picking it up because todo.sh is well known.
 
 ## Contributing
 
-Bug reports, feature requests, and pull requests are welcome. Please open an
-issue before a large change. See
+This is actively maintained. Bug reports, feature requests, and pull requests
+are welcome. Please open an issue before any large change. See
 [Contributing](https://github.com/skaragianis/lsty/blob/main/CONTRIBUTING.md).
 
 ## License
