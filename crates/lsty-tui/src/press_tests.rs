@@ -965,6 +965,8 @@ fn a_message_names_tasks_by_their_place() {
         // after `|` an outside edit moves the lines down: the keys before
         // it wrote, the keys after it are an undo and a redo
         ("A\nB\nC\n", "X\nA\n\nC\n", "jdd|u", "undid: 3 deleted"),
+        // beside a twin another writer added, the row the line went back to
+        ("A\nB\nC\n", "N\nB\nB\nC\n", "jdd|u", "undid: 1 deleted"),
         (
             "A\nB\nC\n",
             "X\nA\nB\nC\n",
