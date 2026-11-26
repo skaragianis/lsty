@@ -4,6 +4,12 @@ Changes a lsty user can see, newest first.
 
 <!-- markdownlint-configure-file { "MD013": false, "MD024": { "siblings_only": true } } -->
 
+## 0.10.1 (2026-11-26)
+
+### Changed
+
+- **docs:** Rewrite the README: why lsty, the todo.txt tags lsty adds, an agent's loop, the keys for moving tasks, adding below and undo, and usage tips.
+
 ## 0.10.0 (2026-11-25)
 
 ### Changed
